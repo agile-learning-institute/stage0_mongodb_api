@@ -1,0 +1,470 @@
+name: Fran API Check
+version: "1.0"
+env:
+  host: localhost:8580
+config:
+  loadTest:
+    phases:
+      - duration: 5
+        arrivalRate: 50
+
+tests:
+  observable:
+    name: Test Observability
+    steps:
+      - name: GET Config Values
+        http:
+          url: http://${{env.host}}/api/config
+          method: GET
+          check:
+            status: /200/
+            schema:
+              type: object
+              properties:
+                config_items:
+                  type: array
+                versions:
+                  type: array
+                enumerators:
+                  type: object
+                token:
+                  type: object
+              required:
+                - config_items
+                - versions
+                - enumerators
+                - token
+              additionalProperties: false
+      - name: GET Health
+        http:
+          url: http://${{env.host}}/api/health
+          method: GET
+          check:
+            status: /200/
+  echo:
+    name: Test Echo endpoints
+    steps:
+      - name: Get All Agents
+        http:
+          url: http://${{env.host}}/api/echo
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+      - name: Get an action
+        http:
+          url: http://${{env.host}}/api/echo/bot/get_bot
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+  chains:
+    name: Test Chain endpoints
+    steps:
+      - name: Get All Chains
+        http:
+          url: http://${{env.host}}/api/chain
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Get one Chain
+        http:
+          url: http://${{env.host}}/api/chain/a00000000000000000000001
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+  exercises:
+    name: Test Exercise endpoints
+    steps:
+      - name: Get All Exercises
+        http:
+          url: http://${{env.host}}/api/exercise
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Get one Exercise
+        http:
+          url: http://${{env.host}}/api/exercise/b00000000000000000000001
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+  bots:
+    steps:
+      - name: Get some Bots
+        http:
+          url: http://${{env.host}}/api/bot
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  description:
+                    type: string
+                  name:
+                    type: string
+                required:
+                  - _id
+                  - description
+                  - name
+                additionalProperties: false
+      - name: Get a Bot
+        http:
+          url: http://${{env.host}}/api/bot/bbb000000000000000000001
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            Content-Type: application/json          
+            schema:
+              type: object
+              properties:
+                _id:
+                  type: string
+                status:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+                channels:
+                  type: array
+                  items:
+                    type: string
+                last_saved:
+                  type: object
+                  properties:
+                    fromIp:
+                      type: string
+                    byUser:
+                      type: string
+                    atTime:
+                      type: string
+                    correlationId:
+                      type: string
+                  additionalProperties: false
+              additionalProperties: false
+            jsonpath:
+              status: active
+              name: Fran
+              channels[0]: TEST_CHANNEL_1
+              channels[1]: TEST_CHANNEL_2
+      - name: Update a bot
+        http:
+          url: http://${{env.host}}/api/bot/bbb000000000000000000001
+          method: PATCH
+          headers:
+            Content-Type: application/json
+          json: 
+            description: StepCI Testing description
+          check:
+            status: /200/
+            jsonpath:
+              description: StepCI Testing description
+      - name: Reset bot Update
+        http:
+          url: http://${{env.host}}/api/bot/bbb000000000000000000001
+          method: PATCH
+          headers:
+            Content-Type: application/json
+          json: 
+            description: Fran the Design Thinking Facilitator
+          check:
+            status: /200/
+            jsonpath:
+              description: Fran the Design Thinking Facilitator
+      - name: Get bot channels
+        http:
+          url: http://${{env.host}}/api/bot/bbb000000000000000000001/channels
+          method: GET
+          headers:
+            Content-Type: application/json
+          check:
+            status: /200/
+            jsonpath:
+              - TEST_CHANNEL_1
+              - TEST_CHANNEL_2
+      - name: Add a channel
+        http:
+          url: http://${{env.host}}/api/bot/bbb000000000000000000001/channel/DISCORD_CHANNEL_NAME
+          method: POST
+          headers:
+            Content-Type: application/json
+          check:
+            status: /200/
+            schema:
+              type: array
+              items:
+                type: string
+      - name: Remove a channel
+        http:
+          url: http://${{env.host}}/api/bot/bbb000000000000000000001/channel/DISCORD_CHANNEL_NAME
+          method: DELETE
+          headers:
+            Content-Type: application/json
+          check:
+            status: /200/
+            jsonpath:
+              - TEST_CHANNEL_1
+              - TEST_CHANNEL_2
+  conversations:
+    steps:
+      - name: Get all latest active Conversations
+        http:
+          url: http://${{env.host}}/api/conversation
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  channel_id:
+                    type: string
+                required:
+                  - _id
+                  - channel_id
+                additionalProperties: false
+      - name: Get some latest active Conversations
+        http:
+          url: http://${{env.host}}/api/conversation?query=^D
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Get an existing Conversation
+        http:
+          url: http://${{env.host}}/api/conversation/DISCORD_01
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+              channel_id: DISCORD_01
+              status: active
+              version: latest
+              messages[0].role: user
+              messages[0].content: group:Hi
+              messages[1].role: assistant
+              messages[1].content: group:Hello, how can I help you
+      - name: Reset NEW_ID before test
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_ID/reset
+          method: POST
+      - name: Create NEW_ID with get conversation
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_ID
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+              channel_id: NEW_ID
+              status: active
+              version: latest
+              messages: []
+      - name: Reset NEW_ID
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_ID/reset
+          method: POST
+      - name: Add a message to an existing Conversation
+        http:
+          url: http://${{env.host}}/api/conversation/DISCORD_01/message
+          method: POST
+          headers:
+            Content-Type: application/json          
+          json:
+            role: user
+            content: group:Why is the sky blue?
+          check:
+            status: /200/
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  role:
+                    type: string
+                  content:
+                    type: string
+      - name: Reset NEW_CHANNEL_01 to start
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_CHANNEL_01/reset
+          method: POST
+      - name: Create NEW_CHANNEL_01 with add message
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_CHANNEL_01/message
+          method: POST
+          headers:
+            Content-Type: application/json          
+          json:
+            role: user
+            content: From:Mike To:group Why is the sky blue?
+          check:
+            status: /200/
+            jsonpath:
+              - role: user
+                content: From:Mike To:group Why is the sky blue?
+      - name: Add another message to NEW_CHANNEL_01
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_CHANNEL_01/message
+          method: POST
+          headers:
+            Content-Type: application/json          
+          json:
+            role: assistant
+            content: From:Fran To:group Because it reflects blue light
+          check:
+            status: /200/
+            jsonpath:
+              - content: From:Mike To:group Why is the sky blue?
+                role: user
+              - content: From:Fran To:group Because it reflects blue light
+                role: assistant
+      - name: Roll Over the NEW_CHANNEL_01
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_CHANNEL_01/reset
+          method: POST
+          check:
+            status: /200/
+          json: 
+            status: complete
+            channel_id: NEW_CHANNEL_01
+            messages:
+              - content: From:aaaa00000000000000000001 To:group Why is the sky blue?
+                role: user
+              - content: From:Mike To:group Because it reflects blue light
+                role: assistant
+      - name: Create a mew NEW_CHANNEL_01 with add message, verify it's new
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_CHANNEL_01/message
+          method: POST
+          headers:
+            Content-Type: application/json          
+          json:
+            role: assistant
+            content: From:Mike To:group A fresh discussion
+          check:
+            status: /200/
+            jsonpath:
+              - role: assistant
+                content: From:Mike To:group A fresh discussion
+      - name: Reset NEW_CHANNEL_01 to housekeep
+        http:
+          url: http://${{env.host}}/api/conversation/NEW_CHANNEL_01/reset
+          method: POST
+          check:
+            status: /200/
+          json: 
+            status: complete
+            channel_id: NEW_CHANNEL_01
+  workshops:
+    steps:
+      - name: Get all active Workshops
+        http:
+          url: http://${{env.host}}/api/workshop
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Get some active Workshops
+        http:
+          url: http://${{env.host}}/api/workshop?query=^p
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Get a Workshop
+        http:
+          url: http://${{env.host}}/api/workshop/000000000000000000000001
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Create a Workshop
+        http:
+          url: http://${{env.host}}/api/workshop/new/a00000000000000000000001
+          method: POST
+          headers:
+            Content-Type: application/json          
+          json:
+            name: StepCI Testing Workshop
+          check:
+            status: /200/
+            jsonpath:
+      - name: Update a Workshop
+        http:
+          url: http://${{env.host}}/api/workshop/000000000000000000000001
+          method: PATCH
+          headers:
+            Content-Type: application/json          
+          json:
+            name: Updated StepCI Testing Workshop
+          check:
+            status: /200/
+            jsonpath:
+      - name: Start a Workshop
+        http:
+          url: http://${{env.host}}/api/workshop/000000000000000000000001/start
+          method: POST
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Advance a Workshop
+        http:
+          url: http://${{env.host}}/api/workshop/000000000000000000000001/next
+          method: POST
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+      - name: Add an Observation
+        http:
+          url: http://${{env.host}}/api/workshop/000000000000000000000001/observation
+          method: POST
+          headers:
+            Content-Type: application/json          
+          json:
+            name: A new observation
+          check:
+            status: /200/
+            jsonpath:

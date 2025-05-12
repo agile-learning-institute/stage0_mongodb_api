@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: MongoDB Schema Management API
+  description: API for managing MongoDB collections, indexes, and migrations
+  version: 1.0.0
+  contact:
+    email: devs@agile-learning.institute
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+paths:
+  /api/collections:
+    get:
+      summary: List all Configured Collections 
+      operationId: list_collections
+      responses:
+        '200':
+          description: List of collections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/collections'
+    post:
+      summary: Process all Configured Collections 
+      operationId: process_collections
+      responses:
+        '200':
+          description: All configured collections processed successfully
+          content:
+            application/json:
+              schema:
+                description: List of processing logs
+                type: array
+                items:
+                  type: string
+  /api/collection/{name}:
+    get:
+      summary: Collection configuration details by name
+      operationId: get_collection
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Collection details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/collection'
+    post:
+      summary: Process a collection configuration
+      operationId: process_collection
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Collection configured successfully
+          content:
+            application/json:
+              schema:
+                description: List of processing logs
+                type: array
+                items:
+                  type: string
+
+  /api/health:
+    get:
+      summary: Health check endpoint
+      description: Returns Prometheus-formatted metrics for monitoring
+      operationId: health_check
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/config:
+    get:
+      summary: Get current configuration
+      operationId: get_config
+      responses:
+        '200':
+          description: Current configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/config'
+components:
+  schemas:
+    collections:
+      type: array
+      items:
+        type: object
+        properties:
+          collection_name:
+            type: string
+          version:
+            type: string
+    collection:
+      description: SchemaManager Collection Configuration
+      type: object
+      required:
+        - name
+        - versions
+      properties:
+        name:
+          description: The collection name
+          type: string
+        versions:
+          type: array
+          items:
+            description: A version of the collection
+            type: object
+            required:
+              - version
+            properties:
+              version:
+                description: The Version Number
+                type: string
+              testData:
+                description: Name of test data file from the testData folder to load
+                type: string
+              dropIndexes:
+                description: List of indexes to drop
+                type: array
+                items:
+                  type: string
+              migrations:
+                description: A list of migrations to run
+                type: array
+                items:
+                  description: The migration pipeline
+                  type: array
+              addIndexes:
+                description: List of indexes to Add
+                type: array
+                items:
+                  type: object
+                  required:
+                    - name
+                    - keys
+                    - options
+                  properties:
+                    name:
+                      description: The unique index name
+                      type: string
+                    keys:
+                      description: The index key fields
+                      type: object
+                    options:
+                      description: The index options
+                      type: object
+                  additionalProperties: false
+            additionalProperties: false
+      additionalProperties: false
+    config:
+      type: object
+      properties:
+        config_items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                description: Configuration item name
+                type: string
+              value:
+                description: Configuration value (or "secret" for sensitive values)
+                type: string
+              from:
+                description: Source of the configuration value
+                type: string
+                enum:
+                  - default
+                  - file
+                  - environment
+        versions:
+          type: array
+          description: List of version information
+          items:
+            type: object
+        enumerators:
+          type: object
+          description: Dictionary of enumerations
+        token:
+          type: object
+          properties:
+            user_id:
+              description: Logged in user_id value
+              type: string
+            from_ip:
+              description: User's current IP address
+              type: string
+            roles:
+              description: User's RBAC roles
+              type: array
+              items:
+                type: string
