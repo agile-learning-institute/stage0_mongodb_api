@@ -1,83 +1,76 @@
 # Testing with ``curl``
 
-See the [stage0_py_utils CURL Examples](https://github.com/agile-learning-institute/stage0_py_utils/blob/main/CURL_EXAMPLES.md) for stage0 standard endpoints
+This document provides examples for testing the MongoDB Schema Management API endpoints.
 
-- [/api/chain endpoints](#apichain-endpoints)
-     - [GET /api/chain](#get-a-list-of-all-exercise-chains)
-     - [GET /api/chain/{id}](#get-a-single-exercise-chain)
+## Collection Management
 
-- [/api/exercise endpoints](#apiexercise-endpoints)
-     - [GET /api/exercise](#get-a-list-of-all-active-exercises)
-     - [GET /api/exercise/{id}](#get-a-single-exercise)
-
-- [/api/workshop endpoints](#apiworkshop-endpoints)
-     - [GET /api/workshop](#get-a-list-of-all-active-workshops-by-workshop-name-regex)
-     - [POST /api/workshop](#add-a-new-workshop)
-     - [GET /api/workshop/{id}](#get-a-specific-workshop)
-     - [PATCH /api/workshop/{id}](#update-a-workshop)
-     - [POST /api/workshop/{id}/start](#start-a-workshop---status-to-active)
-     - [POST /api/workshop/{id}/next](#advance-to-the-next-exercise-in-the-workshop)
-     - [POST /api/workshop/{id}/observation](#add-an-observation-to-the-current-exercise)
-     
-## /api/chain endpoints 
-
-#### Get a list of all Exercise Chains
+### List all configured collections
 ```sh
-curl http://localhost:8580/api/chain
-```
-#### Get a single Exercise Chain
-```sh
-curl http://localhost:8580/api/chain/a00000000000000000000001
+curl http://localhost:8580/api/collections
 ```
 
-## /api/exercise endpoints
-
-#### Get a list of all active exercises
+### Process all configured collections
 ```sh
-curl http://localhost:8580/api/exercise
-```
-#### Get a single exercise
-```sh
-curl http://localhost:8580/api/exercise/b00000000000000000000001
+curl -X POST http://localhost:8580/api/collections
 ```
 
-## /api/workshop endpoints
+### Get collection configuration by name
+```sh
+curl http://localhost:8580/api/collection/sample
+```
 
-#### Get a list of all active workshops by workshop name regex
+### Process a specific collection
 ```sh
-curl "http://localhost:8580/api/workshop"
+curl -X POST http://localhost:8580/api/collection/sample
 ```
-#### Get a list of workshops by workshop name regex
+
+## Configuration
+
+### Get current configuration
 ```sh
-curl "http://localhost:8580/api/workshop?query=^p"
+curl http://localhost:8580/api/config
 ```
-#### Get a specific workshop
+
+### Health check (Prometheus metrics)
 ```sh
-curl "http://localhost:8580/api/workshop/000000000000000000000001"
+curl http://localhost:8580/api/health
 ```
-#### Add a new Workshop
-```sh
-curl -X POST http://localhost:8580/api/workshop/new/a00000000000000000000001 \
-     -H "Content-Type: application/json" \
-     -d '{"name":"Super Duper Workshop"}'
-```
-#### Update a workshop
-```sh
-curl -X PATCH http://localhost:8580/api/workshop/000000000000000000000001 \
-     -H "Content-Type: application/json" \
-     -d '{"name":"Updated Workshop Name"}'
-```
-#### Start a workshop - Status to active
-```sh
-curl -X POST http://localhost:8580/api/workshop/000000000000000000000001/start
-```
-#### Advance to the next exercise in the workshop
-```sh
-curl -X POST http://localhost:8580/api/workshop/000000000000000000000001/next
-```
-#### Add an observation to the current exercise
-```sh
-curl -X POST http://localhost:8580/api/workshop/000000000000000000000001/observation \
-     -H "Content-Type: application/json" \
-     -d '{"name":"Observation1"}'
+
+## Example Collection Configuration
+
+Here's an example of a collection configuration that can be processed:
+
+```json
+{
+  "name": "sample",
+  "versions": [
+    {
+      "version": "1.0.0.0",
+      "testData": "sample-1.0.0.1",
+      "dropIndexes": ["oldIndex"],
+      "migrations": [
+        [
+          {"$addFields": {"name": {"$concat": ["$firstName", " ", "$lastName"]}}},
+          {"$merge": {"into": "sample","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+        ],
+        [
+          {"$unset": ["firstName", "lastName"]},
+          {"$merge": {"into": "sample","on": "_id","whenMatched": "replace","whenNotMatched": "discard"}}
+        ]
+      ],
+      "addIndexes": [
+        {
+          "name": "nameIndex",
+          "keys": { "userName": 1 },
+          "options": { "unique": true }
+        },
+        {
+          "name": "typeIndex",
+          "keys": { "type": 1 },
+          "options": { "unique": false }
+        }
+      ]
+    }
+  ]
+}
 ```
