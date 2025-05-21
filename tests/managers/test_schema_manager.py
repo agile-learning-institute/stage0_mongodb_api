@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.managers.schema_manager import SchemaManager
+from stage0_mongodb_api.managers.schema_manager import SchemaManager
 
 class TestSchemaManager(unittest.TestCase):
 

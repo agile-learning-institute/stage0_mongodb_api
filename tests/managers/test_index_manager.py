@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.managers.index_manager import IndexManager
+from stage0_mongodb_api.managers.index_manager import IndexManager
 
 class TestIndexManager(unittest.TestCase):
 

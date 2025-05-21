@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.services.collection_service import CollectionService
+from stage0_mongodb_api.services.collection_service import CollectionService
 
 class TestCollectionServices(unittest.TestCase):
 

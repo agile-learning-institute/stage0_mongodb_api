@@ -2,6 +2,28 @@
 
 This API implements index, schema, and migration management services for a MongoDB database. Schemas are described using the stage0 Simple Schema standard. 
 
+## Project Structure
+
+```
+stage0_mongodb_api/
+├── stage0_mongodb_api/          # Main package directory
+│   ├── managers/               # Database managers
+│   ├── routes/                 # API route handlers
+│   ├── services/              # Business logic services
+│   ├── server.py              # Main server application
+│   └── __init__.py
+├── tests/                      # Test directory
+│   ├── managers/              # Tests for database managers
+│   ├── routes/                # Tests for API routes
+│   ├── services/              # Tests for business logic
+│   ├── test_server.py         # Server tests
+│   └── stepci.yaml            # StepCI configuration
+├── docs/                       # Documentation
+├── Pipfile                     # Python dependencies
+├── requirements.txt            # Additional requirements
+└── CURL_EXAMPLES.md           # API usage examples
+```
+
 ## Prerequisites
 
 - [Stage0 Developer Edition]() #TODO for now Docker
@@ -29,11 +51,20 @@ API Configuration Values
 pipenv install
 ```
 
-## Run Unit Testing
+## Testing
+
+The project uses pytest for testing. Tests are organized in the `tests/` directory mirroring the main package structure. Test files follow the naming convention `test_*.py`.
+
+### Run Unit Testing
 
 ```bash
 pipenv run test
 ```
+
+The test discovery is configured to:
+- Look for tests in the `tests/` directory
+- Match files named `test_*.py`
+- Use the `unittest` test runner
 
 ## Run the API locally (assumes database is already running)
 

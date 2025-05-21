@@ -8,13 +8,10 @@ local = "sh -c 'PYTHONPATH=$(pwd)/stage0_fran LOGGING_LEVEL=INFO python3 -m serv
 debug = "sh -c 'PYTHONPATH=$(pwd)/stage0_fran LOGGING_LEVEL=DEBUG python3 -m server'"
 start = "sh -c 's0 down && s0 up mongodb && pipenv run local'"
 test = "python -m unittest discover -s ./tests -p 'test_*.py'"
-initialize = "sh -c './fran_model/start_everything.sh'"
 stepci = "stepci run ./tests/stepci.yaml"
 load = "stepci run ./tests/stepci.yaml --loadtest"
 build = "docker build --tag ghcr.io/agile-learning-institute/stage0_fran:latest ."
 container = "sh -c 's0 down && pipenv run build && s0 up curriculum-api'"
-evaluate = "sh -c 'docker run --rm -e OLLAMA_HOST=http://host.docker.internal:11434 -e CONFIG_FOLDER=/config -v ./fran_model:/input -v ./fran_model/config:/config -v ./fran_model/output:/output ghcr.io/agile-learning-institute/stage0_runbook_evaluate:latest'"
-grade = "sh -c 'docker run --rm -e OLLAMA_HOST=http://host.docker.internal:11434 -e CONFIG_FOLDER=/config -v ./fran_model:/input -v ./fran_model/config:/config -v ./fran_model/output:/output ghcr.io/agile-learning-institute/stage0_runbook_grade:latest'"
 
 [packages]
 discord = "*"

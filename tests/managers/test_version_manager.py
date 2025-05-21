@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from src.managers.version_manager import VersionManager, VersionNumber
+from stage0_mongodb_api.managers.version_manager import VersionManager, VersionNumber
 from stage0_py_utils import Config
 
 class TestVersionNumber(unittest.TestCase):
@@ -62,13 +62,15 @@ class TestVersionNumber(unittest.TestCase):
 class TestVersionManager(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures"""
-        self.version_manager = VersionManager()
         self.mock_mongo = MagicMock()
         
-        # Patch only the MongoIO instance
-        self.mongo_patcher = patch('src.managers.version_manager.MongoIO.get_instance')
+        # Patch MongoIO instance
+        self.mongo_patcher = patch('stage0_mongodb_api.managers.version_manager.MongoIO.get_instance')
         self.mock_mongo_instance = self.mongo_patcher.start()
         self.mock_mongo_instance.return_value = self.mock_mongo
+        
+        # Create VersionManager after mock is set up
+        self.version_manager = VersionManager()
 
     def tearDown(self):
         """Clean up test fixtures"""
@@ -77,31 +79,53 @@ class TestVersionManager(unittest.TestCase):
     def test_get_current_version_existing(self):
         """Test getting current version when it exists"""
         # Arrange
-        self.mock_mongo.get_document.return_value = {
+        self.mock_mongo.get_documents.return_value = [{
             "collection_name": "test_collection",
-            "current_version": "1.2.3.4"  # Full version with schema
-        }
+            "current_version": "1.2.3.4"  
+        }]
         
         # Act
         version = self.version_manager.get_current_version("test_collection")
         
         # Assert
         self.assertEqual(version, "1.2.3.4")
-        self.mock_mongo.get_document.assert_called_once_with(
+        self.mock_mongo.get_documents.assert_called_once_with(
             Config.get_instance().VERSION_COLLECTION_NAME,
             match={"collection_name": "test_collection"}
         )
 
-    def test_get_current_version_not_existing(self):
-        """Test getting current version when it doesn't exist"""
+    def test_get_current_version_no_version_exists(self):
+        """Test getting current version when no version exists"""
         # Arrange
-        self.mock_mongo.get_document.return_value = None
+        self.mock_mongo.get_documents.return_value = []
         
         # Act
         version = self.version_manager.get_current_version("test_collection")
         
         # Assert
-        self.assertEqual(version, "0.0.0.0")  # Default version with schema component
+        self.assertEqual(version, "0.0.0.0")
+        self.mock_mongo.get_documents.assert_called_once_with(
+            Config.get_instance().VERSION_COLLECTION_NAME,
+            match={"collection_name": "test_collection"}
+        )
+
+    def test_get_current_version_multiple_versions_exist(self):
+        """Test getting current version when multiple versions exist"""
+        # Arrange
+        self.mock_mongo.get_documents.return_value = [
+            {"collection_name": "test_collection", "current_version": "1.2.3.4"},
+            {"collection_name": "test_collection", "current_version": "1.2.3.5"}
+        ]
+        
+        # Act
+        version = self.version_manager.get_current_version("test_collection")
+        
+        # Assert
+        self.assertEqual(version, "0.0.0.0")
+        self.mock_mongo.get_documents.assert_called_once_with(
+            Config.get_instance().VERSION_COLLECTION_NAME,
+            match={"collection_name": "test_collection"}
+        )
 
     def test_update_version_valid(self):
         """Test updating version with valid version string"""

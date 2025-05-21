@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from flask import Flask
-from src.routes.collection_routes import create_collection_routes
+from stage0_mongodb_api.routes.collection_routes import create_collection_routes
 
 class TestCollectionRoutes(unittest.TestCase):
     def setUp(self):

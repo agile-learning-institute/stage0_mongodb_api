@@ -1,6 +1,9 @@
 import re
+import logging
 from typing import Optional, Dict, List
 from stage0_py_utils import MongoIO, Config
+
+logger = logging.getLogger(__name__)
 
 class VersionNumber:
     """Class for handling semantic version numbers with schema version.
@@ -60,17 +63,24 @@ class VersionManager:
         """Get the current version of a collection.
         
         Returns:
-            str: Version string in format major.minor.patch.schema
+            str: Version string in format major.minor.patch.enums
                  Returns "0.0.0.0" if no version exists
         """
-        version_doc = self.mongo.get_document(
+        version_docs = self.mongo.get_documents(
             self.config.VERSION_COLLECTION_NAME,
             match={"collection_name":collection_name}
         )
         
-        if not version_doc or not version_doc.get("current_version"):
+        if not version_docs:
+            logger.warning(f"No version found for collection: {collection_name}")
             return "0.0.0.0"
-        return version_doc.get("current_version")
+        if len(version_docs) != 1:
+            logger.warning(f"Multiple versions found for collection: {collection_name}")
+            return "0.0.0.0"
+        
+        current_version = version_docs[0].get("current_version")
+        print(f"Returning version: {current_version}")
+        return current_version
 
     def update_version(self, collection_name: str, version: str) -> bool:
         """Update the version of a collection.
