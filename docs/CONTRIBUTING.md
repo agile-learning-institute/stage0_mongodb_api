@@ -4,22 +4,49 @@ Thank you for your interest in contributing to the stage0_mongodb_api project! T
 
 ## Quick Start
 
-1. Clone the repository:
+1. Set up your development environment:
+   - Install Python 3.8 or later
+   - Install Pipenv
+   - Install Docker Desktop
+   - Install [Stage0 Developer Edition]() #TODO for now just Docker
+
+2. Clone the repository:
    ```bash
    git clone https://github.com/agile-learning-institute/stage0_mongodb_api.git
    cd stage0_mongodb_api
    ```
 
-2. Install dependencies:
+3. Install dependencies:
    ```bash
    pipenv install
    ```
 
-3. Set up your development environment:
-   - Install Python 3.8 or later
-   - Install Pipenv
-   - Install MongoDB (or use Docker)
-   - Install [Stage0 Developer Edition]() #TODO for now Docker
+## Other pipenv commands
+
+### Run Locally
+```bash
+pipenv run local
+```
+
+### Build Deployment Package
+```bash
+pipenv run build
+```
+
+### Run Unit Testing
+```bash
+pipenv run test
+```
+
+### Run StepCI testing
+```bash
+pipenv run stepci
+```
+
+### Build and Run Container
+```bash
+pipenv run container
+```
 
 ## Standards and Workflow
 

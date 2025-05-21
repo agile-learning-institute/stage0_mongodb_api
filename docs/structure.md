@@ -17,17 +17,19 @@ input_folder
 │   │   └── ...
 │   ├── user.1.0.0.yaml        
 │   ├── user.1.0.1.yaml        
-│   └── organization.1.0.0.yaml        
+│   ├── organization.1.0.0.yaml        
+│   └── ...
 └── data/
     ├── enumerators.yaml        
     ├── users.yaml        
-    └── organizations.yaml        
+    ├── organizations.yaml        
+│   └── ...
 ```
 
 ## Directory Contents
 
 ### collections/
-Contains the main collection configuration files. Each file defines:
+Contains the main [collection configuration](./collection_config.md) files. Each file defines:
 - Collection name
 - Version history
 - Index configurations
@@ -43,9 +45,9 @@ Custom type definitions that can be used in schemas:
 - Each type includes validation rules
 
 #### Version Files
-Schema definitions for specific versions:
+Schema definitions and test data for specific versions:
 - Named as `{collection}.{version}.yaml`
-- Contains the schema for that version
+- Contains the schema or data for that version
 - References enumerator versions
 
 ### data/
