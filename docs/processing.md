@@ -40,54 +40,20 @@ input_folder/
 
 The service:
 - Scans the `collections/` directory for collection configuration files
-- Identifies schema versions in `dictionary/` directory
-- Validates required files exist:
-  - Collection config file (`{collection}.yaml`)
-  - Schema version file (`{collection}.{version}.yaml`)
-  - Type definitions in `dictionary/types/`
-  - Enumerator definitions in `data/enumerators.yaml`
+- Validate that enumerators definitions exist at in `data/enumerators.yaml`
+- Validates that schema's referenced in the collections yaml file exist
+- Validates that test data referenced in the collections yaml file exist
+- Validate that all `dictionary/` 's resolve to primitives, and verify any used enumerators exist
 
 ### 2. Version Processing
 
-For each collection:
+For each collection, process versions to bring the collection to the latest version. When applying a configuration the following steps are completed:
 
-1. **Version Validation**
-   - Validates version numbers
-   - Checks version dependencies
-   - Ensures backward compatibility
-
-2. **Schema Processing**
-   - Loads and validates schema definitions
-   - Resolves custom types
-   - Validates enumerator references
-   - Generates MongoDB validation rules
-
-3. **Index Management**
-   - Processes `addIndexes` configurations
-   - Handles `dropIndexes` requests
-   - Validates index definitions
-
-4. **Data Migration**
-   - Executes migration scripts if needed
-   - Updates document structures
-   - Handles data transformations
-
-### 3. Database Operations
-
-1. **Collection Creation/Update**
-   - Creates new collections if needed
-   - Updates existing collections
-   - Applies schema validation rules
-
-2. **Index Operations**
-   - Creates new indexes
-   - Drops specified indexes
-   - Validates index operations
-
-3. **Data Operations**
-   - Applies test data if configured
-   - Executes aggregation pipelines
-   - Updates document structures
+1. **Drop existing Schema Validation**
+2. **Drop any Index's listed for removal**
+4. **Execute Data Migration's**
+3. **Add Indexes listed for addition**
+1. **Configure Schema Validation**
 
 ## Related Documentation
 - [Collection Configuration](collection_config.md)

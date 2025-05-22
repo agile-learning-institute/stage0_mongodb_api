@@ -2,90 +2,86 @@
 
 This API implements index, schema, and migration management services for a MongoDB database. Schemas are described using the stage0 Simple Schema standard. 
 
-## Project Structure
-
-```
-stage0_mongodb_api/
-├── stage0_mongodb_api/          # Main package directory
-│   ├── managers/               # Database managers
-│   ├── routes/                 # API route handlers
-│   ├── services/              # Business logic services
-│   ├── server.py              # Main server application
-│   └── __init__.py
-├── tests/                      # Test directory
-│   ├── managers/              # Tests for database managers
-│   ├── routes/                # Tests for API routes
-│   ├── services/              # Tests for business logic
-│   ├── test_server.py         # Server tests
-│   └── stepci.yaml            # StepCI configuration
-├── docs/                       # Documentation
-├── Pipfile                     # Python dependencies
-├── requirements.txt            # Additional requirements
-└── CURL_EXAMPLES.md           # API usage examples
-```
-
 ## Prerequisites
 
-- [Stage0 Developer Edition]() #TODO for now Docker
-- [Python](https://www.python.org/downloads/)
+- [Python](https://www.python.org/downloads/) 3.8 or later
 - [Pipenv](https://pipenv.pypa.io/en/latest/installation.html)
+- [MongoDB](https://www.mongodb.com/try/download/community) or MongoDB Atlas account
 
 ### Optional
 
-- [Mongo Compass](https://www.mongodb.com/try/download/compass) - if you want a way to look into the database
+- [Mongo Compass](https://www.mongodb.com/try/download/compass) - MongoDB GUI client
+- [Docker](https://www.docker.com/products/docker-desktop) - For containerized deployment
 
-## Usage
-Instructions for creating a project Mongo DB API service using your own simple schema documentation. Should include a template repo with a Dockerfile and directory structure.
+## Quick Start
 
-## Configurability
-API Configuration Values
-- MONGO_DB_NAME
-- MONGO_CONNECTION_STRING
-- INPUT_FOLDER that contains configurations etc.
-- AUTO_PROCESS ``true`` will process configurations on startup
-- EXIT_AFTER_PROCESSING ``false`` to expose API
+1. Clone the repository:
+```bash
+git clone https://github.com/agile-learning-institute/stage0_mongodb_api.git
+cd stage0_mongodb_api
+```
 
-## Install Dependencies
-
+2. Install dependencies:
 ```bash
 pipenv install
 ```
 
-## Testing
-
-The project uses pytest for testing. Tests are organized in the `tests/` directory mirroring the main package structure. Test files follow the naming convention `test_*.py`.
-
-### Run Unit Testing
-
+3. Configure environment variables:
 ```bash
-pipenv run test
+export MONGO_DB_NAME=your_database
+export MONGO_CONNECTION_STRING=your_connection_string
+export INPUT_FOLDER=path/to/configs
+export AUTO_PROCESS=true
+export EXIT_AFTER_PROCESSING=false
 ```
 
-The test discovery is configured to:
-- Look for tests in the `tests/` directory
-- Match files named `test_*.py`
-- Use the `unittest` test runner
-
-## Run the API locally (assumes database is already running)
-
+4. Run the API:
 ```bash
 pipenv run local
 ```
 
-## Build and run the server Container
-This will build the new container, and {re}start the mongodb and API container together.
-```bash
-pipenv run container
+## Configuration
+
+The API is configured through environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MONGO_DB_NAME` | MongoDB database name | - |
+| `MONGO_CONNECTION_STRING` | MongoDB connection string | - |
+| `INPUT_FOLDER` | Directory containing configurations | - |
+| `AUTO_PROCESS` | Process configurations on startup | false |
+| `EXIT_AFTER_PROCESSING` | Exit after processing or expose API | false |
+
+## API Usage
+
+The API provides endpoints for managing MongoDB collections, including:
+- Collection configuration
+- Schema management
+- Index management
+- Data migrations
+
+For detailed API examples, see [CURL_EXAMPLES.md](CURL_EXAMPLES.md).
+
+### Example Collection Configuration
+```yaml
+name: sample
+versions:
+  - version: "1.0.0.0"
+    testData: "sample-1.0.0.1"
+    addIndexes:
+      - name: nameIndex
+        keys:
+          userName: 1
+        options:
+          unique: true
 ```
 
-## Run StepCI end-2-end testing
-NOTE: Assumes the API is running at localhost:8580
-```bash
-pipenv run stepci
-```
+## [Reference Documentation](./docs/REFERENCE.md) - Complete Reference documentation
 
-# API Testing with CURL
+## Contributing
 
-There are quite a few endpoints, see [CURL_EXAMPLES](./CURL_EXAMPLES.md) for all of them.
+We welcome contributions! Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development guidelines and workflow.
 
-The [Dockerfile](./Dockerfile) uses a 2-stage build, and supports both amd64 and arm64 architectures. 
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 

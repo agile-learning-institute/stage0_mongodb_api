@@ -13,7 +13,7 @@ items: for array types
 properties: for object types
 required: for object types
 additional_properties: for object types
-enums: for enum or enum_array types
+enums: for enum or enum_array types - references an enumerator from data/enumerators.yaml
 one_of: for polymorphic list properties with type indicator
 ```
 
@@ -32,15 +32,29 @@ The following properties are identical to their JSON Schema equivalents:
 ## Special Types
 
 ### Enumerator Types
-`type: enum` and `type: enum_array` represent single or multiple values from a list of valid values.
+`type: enum` and `type: enum_array` represent single or multiple values from a list of valid values. The values are defined in the `data/enumerators.yaml` file and referenced by name in the schema.
 
 Example:
 ```yaml
 status:
   type: enum
   description: The current status of the item
-  enums: [active, inactive, pending]
+  enums: defaultStatus  # References the defaultStatus enumerator from data/enumerators.yaml
 ```
+
+The enumerator definition in `data/enumerators.yaml`:
+```yaml
+defaultStatus:
+  Draft: "Not finalized"
+  Active: "Not deleted"
+  Archived: "Soft delete indicator"
+```
+
+This approach:
+1. Centralizes enumerator definitions for reuse across schemas
+2. Makes enumerators available to API/SPA code through the database
+3. Ensures consistency in enumerator values and descriptions
+4. Supports versioning of enumerator definitions
 
 ### OneOf Type
 The `one_of` type describes a polymorphic list with a type indicator. Useful for storing objects with different structures based on their type.
@@ -57,7 +71,7 @@ cards:
       type:
         type: enum
         description: The type of media this card represents
-        enums: [book, video]
+        enums: mediaType
       title:
         type: sentence
         description: The title of the media
@@ -93,7 +107,20 @@ cards:
             format:
               type: enum
               description: The video format
-              enums: [dvd, bluray, digital]
+              enums: videoFormat
+```
+
+The enumerator definitions in `data/enumerators.yaml`:
+```yaml
+mediaType:
+  book: "A printed or digital book"
+  video: "A video recording"
+  article: "A written article"
+
+videoFormat:
+  dvd: "Digital Versatile Disc"
+  bluray: "Blu-ray Disc"
+  digital: "Digital streaming format"
 ```
 
 This would validate documents like:
