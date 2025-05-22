@@ -33,12 +33,15 @@ class TestVersionNumber(unittest.TestCase):
             ".1.2.3",    # Leading dot
             "1.2.3.4a",  # Non-numeric in schema
             "1.2.3a.4",  # Non-numeric in patch
+            "1000.0.0.0", # Exceeds MAX_VERSION
+            "0.1000.0.0", # Exceeds MAX_VERSION
+            "0.0.1000.0", # Exceeds MAX_VERSION
+            "0.0.0.1000", # Exceeds MAX_VERSION
         ]
         
         for invalid_version in invalid_versions:
-            with self.assertRaises(ValueError) as context:
+            with self.assertRaises(ValueError):
                 VersionNumber(invalid_version)
-            self.assertIn("Invalid version format", str(context.exception))
 
     def test_version_comparison(self):
         """Test version comparison operators"""
@@ -75,6 +78,12 @@ class TestVersionManager(unittest.TestCase):
     def tearDown(self):
         """Clean up test fixtures"""
         self.mongo_patcher.stop()
+
+    def test_get_current_version_empty_collection_name(self):
+        """Test getting current version with empty collection name"""
+        with self.assertRaises(ValueError) as context:
+            self.version_manager.get_current_version("")
+        self.assertEqual(str(context.exception), "Collection name cannot be empty")
 
     def test_get_current_version_existing(self):
         """Test getting current version when it exists"""
@@ -117,15 +126,29 @@ class TestVersionManager(unittest.TestCase):
             {"collection_name": "test_collection", "current_version": "1.2.3.5"}
         ]
         
-        # Act
-        version = self.version_manager.get_current_version("test_collection")
+        # Act & Assert
+        with self.assertRaises(RuntimeError) as context:
+            self.version_manager.get_current_version("test_collection")
+        self.assertEqual(str(context.exception), "Multiple versions found for collection: test_collection")
+
+    def test_get_current_version_invalid_document(self):
+        """Test getting current version when document is invalid"""
+        # Arrange
+        self.mock_mongo.get_documents.return_value = [{
+            "collection_name": "test_collection"
+            # Missing current_version field
+        }]
         
-        # Assert
-        self.assertEqual(version, "0.0.0.0")
-        self.mock_mongo.get_documents.assert_called_once_with(
-            Config.get_instance().VERSION_COLLECTION_NAME,
-            match={"collection_name": "test_collection"}
-        )
+        # Act & Assert
+        with self.assertRaises(RuntimeError) as context:
+            self.version_manager.get_current_version("test_collection")
+        self.assertEqual(str(context.exception), "Invalid version document for collection: test_collection")
+
+    def test_update_version_empty_collection_name(self):
+        """Test updating version with empty collection name"""
+        with self.assertRaises(ValueError) as context:
+            self.version_manager.update_version("", "1.2.3.4")
+        self.assertEqual(str(context.exception), "Collection name cannot be empty")
 
     def test_update_version_valid(self):
         """Test updating version with valid version string"""
@@ -136,7 +159,10 @@ class TestVersionManager(unittest.TestCase):
         result = self.version_manager.update_version("test_collection", "1.2.3.4")
         
         # Assert
-        self.assertTrue(result)
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["operation"], "version_update")
+        self.assertEqual(result["collection"], "test_collection")
+        self.assertEqual(result["version"], "1.2.3.4")
         self.mock_mongo.upsert_document.assert_called_once_with(
             Config.get_instance().VERSION_COLLECTION_NAME,
             match={"collection_name": "test_collection"},
@@ -154,13 +180,23 @@ class TestVersionManager(unittest.TestCase):
             "1.2.3.4.",   # Trailing dot with schema
             "1..2.3",     # Double dot
             ".1.2.3",     # Leading dot
+            "1000.0.0.0", # Exceeds MAX_VERSION
         ]
         
         # Act & Assert
         for invalid_version in invalid_versions:
-            with self.assertRaises(ValueError) as context:
+            with self.assertRaises(ValueError):
                 self.version_manager.update_version("test_collection", invalid_version)
-            self.assertIn("Invalid version format", str(context.exception))
+
+    def test_update_version_failed_upsert(self):
+        """Test updating version when upsert fails"""
+        # Arrange
+        self.mock_mongo.upsert_document.return_value = None
+        
+        # Act & Assert
+        with self.assertRaises(RuntimeError) as context:
+            self.version_manager.update_version("test_collection", "1.2.3.4")
+        self.assertEqual(str(context.exception), "Failed to update version for collection: test_collection")
 
 if __name__ == '__main__':
     unittest.main()
