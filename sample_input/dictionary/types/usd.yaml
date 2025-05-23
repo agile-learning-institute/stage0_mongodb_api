@@ -1,0 +1,8 @@
+$schema: "https://agile-learning.institute/stage0/schemas/dd_type.schema.yaml"
+$id: "https://{{organization}}/{{product}}/schemas/types/usd.yaml"
+version: "1.0.0"
+title: USD
+description: An integer value in the range 0-TODO representing US Currency in cents.
+json_type: 
+  type: number
+  TODO: Constrain

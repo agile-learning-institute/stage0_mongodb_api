@@ -1,0 +1,10 @@
+$schema: "https://agile-learning.institute/stage0/schemas/dd_type.schema.yaml"
+$id: "https://{{organization}}/{{product}}/schemas/types/-time.yaml"
+version: "1.0.0"
+title: Time
+description: A Time value
+json_type: 
+  type: string
+  pattern: "TODO"
+bson_type:
+  bsonType: time

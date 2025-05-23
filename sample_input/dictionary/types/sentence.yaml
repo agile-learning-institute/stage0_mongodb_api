@@ -1,0 +1,8 @@
+$schema: "https://agile-learning.institute/stage0/schemas/dd_type.schema.yaml"
+$id: "https://{{organization}}/{{product}}/schemas/types/sentence.yaml"
+version: "1.0.0"
+title: Sentence
+description: A String of text, at least 4 and no more than 255 characters with no special characters
+json_type: 
+  type: string
+  pattern: "TODO"

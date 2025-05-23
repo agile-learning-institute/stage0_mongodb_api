@@ -1,0 +1,5 @@
+title: Count
+description: A positive integer value
+json_type: 
+  type: number
+  TODO: Constrain

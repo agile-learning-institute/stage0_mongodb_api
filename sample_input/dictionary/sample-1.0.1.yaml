@@ -1,5 +1,6 @@
 title: Sample Collection
 description: A sample collection for testing the schema system
+type: object
 properties:
   _id:
     description: The unique identifier for a person

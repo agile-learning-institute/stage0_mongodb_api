@@ -1,0 +1,10 @@
+$schema: "https://agile-learning.institute/stage0/schemas/dd_type.schema.yaml"
+$id: "https://{{organization}}/{{product}}/schemas/types/date-time.yaml"
+version: "1.0.0"
+title: DateTime
+description: A Date and Time
+json_type: 
+  type: string
+  pattern: "TODO"
+bson_type:
+  bsonType: date-time
