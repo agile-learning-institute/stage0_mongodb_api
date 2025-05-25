@@ -2,28 +2,28 @@
 
 The stage0_mongodb_api service expects a specific directory structure in the input folder. This structure organizes collection configurations, type definitions, and data files.
 
-## Directory Layout
+## Input Directory Layout
 
 ```
 input_folder
-├── collections/
+├── collections/            # collection configurations *.yaml
 │   ├── user.yaml
-│   ├── organization.yaml
+│   ├── org.yaml
 │   └── ...
-├── dictionary/
-│   ├── types/
+├── dictionary/             # Simple schema *.yaml
+│   ├── types/              # Custom types *.yaml
 │   │   ├── word.yaml
 │   │   ├── sentence.yaml
 │   │   └── ...
 │   ├── user.1.0.0.yaml        
 │   ├── user.1.0.1.yaml        
-│   ├── organization.1.0.0.yaml        
+│   ├── org.1.0.0.yaml        
 │   └── ...
-└── data/
-    ├── enumerators.yaml        
-    ├── users.yaml        
-    ├── organizations.yaml        
-│   └── ...
+└── data/                   # Test Data *.json
+    ├── enumerators.json      ## enumerators 
+    ├── users.1.0.0.1.json        
+    ├── org.1.0.0.1.json        
+    └── ...
 ```
 
 ## Directory Contents
@@ -61,9 +61,10 @@ Contains data files:
 - Collection configs: `{collection}.yaml`
 - Schema versions: `{collection}.{version}.yaml`
 - Type definitions: `{type}.yaml`
-- Data files: `{collection}.yaml` or `{collection}.{version}.yaml` 
+- Data files: `{collection}.json` or `{collection}.{version}.json` 
 
 ## Related Documentation
-- [Collection Configuration](collection_config.md)
-- [Custom Types](types.md)
-- [Enumerators](enumerators.md) 
+- [Simple Schema Language](./schema.md)
+- [Collection Configuration](./collection_config.md)
+- [Custom Types](./types.md)
+- [Enumerators](./enumerators.md) 

@@ -6,28 +6,28 @@ Thank you for your interest in contributing to the stage0_mongodb_api project! T
 
 ```
 stage0_mongodb_api/
-├── stage0_mongodb_api/          # Main package directory
-│   ├── managers/               # Database managers
-│   ├── routes/                 # API route handlers
-│   ├── services/              # Business logic services
-│   ├── server.py              # Main server application
+├── stage0_mongodb_api/       # Main package directory
+│   ├── managers/             # Database managers
+│   ├── routes/               # API route handlers
+│   ├── services/             # Business logic services
+│   ├── server.py             # Main server application
 │   └── __init__.py
-├── tests/                      # Test directory
-│   ├── managers/              # Tests for database managers
-│   ├── routes/                # Tests for API routes
-│   ├── services/              # Tests for business logic
-│   ├── test_server.py         # Server tests
-│   └── stepci.yaml            # StepCI configuration
-├── docs/                       # Documentation
-│   ├── REFERENCE.md           # Main reference documentation
-│   ├── collection_config.md   # Collection configuration guide
+├── tests/                    # Test directory
+│   ├── managers/             # Tests for database managers
+│   ├── routes/               # Tests for API routes
+│   ├── services/             # Tests for business logic
+│   ├── test_server.py        # Server tests
+│   ├── test_cases/           # Schema test cases
+│   └── stepci.yaml           # StepCI configuration
+├── docs/                     # Documentation
+│   ├── REFERENCE.md          # Main reference documentation
+│   ├── CONTRIBUTING.md       # Collection configuration guide
 │   ├── schema.md             # Schema language documentation
 │   ├── types.md              # Custom types documentation
 │   ├── versioning.md         # Version management guide
 │   └── schemas/              # Schema definitions
-├── Pipfile                     # Python dependencies
-├── requirements.txt            # Additional requirements
-└── CURL_EXAMPLES.md           # API usage examples
+├── README.md                 # Overview and Usage
+└── CURL_EXAMPLES.md          # API usage examples
 ```
 
 ## Development Setup
@@ -49,55 +49,64 @@ stage0_mongodb_api/
    pipenv install
    ```
 
-## Development Workflow
+## Development Commands
 
-### Local Development
+All development commands are run using pipenv:
+
 ```bash
+# Local development
 pipenv run local
-```
 
-### Testing
-```bash
 # Run unit tests
 pipenv run test
 
 # Run end-to-end tests
 pipenv run stepci
-```
 
-### Containerized Development
-```bash
 # Build and run containers
 pipenv run container
 ```
 
+## Schema Testing
+
+The schema system uses test input folders to validate functionality. Each test case consists of:
+
+1. **Test Case Structure**:
+```
+tests/test_cases/
+  case_name/
+    collections/              # Collection configurations
+      user.yaml              # User collection config
+      media.yaml             # Media collection config
+    dictionary/              # Schema definitions
+      types/                 # Custom types
+        word.yaml
+        timestamp.yaml
+      user.1.0.0.yaml        # Schema version
+    data/                    # Test data
+      enumerators.json       # Enumerator definitions
+      users.1.0.0.1.json     # Test data version
+    expected/
+      validation.json                # Expected validation errors
+      user.1.0.0.1.json_schema.json  # Expected JSON schema
+      user.1.0.0.1.bson_schema.json  # Expected BSON schema
+      media.1.0.0.1.json_schema.json # Expected JSON schema
+      media.1.0.0.1.bson_schema.json # Expected BSON schema
+```
+
+2. **Test Organization**:
+   - Each test case has its own directory
+   - Input files mirror the production structure
+   - Expected outputs are stored in the `expected` directory
+   - Validation results are a list of errors (empty list for success)
+   - Schema outputs are organized by collection
+
 ## Development Standards
 
-### Code Style
-- Follow PEP 8 guidelines
-- Use type hints
-- Document all public functions and classes
-- Keep functions focused and small
+This project follows the development standards defined in the stage0 project:
 
-### Testing Requirements
-- Maintain 90% test coverage
-- Write unit tests for all new features
-- Include integration tests for API endpoints
-- Run tests before submitting PRs
-
-### Documentation
-- Update relevant documentation files
-- Include examples for new features
-- Add API endpoint documentation
-- Update CURL examples if needed
-
-### Pull Request Process
-1. Create a feature branch
-2. Make your changes
-3. Run tests and ensure they pass
-4. Update documentation
-5. Submit a pull request
-6. Address review comments
+- [Contributing Guidelines](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/docs/contributing.md)
+- [API Standards](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/docs/api-standards.md)
 
 ## Getting Help
 
