@@ -86,7 +86,7 @@ class IndexManager:
             }
         """
         mongo = MongoIO.get_instance()
-        indexes = mongo.get_indexes(collection_name=collection_name)
+        indexes = mongo.get_indexes(collection_name=collection_name)        
         
         return {
             "status": "success",

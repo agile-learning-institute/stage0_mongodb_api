@@ -140,7 +140,7 @@ class CollectionService:
     def _process_version(self, collection_name: str, version: Dict) -> List[Dict]:
         """Process a single version of a collection."""
         operations = []
-        
+
         # Remove existing schema validation
         operations.append(self.schema_manager.remove_schema(collection_name))
         
@@ -202,7 +202,7 @@ class CollectionService:
             
         # Get JSON Schema
         json_schema = self.schema_manager.render_schema(schema_name, SchemaFormat.JSON_SCHEMA)
-        
+
         # Get API template
         template = self.api_templates.get(collection_name, {})
         
@@ -334,7 +334,7 @@ class CollectionService:
         # Merge with template
         if template:
             openapi = self._merge_templates(openapi, template)
-            
+
         return {
             "status": "success",
             "collection": collection_name,

@@ -1,7 +1,0 @@
-[
-    {
-      "_id": {"$oid": "000000000000000000000003"},
-      "userName": "John Doe",
-      "status": "Draft"
-   }
-]

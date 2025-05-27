@@ -544,7 +544,7 @@ class SchemaManager:
             
         schema = self.render_schema(schema_name, SchemaFormat.BSON_SCHEMA)
         self.mongo.update_document(
-            collection_name,
+                    collection_name,
             set_data={"validator": {"$jsonSchema": schema}}
         )
         return {
@@ -578,8 +578,8 @@ class SchemaManager:
             collection_name,
             set_data={"validator": {}}
         )
-        return {
+            return {
             "status": "success",
             "operation": "remove_schema",
             "collection": collection_name
-        } 
+            } 

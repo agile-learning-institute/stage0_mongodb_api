@@ -58,10 +58,10 @@ class TestIndexManager(unittest.TestCase):
         """Test dropping an index."""
         # Arrange
         mock_mongo.get_instance.return_value = MagicMock()
-        
+
         # Act
         result = IndexManager.drop_index(self.collection_name, self.index_name)
-        
+
         # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "drop_index")

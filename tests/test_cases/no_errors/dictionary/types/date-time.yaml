@@ -1,10 +1,7 @@
-$schema: "https://agile-learning.institute/stage0/schemas/dd_type.schema.yaml"
-$id: "https://{{organization}}/{{product}}/schemas/types/date-time.yaml"
-version: "1.0.0"
 title: DateTime
-description: A Date and Time
-json_type: 
+description: An ISO 8601 formatted date-time string
+json_type:
   type: string
-  pattern: "TODO"
+  format: date-time
 bson_type:
-  bsonType: date-time
+  bsonType: date

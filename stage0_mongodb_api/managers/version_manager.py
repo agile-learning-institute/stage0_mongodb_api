@@ -73,7 +73,7 @@ class VersionManager:
         
         Args:
             collection_name: Name of the collection to get version for
-            
+        
         Returns:
             str: Version string in format major.minor.patch.schema
             

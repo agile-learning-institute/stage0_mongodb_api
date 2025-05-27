@@ -1,0 +1,51 @@
+bsonType: object
+required: ["_id", "name", "status", "last_saved"]
+properties:
+  _id:
+    bsonType: objectId
+    pattern: "^[0-9a-fA-F]{24}$"
+  name:
+    bsonType: string
+    pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+  status:
+    bsonType: string
+    enum: ["draft", "active", "archived"]
+  last_saved:
+    bsonType: object
+    required: ["from_ip", "by_user", "at_time", "correlation_id"]
+    properties:
+      from_ip:
+        bsonType: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      by_user:
+        bsonType: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      at_time:
+        bsonType: date
+      correlation_id:
+        bsonType: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+  users:
+    bsonType: array
+    items:
+      bsonType: objectId
+      pattern: "^[0-9a-fA-F]{24}$"
+  website:
+    bsonType: string
+    pattern: "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
+  home_address:
+    bsonType: object
+    required: ["street", "city", "state", "postal_code"]
+    properties:
+      street:
+        bsonType: string
+        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+      city:
+        bsonType: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      state:
+        bsonType: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      postal_code:
+        bsonType: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$" 
