@@ -15,33 +15,21 @@ properties:
         version:
           description: Version string in format major.minor.patch.schema
           type: version4
-        testData:
+        test_data:
           description: Name of the test data file for this version
           type: word
-        addIndexes:
-          description: List of indexes to add in this version
+        add_indexes:
+          description: List of indexes to add in this version. 
           type: array
           items:
-            description: MongoDB index configuration
-            type: object
-            properties:
-              name:
-                description: Name of the index
-                type: word
-              key:
-                description: Index key specification
-                type: object
-              options:
-                description: MongoDB index options
-                type: object
-        dropIndexes:
+            description: Index items are defined at https://www.mongodb.com/docs/manual/indexes/
+        drop_indexes:
           description: List of index names to drop in this version
           type: array
           items:
             type: word
         aggregations:
-          description: List of aggregation pipelines to run for this version
+          description: List of aggregation pipelines to run for this version. 
           type: array
           items:
-            description: MongoDB aggregation pipeline stages
-            type: array 
+            description: Aggregate pipelines are defined at https://www.mongodb.com/docs/manual/aggregation/

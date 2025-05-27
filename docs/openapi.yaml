@@ -34,22 +34,6 @@ paths:
                 items:
                   type: string
   /api/collection/{name}:
-    get:
-      summary: Collection configuration details by name
-      operationId: get_collection
-      parameters:
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Collection details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/collection'
     post:
       summary: Process a collection configuration
       operationId: process_collection
@@ -69,6 +53,57 @@ paths:
                 type: array
                 items:
                   type: string
+
+  /api/render/json_schema/{name}:
+    get:
+      summary: Get a Json Schema rendered for a collection
+      description: Json Schema 
+      operationId: render_json_schema
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Schema
+          content:
+            text/json:
+              schema:
+                type: object
+
+  /api/render/bson_schema/{name}:
+    get:
+      summary: Get a Bson Schema rendered for a collection
+      description: Bson Schema 
+      operationId: render_bson_schema
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Schema
+          content:
+            text/json:
+              schema:
+                type: object
+
+  /api/render/openapi/{name}:
+    get:
+      summary: Get a OpenAPI rendered for a collection
+      description: OpenAPI Specification
+      operationId: render_openapi
+      responses:
+        '200':
+          description: OpenAPI Specification
+          content:
+            text/yaml:
+              schema:
+                type: object
 
   /api/health:
     get:

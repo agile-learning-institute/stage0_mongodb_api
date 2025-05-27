@@ -47,13 +47,25 @@ The service:
 
 ### 2. Version Processing
 
-For each collection, process versions to bring the collection to the latest version. When applying a configuration the following steps are completed:
+For each collection, the service processes versions in chronological order to bring the collection to the latest version. The process follows these steps:
 
-1. **Drop existing Schema Validation**
-2. **Drop any Index's listed for removal**
-4. **Execute Data Migration's**
-3. **Add Indexes listed for addition**
-1. **Configure Schema Validation**
+1. Get the current version from the database (returns "0.0.0.0" if no version exists)
+2. For each version in the configuration:
+   - Compare version number with current version
+   - If version number is greater than current version:
+     a. Process the version configuration
+     b. Update the current version in the database
+   - If version number is less than or equal to current version:
+     - Skip processing this version
+
+When processing a version configuration, the following steps are completed in order:
+
+1. **Drop existing Schema Validation** (Required)
+2. **Drop any Indexes listed in drop_indexes** (Optional)
+3. **Execute Aggregation Pipelines if provided** (Optional)
+4. **Add Indexes listed in add_indexes** (Optional)
+5. **Apply Schema Validation** (Required)
+6. **Update Current Version** (Required)
 
 ## Related Documentation
 - [Collection Configuration](collection_config.md)
