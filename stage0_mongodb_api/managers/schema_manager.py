@@ -562,11 +562,6 @@ class SchemaManager:
             
         Returns:
             Dict containing operation result:
-            {
-                "status": "success",
-                "operation": "remove_schema",
-                "collection": str
-            }
             
         Raises:
             ValueError: If collection_name is empty
@@ -578,8 +573,9 @@ class SchemaManager:
             collection_name,
             set_data={"validator": {}}
         )
-            return {
+
+        return {
             "status": "success",
             "operation": "remove_schema",
             "collection": collection_name
-            } 
+        } 
