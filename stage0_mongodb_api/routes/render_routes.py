@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 import yaml
-from stage0_mongodb_api.services.render_service import CollectionService, RenderService
+from stage0_mongodb_api.services.render_service import RenderService
 
 def create_render_routes():
     blueprint = Blueprint('renders', __name__)
@@ -21,7 +21,7 @@ def create_render_routes():
     @blueprint.route('openapi/<collection_name>', methods=['GET'])
     def render_openapi(collection_name):
         """Render OpenAPI for a collection"""
-        openapi = render_service.render_bson_schema(collection_name)
+        openapi = render_service.render_openapi(collection_name)
         return yaml.dump(openapi)
 
     return blueprint 
