@@ -23,10 +23,12 @@ metrics.info('app_info', 'Application info', version=config.BUILT_AT)
 
 # Register flask routes
 from stage0_py_utils import create_config_routes
-from routes.collection_routes import create_collection_routes
+from stage0_mongodb_api.routes.collection_routes import create_collection_routes
+from stage0_mongodb_api.routes.render_routes import create_render_routes
 
 app.register_blueprint(create_config_routes(), url_prefix='/api/config')
 app.register_blueprint(create_collection_routes(), url_prefix='/api/collections')
+app.register_blueprint(create_render_routes(), url_prefix='/api/render')
 logger.info(f"============= Routes Registered ===============")
 
 # Define a signal handler for SIGTERM and SIGINT
