@@ -3,8 +3,7 @@ description: Collection for managing users
 name: user
 versions:
   - version: "1.0.0.1"
-    testData: "sample-1.0.0.1"
-    addIndexes:
+    add_indexes:
       - name: nameIndex
         key:
           userName: 1
@@ -21,11 +20,10 @@ versions:
         options:
           unique: false
   - version: "1.0.0.2"
-    dropIndexes:
+    drop_indexes:
       - statusIndex
-    testData: "sample-1.0.0.2"
   - version: "1.0.1.3"
-    migrations:
+    aggregations:
       - - $addFields:
             full_name:
               $concat: ["$profile.first_name", " ", "$profile.last_name"]

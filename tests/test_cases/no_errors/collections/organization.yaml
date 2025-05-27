@@ -3,8 +3,7 @@ description: Collection for managing organizations
 name: organization
 versions:
   - version: "1.0.0.1"
-    testData: "organization.1.0.0.1.json"
-    addIndexes:
+    add_indexes:
       - name: name
         key:
           name: 1

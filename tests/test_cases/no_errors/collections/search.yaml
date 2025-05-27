@@ -1,6 +1,6 @@
-title: Media Collection
-description: Collection for managing media items
-name: media
+title: Search Collection
+description: Collection for managing search operations
+name: search
 versions:
   - version: "1.0.0.1"
   - version: "1.0.0.2"

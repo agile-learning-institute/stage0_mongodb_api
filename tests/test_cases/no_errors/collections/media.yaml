@@ -3,8 +3,7 @@ description: Collection for managing media items
 name: media
 versions:
   - version: "1.0.0.1"
-    testData: "media.1.0.0.1.json"
-    addIndexes:
+    add_indexes:
       - name: title
         key:
           title: 1
