@@ -1,10 +1,11 @@
 from typing import Dict, List, Optional, Union, TypedDict, Set
 from enum import Enum
-from stage0_py_utils import MongoIO
+from stage0_py_utils import MongoIO, Config
 import yaml
 import os
 import re
 import json
+from stage0_mongodb_api.managers.version_number import VersionNumber
 
 class SchemaType(Enum):
     """Valid schema types."""
@@ -25,8 +26,9 @@ class PrimitiveType(TypedDict):
     These types map directly to JSON/BSON types and don't need complex validation.
     """
     description: str
-    json_type: Dict  # JSON Schema validation rules
-    bson_type: Dict  # BSON Schema validation rules
+    schema: Dict     # Rules for both JSON and BSON when the only difference is type vs. bsonType
+    json_type: Dict  # JSON Schema specific validation rules
+    bson_type: Dict  # BSON Schema specific validation rules
 
 class Schema(TypedDict):
     """Type definition for schema and schema properties.
@@ -60,117 +62,154 @@ class SchemaManager:
     """Implements the stage0 Simple Schema standard.
     
     Constructor:
-        __init__(input_path: str) -> None
+        __init__() -> None : Initialize the schema manager, load all the schemas and types from the input folder
         
     Public Methods:
         validate_schema() -> List[str]
         render_schema(schema_name: str, format: SchemaFormat = SchemaFormat.BSON_SCHEMA) -> Dict
-        apply_schema(collection_name: str, schema_name: str) -> Dict
+        apply_schema(collection_name: str, bson_schema: Dict) -> Dict
         remove_schema(collection_name: str) -> Dict
 
     See /docs/schema.md, /docs/processing.md for more details.
     """
     
     SCHEMA_NAME_PATTERN = r'^[a-zA-Z][a-zA-Z0-9_]*$'
-    VERSION_PATTERN = r'^\d+\.\d+\.\d+$'
+    VERSION_PATTERN = r'^\d+\.\d+\.\d+$'  # Three-part version for schema files
     VALID_TYPES = {t.value for t in SchemaType}
     
-    def __init__(self, input_path: str):
-        """Initialize the schema manager with input path.
-        
-        Args:
-            input_path: Path to the input directory containing dictionary, types, and data folders
-            
-        Raises:
-            ValueError: If input_path is empty or invalid
-            FileNotFoundError: If required input files are missing
-            SchemaError: If input files contain invalid content
-        """
-        if not input_path:
-            raise ValueError("Input path cannot be empty")
-            
-        if not os.path.exists(input_path):
-            raise FileNotFoundError(f"Input path does not exist: {input_path}")
-            
-        self.input_path = input_path
+    def __init__(self):
+        """Initialize the schema manager with input path."""
+        self.config = Config.get_instance()
         self.mongo = MongoIO.get_instance()
         self.types: Dict[str, Dict] = {}
-        self.enumerators: Dict[str, Dict] = {}
+        self.enumerators: List[Dict] = []  
         self.dictionaries: Dict[str, Schema] = {}
+        self.load_errors: List[Dict] = []
         
-        self._load_types()
-        self._load_enumerators()
-        self._load_dictionaries()
+        # Load and validate all components
+        self.load_errors.extend(self._load_types())
+        self.load_errors.extend(self._load_enumerators())
+        self.load_errors.extend(self._load_dictionaries())
 
-    def _load_types(self) -> None:
+    def _load_types(self) -> List[Dict]:
         """Load type definitions from the types directory.
         
-        Raises:
-            FileNotFoundError: If types directory is missing
-            SchemaError: If type definition fails to parse
+        Returns:
+            List of load errors. Empty list indicates all types loaded successfully.
         """
-        types_dir = os.path.join(self.input_path, "dictionary", "types")
+        errors = []
+        types_dir = os.path.join(self.config.INPUT_FOLDER, "dictionary", "types")
         if not os.path.exists(types_dir):
-            raise FileNotFoundError(f"Types directory not found: {types_dir}")
+            errors.append({"error": "directory_not_found", "path": types_dir})
+            return errors
             
         for file in os.listdir(types_dir):
             if file.endswith(".yaml"):
-                with open(os.path.join(types_dir, file), 'r') as f:
-                    try:
+                try:
+                    with open(os.path.join(types_dir, file), 'r') as f:
                         type_def = yaml.safe_load(f)
                         key = os.path.splitext(file)[0]
                         self.types[key] = type_def
-                    except yaml.YAMLError as e:
-                        raise SchemaError(f"Failed to parse type definition in {file}: {str(e)}")
+                except yaml.YAMLError as e:
+                    errors.append({
+                        "error": "parse_error",
+                        "file": file,
+                        "message": str(e)
+                    })
+                except Exception as e:
+                    errors.append({
+                        "error": "load_error",
+                        "file": file,
+                        "message": str(e)
+                    })
+                    
+        return errors
 
-    def _load_enumerators(self) -> None:
+    def _load_enumerators(self) -> List[Dict]:
         """Load enumerators from the data directory.
         
-        Raises:
-            FileNotFoundError: If data directory or enumerators file is missing
-            SchemaError: If enumerators file fails to parse
+        Returns:
+            List of load errors. Empty list indicates all enumerators loaded successfully.
         """
-        data_dir = os.path.join(self.input_path, "data")
+        errors = []
+        data_dir = os.path.join(self.config.INPUT_FOLDER, "data")
         if not os.path.exists(data_dir):
-            raise FileNotFoundError(f"Data directory not found: {data_dir}")
+            errors.append({"error": "directory_not_found", "path": data_dir})
+            return errors
             
         enumerators_file = os.path.join(data_dir, "enumerators.json")
         if not os.path.exists(enumerators_file):
-            raise FileNotFoundError(f"Enumerators file not found: {enumerators_file}")
+            errors.append({"error": "file_not_found", "path": enumerators_file})
+            return errors
             
-        with open(enumerators_file, 'r') as f:
-            try:
+        try:
+            with open(enumerators_file, 'r') as f:
                 self.enumerators = json.load(f)
-            except json.JSONDecodeError as e:
-                raise SchemaError(f"Failed to parse enumerators file: {str(e)}")
+                if not isinstance(self.enumerators, list):
+                    errors.append({
+                        "error": "invalid_format",
+                        "file": "enumerators.json",
+                        "message": "must be a list of versioned enumerators"
+                    })
+        except json.JSONDecodeError as e:
+            errors.append({
+                "error": "parse_error",
+                "file": "enumerators.json",
+                "message": str(e)
+            })
+        except Exception as e:
+            errors.append({
+                "error": "load_error",
+                "file": "enumerators.json",
+                "message": str(e)
+            })
+            
+        return errors
 
-    def _load_dictionaries(self) -> None:
+    def _load_dictionaries(self) -> List[Dict]:
         """Load dictionary definitions from the dictionary directory.
         
-        Raises:
-            FileNotFoundError: If dictionary directory is missing
-            SchemaError: If dictionary definition fails to parse
+        Returns:
+            List of load errors. Empty list indicates all dictionaries loaded successfully.
         """
-        dict_dir = os.path.join(self.input_path, "dictionary")
+        errors = []
+        dict_dir = os.path.join(self.config.INPUT_FOLDER, "dictionary")
         if not os.path.exists(dict_dir):
-            raise FileNotFoundError(f"Dictionary directory not found: {dict_dir}")
+            errors.append({"error": "directory_not_found", "path": dict_dir})
+            return errors
             
         for file in os.listdir(dict_dir):
             if file.endswith(".yaml"):
-                # Extract version from filename
-                name_parts = os.path.splitext(file)[0].split(".")
-                if len(name_parts) < 2 or not re.match(self.VERSION_PATTERN, name_parts[-1]):
-                    raise SchemaError(f"Invalid schema version format in {file}")
+                try:
+                    # Parse schema name and version
+                    schema_name = os.path.splitext(file)[0]
+                    collection_name, version = VersionNumber.from_schema_name(schema_name)
                     
-                with open(os.path.join(dict_dir, file), 'r') as f:
-                    try:
+                    with open(os.path.join(dict_dir, file), 'r') as f:
                         dict_def = yaml.safe_load(f)
-                        key = os.path.splitext(file)[0]
-                        self.dictionaries[key] = dict_def
-                    except yaml.YAMLError as e:
-                        raise SchemaError(f"Failed to parse dictionary definition in {file}: {str(e)}")
+                        self.dictionaries[schema_name] = dict_def
+                except ValueError as e:
+                    errors.append({
+                        "error": "invalid_version",
+                        "file": file,
+                        "message": str(e)
+                    })
+                except yaml.YAMLError as e:
+                    errors.append({
+                        "error": "parse_error",
+                        "file": file,
+                        "message": str(e)
+                    })
+                except Exception as e:
+                    errors.append({
+                        "error": "load_error",
+                        "file": file,
+                        "message": str(e)
+                    })
+                    
+        return errors
 
-    def validate_schema(self) -> List[str]:
+    def validate_schema(self) -> List[Dict]:
         """Validate all loaded schemas and configurations against the stage0 Simple Schema standard.
         
         Returns:
@@ -370,69 +409,98 @@ class SchemaManager:
             
         return errors
 
-    def render_schema(self, schema_name: str, format: SchemaFormat = SchemaFormat.BSON_SCHEMA) -> Dict:
-        """Render a schema in the specified format.
+    def _get_enumerator_version(self, collection_name: str) -> int:
+        """Get the enumerator version from a collection configuration.
         
         Args:
-            schema_name: Name of the schema to render
-            format: Target schema format (JSON_SCHEMA or BSON_SCHEMA)
+            collection_name: Name of the collection
             
         Returns:
-            Dict containing the rendered schema
+            Enumerator version number
             
         Raises:
-            ValueError: If schema_name is empty or invalid
-            SchemaValidationError: If schema validation fails
+            KeyError: If collection configuration not found
         """
-        if not schema_name:
-            raise ValueError("Schema name cannot be empty")
+        # Get collection config from Config singleton
+        collection_config = self.config.get_collection_config(collection_name)
+        if not collection_config:
+            raise KeyError(f"No configuration found for collection: {collection_name}")
             
-        if not re.match(self.SCHEMA_NAME_PATTERN, schema_name):
-            raise ValueError(f"Invalid schema name format: {schema_name}")
+        # Get version from config
+        version = collection_config.get("version")
+        if not version:
+            raise KeyError(f"No version found in collection config: {collection_name}")
             
-        # Validate schema before rendering
-        errors = self.validate_schema()
-        if errors:
-            raise SchemaValidationError(errors)
-            
-        schema = self._load_schema(schema_name)
+        # Parse version using VersionNumber
+        try:
+            _, version_number = VersionNumber.from_collection_config(collection_name, version)
+            return version_number.get_enumerator_version()
+        except ValueError as e:
+            raise KeyError(f"Invalid version format in collection config: {version}")
+
+    def _get_enumerator_for_version(self, enum_name: str, version: int) -> Dict:
+        """Get the enumerator definition for a specific version.
         
-        if format == SchemaFormat.BSON_SCHEMA:
-            return self._render_bson_schema(schema)
+        Args:
+            enum_name: Name of the enumerator
+            version: Version number to get
+            
+        Returns:
+            Enumerator definition for the specified version
+            
+        Raises:
+            KeyError: If enumerator or version not found
+        """
+        # Find the version entry
+        version_entry = None
+        for entry in self.enumerators:
+            if entry["version"] == version and entry["status"] == "Active":
+                version_entry = entry
+                break
+                
+        if not version_entry:
+            raise KeyError(f"No active enumerator version {version} found")
+            
+        # Get the enumerator from the version
+        if enum_name not in version_entry["enumerators"]:
+            raise KeyError(f"Enumerator '{enum_name}' not found in version {version}")
+            
+        return version_entry["enumerators"][enum_name]
+
+    def _resolve_enum(self, enum_name: str, collection_name: str, is_json: bool) -> Dict:
+        """Resolve an enumerator definition for a specific collection.
+        
+        Args:
+            enum_name: Name of the enumerator
+            collection_name: Name of the collection (used to get version)
+            is_json: Whether to resolve to JSON Schema format
+            
+        Returns:
+            Resolved enumerator definition
+            
+        Raises:
+            KeyError: If enumerator or version not found
+        """
+        version = self._get_enumerator_version(collection_name)
+        enum_def = self._get_enumerator_for_version(enum_name, version)
+        
+        if is_json:
+            return {
+                "type": "string",
+                "enum": list(enum_def.keys())
+            }
         else:
-            return self._render_json_schema(schema)
+            return {
+                "bsonType": "string",
+                "enum": list(enum_def.keys())
+            }
 
-    def _render_bson_schema(self, schema_def: Dict) -> Dict:
-        """Render a BSON schema."""
-        schema = {
-            "bsonType": "object",
-            "required": schema_def.get("required", []),
-            "properties": {}
-        }
-        
-        for prop_name, prop_def in schema_def["properties"].items():
-            schema["properties"][prop_name] = self._resolve_property(prop_def)
-            
-        return schema
-
-    def _render_json_schema(self, schema_def: Dict) -> Dict:
-        """Render a JSON schema."""
-        schema = {
-            "type": "object",
-            "required": schema_def.get("required", []),
-            "properties": {}
-        }
-        
-        for prop_name, prop_def in schema_def["properties"].items():
-            schema["properties"][prop_name] = self._resolve_property(prop_def, is_json=True)
-            
-        return schema
-
-    def _resolve_property(self, prop_def: Schema, is_json: bool = False) -> Dict:
+    def _resolve_property(self, prop_def: Schema, collection_name: str, is_json: bool = False) -> Dict:
         """Resolve a property definition to its primitive type.
         
         Args:
             prop_def: Property definition to resolve
+            collection_name: Name of the collection (used for version-specific enumerators)
             is_json: Whether to resolve to JSON Schema format
             
         Returns:
@@ -453,11 +521,11 @@ class SchemaManager:
         if type_name in self.types:
             resolved.update(self._resolve_type(self.types[type_name], is_json))
         elif type_name in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
-            resolved.update(self._resolve_enum(prop_def["enums"], is_json))
+            resolved.update(self._resolve_enum(prop_def["enums"], collection_name, is_json))
         elif type_name == SchemaType.OBJECT.value and "properties" in prop_def:
-            resolved.update(self._resolve_schema({"type": "object", "properties": prop_def["properties"]}, is_json))
+            resolved.update(self._resolve_schema({"type": "object", "properties": prop_def["properties"]}, collection_name, is_json))
         elif type_name == SchemaType.ARRAY.value and "items" in prop_def:
-            resolved_items = self._resolve_property(prop_def["items"], is_json)
+            resolved_items = self._resolve_property(prop_def["items"], collection_name, is_json)
             resolved.update({
                 "type": "array" if is_json else "array",
                 "items": resolved_items
@@ -472,33 +540,16 @@ class SchemaManager:
         else:
             return type_def["bson_type"]
 
-    def _resolve_enum(self, enum_name: str, is_json: bool) -> Dict:
-        """Resolve an enumerator definition."""
-        enum_def = self.enumerators[enum_name]
-        if is_json:
-            return {
-                "type": "string",
-                "enum": list(enum_def.keys())
-            }
-        else:
-            return {
-                "bsonType": "string",
-                "enum": list(enum_def.keys())
-            }
-
-    def _resolve_schema(self, schema_def: Schema, is_json: bool = False) -> Dict:
+    def _resolve_schema(self, schema_def: Schema, collection_name: str, is_json: bool = False) -> Dict:
         """Resolve a schema definition to its primitive type.
         
         Args:
             schema_def: Schema definition to resolve
+            collection_name: Name of the collection (used for version-specific enumerators)
             is_json: Whether to resolve to JSON Schema format
             
         Returns:
             Resolved schema definition
-            
-        Example:
-            >>> manager._resolve_schema({"type": "object", "properties": {"status": {"type": "enum", "enums": "status"}}})
-            {"type": "object", "properties": {"status": {"type": "string", "enum": ["Active", "Inactive"]}}}
         """
         if not schema_def.get("properties"):
             return schema_def
@@ -512,46 +563,106 @@ class SchemaManager:
             resolved["required"] = schema_def["required"]
             
         for prop_name, prop_def in schema_def["properties"].items():
-            resolved["properties"][prop_name] = self._resolve_property(prop_def, is_json)
+            resolved["properties"][prop_name] = self._resolve_property(prop_def, collection_name, is_json)
             
         return resolved
 
-    def apply_schema(self, collection_name: str, schema_name: str) -> Dict:
-        """Apply a schema to a collection.
+    def render_schema(self, schema_name: str, collection_name: str, format: SchemaFormat = SchemaFormat.BSON_SCHEMA) -> Dict:
+        """Render a schema in the specified format.
         
         Args:
-            collection_name: Name of the collection
-            schema_name: Name of the schema to apply
+            schema_name: Name of the schema to render
+            collection_name: Name of the collection (used for version-specific enumerators)
+            format: Target schema format (JSON_SCHEMA or BSON_SCHEMA)
             
         Returns:
-            Dict containing operation result:
-            {
-                "status": "success",
-                "operation": "apply_schema",
-                "collection": str,
-                "schema": str
-            }
+            Dict containing the rendered schema
             
         Raises:
-            ValueError: If collection_name or schema_name is empty or invalid
+            ValueError: If schema_name is empty or invalid
             SchemaValidationError: If schema validation fails
+            KeyError: If collection configuration not found
         """
-        if not collection_name:
-            raise ValueError("Collection name cannot be empty")
-            
         if not schema_name:
             raise ValueError("Schema name cannot be empty")
             
-        schema = self.render_schema(schema_name, SchemaFormat.BSON_SCHEMA)
-        self.mongo.update_document(
-                    collection_name,
-            set_data={"validator": {"$jsonSchema": schema}}
-        )
+        if not re.match(self.SCHEMA_NAME_PATTERN, schema_name):
+            raise ValueError(f"Invalid schema name format: {schema_name}")
+            
+        # Validate schema before rendering
+        errors = self.validate_schema()
+        if errors:
+            raise SchemaValidationError(errors)
+            
+        schema = self._load_schema(schema_name)
+        
+        if format == SchemaFormat.BSON_SCHEMA:
+            return self._render_bson_schema(schema, collection_name)
+        else:
+            return self._render_json_schema(schema, collection_name)
+
+    def _render_bson_schema(self, schema_def: Dict, collection_name: str) -> Dict:
+        """Render a BSON schema."""
+        schema = {
+            "bsonType": "object",
+            "required": schema_def.get("required", []),
+            "properties": {}
+        }
+        
+        for prop_name, prop_def in schema_def["properties"].items():
+            schema["properties"][prop_name] = self._resolve_property(prop_def, collection_name, is_json=False)
+            
+        return schema
+
+    def _render_json_schema(self, schema_def: Dict, collection_name: str) -> Dict:
+        """Render a JSON schema."""
+        schema = {
+            "type": "object",
+            "required": schema_def.get("required", []),
+            "properties": {}
+        }
+        
+        for prop_name, prop_def in schema_def["properties"].items():
+            schema["properties"][prop_name] = self._resolve_property(prop_def, collection_name, is_json=True)
+            
+        return schema
+
+    def apply_schema(self, version_name: str) -> Dict:
+        """Apply a schema to a collection.
+        
+        Args:
+            collection_name: Name of the collection version (e.g. user.1.0.0.1)
+            bson_schema: BSON schema to apply
+            
+        Returns:
+            Dict containing operation result
+            
+        """
+        if not version_name:
+            return {
+                "status": "error",
+                "operation": "apply_schema",
+                "collection": collection_name,
+                "message": "Collection name cannot be empty"
+            }
+
+        [collection_name, version_number] = version_name.split(".")
+        try:
+            bson_schema = self.render_schema(version_name, SchemaFormat.BSON_SCHEMA)
+            self.mongo.apply_schema(collection_name, bson_schema)
+        except Exception as e:
+            return {
+                "status": "error",
+                "operation": "apply_schema",
+                "collection": collection_name,
+                "message": str(e)
+            }
+        
         return {
             "status": "success",
             "operation": "apply_schema",
             "collection": collection_name,
-            "schema": schema_name
+            "schema": bson_schema
         }
 
     def remove_schema(self, collection_name: str) -> Dict:
@@ -562,17 +673,25 @@ class SchemaManager:
             
         Returns:
             Dict containing operation result:
-            
-        Raises:
-            ValueError: If collection_name is empty
+
         """
         if not collection_name:
-            raise ValueError("Collection name cannot be empty")
+            return {
+                "status": "error",
+                "operation": "remove_schema",
+                "collection": collection_name,
+                "message": "Collection name cannot be empty"
+            }
             
-        self.mongo.update_document(
-            collection_name,
-            set_data={"validator": {}}
-        )
+        try:
+            self.mongo.remove_schema(collection_name)
+        except Exception as e:
+            return {
+                "status": "error",
+                "operation": "remove_schema",
+                "collection": collection_name,
+                "message": str(e)
+            }
 
         return {
             "status": "success",

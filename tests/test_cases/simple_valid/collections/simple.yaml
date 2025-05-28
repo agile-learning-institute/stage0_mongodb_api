@@ -1,0 +1,5 @@
+title: Simple Collection
+description: Collection for testing
+name: simple
+versions:
+  - version: "1.0.0.1"

@@ -1,0 +1,49 @@
+type: object
+required: ["_id", "title", "status", "last_saved"]
+properties:
+  _id:
+    type: string
+    pattern: "^[0-9a-fA-F]{24}$"
+  title:
+    type: string
+    pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+  type:
+    type: string
+    enum: ["video", "audio", "image", "document"]
+  status:
+    type: string
+    enum: ["draft", "active", "archived"]
+  last_saved:
+    type: object
+    required: ["from_ip", "by_user", "at_time", "correlation_id"]
+    properties:
+      from_ip:
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      by_user:
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      at_time:
+        type: string
+        format: date-time
+      correlation_id:
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+  tags:
+    type: array
+    items:
+      type: string
+      enum: ["educational", "entertainment", "tutorial", "documentary"]
+  metadata:
+    type: object
+    properties:
+      duration:
+        type: number
+        minimum: 1
+        multipleOf: 1
+      format:
+        type: string
+        enum: ["mp4", "mp3", "jpg", "pdf"]
+      quality:
+        type: string
+        enum: ["low", "medium", "high", "ultra"] 
