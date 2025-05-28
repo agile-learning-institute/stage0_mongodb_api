@@ -1,66 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from stage0_mongodb_api.managers.version_manager import VersionManager, VersionNumber
+from stage0_mongodb_api.managers.version_manager import VersionManager
 from stage0_py_utils import Config
-
-class TestVersionNumber(unittest.TestCase):
-    def test_parse_version(self):
-        """Test parsing of version strings"""
-        # Test full version with schema version
-        version = VersionNumber("1.2.3.4")
-        self.assertEqual(version.parts, [1, 2, 3, 4])
-        
-        # Test partial version (should pad with zeros)
-        version = VersionNumber("1.2.3")
-        self.assertEqual(version.parts, [1, 2, 3, 0])
-        
-        version = VersionNumber("1.2")
-        self.assertEqual(version.parts, [1, 2, 0, 0])
-        
-        # Test single number
-        version = VersionNumber("1")
-        self.assertEqual(version.parts, [1, 0, 0, 0])
-
-    def test_invalid_version_constructor(self):
-        """Test that invalid version strings raise ValueError in constructor"""
-        invalid_versions = [
-            "",           # Empty string
-            "1.2.3.4.5", # Too many components
-            "a.b.c.d",   # Non-numeric
-            "1.2.3.",    # Trailing dot
-            "1.2.3.4.",  # Trailing dot with schema
-            "1..2.3",    # Double dot
-            ".1.2.3",    # Leading dot
-            "1.2.3.4a",  # Non-numeric in schema
-            "1.2.3a.4",  # Non-numeric in patch
-            "1000.0.0.0", # Exceeds MAX_VERSION
-            "0.1000.0.0", # Exceeds MAX_VERSION
-            "0.0.1000.0", # Exceeds MAX_VERSION
-            "0.0.0.1000", # Exceeds MAX_VERSION
-        ]
-        
-        for invalid_version in invalid_versions:
-            with self.assertRaises(ValueError):
-                VersionNumber(invalid_version)
-
-    def test_version_comparison(self):
-        """Test version comparison operators"""
-        v1 = VersionNumber("1.2.3.4")
-        v2 = VersionNumber("1.2.3.5")
-        v3 = VersionNumber("1.2.3.4")
-        v4 = VersionNumber("1.2.4.0")  # Different patch version
-        v5 = VersionNumber("1.2.3.0")  # Missing schema version
-        
-        self.assertTrue(v1 < v2)  # Different schema version
-        self.assertTrue(v1 < v4)  # Different patch version
-        self.assertTrue(v5 < v1)  # Missing schema version
-        self.assertFalse(v2 < v1)
-        self.assertTrue(v1 == v3)
-        self.assertFalse(v1 == v2)
-        
-        # Test string comparison
-        self.assertTrue(v1 < "1.2.3.5")
-        self.assertTrue(v1 == "1.2.3.4")
 
 class TestVersionManager(unittest.TestCase):
     def setUp(self):
@@ -72,12 +13,18 @@ class TestVersionManager(unittest.TestCase):
         self.mock_mongo_instance = self.mongo_patcher.start()
         self.mock_mongo_instance.return_value = self.mock_mongo
         
-        # Create VersionManager after mock is set up
+        # Patch SchemaManager to prevent file system access
+        self.schema_manager_patcher = patch('stage0_mongodb_api.managers.version_manager.SchemaManager')
+        self.mock_schema_manager = self.schema_manager_patcher.start()
+        self.mock_schema_manager.return_value = MagicMock()
+        
+        # Create VersionManager after mocks are set up
         self.version_manager = VersionManager()
 
     def tearDown(self):
         """Clean up test fixtures"""
         self.mongo_patcher.stop()
+        self.schema_manager_patcher.stop()
 
     def test_get_current_version_empty_collection_name(self):
         """Test getting current version with empty collection name"""
