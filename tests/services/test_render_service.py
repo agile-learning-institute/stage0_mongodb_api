@@ -1,18 +1,20 @@
+import os
 import unittest
 from stage0_mongodb_api.services.render_service import RenderService
+from stage0_py_utils import Config
 
 class TestRenderService(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures before each test method."""
-        self.render_service = RenderService()
+        self.config = Config.get_instance()
+        self.test_cases_dir = os.path.join(os.path.dirname(__file__), '..', 'test_cases')
 
     def test_render_json_schema(self):
         """Test rendering JSON schema returns empty dict."""
-        # Arrange
-        collection_name = "test_collection"
+        render_service = RenderService()     
 
         # Act
-        result = self.render_service.render_json_schema(collection_name)
+        result = render_service.render_json_schema("simple.1.0.0.1")
 
         # Assert
         self.assertEqual(result, {})
@@ -20,10 +22,10 @@ class TestRenderService(unittest.TestCase):
     def test_render_bson_schema(self):
         """Test rendering BSON schema returns empty dict."""
         # Arrange
-        collection_name = "test_collection"
+        render_service = RenderService()     
 
         # Act
-        result = self.render_service.render_bson_schema(collection_name)
+        result = render_service.render_bson_schema("simple.1.0.0.1")
 
         # Assert
         self.assertEqual(result, {})
@@ -31,10 +33,10 @@ class TestRenderService(unittest.TestCase):
     def test_render_openapi(self):
         """Test rendering OpenAPI specification returns empty dict."""
         # Arrange
-        collection_name = "test_collection"
+        render_service = RenderService()     
 
         # Act
-        result = self.render_service.render_openapi(collection_name)
+        result = render_service.render_openapi("simple.1.0.0.1")
 
         # Assert
         self.assertEqual(result, {})
