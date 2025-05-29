@@ -1,0 +1,25 @@
+title: Enumerators Schema
+description: Schema for defining versioned enumerator definitions
+type: object
+properties:
+  name:
+    description: Name of the enumerator set
+    type: string
+    pattern: "^[A-Z][a-zA-Z0-9_]*$"
+  status:
+    description: Current status of this enumerator version
+    type: enum
+    enums: ["Active", "Deprecated"]
+  version:
+    description: Version number of this enumerator set
+    type: integer
+    minimum: 0
+  enumerators:
+    description: Map of enumerator definitions
+    type: object
+    additionalProperties:
+      type: object
+      description: Individual enumerator definition
+      additionalProperties:
+        type: string
+        description: Description of the enumerator value 

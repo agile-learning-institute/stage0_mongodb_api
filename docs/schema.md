@@ -6,7 +6,7 @@ The stage0_mongodb_api service uses the stage0 Simple Schema language for defini
 
 The schema language supports the following properties:
 ```yaml
-title: Required on top-level objects
+title: Optional, but recommended for top-level dictionaries
 description: Required for ALL properties
 type: [array, object, enum, enum_array, one_of, **custom_type**]
 required: Optional boolean, defaults to false
@@ -65,11 +65,16 @@ Unlike JSON Schema where `required` is a required property list, in Simple Schem
 ### Enumerator Types
 `type: enum` and `type: enum_array` represent single or multiple values from a list of valid values. The values are defined in the `data/enumerators.json` file and referenced by name in the schema.
 
+The enumerators.json file must follow the schema defined in `docs/schemas/enumerators_schema.yaml`. Each enumerator version must have:
+- A unique version number
+- A valid status ("Active" or "Deprecated")
+- A map of enumerator definitions where each value has a description
+
 Example:
 ```yaml
 status:
-  type: enum
   description: The current status of the item
+  type: enum
   enums: defaultStatus  # References the defaultStatus enumerator from data/enumerators.json
 ```
 
@@ -87,19 +92,6 @@ The enumerator definition in `data/enumerators.json`:
                 "Archived": "Soft delete indicator"
             }
         }
-    },
-    {
-        "name": "Enumerations",
-        "status": "Active",
-        "version": 2,
-        "enumerators": {
-            "defaultStatus": {
-                "Draft": "Not finalized",
-                "Active": "Not deleted",
-                "Archived": "Soft delete indicator",
-                "Deleted": "Hard delete indicator"
-            }
-        }
     }
 ]
 ```
@@ -114,6 +106,7 @@ This approach:
 3. Ensures consistency in enumerator values and descriptions
 4. Supports versioning of enumerator definitions
 5. Allows collections to specify which version of enumerators to use
+6. Validates enumerator definitions against a schema
 
 ### Schema References
 The `$ref` property allows referencing schema files. This provides an alternative to complex custom types, and should be used when the complex type is likely to need version control. 
@@ -242,6 +235,37 @@ This would validate documents like:
 ## Custom Types
 
 Custom types are defined in the dictionary/types folder. Custom types can be complex types that reference other custom types. All custom types must resolve to a primitive type that defines both json and bson versions.
+
+Unlike enumerators, custom types are considered immutable and are not versioned. Once defined, they should not be changed as they may be used across multiple schemas.
+
+### Type Resolution
+
+Custom types are resolved recursively until a primitive type is found. For example:
+
+```yaml
+# types/breadcrumb.yaml
+title: Breadcrumb
+description: A tracking breadcrumb
+type: object
+properties:
+  from_ip:
+    description: Http Request remote IP address
+    type: word
+  by_user:
+    description: ID Of User
+    type: word
+  at_time:
+    description: The date-time when last updated
+    type: date-time
+  correlation_id:
+    description: The logging correlation ID of the update transaction
+    type: word
+```
+
+In this example:
+1. `breadcrumb` is a complex type that uses `word` and `date-time` types
+2. `word` and `date-time` are primitive types that resolve to JSON/BSON schemas
+3. The resolution process continues until all types are resolved to primitive types
 
 ### Primitive Types
 
