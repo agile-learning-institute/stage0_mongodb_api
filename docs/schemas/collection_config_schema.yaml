@@ -15,6 +15,7 @@ properties:
         version:
           description: Version string in format major.minor.patch.schema
           type: version4
+          required: true
         test_data:
           description: Name of the test data file for this version
           type: word
