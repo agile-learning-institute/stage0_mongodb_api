@@ -6,6 +6,7 @@ import os
 import re
 import json
 from stage0_mongodb_api.managers.version_number import VersionNumber
+from stage0_mongodb_api.managers.config_manager import ConfigManager
 
 class SchemaType(Enum):
     """Valid schema types."""
@@ -81,9 +82,11 @@ class SchemaManager:
         """Initialize the schema manager with input path."""
         self.config = Config.get_instance()
         self.mongo = MongoIO.get_instance()
+        self.config_manager = ConfigManager()
         self.types: Dict[str, Dict] = {}
         self.enumerators: List[Dict] = []  
         self.dictionaries: Dict[str, Schema] = {}
+        self.config_manager = ConfigManager()
         self.load_errors: List[Dict] = []
         
         # Load and validate all components
@@ -209,46 +212,103 @@ class SchemaManager:
                     
         return errors
 
-    def validate_schema(self) -> List[Dict]:
+    def validate_schema(self) -> List[str]:
         """Validate all loaded schemas and configurations against the stage0 Simple Schema standard.
         
+        Args:
+            collection_name: Optional collection name for context-aware validation
+            
         Returns:
             List of validation errors. Empty list indicates all configurations are valid.
         """
         errors = []
         
+        # Validate collection configs
+        errors.extend(self.config_manager.validate_configs())
+        
+        # Validate enumerators first
+        errors.extend(self._validate_enumerators())
+        
         # Validate all custom types
         for type_name, type_def in self.types.items():
-            errors.extend(self._validate_custom_type(type_def, type_name))
+            errors.extend(self._validate_type(type_def, type_name))
             
-        # Validate all schemas
-        for schema_name, schema in self.dictionaries.items():
-            errors.extend(self._validate_schema_structure(schema))
-            
-            if "properties" in schema:
-                for prop_name, prop_def in schema["properties"].items():
-                    errors.extend(self._validate_property(prop_name, prop_def))
-                    
-                    # Validate enumerator references
-                    if prop_def.get("type") in ["enum", "enum_array"]:
-                        enum_name = prop_def.get("enums")
-                        if enum_name not in self.enumerators:
-                            errors.append(f"Schema '{schema_name}' references unknown enumerator '{enum_name}' in property '{prop_name}'")
-                            
-                    # Validate custom type references
-                    elif prop_def.get("type") in self.types:
-                        type_name = prop_def["type"]
-                        if type_name not in self.types:
-                            errors.append(f"Schema '{schema_name}' references unknown type '{type_name}' in property '{prop_name}'")
+        # Validate all schemas in all collection contexts
+        for config in self.config_manager.collection_configs:
+            collection_name = config.get("name")
                 
+            # Validate each version in the collection config
+            for version_str in config.get("versions", []):
+                version = VersionNumber.from_collection_config(collection_name, version_str)
+                schema_name = version.get_schema_name()
+                enum_version = version.get_enumerator_version()
+                    
+                if schema_name not in self.dictionaries:
+                    errors.append({
+                        "error": "schema_not_found",
+                        "schema_name": schema_name,
+                        "collection_name": collection_name
+                    })
+                    continue
+
+                errors.extend(self._validate_type(
+                    schema=self.dictionaries[schema_name], 
+                    path=schema_name,
+                    enum_version=enum_version
+                ))
+            
         return errors
 
-    def _validate_schema_structure(self, schema: Schema, is_root: bool = True) -> List[str]:
-        """Validate the basic structure of a schema.
+    def _validate_enumerators(self) -> List[str]:
+        """Validate enumerator definitions against the schema.
+        
+        Returns:
+            List of validation errors
+        """
+        errors = []
+        
+        # Validate each enumerator version
+        for version in self.enumerators:
+            # Validate required fields
+            if "name" not in version:
+                errors.append("Enumerator version missing required field 'name'")
+            elif not re.match(r'^[A-Z][a-zA-Z0-9_]*$', version["name"]):
+                errors.append(f"Invalid enumerator name format: {version['name']}")
+                
+            if "status" not in version:
+                errors.append("Enumerator version missing required field 'status'")
+            elif version["status"] not in ["Active", "Deprecated"]:
+                errors.append(f"Invalid enumerator status: {version['status']}")
+                
+            if "version" not in version:
+                errors.append("Enumerator version missing required field 'version'")
+            elif not isinstance(version["version"], int) or version["version"] < 0:
+                errors.append(f"Invalid enumerator version number: {version['version']}")
+                
+            if "enumerators" not in version:
+                errors.append("Enumerator version missing required field 'enumerators'")
+            elif not isinstance(version["enumerators"], dict):
+                errors.append("Enumerator version 'enumerators' must be a dictionary")
+            else:
+                # Validate each enumerator definition
+                for enum_name, enum_def in version["enumerators"].items():
+                    if not isinstance(enum_def, dict):
+                        errors.append(f"Enumerator '{enum_name}' must be a dictionary")
+                    else:
+                        # Validate each value has a description
+                        for value, description in enum_def.items():
+                            if not isinstance(description, str):
+                                errors.append(f"Enumerator '{enum_name}' value '{value}' must have a string description")
+                                
+        return errors
+
+    def _validate_type(self, schema: Dict, path: str, enum_version: Optional[int] = None) -> List[str]:
+        """Validate a schema or type definition.
         
         Args:
-            schema: The schema to validate
-            is_root: Whether this is a root schema (requires title)
+            schema: Schema or type definition to validate
+            path: Path to the schema/type for error messages
+            enum_version: Optional enumerator version number for context-aware validation
             
         Returns:
             List of validation errors
@@ -257,120 +317,26 @@ class SchemaManager:
         
         # Validate schema is a dictionary
         if not isinstance(schema, dict):
-            errors.append("Schema must be a dictionary")
+            errors.append(f"{path} must be a dictionary")
             return errors
-            
-        # Validate required fields
-        if is_root and "title" not in schema:
-            errors.append("Missing required field 'title' at root level")
-            
-        if "description" not in schema:
-            errors.append("Missing required field 'description'")
-            
-        if "type" not in schema:
-            errors.append("Missing required field 'type'")
-            return errors
-            
-        # Validate type is valid
-        if schema["type"] not in self.VALID_TYPES:
-            errors.append(f"Invalid schema type '{schema['type']}'")
-            return errors
-            
-        # Validate type-specific properties
-        type_name = schema["type"]
-        valid_fields = {"title", "description", "type", "required"}
+
+        # Check if this is a primitive type
+        has_schema = "schema" in schema
+        has_json_type = "json_type" in schema
+        has_bson_type = "bson_type" in schema
         
-        if type_name == SchemaType.OBJECT.value:
-            valid_fields.update({"properties", "additionalProperties"})
-            if "properties" not in schema:
-                errors.append("Object type must have properties definition")
-        elif type_name == SchemaType.ARRAY.value:
-            valid_fields.add("items")
-            if "items" not in schema:
-                errors.append("Array type must have items definition")
-        elif type_name in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
-            valid_fields.add("enums")
-            if "enums" not in schema:
-                errors.append(f"{type_name} type must have enums reference")
-        elif type_name == SchemaType.ONE_OF.value:
-            valid_fields.update({"type_property", "schemas"})
-            if "type_property" not in schema:
-                errors.append("one_of type must have type_property definition")
-            if "schemas" not in schema:
-                errors.append("one_of type must have schemas definition")
-                
-        # Validate no unexpected fields
-        for field in schema:
-            if field not in valid_fields:
-                errors.append(f"Unexpected field '{field}' for type '{type_name}'")
+        if has_schema or has_json_type or has_bson_type:
+            errors.extend(self._validate_primitive_type(schema, path))
+        else:
+            errors.extend(self._validate_schema_type(schema, path, enum_version))
                 
         return errors
 
-    def _validate_property(self, prop_name: str, prop_def: Schema, path: str = "") -> List[str]:
-        """Validate a property definition recursively.
+    def _validate_primitive_type(self, schema: Dict, path: str) -> List[str]:
+        """Validate a primitive type definition.
         
         Args:
-            prop_name: Name of the property
-            prop_def: Property definition to validate
-            path: Current property path for error messages
-            
-        Returns:
-            List of validation errors
-            
-        """
-        errors = []
-        current_path = f"{path}.{prop_name}" if path else prop_name
-        
-        # Validate property structure
-        errors.extend(self._validate_schema_structure(prop_def, is_root=False))
-        if errors:
-            return errors
-            
-        type_name = prop_def["type"]
-        
-        # Validate type-specific requirements
-        if type_name == SchemaType.OBJECT.value:
-            for sub_prop_name, sub_prop_def in prop_def["properties"].items():
-                errors.extend(self._validate_property(sub_prop_name, sub_prop_def, current_path))
-                
-            # Validate additionalProperties if present
-            if "additionalProperties" in prop_def and not isinstance(prop_def["additionalProperties"], bool):
-                errors.append(f"Property {current_path} has invalid additionalProperties value: must be boolean")
-                
-        elif type_name == SchemaType.ARRAY.value:
-            errors.extend(self._validate_property("items", prop_def["items"], current_path))
-                
-        elif type_name in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
-            if prop_def["enums"] not in self.enumerators:
-                errors.append(f"Unknown enumerator '{prop_def['enums']}' referenced by property {current_path}")
-                
-        elif type_name == SchemaType.ONE_OF.value:
-            if "type_property" not in prop_def:
-                errors.append(f"Property {current_path} of type 'one_of' missing required type_property definition")
-            if "schemas" not in prop_def:
-                errors.append(f"Property {current_path} of type 'one_of' missing required schemas definition")
-            elif not isinstance(prop_def["schemas"], dict):
-                errors.append(f"Property {current_path} has invalid schemas value: must be a dictionary")
-            else:
-                for schema_name, schema_def in prop_def["schemas"].items():
-                    errors.extend(self._validate_property(schema_name, schema_def, current_path))
-                    
-        elif type_name in self.types:
-            # Validate custom type recursively
-            type_def = self.types[type_name]
-            errors.extend(self._validate_custom_type(type_def, current_path))
-                
-        return errors
-
-    def _validate_custom_type(self, type_def: Dict, path: str) -> List[str]:
-        """Validate a custom type definition.
-        
-        Custom types can be either primitive types (string, number, etc) or complex types
-        (objects, arrays). Primitive types must have json_type and bson_type definitions.
-        Complex types are validated as regular schemas.
-        
-        Args:
-            type_def: Type definition to validate
+            schema: Primitive type definition to validate
             path: Path to the type for error messages
             
         Returns:
@@ -378,94 +344,143 @@ class SchemaManager:
         """
         errors = []
         
-        # Validate type is a dictionary
-        if not isinstance(type_def, dict):
-            errors.append(f"Custom type {path} must be a dictionary")
+        # Check for valid schema/json_type/bson_type combination
+        has_schema = "schema" in schema
+        has_json_type = "json_type" in schema
+        has_bson_type = "bson_type" in schema
+        
+        if has_schema:
+            if has_json_type or has_bson_type:
+                errors.append(f"Primitive type {path} cannot have both 'schema' and *_type fields")
+        else:
+            if not (has_json_type and has_bson_type):
+                errors.append(f"Primitive type {path} must have either 'schema' or both 'json_type' and 'bson_type' fields")
+        
+        # Validate required fields
+        if "description" not in schema:
+            errors.append(f"Primitive type {path} missing required field 'description'")
+            
+        # Validate schema/json_type/bson_type are valid JSON
+        for field in ["schema", "json_type", "bson_type"]:
+            if field in schema:
+                try:
+                    json.dumps(schema[field])
+                except (TypeError, ValueError):
+                    errors.append(f"Primitive type {path} has invalid {field}: must be valid JSON")
+                    
+        return errors
+
+    def _validate_schema_type(self, schema: Dict, path: str, enum_version: int) -> List[str]:
+        """Validate a schema type definition.
+        
+        Args:
+            schema: Schema definition to validate
+            path: Path to the schema for error messages
+            enum_version: Optional enumerator version number for context-aware validation
+            
+        Returns:
+            List of validation errors
+        """
+        errors = []
+        
+        # Validate required fields
+        if "description" not in schema:
+            errors.append(f"Missing required field 'description' in {path}")
+            
+        if "type" not in schema:
+            errors.append(f"Missing required field 'type' in {path}")
             return errors
             
-        # Check if this is a primitive type
-        if "json_type" in type_def and "bson_type" in type_def:
-            # Validate primitive type
-            required_fields = ["description", "json_type", "bson_type"]
-            for field in required_fields:
-                if field not in type_def:
-                    errors.append(f"Primitive type {path} missing required field '{field}'")
-                    
-            # Validate JSON and BSON types are valid
-            if "json_type" in type_def:
-                try:
-                    json.dumps(type_def["json_type"])
-                except (TypeError, ValueError):
-                    errors.append(f"Primitive type {path} has invalid json_type: must be valid JSON")
-                    
-            if "bson_type" in type_def:
-                try:
-                    json.dumps(type_def["bson_type"])
-                except (TypeError, ValueError):
-                    errors.append(f"Primitive type {path} has invalid bson_type: must be valid JSON")
-        else:
-            # Validate as a complex type (object or array)
-            errors.extend(self._validate_schema_structure(type_def, is_root=True))
+        # Validate type is valid
+        type_name = schema["type"]
+        if type_name not in self.VALID_TYPES and type_name not in self.types:
+            errors.append(f"Invalid type '{type_name}' in {path}")
+            return errors
+            
+        # Validate type-specific properties
+        if type_name == SchemaType.OBJECT.value:
+            errors.extend(self._validate_object_type(schema, path, enum_version))
+        elif type_name == SchemaType.ARRAY.value:
+            errors.extend(self._validate_array_type(schema, path, enum_version))
+        elif type_name in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
+            errors.extend(self._validate_enum_type(schema, path, enum_version))
+        elif type_name == SchemaType.ONE_OF.value:
+            errors.extend(self._validate_one_of_type(schema, path, enum_version))
+        elif type_name in self.types:
+            # Validate custom type recursively
+            type_def = self.types[type_name]
+            errors.extend(self._validate_type(type_def, path, enum_version))
             
         return errors
 
-    def _get_enumerator_version(self, collection_name: str) -> int:
-        """Get the enumerator version from a collection configuration.
-        
-        Args:
-            collection_name: Name of the collection
-            
-        Returns:
-            Enumerator version number
-            
-        Raises:
-            KeyError: If collection configuration not found
-        """
-        # Get collection config from Config singleton
-        collection_config = self.config.get_collection_config(collection_name)
-        if not collection_config:
-            raise KeyError(f"No configuration found for collection: {collection_name}")
-            
-        # Get version from config
-        version = collection_config.get("version")
-        if not version:
-            raise KeyError(f"No version found in collection config: {collection_name}")
-            
-        # Parse version using VersionNumber
-        try:
-            _, version_number = VersionNumber.from_collection_config(collection_name, version)
-            return version_number.get_enumerator_version()
-        except ValueError as e:
-            raise KeyError(f"Invalid version format in collection config: {version}")
+    def _validate_object_type(self, schema: Dict, path: str, enum_version: int) -> List[str]:
+        """Validate an object type definition."""
+        errors = []
+        if "properties" not in schema:
+            errors.append(f"Object type must have properties definition in {path}")
+        else:
+            for prop_name, prop_def in schema["properties"].items():
+                errors.extend(self._validate_type(prop_def, f"{path}.{prop_name}", enum_version))
+        return errors
 
-    def _get_enumerator_for_version(self, enum_name: str, version: int) -> Dict:
-        """Get the enumerator definition for a specific version.
+    def _validate_array_type(self, schema: Dict, path: str, enum_version: Optional[int] = None) -> List[str]:
+        """Validate an array type definition."""
+        errors = []
+        if "items" not in schema:
+            errors.append(f"Array type must have items definition in {path}")
+        else:
+            errors.extend(self._validate_type(schema["items"], f"{path}.items", enum_version))
+        return errors
+
+    def _validate_enum_type(self, schema: Dict, path: str, enum_version: int) -> List[str]:
+        """Validate an enum type definition.
         
         Args:
-            enum_name: Name of the enumerator
-            version: Version number to get
+            schema: Schema definition to validate
+            path: Path to the schema for error messages
+            enum_version: Enumerator version number for context-aware validation
             
         Returns:
-            Enumerator definition for the specified version
-            
-        Raises:
-            KeyError: If enumerator or version not found
+            List of validation errors
         """
-        # Find the version entry
-        version_entry = None
-        for entry in self.enumerators:
-            if entry["version"] == version and entry["status"] == "Active":
-                version_entry = entry
-                break
+        errors = []
+        if "enums" not in schema:
+            errors.append(f"{schema['type']} type must have enums reference in {path}")
+            return errors
+            
+        enum_name = schema["enums"]
+                
+        # Find the version entry using next() with a generator expression
+        version_entry = next(
+            (entry for entry in self.enumerators 
+             if entry["version"] == enum_version and entry["status"] == "Active"),
+            None
+        )
                 
         if not version_entry:
-            raise KeyError(f"No active enumerator version {version} found")
+            errors.append(f"No active enumerator version {enum_version} found")
+            return errors
             
-        # Get the enumerator from the version
+        # Check if enumerator exists in this version
         if enum_name not in version_entry["enumerators"]:
-            raise KeyError(f"Enumerator '{enum_name}' not found in version {version}")
-            
-        return version_entry["enumerators"][enum_name]
+            errors.append(f"Unknown enumerator '{enum_name}' in version {enum_version} referenced in {path}")
+            return errors
+                    
+        return errors
+
+    def _validate_one_of_type(self, schema: Dict, path: str, enum_version: Optional[int] = None) -> List[str]:
+        """Validate a one_of type definition."""
+        errors = []
+        if "type_property" not in schema:
+            errors.append(f"one_of type must have type_property definition in {path}")
+        if "schemas" not in schema:
+            errors.append(f"one_of type must have schemas definition in {path}")
+        elif not isinstance(schema["schemas"], dict):
+            errors.append(f"Invalid schemas value in {path}: must be a dictionary")
+        else:
+            for schema_name, schema_def in schema["schemas"].items():
+                errors.extend(self._validate_type(schema_def, f"{path}.schemas.{schema_name}", enum_version))
+        return errors
 
     def _resolve_enum(self, enum_name: str, collection_name: str, is_json: bool) -> Dict:
         """Resolve an enumerator definition for a specific collection.

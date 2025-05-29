@@ -1,0 +1,13 @@
+{
+  "_id": {"$oid": "A00000000000000000000002"},
+  "user_name": "jane_smith",
+  "first_name": "Jane",
+  "last_name": "Smith",
+  "status": "active",
+  "last_saved": {
+    "from_ip": "127.0.0.1",
+    "by_user": "system",
+    "at_time": {"$date": "2024-01-02T00:00:00Z"},
+    "correlation_id": "corr_002"
+  }
+} 

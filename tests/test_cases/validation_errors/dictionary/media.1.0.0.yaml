@@ -1,0 +1,44 @@
+title: Media
+description: A media item in the system
+type: object
+properties:
+  _id:
+    description: The unique identifier for the media
+    type: identity
+    required: true
+  title:
+    description: The title of the media
+    type: sentence
+    required: true
+  type:
+    description: The type of media
+    type: enum
+    enums: media_type
+  status:
+    description: The current status of the media
+    type: enum
+    enums: media_status
+    required: true
+  last_saved:
+    description: When the media was last updated
+    type: breadcrumb
+    required: true
+  tags:
+    description: Tags associated with the media
+    type: enum_array
+    enums: media_tags
+  metadata:
+    description: Additional metadata about the media
+    type: object
+    properties:
+      duration:
+        description: Duration in minutes
+        type: count
+      format:
+        description: Media format
+        type: enum
+        enums: media_format
+      quality:
+        description: Quality rating
+        type: enum
+        enums: media_quality 

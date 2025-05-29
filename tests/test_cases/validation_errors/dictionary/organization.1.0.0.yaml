@@ -1,0 +1,33 @@
+title: Organization
+description: An organization in the system
+type: object
+properties:
+  _id:
+    description: The unique identifier for the organization
+    type: identity
+    required: true
+  name:
+    description: The organization name
+    type: sentence
+    required: true
+  status:
+    description: The current status of the organization
+    type: enum
+    enums: default_status
+    required: true
+  last_saved:
+    description: When the organization document was last updated
+    type: breadcrumb
+    required: true
+  users:
+    description: Users associated with this organization
+    type: array
+    items:
+      type: identity
+  website:
+    description: Organization website
+    type: url
+  home_address:
+    description: Organization home address
+    type: street_address
+ 
