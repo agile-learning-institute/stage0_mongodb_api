@@ -66,7 +66,7 @@ class TestConfigManager(unittest.TestCase):
         self.assertEqual(len(manager.load_errors), 1, f"Unexpected load errors {manager.load_errors}")
 
     def test_validation_errors(self):
-        """Test loading with non-parsable files"""
+        """Test loading with validation errors"""
 
         # Initialize SchemaManager 
         test_case_dir = os.path.join(self.test_cases_dir, "validation_errors")
@@ -76,8 +76,9 @@ class TestConfigManager(unittest.TestCase):
         
         # Verify no load errors
         self.assertEqual(len(manager.load_errors), 0, f"Unexpected load errors {manager.load_errors}")
-        self.assertEqual(len(errors), 1, f"Unexpected number of validation errors {errors}")
-        self.assertIn("error", errors[0])
+        self.assertEqual(len(errors), 2, f"Unexpected number of validation errors {errors}")
+        self.assertEqual("Missing version number", errors[0]["error"], f"Unexpected error {errors[0]}")
+        self.assertEqual("Missing required field", errors[1]["error"], f"Unexpected error {errors[1]}")
 
 if __name__ == '__main__':
     unittest.main() 
