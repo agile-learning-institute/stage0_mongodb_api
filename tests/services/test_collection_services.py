@@ -12,7 +12,7 @@ class TestCollectionServices(unittest.TestCase):
         self.config = Config.get_instance()
         self.config.INPUT_FOLDER = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            'test_cases/no_errors'
+            'test_cases/large_sample'
         )
         
         # Create service instance with mocked VersionManager
