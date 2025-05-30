@@ -95,15 +95,15 @@ class SchemaManager:
         self.load_errors.extend(self._load_dictionaries())
 
     def _load_types(self) -> List[Dict]:
-        """Load type definitions from the types directory.
-        
-        Returns:
-            List of load errors. Empty list indicates all types loaded successfully.
-        """
+        """Load type definitions from the types directory."""
         errors = []
         types_dir = os.path.join(self.config.INPUT_FOLDER, "dictionary", "types")
         if not os.path.exists(types_dir):
-            errors.append({"error": "directory_not_found", "path": types_dir})
+            errors.append({
+                "error": "directory_not_found",
+                "error_id": "SCH-001",
+                "path": types_dir
+            })
             return errors
             
         for file in os.listdir(types_dir):
@@ -116,12 +116,14 @@ class SchemaManager:
                 except yaml.YAMLError as e:
                     errors.append({
                         "error": "parse_error",
+                        "error_id": "SCH-002",
                         "file": file,
                         "message": str(e)
                     })
                 except Exception as e:
                     errors.append({
                         "error": "load_error",
+                        "error_id": "SCH-003",
                         "file": file,
                         "message": str(e)
                     })
@@ -129,20 +131,24 @@ class SchemaManager:
         return errors
 
     def _load_enumerators(self) -> List[Dict]:
-        """Load enumerators from the data directory.
-        
-        Returns:
-            List of load errors. Empty list indicates all enumerators loaded successfully.
-        """
+        """Load enumerators from the data directory."""
         errors = []
         data_dir = os.path.join(self.config.INPUT_FOLDER, "data")
         if not os.path.exists(data_dir):
-            errors.append({"error": "directory_not_found", "path": data_dir})
+            errors.append({
+                "error": "directory_not_found",
+                "error_id": "SCH-004",
+                "path": data_dir
+            })
             return errors
             
         enumerators_file = os.path.join(data_dir, "enumerators.json")
         if not os.path.exists(enumerators_file):
-            errors.append({"error": "file_not_found", "path": enumerators_file})
+            errors.append({
+                "error": "file_not_found",
+                "error_id": "SCH-005",
+                "path": enumerators_file
+            })
             return errors
             
         try:
@@ -151,18 +157,21 @@ class SchemaManager:
                 if not isinstance(self.enumerators, list):
                     errors.append({
                         "error": "invalid_format",
+                        "error_id": "SCH-006",
                         "file": "enumerators.json",
                         "message": "must be a list of versioned enumerators"
                     })
         except json.JSONDecodeError as e:
             errors.append({
                 "error": "parse_error",
+                "error_id": "SCH-007",
                 "file": "enumerators.json",
                 "message": str(e)
             })
         except Exception as e:
             errors.append({
                 "error": "load_error",
+                "error_id": "SCH-008",
                 "file": "enumerators.json",
                 "message": str(e)
             })
@@ -170,15 +179,15 @@ class SchemaManager:
         return errors
 
     def _load_dictionaries(self) -> List[Dict]:
-        """Load dictionary definitions from the dictionary directory.
-        
-        Returns:
-            List of load errors. Empty list indicates all dictionaries loaded successfully.
-        """
+        """Load dictionary definitions from the dictionary directory."""
         errors = []
         dict_dir = os.path.join(self.config.INPUT_FOLDER, "dictionary")
         if not os.path.exists(dict_dir):
-            errors.append({"error": "directory_not_found", "path": dict_dir})
+            errors.append({
+                "error": "directory_not_found",
+                "error_id": "SCH-009",
+                "path": dict_dir
+            })
             return errors
             
         for file in os.listdir(dict_dir):
@@ -191,18 +200,21 @@ class SchemaManager:
                 except ValueError as e:
                     errors.append({
                         "error": "invalid_version",
+                        "error_id": "SCH-010",
                         "file": file,
                         "message": str(e)
                     })
                 except yaml.YAMLError as e:
                     errors.append({
                         "error": "parse_error",
+                        "error_id": "SCH-011",
                         "file": file,
                         "message": str(e)
                     })
                 except Exception as e:
                     errors.append({
                         "error": "load_error",
+                        "error_id": "SCH-012",
                         "file": file,
                         "message": str(e)
                     })
@@ -256,64 +268,108 @@ class SchemaManager:
         return errors
 
     def _validate_enumerators(self) -> List[str]:
-        """Validate enumerator definitions against the schema.
-        
-        Returns:
-            List of validation errors
-        """
+        """Validate enumerator definitions against the schema."""
         errors = []
         
         # Validate each enumerator version
         for version in self.enumerators:
             # Validate required fields
             if "name" not in version:
-                errors.append("Enumerator version missing required field 'name'")
+                errors.append({
+                    "error": "invalid_enumerator_name",
+                    "error_id": "SCH-013",
+                    "name": version.get("name", "unknown"),
+                    "message": "Invalid enumerator name format"
+                })
             elif not re.match(r'^[A-Z][a-zA-Z0-9_]*$', version["name"]):
-                errors.append(f"Invalid enumerator name format: {version['name']}")
+                errors.append({
+                    "error": "invalid_enumerator_name",
+                    "error_id": "SCH-014",
+                    "name": version["name"],
+                    "message": "Invalid enumerator name format"
+                })
                 
             if "status" not in version:
-                errors.append("Enumerator version missing required field 'status'")
+                errors.append({
+                    "error": "invalid_enumerator_status",
+                    "error_id": "SCH-015",
+                    "status": version.get("status", "unknown"),
+                    "message": "Invalid enumerator status"
+                })
             elif version["status"] not in ["Active", "Deprecated"]:
-                errors.append(f"Invalid enumerator status: {version['status']}")
+                errors.append({
+                    "error": "invalid_enumerator_status",
+                    "error_id": "SCH-016",
+                    "status": version["status"],
+                    "message": "Invalid enumerator status"
+                })
                 
             if "version" not in version:
-                errors.append("Enumerator version missing required field 'version'")
+                errors.append({
+                    "error": "invalid_enumerator_version",
+                    "error_id": "SCH-017",
+                    "version": version.get("version", "unknown"),
+                    "message": "Invalid enumerator version number"
+                })
             elif not isinstance(version["version"], int) or version["version"] < 0:
-                errors.append(f"Invalid enumerator version number: {version['version']}")
+                errors.append({
+                    "error": "invalid_enumerator_version",
+                    "error_id": "SCH-018",
+                    "version": version["version"],
+                    "message": "Invalid enumerator version number"
+                })
                 
             if "enumerators" not in version:
-                errors.append("Enumerator version missing required field 'enumerators'")
+                errors.append({
+                    "error": "invalid_enumerator_structure",
+                    "error_id": "SCH-019",
+                    "enumerator": version.get("name", "unknown"),
+                    "message": "Enumerator must be a dictionary"
+                })
             elif not isinstance(version["enumerators"], dict):
-                errors.append(f"Enumerator version 'enumerators' must be a dictionary not {version['enumerators']}")
+                errors.append({
+                    "error": "invalid_enumerator_structure",
+                    "error_id": "SCH-020",
+                    "enumerator": version["name"],
+                    "message": "Enumerator must be a dictionary"
+                })
             else:
                 # Validate each enumerator definition
                 for enum_name, enum_def in version["enumerators"].items():
                     if not isinstance(enum_def, dict):
-                        errors.append(f"Enumerator '{enum_name}' must be a dictionary")
+                        errors.append({
+                            "error": "invalid_enumerator_structure",
+                            "error_id": "SCH-021",
+                            "enumerator": enum_name,
+                            "message": "Enumerator must be a dictionary"
+                        })
                     else:
                         # Validate each value has a description
                         for value, description in enum_def.items():
                             if not isinstance(description, str):
-                                errors.append(f"Enumerator '{enum_name}' value '{value}' must have a string description")
+                                errors.append({
+                                    "error": "invalid_enumerator_value",
+                                    "error_id": "SCH-022",
+                                    "enumerator": enum_name,
+                                    "value": value,
+                                    "message": "Enumerator value must have a string description"
+                                })
                                 
         return errors
 
     def _validate_type(self, schema: Dict, path: str, enum_version: Optional[int] = None) -> List[str]:
-        """Validate a schema or type definition.
-        
-        Args:
-            schema: Schema or type definition to validate
-            path: Path to the schema/type for error messages
-            enum_version: Optional enumerator version number for context-aware validation
-            
-        Returns:
-            List of validation errors
-        """
+        """Validate a schema or type definition."""
         errors = []
         
         # Validate schema is a dictionary
         if not isinstance(schema, dict):
-            errors.append(f"{path} must be a dictionary")
+            errors.append({
+                "error": "invalid_schema_type",
+                "error_id": "SCH-023",
+                "path": path,
+                "type": str(type(schema)),
+                "message": "Invalid type"
+            })
             return errors
 
         # Check if this is a primitive type
@@ -329,15 +385,7 @@ class SchemaManager:
         return errors
 
     def _validate_primitive_type(self, schema: Dict, path: str) -> List[str]:
-        """Validate a primitive type definition.
-        
-        Args:
-            schema: Primitive type definition to validate
-            path: Path to the type for error messages
-            
-        Returns:
-            List of validation errors
-        """
+        """Validate a primitive type definition."""
         errors = []
         
         # Check for valid schema/json_type/bson_type combination
@@ -347,14 +395,30 @@ class SchemaManager:
         
         if has_schema:
             if has_json_type or has_bson_type:
-                errors.append(f"Primitive type {path} cannot have both 'schema' and *_type fields")
+                errors.append({
+                    "error": "invalid_schema_combination",
+                    "error_id": "SCH-024",
+                    "path": path,
+                    "message": "Primitive type cannot have both 'schema' and *_type fields"
+                })
         else:
             if not (has_json_type and has_bson_type):
-                errors.append(f"Primitive type {path} must have either 'schema' or both 'json_type' and 'bson_type' fields")
+                errors.append({
+                    "error": "invalid_primitive_type",
+                    "error_id": "SCH-025",
+                    "path": path,
+                    "message": "Primitive type must have either 'schema' or both 'json_type' and 'bson_type' fields"
+                })
         
         # Validate required fields
         if "description" not in schema:
-            errors.append(f"Primitive type {path} missing required field 'description'")
+            errors.append({
+                "error": "missing_required_field",
+                "error_id": "SCH-026",
+                "path": path,
+                "field": "description",
+                "message": "Missing required field"
+            })
             
         # Validate schema/json_type/bson_type are valid JSON
         for field in ["schema", "json_type", "bson_type"]:
@@ -362,35 +426,49 @@ class SchemaManager:
                 try:
                     json.dumps(schema[field])
                 except (TypeError, ValueError):
-                    errors.append(f"Primitive type {path} has invalid {field}: must be valid JSON")
+                    errors.append({
+                        "error": f"invalid_{field}",
+                        "error_id": f"SCH-{27 if field == 'schema' else 28 if field == 'json_type' else 29}",
+                        "path": path,
+                        "message": f"Primitive type has invalid {field}: must be valid JSON"
+                    })
                     
         return errors
 
     def _validate_schema_type(self, schema: Dict, path: str, enum_version: int) -> List[str]:
-        """Validate a schema type definition.
-        
-        Args:
-            schema: Schema definition to validate
-            path: Path to the schema for error messages
-            enum_version: Optional enumerator version number for context-aware validation
-            
-        Returns:
-            List of validation errors
-        """
+        """Validate a schema type definition."""
         errors = []
         
         # Validate required fields
         if "description" not in schema:
-            errors.append(f"Missing required field 'description' in {path}")
+            errors.append({
+                "error": "missing_required_field",
+                "error_id": "SCH-030",
+                "path": path,
+                "field": "description",
+                "message": "Missing required field"
+            })
             
         if "type" not in schema:
-            errors.append(f"Missing required field 'type' in {path}")
+            errors.append({
+                "error": "missing_required_field",
+                "error_id": "SCH-031",
+                "path": path,
+                "field": "type",
+                "message": "Missing required field"
+            })
             return errors
             
         # Validate type is valid
         type_name = schema["type"]
         if type_name not in self.VALID_TYPES and type_name not in self.types:
-            errors.append(f"Invalid type '{type_name}' in {path}")
+            errors.append({
+                "error": "invalid_schema_type",
+                "error_id": "SCH-032",
+                "path": path,
+                "type": type_name,
+                "message": "Invalid type"
+            })
             return errors
             
         # Validate type-specific properties
@@ -413,7 +491,12 @@ class SchemaManager:
         """Validate an object type definition."""
         errors = []
         if "properties" not in schema:
-            errors.append(f"Object type must have properties definition in {path}")
+            errors.append({
+                "error": "invalid_object_properties",
+                "error_id": "SCH-033",
+                "path": path,
+                "message": "Object type must have properties definition"
+            })
         else:
             for prop_name, prop_def in schema["properties"].items():
                 errors.extend(self._validate_type(prop_def, f"{path}.{prop_name}", enum_version))
@@ -423,25 +506,27 @@ class SchemaManager:
         """Validate an array type definition."""
         errors = []
         if "items" not in schema:
-            errors.append(f"Array type must have items definition in {path}")
+            errors.append({
+                "error": "invalid_array_items",
+                "error_id": "SCH-034",
+                "path": path,
+                "message": "Array type must have items definition"
+            })
         else:
             errors.extend(self._validate_type(schema["items"], f"{path}.items", enum_version))
         return errors
 
     def _validate_enum_type(self, schema: Dict, path: str, enum_version: int) -> List[str]:
-        """Validate an enum type definition.
-        
-        Args:
-            schema: Schema definition to validate
-            path: Path to the schema for error messages
-            enum_version: Enumerator version number for context-aware validation
-            
-        Returns:
-            List of validation errors
-        """
+        """Validate an enum type definition."""
         errors = []
         if "enums" not in schema:
-            errors.append(f"{schema['type']} type must have enums reference in {path}")
+            errors.append({
+                "error": "invalid_enum_reference",
+                "error_id": "SCH-035",
+                "path": path,
+                "type": schema["type"],
+                "message": "Enum type must have enums reference"
+            })
             return errors
             
         enum_name = schema["enums"]
@@ -454,12 +539,26 @@ class SchemaManager:
         )
                 
         if not version_entry:
-            errors.append(f"No active enumerator version {enum_version} found")
+            errors.append({
+                "error": "unknown_enumerator",
+                "error_id": "SCH-036",
+                "path": path,
+                "enumerator": enum_name,
+                "version": enum_version,
+                "message": "No active enumerator version found"
+            })
             return errors
             
         # Check if enumerator exists in this version
         if enum_name not in version_entry["enumerators"]:
-            errors.append(f"Unknown enumerator '{enum_name}' in version {enum_version} referenced in {path}")
+            errors.append({
+                "error": "unknown_enumerator",
+                "error_id": "SCH-037",
+                "path": path,
+                "enumerator": enum_name,
+                "version": enum_version,
+                "message": "Unknown enumerator in version"
+            })
             return errors
                     
         return errors
@@ -468,11 +567,26 @@ class SchemaManager:
         """Validate a one_of type definition."""
         errors = []
         if "type_property" not in schema:
-            errors.append(f"one_of type must have type_property definition in {path}")
+            errors.append({
+                "error": "invalid_one_of_type",
+                "error_id": "SCH-038",
+                "path": path,
+                "message": "one_of type must have type_property definition"
+            })
         if "schemas" not in schema:
-            errors.append(f"one_of type must have schemas definition in {path}")
+            errors.append({
+                "error": "invalid_one_of_schemas",
+                "error_id": "SCH-039",
+                "path": path,
+                "message": "one_of type must have schemas definition"
+            })
         elif not isinstance(schema["schemas"], dict):
-            errors.append(f"Invalid schemas value in {path}: must be a dictionary")
+            errors.append({
+                "error": "invalid_schemas_value",
+                "error_id": "SCH-040",
+                "path": path,
+                "message": "Invalid schemas value: must be a dictionary"
+            })
         else:
             for schema_name, schema_def in schema["schemas"].items():
                 errors.extend(self._validate_type(schema_def, f"{path}.schemas.{schema_name}", enum_version))
