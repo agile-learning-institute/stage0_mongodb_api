@@ -22,8 +22,8 @@ properties:
   users:
     description: Users associated with this organization
     type: array
-    items:
-      type: identity
+    properties:
+      type: 
   website:
     description: Organization website
     type: url

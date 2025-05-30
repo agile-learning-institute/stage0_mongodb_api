@@ -38,11 +38,7 @@
                 "digital": "Digital format",
                 "streaming": "Streaming format"
             },
-            "media_quality": {
-                "sd": "Standard definition",
-                "hd": "High definition",
-                "uhd": "Ultra high definition"
-            }
+            "media_quality": ["sd", "hd", "uhd"]
         }
     },
     {
