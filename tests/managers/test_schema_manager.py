@@ -63,7 +63,7 @@ class TestSchemaManager(unittest.TestCase):
         self.assertEqual(len(manager.types), 10, f"Unexpected number of types {len(manager.types)}")
         self.assertEqual(len(manager.enumerators), 4, f"Unexpected number of enumerators {len(manager.enumerators)}")
 
-    def test_missing_folders(self):
+    def test_load_missing_folders(self):
         """Test loading with missing folders."""
 
         # Initialize SchemaManager 
@@ -74,7 +74,7 @@ class TestSchemaManager(unittest.TestCase):
         # Verify no load errors
         self.assertEqual(len(manager.load_errors), 3, f"Unexpected load errors {manager.load_errors}")
 
-    def test_non_parsable(self):
+    def test_load_non_parsable(self):
         """Test loading with non-parsable files"""
 
         # Initialize SchemaManager 
@@ -85,11 +85,37 @@ class TestSchemaManager(unittest.TestCase):
         # Verify no load errors
         self.assertEqual(len(manager.load_errors), 3, f"Unexpected load errors {manager.load_errors}")
 
+    def test_validate_minimum_valid(self):
+        """Test schema validation for minimum valid."""
+
+        # Initialize SchemaManager 
+        test_case_dir = os.path.join(self.test_cases_dir, "minimum_valid")
+        self.config.INPUT_FOLDER = test_case_dir        
+        manager = SchemaManager()
+        errors = manager.validate_schema()
+        
+        # Assert Validation
+        self.assertEqual(manager.load_errors, [], f"Unexpected load errors {manager.load_errors}")
+        self.assertEqual(errors, [], f"Unexpected validation errors {errors}, with enumerators {manager.enumerators}")       
+        
     def test_validate_small_sample(self):
         """Test schema validation for small sample."""
 
         # Initialize SchemaManager 
         test_case_dir = os.path.join(self.test_cases_dir, "small_sample")
+        self.config.INPUT_FOLDER = test_case_dir        
+        manager = SchemaManager()
+        errors = manager.validate_schema()
+        
+        # Assert Validation
+        self.assertEqual(manager.load_errors, [], f"Unexpected load errors {manager.load_errors}")
+        self.assertEqual(errors, [], f"Unexpected validation errors {errors}, with enumerators {manager.enumerators}")       
+        
+    def test_validate_large_sample(self):
+        """Test schema validation for large sample."""
+
+        # Initialize SchemaManager 
+        test_case_dir = os.path.join(self.test_cases_dir, "large_sample")
         self.config.INPUT_FOLDER = test_case_dir        
         manager = SchemaManager()
         errors = manager.validate_schema()

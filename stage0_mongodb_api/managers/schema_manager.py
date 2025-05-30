@@ -86,8 +86,8 @@ class SchemaManager:
         self.types: Dict[str, Dict] = {}
         self.enumerators: List[Dict] = []  
         self.dictionaries: Dict[str, Schema] = {}
-        self.config_manager = ConfigManager()
         self.load_errors: List[Dict] = []
+        self.load_errors.extend(self.config_manager.load_errors)
         
         # Load and validate all components
         self.load_errors.extend(self._load_types())
@@ -184,10 +184,7 @@ class SchemaManager:
         for file in os.listdir(dict_dir):
             if file.endswith(".yaml"):
                 try:
-                    # Parse schema name and version
                     schema_name = os.path.splitext(file)[0]
-                    collection_name, version = VersionNumber.from_schema_name(schema_name)
-                    
                     with open(os.path.join(dict_dir, file), 'r') as f:
                         dict_def = yaml.safe_load(f)
                         self.dictionaries[schema_name] = dict_def
@@ -234,13 +231,12 @@ class SchemaManager:
             errors.extend(self._validate_type(type_def, type_name))
             
         # Validate all schemas in all collection contexts
-        for config in self.config_manager.collection_configs:
-            collection_name = config.get("name")
+        for collection_name, configuration in self.config_manager.collection_configs.items():
                 
             # Validate each version in the collection config
-            for version_str in config.get("versions", []):
-                version = VersionNumber.from_collection_config(collection_name, version_str)
-                schema_name = version.get_schema_name()
+            for collection_version in configuration.get("versions"):
+                version = VersionNumber(collection_version.get("version"))
+                schema_name = collection_name + "." + version.get_schema_version()
                 enum_version = version.get_enumerator_version()
                     
                 if schema_name not in self.dictionaries:
@@ -288,7 +284,7 @@ class SchemaManager:
             if "enumerators" not in version:
                 errors.append("Enumerator version missing required field 'enumerators'")
             elif not isinstance(version["enumerators"], dict):
-                errors.append("Enumerator version 'enumerators' must be a dictionary")
+                errors.append(f"Enumerator version 'enumerators' must be a dictionary not {version['enumerators']}")
             else:
                 # Validate each enumerator definition
                 for enum_name, enum_def in version["enumerators"].items():
