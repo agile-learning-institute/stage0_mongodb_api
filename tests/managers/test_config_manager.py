@@ -77,8 +77,8 @@ class TestConfigManager(unittest.TestCase):
         # Verify no load errors
         self.assertEqual(len(manager.load_errors), 0, f"Unexpected load errors {manager.load_errors}")
         self.assertEqual(len(errors), 2, f"Unexpected number of validation errors {errors}")
-        self.assertEqual("Missing version number", errors[0]["error"], f"Unexpected error {errors[0]}")
-        self.assertEqual("Missing required field", errors[1]["error"], f"Unexpected error {errors[1]}")
+        self.assertEqual("missing_version_number", errors[0]["error"], f"Unexpected error {errors[0]}")
+        self.assertEqual("missing_required_field", errors[1]["error"], f"Unexpected error {errors[1]}")
 
 if __name__ == '__main__':
     unittest.main() 
