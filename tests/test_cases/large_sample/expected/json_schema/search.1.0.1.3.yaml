@@ -1,0 +1,41 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: Search Collection
+description: A search index that is used to support a elastic search polymorphic query service
+type: object
+required:
+  - collection_name
+  - collection_id
+properties:
+  collection_name:
+    type: string
+    description: The name of the collection
+    minLength: 2
+    maxLength: 40
+    pattern: ^[a-zA-Z0-9_-]{2,40}$
+    enum:
+      - media
+      - organization
+      - user
+  collection_id:
+    type: string
+    description: The unique identifier for this source document
+    pattern: ^[0-9a-fA-F]{24}$
+oneOf:
+  - if:
+      properties:
+        collection_name:
+          const: media
+    then:
+      $ref: media.1.0.0.1.json
+  - if:
+      properties:
+        collection_name:
+          const: organization
+    then:
+      $ref: organization.1.0.0.1.json
+  - if:
+      properties:
+        collection_name:
+          const: user
+    then:
+      $ref: user.1.0.1.3.json 

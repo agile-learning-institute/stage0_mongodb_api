@@ -1,0 +1,231 @@
+{
+  "bsonType": "object",
+  "required": ["collection_name", "collection_id"],
+  "properties": {
+    "collection_name": {
+      "bsonType": "string",
+      "pattern": "^[a-zA-Z0-9_-]{2,40}$",
+      "enum": ["media", "organization", "user"]
+    },
+    "collection_id": {
+      "bsonType": "objectId",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    }
+  },
+  "oneOf": [
+    {
+      "if": {
+        "properties": { "collection_name": { "const": "media" } }
+      },
+      "then": {
+        "properties": {
+          "_id": {
+            "bsonType": "objectId",
+            "pattern": "^[0-9a-fA-F]{24}$"
+          },
+          "title": {
+            "bsonType": "string",
+            "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          },
+          "type": {
+            "bsonType": "string",
+            "enum": ["image", "video", "audio", "document"]
+          },
+          "status": {
+            "bsonType": "string",
+            "enum": ["draft", "active", "archived"]
+          },
+          "last_saved": {
+            "bsonType": "object",
+            "required": ["from_ip", "by_user", "at_time", "correlation_id"],
+            "properties": {
+              "from_ip": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              },
+              "by_user": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              },
+              "at_time": {
+                "bsonType": "date"
+              },
+              "correlation_id": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              }
+            }
+          },
+          "tags": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string",
+              "enum": ["featured", "popular", "trending", "new", "updated"]
+            }
+          },
+          "metadata": {
+            "bsonType": "object",
+            "properties": {
+              "duration": {
+                "bsonType": "int",
+                "minimum": 0
+              },
+              "format": {
+                "bsonType": "string",
+                "enum": ["mp4", "mp3", "jpg", "png", "pdf"]
+              },
+              "quality": {
+                "bsonType": "string",
+                "enum": ["low", "medium", "high", "ultra"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "collection_name": { "const": "organization" } }
+      },
+      "then": {
+        "properties": {
+          "_id": {
+            "bsonType": "objectId",
+            "pattern": "^[0-9a-fA-F]{24}$"
+          },
+          "name": {
+            "bsonType": "string",
+            "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          },
+          "status": {
+            "bsonType": "string",
+            "enum": ["draft", "active", "archived"]
+          },
+          "last_saved": {
+            "bsonType": "object",
+            "required": ["from_ip", "by_user", "at_time", "correlation_id"],
+            "properties": {
+              "from_ip": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              },
+              "by_user": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              },
+              "at_time": {
+                "bsonType": "date"
+              },
+              "correlation_id": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              }
+            }
+          },
+          "users": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "objectId"
+            }
+          },
+          "website": {
+            "bsonType": "string",
+            "pattern": "^https?://[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}(?:\\.[a-zA-Z]{2,})?$"
+          },
+          "home_address": {
+            "bsonType": "object",
+            "required": ["postal_code"],
+            "properties": {
+              "street": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+              },
+              "city": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{2,40}$"
+              },
+              "state": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{2,40}$"
+              },
+              "postal_code": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{2,40}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "collection_name": { "const": "user" } }
+      },
+      "then": {
+        "properties": {
+          "_id": {
+            "bsonType": "objectId",
+            "pattern": "^[0-9a-fA-F]{24}$"
+          },
+          "user_name": {
+            "bsonType": "string",
+            "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          },
+          "first_name": {
+            "bsonType": "string",
+            "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          },
+          "last_name": {
+            "bsonType": "string",
+            "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          },
+          "status": {
+            "bsonType": "string",
+            "enum": ["draft", "active", "archived"]
+          },
+          "last_saved": {
+            "bsonType": "object",
+            "required": ["from_ip", "by_user", "at_time", "correlation_id"],
+            "properties": {
+              "from_ip": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              },
+              "by_user": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              },
+              "at_time": {
+                "bsonType": "date"
+              },
+              "correlation_id": {
+                "bsonType": "string",
+                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+              }
+            }
+          },
+          "categories": {
+            "bsonType": "object",
+            "properties": {
+              "tags": {
+                "bsonType": "array",
+                "items": {
+                  "bsonType": "string",
+                  "enum": ["admin", "user", "guest", "on_hold", "cancelled"]
+                }
+              }
+            }
+          },
+          "email": {
+            "bsonType": "string",
+            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          },
+          "phone": {
+            "bsonType": "string",
+            "pattern": "^\\+?[1-9]\\d{1,14}$"
+          }
+        }
+      }
+    }
+  ]
+} 

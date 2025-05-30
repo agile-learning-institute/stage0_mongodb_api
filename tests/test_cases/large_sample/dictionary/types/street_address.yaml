@@ -14,4 +14,4 @@ properties:
   postal_code:
     description: Postal code
     type: word
-  required: true
+    required: true

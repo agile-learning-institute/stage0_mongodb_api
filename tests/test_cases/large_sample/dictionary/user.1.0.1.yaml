@@ -22,19 +22,23 @@ properties:
     description: A users list of categorized tags
     type: array
     items:
+      description: A user category
       type: object
       properties:
         name: 
           description: Category Name assigned by the user
           type: word
+          required: true
         category:
           description: The category type assigned by the user
           type: enum
           enums: category_type
+          required: true
         tags:
           description: A list of enumerated values assigned by the user
           type: enum_array
           enums: category_tags
+          required: true
   email:
     description: The person's email address
     type: email

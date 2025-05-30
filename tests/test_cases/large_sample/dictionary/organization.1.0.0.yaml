@@ -23,6 +23,7 @@ properties:
     description: Users associated with this organization
     type: array
     items:
+      description: A user identifier
       type: identity
   website:
     description: Organization website

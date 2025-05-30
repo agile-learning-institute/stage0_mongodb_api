@@ -1,7 +1,7 @@
 title: Media Collection
 description: Collection for managing media items
 name: media
-versions:
+not_versions:
   - version: "1.0.0.1"
     add_indexes:
       - name: title

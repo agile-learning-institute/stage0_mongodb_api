@@ -2,7 +2,7 @@ title: Organization Collection
 description: Collection for managing organizations
 name: organization
 versions:
-  - version: "1.0.0.1"
+  - not_a_version: "1.0.0.1"
     add_indexes:
       - name: name
         key:

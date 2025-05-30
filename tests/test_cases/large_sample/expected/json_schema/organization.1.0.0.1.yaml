@@ -1,0 +1,89 @@
+$schema: http://json-schema.org/draft-07/schema#
+title: Organization Collection
+description: Collection for managing organizations
+type: object
+required:
+  - _id
+  - name
+  - status
+  - last_saved
+properties:
+  _id:
+    type: string
+    description: The unique identifier for an organization
+    pattern: ^[0-9a-fA-F]{24}$
+  name:
+    type: string
+    description: The name of the organization
+    minLength: 4
+    maxLength: 255
+    pattern: ^[a-zA-Z0-9\s.,!?-]{4,255}$
+  status:
+    type: string
+    description: The status of the organization
+    enum:
+      - draft
+      - active
+      - archived
+  last_saved:
+    type: object
+    description: The last time this document was saved
+    required:
+      - from_ip
+      - by_user
+      - at_time
+      - correlation_id
+    properties:
+      from_ip:
+        type: string
+        pattern: ^[a-zA-Z0-9_-]{4,40}$
+      by_user:
+        type: string
+        pattern: ^[a-zA-Z0-9_-]{4,40}$
+      at_time:
+        type: string
+        format: date-time
+      correlation_id:
+        type: string
+        pattern: ^[a-zA-Z0-9_-]{4,40}$
+  users:
+    type: array
+    description: List of user IDs associated with the organization
+    items:
+      type: string
+      pattern: ^[0-9a-fA-F]{24}$
+  website:
+    type: string
+    description: The organization's website URL
+    format: uri
+    pattern: ^https?://[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$
+  home_address:
+    type: object
+    description: The organization's home address
+    required:
+      - postal_code
+    properties:
+      street:
+        type: string
+        description: Street address
+        minLength: 4
+        maxLength: 255
+        pattern: ^[a-zA-Z0-9\s.,!?-]{4,255}$
+      city:
+        type: string
+        description: City name
+        minLength: 2
+        maxLength: 40
+        pattern: ^[a-zA-Z0-9_-]{2,40}$
+      state:
+        type: string
+        description: State or province
+        minLength: 2
+        maxLength: 40
+        pattern: ^[a-zA-Z0-9_-]{2,40}$
+      postal_code:
+        type: string
+        description: Postal or ZIP code
+        minLength: 2
+        maxLength: 40
+        pattern: ^[a-zA-Z0-9_-]{2,40}$ 
