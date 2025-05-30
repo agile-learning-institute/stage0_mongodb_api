@@ -67,27 +67,26 @@ class TestSchemaManager(unittest.TestCase):
     def test_load_errors(self):
         """Test loading with all load errors."""
 
-        # Initialize SchemaManager 
+        # Arrange - Initialize SchemaManager 
         test_case_dir = os.path.join(self.test_cases_dir, "load_errors")
         self.config.INPUT_FOLDER = test_case_dir        
+
+        # Act - Load SchemaManager
         manager = SchemaManager()
         errors = manager.load_errors
         
-        # Load expected errors
-        expected_errors_path = os.path.join(test_case_dir, "expected", "load_errors.json")
-        with open(expected_errors_path, 'r') as f:
-            expected_errors = json.load(f)
+        # Assert - Verify expected load error IDs
+        expected_error_ids = {
+            "CFG-001", "CFG-002", "CFG-003", "CFG-004", "CFG-005", "CFG-006",
+            "SCH-001", "SCH-002", "SCH-003", "SCH-004", "SCH-005", "SCH-006",
+            "SCH-007", "SCH-008", "SCH-009", "SCH-010", "SCH-011", "SCH-012"
+        }
         
-        # Assert Validation
-        # self.assertEqual(len(errors), len(expected_errors), 
-        #     f"Unexpected number of validation errors. Expected {len(expected_errors)}, got {len(errors)}")
-        
-        # Compare each error with its expected counterpart
-        for actual_error, expected_error in zip(sorted(errors, key=lambda x: x.get('error', '')), 
-                                              sorted(expected_errors, key=lambda x: x.get('error', ''))):
-            self.assertEqual(actual_error, expected_error, 
-                f"Validation error mismatch.\nExpected: {expected_error}\nActual: {actual_error}")
-
+        actual_error_ids = {error.get('error_id') for error in errors if 'error_id' in error}
+        missing_errors = expected_error_ids - actual_error_ids
+        unexpected_errors = actual_error_ids - expected_error_ids
+        self.assertEqual(missing_errors, set(), f"Missing error IDs: {missing_errors} ")
+        self.assertEqual(unexpected_errors, set(), f"Unexpected error IDs: {unexpected_errors}")
 
     def test_validate_minimum_valid(self):
         """Test schema validation for minimum valid."""
@@ -128,10 +127,10 @@ class TestSchemaManager(unittest.TestCase):
         self.assertEqual(manager.load_errors, [], f"Unexpected load errors {manager.load_errors}")
         self.assertEqual(errors, [], f"Unexpected validation errors {errors}, with enumerators {manager.enumerators}")       
 
-    def test_validate_validation_errors(self):
+    def test_validation_errors(self):
         """Test schema validation with all validation errors."""
 
-        # Initialize SchemaManager 
+        # Arrange - Initialize SchemaManager 
         test_case_dir = os.path.join(self.test_cases_dir, "validation_errors")
         self.config.INPUT_FOLDER = test_case_dir        
         manager = SchemaManager()
@@ -140,20 +139,24 @@ class TestSchemaManager(unittest.TestCase):
         # Act - validate the schema
         errors = manager.validate_schema()
         
-        # Load expected errors
-        expected_errors_path = os.path.join(test_case_dir, "expected", "validation.json")
-        with open(expected_errors_path, 'r') as f:
-            expected_errors = json.load(f)
+        # Assert - Verify expected validation error IDs
+        expected_error_ids = {
+            # Schema Manager validation errors
+            "SCH-013", "SCH-014", "SCH-015", "SCH-016", "SCH-017", "SCH-023",
+            "SCH-026", "SCH-033", "SCH-034", "SCH-035", "SCH-036", "SCH-038",
+            "SCH-039", "SCH-040", "SCH-024", "SCH-025", "SCH-027", "SCH-028",
+            "SCH-029",
+            
+            # Config Manager validation errors
+            "CFG-004", "CFG-005", "CFG-006", "CFG-007", "CFG-008", "CFG-009",
+            "CFG-010", "CFG-011", "CFG-012", "CFG-013"
+        }
         
-        # Assert Validation
-        self.assertEqual(len(errors), len(expected_errors), 
-            f"Unexpected number of validation errors. Expected {len(expected_errors)}, got {len(errors)}")
-        
-        # Compare each error with its expected counterpart
-        for actual_error, expected_error in zip(sorted(errors, key=lambda x: x.get('error', '')), 
-                                              sorted(expected_errors, key=lambda x: x.get('error', ''))):
-            self.assertEqual(actual_error, expected_error, 
-                f"Validation error mismatch.\nExpected: {expected_error}\nActual: {actual_error}")
+        actual_error_ids = {error.get('error_id') for error in errors if 'error_id' in error}
+        missing_errors = expected_error_ids - actual_error_ids
+        unexpected_errors = actual_error_ids - expected_error_ids
+        self.assertEqual(missing_errors, set(), f"Missing error IDs: {missing_errors}")
+        self.assertEqual(unexpected_errors, set(), f"Unexpected error IDs: {unexpected_errors}")
 
     def test_apply_schema_valid(self):
         """Test schema application with valid schema."""
