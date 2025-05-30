@@ -124,6 +124,22 @@ class TestSchemaManager(unittest.TestCase):
         self.assertEqual(manager.load_errors, [], f"Unexpected load errors {manager.load_errors}")
         self.assertEqual(errors, [], f"Unexpected validation errors {errors}, with enumerators {manager.enumerators}")       
         
+    def test_validation_errors(self):
+        """Test schema validation with all validation errors."""
+
+        # Initialize SchemaManager 
+        test_case_dir = os.path.join(self.test_cases_dir, "validation_errors")
+        self.config.INPUT_FOLDER = test_case_dir        
+        manager = SchemaManager()
+        self.assertEqual(len(manager.load_errors), 0, f"Unexpected number of load errors {manager.load_errors}")
+        
+        # Act - validate the schema
+        errors = manager.validate_schema()
+        
+        # Assert Validation
+        self.assertEqual(len(errors), 10, f"Unexpected number of validation errors {manager.load_errors}")
+        self.assertEqual(errors[0], {}, f"Unexpected validation errors {errors}, with enumerators {manager.enumerators}")       
+        
     def test_apply_schema_valid(self):
         """Test schema application with valid schema."""
 
