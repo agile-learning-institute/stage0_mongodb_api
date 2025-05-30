@@ -1,7 +1,6 @@
-$schema: http://json-schema.org/draft-07/schema#
-title: Search Collection
-description: A search index that is used to support a elastic search polymorphic query service
 type: object
+title: Search Collection
+description: Collection for managing search operations
 required:
   - collection_name
   - collection_id
@@ -9,33 +8,270 @@ properties:
   collection_name:
     type: string
     description: The name of the collection
-    minLength: 2
-    maxLength: 40
-    pattern: ^[a-zA-Z0-9_-]{2,40}$
+    pattern: "^[a-zA-Z0-9_-]{4,40}$"
     enum:
       - media
       - organization
       - user
   collection_id:
     type: string
-    description: The unique identifier for this source document
-    pattern: ^[0-9a-fA-F]{24}$
-oneOf:
-  - if:
-      properties:
-        collection_name:
-          const: media
-    then:
-      $ref: media.1.0.0.1.json
-  - if:
-      properties:
-        collection_name:
-          const: organization
-    then:
-      $ref: organization.1.0.0.1.json
-  - if:
-      properties:
-        collection_name:
-          const: user
-    then:
-      $ref: user.1.0.1.3.json 
+    description: The unique identifier for a collection
+    pattern: "^[0-9a-fA-F]{24}$"
+  media:
+    type: object
+    description: Media collection
+    required:
+      - _id
+      - title
+      - type
+      - status
+      - last_saved
+    properties:
+      _id:
+        type: string
+        description: The unique identifier for a media
+        pattern: "^[0-9a-fA-F]{24}$"
+      title:
+        type: string
+        description: The title of the media
+        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+      type:
+        type: string
+        description: The type of media
+        enum:
+          - movie
+          - tv_show
+          - documentary
+          - short
+      status:
+        type: string
+        description: The status
+        enum:
+          - draft
+          - published
+          - archived
+      last_saved:
+        type: object
+        description: The last time this document was saved
+        required:
+          - from_ip
+          - by_user
+          - at_time
+          - correlation_id
+        properties:
+          from_ip:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          by_user:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          at_time:
+            type: string
+            format: date-time
+          correlation_id:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      tags:
+        type: array
+        description: A list of enumerated values assigned by the user
+        items:
+          type: string
+          enum:
+            - action
+            - comedy
+            - drama
+            - sci_fi
+            - documentary
+      metadata:
+        type: object
+        description: The metadata for the media
+        properties:
+          duration:
+            type: number
+            description: The duration of the media in seconds
+          format:
+            type: string
+            description: The format of the media
+            enum:
+              - dvd
+              - bluray
+              - digital
+              - streaming
+          quality:
+            type: string
+            description: The quality of the media
+            enum:
+              - sd
+              - hd
+              - uhd
+  organization:
+    type: object
+    description: Organization collection
+    required:
+      - _id
+      - name
+      - status
+      - last_saved
+    properties:
+      _id:
+        type: string
+        description: The unique identifier for an organization
+        pattern: "^[0-9a-fA-F]{24}$"
+      name:
+        type: string
+        description: The name of the organization
+        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+      status:
+        type: string
+        description: The status
+        enum:
+          - draft
+          - active
+          - archived
+      last_saved:
+        type: object
+        description: The last time this document was saved
+        required:
+          - from_ip
+          - by_user
+          - at_time
+          - correlation_id
+        properties:
+          from_ip:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          by_user:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          at_time:
+            type: string
+            format: date-time
+          correlation_id:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      users:
+        type: array
+        description: A list of enumerated values assigned by the user
+        items:
+          type: string
+          pattern: "^[0-9a-fA-F]{24}$"
+      website:
+        type: string
+        description: The website of the organization
+        pattern: "^https?://[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(/\\S*)?$"
+      home_address:
+        type: object
+        description: Organization home address
+        required:
+          - postal_code
+        properties:
+          street:
+            type: string
+            description: The street address
+            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          city:
+            type: string
+            description: The city
+            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          state:
+            type: string
+            description: The state
+            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          postal_code:
+            type: string
+            description: The postal code
+            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+  user:
+    type: object
+    description: User collection
+    required:
+      - _id
+      - user_name
+      - status
+      - last_saved
+    properties:
+      _id:
+        type: string
+        description: The unique identifier for a user
+        pattern: "^[0-9a-fA-F]{24}$"
+      user_name:
+        type: string
+        description: Username
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      full_name:
+        type: string
+        description: Users Full Name
+        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+      status:
+        type: string
+        description: The status
+        enum:
+          - draft
+          - active
+          - archived
+      categories:
+        type: array
+        description: A users list of categorized tags
+        items:
+          type: object
+          description: A user category
+          required:
+            - name
+            - category
+            - tags
+          properties:
+            name:
+              type: string
+              description: Category Name assigned by the user
+              pattern: "^[a-zA-Z0-9_-]{4,40}$"
+            category:
+              type: string
+              description: The category type assigned by the user
+              enum:
+                - work
+                - personal
+                - project
+                - reference
+            tags:
+              type: array
+              description: A list of enumerated values assigned by the user
+              items:
+                type: string
+                enum:
+                  - urgent
+                  - important
+                  - normal
+                  - low
+                  - completed
+                  - in_progress
+                  - blocked
+                  - review
+      email:
+        type: string
+        description: The person's email address
+        pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      phone:
+        type: string
+        description: The person's phone number
+        pattern: "^\\+?[1-9]\\d{1,14}$"
+      last_saved:
+        type: object
+        description: The last time this document was saved
+        required:
+          - from_ip
+          - by_user
+          - at_time
+          - correlation_id
+        properties:
+          from_ip:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          by_user:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          at_time:
+            type: string
+            format: date-time
+          correlation_id:
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$" 

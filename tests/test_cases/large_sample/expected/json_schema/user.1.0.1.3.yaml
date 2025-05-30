@@ -1,71 +1,79 @@
-$schema: http://json-schema.org/draft-07/schema#
-title: User Collection
-description: A collection of users
 type: object
+title: User Collection
+description: Collection for managing users
 required:
   - _id
   - user_name
   - status
   - last_saved
-  - full_name
-  - email
 properties:
   _id:
     type: string
-    description: The unique identifier for this user
-    pattern: ^[0-9a-fA-F]{24}$
+    description: The unique identifier for a user
+    pattern: "^[0-9a-fA-F]{24}$"
   user_name:
     type: string
-    description: The user's username
-    minLength: 3
-    maxLength: 50
-    pattern: ^[a-zA-Z0-9_-]{3,50}$
-  first_name:
-    type: string
-    description: The user's first name
-    minLength: 1
-    maxLength: 100
-    pattern: ^[a-zA-Z0-9\s'-]{1,100}$
-  last_name:
-    type: string
-    description: The user's last name
-    minLength: 1
-    maxLength: 100
-    pattern: ^[a-zA-Z0-9\s'-]{1,100}$
+    description: Username
+    pattern: "^[a-zA-Z0-9_-]{4,40}$"
   full_name:
     type: string
-    description: The user's full name
-    minLength: 1
-    maxLength: 201
-    pattern: ^[a-zA-Z0-9\s'-]{1,201}$
+    description: Users Full Name
+    pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
   status:
     type: string
-    description: The user's status
+    description: The status
     enum:
       - draft
       - active
       - archived
   categories:
     type: array
-    description: The user's categories
+    description: A users list of categorized tags
     items:
-      type: string
-      enum:
-        - admin
-        - user
-        - guest
+      type: object
+      description: A user category
+      required:
+        - name
+        - category
+        - tags
+      properties:
+        name:
+          type: string
+          description: Category Name assigned by the user
+          pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        category:
+          type: string
+          description: The category type assigned by the user
+          enum:
+            - work
+            - personal
+            - project
+            - reference
+        tags:
+          type: array
+          description: A list of enumerated values assigned by the user
+          items:
+            type: string
+            enum:
+              - urgent
+              - important
+              - normal
+              - low
+              - completed
+              - in_progress
+              - blocked
+              - review
   email:
     type: string
-    description: The user's email address
-    format: email
-    pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+    description: The person's email address
+    pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
   phone:
     type: string
-    description: The user's phone number
-    pattern: ^\+?[1-9]\d{1,14}$
+    description: The person's phone number
+    pattern: "^\\+?[1-9]\\d{1,14}$"
   last_saved:
     type: object
-    description: Information about the last save action
+    description: The last time this document was saved
     required:
       - from_ip
       - by_user
@@ -74,17 +82,13 @@ properties:
     properties:
       from_ip:
         type: string
-        description: The IP address of the client that made the request
-        pattern: ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
       by_user:
         type: string
-        description: The ID of the user who made the request
-        pattern: ^[0-9a-fA-F]{24}$
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
       at_time:
         type: string
-        description: The timestamp of the request
         format: date-time
       correlation_id:
         type: string
-        description: The correlation ID for the request
-        pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$ 
+        pattern: "^[a-zA-Z0-9_-]{4,40}$" 
