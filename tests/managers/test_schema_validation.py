@@ -16,51 +16,49 @@ class TestSchemaValidation(unittest.TestCase):
         """Test validation of minimum valid schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "minimum_valid")
-        config_manager = ConfigManager()
-        schema_manager = SchemaManager(config_manager)
-        schema_manager.load_schemas()
+        schema_manager = SchemaManager()
         
         # Act
         errors = schema_manager.validate_schema()
         
         # Assert
-        self.assertEqual(self.schema_manager.load_errors, [])
+        self.assertEqual(schema_manager.load_errors, [])
         self.assertEqual(errors, [])
         
     def test_validate_small_sample(self):
         """Test validation of small sample schema."""
         # Arrange
-        self.schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "small_sample")
-        self.schema_manager.load_schemas()
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
+        schema_manager = SchemaManager()
         
         # Act
-        errors = self.schema_manager.validate_schema()
+        errors = schema_manager.validate_schema()
         
         # Assert
-        self.assertEqual(self.schema_manager.load_errors, [])
+        self.assertEqual(schema_manager.load_errors, [])
         self.assertEqual(errors, [])
         
     def test_validate_large_sample(self):
         """Test validation of large sample schema."""
         # Arrange
-        self.schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "large_sample")
-        self.schema_manager.load_schemas()
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
         
         # Act
-        errors = self.schema_manager.validate_schema()
+        errors = schema_manager.validate_schema()
         
         # Assert
-        self.assertEqual(self.schema_manager.load_errors, [])
+        self.assertEqual(schema_manager.load_errors, [])
         self.assertEqual(errors, [])
         
     def test_validation_errors(self):
         """Test validation with all validation errors."""
         # Arrange
-        self.schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "validation_errors")
-        self.schema_manager.load_schemas()
+        schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "validation_errors")
+        schema_manager.load_schemas()
         
         # Act
-        errors = self.schema_manager.validate_schema()
+        errors = schema_manager.validate_schema()
         
         # Assert
         expected_error_ids = {

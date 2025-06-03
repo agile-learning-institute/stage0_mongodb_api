@@ -29,25 +29,29 @@ class SchemaManager:
         self.types: Dict = {}
         self.enumerators: List[Dict] = []
         self.dictionaries: Dict = {}
+
+        # Load all schema definitions
         self.load_errors: List[Dict] = self.config_manager.load_errors
+        self.load_errors.extend(self._load_types())
+        self.load_errors.extend(self._load_enumerators())
+        self.load_errors.extend(self._load_dictionaries())
         
-    def load_schemas(self) -> None:
-        """Load all schema definitions."""
-        self._load_types()
-        self._load_enumerators()
-        self._load_dictionaries()
+    def _load_types(self) -> List[Dict]:
+        """Load type definitions.
         
-    def _load_types(self) -> None:
-        """Load type definitions."""
+        Returns:
+            List of load errors
+        """
+        errors = []
         types_dir = os.path.join(self.config.INPUT_FOLDER, "dictionary", "types")
         if not os.path.exists(types_dir):
-            self.load_errors.append({
+            errors.append({
                 "error": "directory_not_found",
                 "error_id": "SCH-001",
                 "path": types_dir,
                 "message": "Types directory not found"
             })
-            return
+            return errors
             
         try:
             for filename in os.listdir(types_dir):
@@ -58,29 +62,35 @@ class SchemaManager:
                             type_def = yaml.safe_load(f)
                             self.types[filename[:-5]] = type_def
                     except yaml.YAMLError:
-                        self.load_errors.append({
+                        errors.append({
                             "error": "parse_error",
                             "error_id": "SCH-002",
                             "file": filename,
                             "message": "Failed to parse type definition"
                         })
                     except Exception as e:
-                        self.load_errors.append({
+                        errors.append({
                             "error": "load_error",
                             "error_id": "SCH-003",
                             "file": filename,
                             "message": str(e)
                         })
         except Exception as e:
-            self.load_errors.append({
+            errors.append({
                 "error": "load_error",
                 "error_id": "SCH-003",
                 "path": types_dir,
                 "message": str(e)
             })
+        return errors
             
-    def _load_enumerators(self) -> None:
-        """Load all enumerator definitions from the enumerators.json file."""
+    def _load_enumerators(self) -> List[Dict]:
+        """Load all enumerator definitions from the enumerators.json file.
+        
+        Returns:
+            List of load errors
+        """
+        errors = []
         enumerator_file = os.path.join(self.config.INPUT_FOLDER, "data", "enumerators.json")
         
         try:
@@ -89,57 +99,64 @@ class SchemaManager:
                 self.enumerators = enumerators
             
         except FileNotFoundError:
-            self.load_errors.append({
+            errors.append({
                 'error_id': 'SCH-004',
                 'message': f'Enumerator file not found: {enumerator_file}'
             })
         except json.JSONDecodeError as e:
-            self.load_errors.append({
+            errors.append({
                 'error_id': 'SCH-007',
                 'message': f'Failed to parse enumerator file {enumerator_file}: {str(e)}'
             })
+        return errors
             
-    def _load_dictionaries(self) -> None:
-        """Load dictionary definitions."""
+    def _load_dictionaries(self) -> List[Dict]:
+        """Load dictionary definitions.
+        
+        Returns:
+            List of load errors
+        """
+        errors = []
         dictionaries_dir = os.path.join(self.config.INPUT_FOLDER, "dictionary")
         if not os.path.exists(dictionaries_dir):
-            self.load_errors.append({
+            errors.append({
                 "error": "directory_not_found",
                 "error_id": "SCH-009",
                 "path": dictionaries_dir,
                 "message": "Dictionaries directory not found"
             })
-            return
+            return errors
             
         try:
             for filename in os.listdir(dictionaries_dir):
-                if filename.endswith(".yaml"):
+                if filename.endswith((".yaml", ".yml")):
                     file_path = os.path.join(dictionaries_dir, filename)
                     try:
                         with open(file_path, "r") as f:
                             dict_def = yaml.safe_load(f)
-                            self.dictionaries[filename[:-5]] = dict_def
+                            self.dictionaries[os.path.splitext(filename)[0]] = dict_def
                     except yaml.YAMLError:
-                        self.load_errors.append({
+                        errors.append({
                             "error": "parse_error",
                             "error_id": "SCH-011",
                             "file": filename,
                             "message": "Failed to parse dictionary definition"
                         })
                     except Exception as e:
-                        self.load_errors.append({
+                        errors.append({
                             "error": "load_error",
                             "error_id": "SCH-012",
                             "file": filename,
                             "message": str(e)
                         })
         except Exception as e:
-            self.load_errors.append({
+            errors.append({
                 "error": "load_error",
                 "error_id": "SCH-012",
                 "path": dictionaries_dir,
                 "message": str(e)
             })
+        return errors
             
     def validate_schema(self) -> List[Dict]:
         """Validate all loaded schema definitions.
