@@ -9,7 +9,7 @@ from stage0_mongodb_api.managers.version_number import VersionNumber
 from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_mongodb_api.managers.schema_renderer import SchemaRenderer
 from stage0_mongodb_api.managers.schema_validator import SchemaValidator, SchemaValidationError
-from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat, Schema, PrimitiveType
+from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat, Schema, PrimitiveType, ValidationContext
 
 class SchemaError(Exception):
     """Base exception for schema-related errors."""
@@ -29,7 +29,7 @@ class SchemaManager:
         self.types: Dict = {}
         self.enumerators: List[Dict] = []
         self.dictionaries: Dict = {}
-        self.load_errors: List[Dict] = []
+        self.load_errors: List[Dict] = config_manager.load_errors
         
     def load_schemas(self) -> None:
         """Load all schema definitions."""
@@ -51,13 +51,13 @@ class SchemaManager:
             
         try:
             for filename in os.listdir(types_dir):
-                if filename.endswith(".json"):
+                if filename.endswith(".yaml"):
                     file_path = os.path.join(types_dir, filename)
                     try:
                         with open(file_path, "r") as f:
-                            type_def = json.load(f)
+                            type_def = yaml.safe_load(f)
                             self.types[filename[:-5]] = type_def
-                    except json.JSONDecodeError:
+                    except yaml.YAMLError:
                         self.load_errors.append({
                             "error": "parse_error",
                             "error_id": "SCH-002",
@@ -86,17 +86,7 @@ class SchemaManager:
         try:
             with open(enumerator_file, 'r') as f:
                 enumerators = json.load(f)
-                
-            # Validate that enumerators is a dictionary
-            if not isinstance(enumerators, List):
-                self.load_errors.append({
-                    'error_id': 'SCH-005',
-                    'message': f'Invalid enumerator format in {enumerator_file}: must be a List'
-                })
-                return
-                
-            # Store enumerators
-            self.enumerators = enumerators
+                self.enumerators = enumerators
             
         except FileNotFoundError:
             self.load_errors.append({
@@ -123,22 +113,13 @@ class SchemaManager:
             
         try:
             for filename in os.listdir(dictionaries_dir):
-                if filename.endswith(".json"):
+                if filename.endswith(".yaml"):
                     file_path = os.path.join(dictionaries_dir, filename)
                     try:
                         with open(file_path, "r") as f:
-                            dict_def = json.load(f)
-                            if "version" not in dict_def:
-                                self.load_errors.append({
-                                    "error": "invalid_version",
-                                    "error_id": "SCH-010",
-                                    "file": filename,
-                                    "message": "Dictionary must have a version"
-                                })
-                                continue
-                                
+                            dict_def = yaml.safe_load(f)
                             self.dictionaries[filename[:-5]] = dict_def
-                    except json.JSONDecodeError:
+                    except yaml.YAMLError:
                         self.load_errors.append({
                             "error": "parse_error",
                             "error_id": "SCH-011",
@@ -160,31 +141,23 @@ class SchemaManager:
                 "message": str(e)
             })
             
-    def validate_schema(self, schema_name: str, enum_version: Optional[int] = None) -> List[Dict]:
-        """Validate a schema definition.
+    def validate_schema(self) -> List[Dict]:
+        """Validate all loaded schema definitions.
         
-        Args:
-            schema_name: Name of the schema to validate
-            enum_version: Optional version number for enumerators
-            
         Returns:
             List of validation errors
         """
-        if schema_name not in self.types:
-            return [{
-                "error": "schema_not_found",
-                "error_id": "SCH-013",
-                "schema_name": schema_name,
-                "message": "Schema not found"
-            }]
-            
-        schema = self.types[schema_name]
-        errors = SchemaValidator.validate_schema(schema, schema_name, enum_version, self.enumerators)
+        errors = self.config_manager.validate_configs()
         
-        # Validate enumerators if present
-        if self.enumerators:
-            errors.extend(SchemaValidator.validate_enumerators(self.enumerators))
-            
+        # Create validation context
+        context: ValidationContext = {
+            "types": self.types,
+            "enumerators": self.enumerators,
+            "dictionaries": self.dictionaries,
+            "collection_configs": self.config_manager.collection_configs
+        }
+        
+        errors.extend(SchemaValidator.validate_schema(context))
         return errors
         
     def render_schema(self, schema_name: str, format: SchemaFormat = SchemaFormat.BSON) -> Dict:
@@ -197,11 +170,7 @@ class SchemaManager:
         Returns:
             Dict containing the rendered schema
         """
-        if schema_name not in self.types:
-            raise ValueError(f"Schema not found: {schema_name}")
-            
-        schema = self.types[schema_name]
-        return SchemaRenderer.render_schema(schema, format, self.types, self.enumerators)
+        return SchemaRenderer.render_schema(self, schema_name, format)
 
     def apply_schema(self, version_name: str) -> Dict:
         """Apply a schema to a collection.

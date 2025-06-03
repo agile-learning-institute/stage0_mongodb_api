@@ -1,7 +1,9 @@
 from typing import Dict, List, Optional
 import re
 import json
-from stage0_mongodb_api.managers.schema_types import SchemaType, Schema
+from stage0_py_utils import Config
+from stage0_mongodb_api.managers.schema_types import SchemaType, Schema, ValidationContext
+from stage0_mongodb_api.managers.version_number import VersionNumber
 
 class SchemaError(Exception):
     """Base exception for schema-related errors."""
@@ -111,31 +113,45 @@ class SchemaValidator:
         return errors
 
     @staticmethod
-    def validate_schema(schema: Dict, path: str, enum_version: Optional[int] = None, enumerators: Optional[List[Dict]] = None) -> List[Dict]:
-        """Validate a schema definition."""
+    def validate_schema(context: ValidationContext) -> List[Dict]:
+        """Validate schema definitions against collection configurations.
+        
+        Args:
+            context: Validation context containing all necessary data
+            
+        Returns:
+            List of validation errors
+        """
         errors = []
-        
-        # Validate schema is a dictionary
-        if not isinstance(schema, dict):
-            errors.append({
-                "error": "invalid_schema_type",
-                "error_id": "SCH-023",
-                "path": path,
-                "type": str(type(schema)),
-                "message": "Invalid type"
-            })
-            return errors
 
-        # Check if this is a primitive type
-        has_schema = "schema" in schema
-        has_json_type = "json_type" in schema
-        has_bson_type = "bson_type" in schema
-        
-        if has_schema or has_json_type or has_bson_type:
-            errors.extend(SchemaValidator._validate_primitive_type(schema, path))
-        else:
-            errors.extend(SchemaValidator._validate_schema_type(schema, path, enum_version, enumerators))
+        # Validate enumerators 
+        errors.extend(SchemaValidator.validate_enumerators(context["enumerators"]))
+            
+        # Validate each collection configuration
+        for collection in context["collection_configs"]:
+            # Get the version number from the collection config
+            version = VersionNumber.from_string(collection["version"])
+            
+            # Construct schema name with version (e.g., user.1.2.3)
+            schema_name = f"{collection['name']}.{version.major}.{version.minor}.{version.patch}"
+            
+            # Get the enumerator version from the collection config
+            enum_version = collection["enum_version"]
+            
+            # Validate the schema exists
+            if schema_name not in context["types"]:
+                errors.append({
+                    "error": "schema_not_found",
+                    "error_id": "SCH-013",
+                    "schema_name": schema_name,
+                    "message": f"Schema not found for collection {collection['name']} version {version}"
+                })
+                continue
                 
+            # Validate the schema structure
+            schema = context["types"][schema_name]
+            schema_errors = SchemaValidator._validate_schema_type(schema, schema_name, enum_version, context["enumerators"])
+            errors.extend(schema_errors)            
         return errors
 
     @staticmethod

@@ -2,24 +2,26 @@ import unittest
 import os
 from stage0_mongodb_api.managers.schema_manager import SchemaManager
 from stage0_mongodb_api.managers.config_manager import ConfigManager
+from stage0_py_utils import Config
 
 class TestSchemaValidation(unittest.TestCase):
     """Test suite for schema validation functionality."""
     
     def setUp(self):
         """Set up test fixtures."""
-        self.config_manager = ConfigManager()
-        self.schema_manager = SchemaManager(self.config_manager)
+        self.config = Config.get_instance()
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
         
     def test_validate_minimum_valid(self):
         """Test validation of minimum valid schema."""
         # Arrange
-        self.schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "minimum_valid")
-        self.schema_manager.load_schemas()
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "minimum_valid")
+        config_manager = ConfigManager()
+        schema_manager = SchemaManager(config_manager)
+        schema_manager.load_schemas()
         
         # Act
-        errors = self.schema_manager.validate_schema()
+        errors = schema_manager.validate_schema()
         
         # Assert
         self.assertEqual(self.schema_manager.load_errors, [])

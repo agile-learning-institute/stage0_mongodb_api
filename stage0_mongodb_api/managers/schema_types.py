@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Optional, TypedDict
+from typing import Dict, Optional, TypedDict, List
 
 class SchemaType(Enum):
     """Schema type definitions."""
@@ -34,10 +34,17 @@ class Schema(TypedDict):
     title: Optional[str]                        # Best Practices for root schemas
     description: str
     type: str
-    required: Optional[bool]                    # Default is False
+    required: Optional[List[str]]                    # Default is False
     properties: Optional[Dict[str, 'Schema']]   # Required for object type only
     additionalProperties: Optional[bool]        # For object type, default is False
     items: Optional['Schema']                   # Required for array type only
     enums: Optional[str]                        # Required for enum and enum_array types only
     type_property: Optional[str]                # Required for one_of type only
     schemas: Optional[Dict[str, 'Schema']]      # Required for one_of type only 
+
+class ValidationContext(TypedDict):
+    """Context for schema validation."""
+    types: Dict
+    enumerators: List[Dict]
+    dictionaries: Dict
+    collection_configs: List[Dict] 
