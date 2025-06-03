@@ -18,18 +18,18 @@ class SchemaError(Exception):
 class SchemaManager:
     """Manager class for handling schema operations."""
     
-    def __init__(self, config_manager: ConfigManager):
+    def __init__(self):
         """Initialize the schema manager.
         
         Args:
             config_manager: Configuration manager instance
         """
         self.config = Config.get_instance()
-        self.config_manager = config_manager
+        self.config_manager = ConfigManager()
         self.types: Dict = {}
         self.enumerators: List[Dict] = []
         self.dictionaries: Dict = {}
-        self.load_errors: List[Dict] = config_manager.load_errors
+        self.load_errors: List[Dict] = self.config_manager.load_errors
         
     def load_schemas(self) -> None:
         """Load all schema definitions."""

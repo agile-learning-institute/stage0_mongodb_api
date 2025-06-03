@@ -16,8 +16,7 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading minimum valid schema structure."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "minimum_valid")
-        config_manager = ConfigManager()
-        schema_manager = SchemaManager(config_manager)
+        schema_manager = SchemaManager()
         
         # Act
         schema_manager.load_schemas()
@@ -32,8 +31,7 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading small sample schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
-        config_manager = ConfigManager()
-        schema_manager = SchemaManager(config_manager)
+        schema_manager = SchemaManager()
         
         # Act
         schema_manager.load_schemas()
@@ -48,8 +46,7 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading large sample schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
-        config_manager = ConfigManager()
-        schema_manager = SchemaManager(config_manager)
+        schema_manager = SchemaManager()
         
         # Act
         schema_manager.load_schemas()
@@ -64,8 +61,7 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading with empty input."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "empty_input")
-        config_manager = ConfigManager()
-        schema_manager = SchemaManager(config_manager)
+        schema_manager = SchemaManager()
         
         # Act
         schema_manager.load_schemas()
@@ -82,8 +78,7 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading with empty sub-folders."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "missing_folders")
-        config_manager = ConfigManager()
-        schema_manager = SchemaManager(config_manager)
+        schema_manager = SchemaManager()
         
         # Act
         schema_manager.load_schemas()
@@ -100,8 +95,7 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading with unparsable input files."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "unparsable_files")
-        config_manager = ConfigManager()
-        schema_manager = SchemaManager(config_manager)
+        schema_manager = SchemaManager()
         
         # Act
         schema_manager.load_schemas()
