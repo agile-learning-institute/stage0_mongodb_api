@@ -16,10 +16,9 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading minimum valid schema structure."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "minimum_valid")
-        schema_manager = SchemaManager()
         
         # Act
-        schema_manager.load_schemas()
+        schema_manager = SchemaManager()
         
         # Assert
         self.assertEqual(schema_manager.load_errors, [])
@@ -31,10 +30,9 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading small sample schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
-        schema_manager = SchemaManager()
         
         # Act
-        schema_manager.load_schemas()
+        schema_manager = SchemaManager()
         
         # Assert
         self.assertEqual(schema_manager.load_errors, [])
@@ -46,10 +44,9 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading large sample schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
-        schema_manager = SchemaManager()
         
         # Act
-        schema_manager.load_schemas()
+        schema_manager = SchemaManager()
         
         # Assert
         self.assertEqual(schema_manager.load_errors, [])
@@ -61,10 +58,9 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading with empty input."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "empty_input")
-        schema_manager = SchemaManager()
         
         # Act
-        schema_manager.load_schemas()
+        schema_manager = SchemaManager()
         
         # Assert
         expected_error_ids = {"CFG-001", "SCH-001", "SCH-004", "SCH-009"}
@@ -78,10 +74,9 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading with empty sub-folders."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "missing_folders")
-        schema_manager = SchemaManager()
         
         # Act
-        schema_manager.load_schemas()
+        schema_manager = SchemaManager()
         
         # Assert
         expected_error_ids = {"SCH-001", "SCH-004"}
@@ -95,10 +90,9 @@ class TestSchemaLoading(unittest.TestCase):
         """Test loading with unparsable input files."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "unparsable_files")
-        schema_manager = SchemaManager()
         
         # Act
-        schema_manager.load_schemas()
+        schema_manager = SchemaManager()
         
         # Assert
         expected_error_ids = {"CFG-002", "SCH-002", "SCH-007", "SCH-011"}
