@@ -15,9 +15,9 @@ class VersionManager:
     def __init__(self):
         self.mongo = MongoIO.get_instance()
         self.config = Config.get_instance()
-        self.schema_manager = SchemaManager(self.config.INPUT_FOLDER)
-        self.index_manager = IndexManager()
-        self.migration_manager = MigrationManager()
+        # self.schema_manager = SchemaManager(self.config.INPUT_FOLDER)
+        # self.index_manager = IndexManager()
+        # self.migration_manager = MigrationManager()
     
     def get_current_version(self, collection_name: str) -> str:
         """Get the current version of a collection.

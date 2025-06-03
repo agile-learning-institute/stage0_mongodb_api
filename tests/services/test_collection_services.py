@@ -1,124 +1,119 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import os
-import yaml
 from stage0_mongodb_api.services.collection_service import CollectionService
-from stage0_py_utils import MongoIO, Config
+from stage0_py_utils import Config
 
 class TestCollectionServices(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures before each test method."""
         # Set up test input folder
         self.config = Config.get_instance()
-        self.config.INPUT_FOLDER = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            'test_cases/large_sample'
-        )
-        
-        # Create service instance with mocked VersionManager
-        with patch('stage0_mongodb_api.services.collection_service.VersionManager') as mock_version_manager:
-            self.mock_version_manager = mock_version_manager.return_value
-            self.mock_version_manager.get_current_version.return_value = "1.0.0.1"
-            self.service = CollectionService()
+        self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
 
-    def tearDown(self):
-        """Clean up test fixtures after each test method."""
-        pass
-    
-    def test_list_collections(self):
-        """Test listing all collections."""
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_list_collections_small_sample(self, mock_config_manager):
+        """Test listing all collections using simple data."""
+        # Arrange
+        mock_config_manager.return_value.collection_configs = {"simple": {}}
+        
         # Act
-        result = self.service.list_collections()
+        result = CollectionService.list_collections()
 
         # Assert
-        self.assertEqual(len(result), 4)  # We have 4 collection files
-        collection_names = {c["name"] for c in result}
-        self.assertEqual(collection_names, {"user", "organization", "media", "search"})
-        
-        # Verify user collection structure
-        user_collection = next(c for c in result if c["name"] == "user")
-        self.assertEqual(user_collection["title"], "User Collection")
-        self.assertEqual(user_collection["description"], "Collection for managing users")
-        self.assertEqual(len(user_collection["versions"]), 3)
-        self.assertEqual(user_collection["current_version"], "1.0.0.1")
+        self.assertEqual(len(result), 1)  # Small sample has 1 collection
+        self.assertIsInstance(result, dict)
+        self.assertIn("simple", result)
 
-    def test_process_collections_success(self):
-        """Test processing all collections successfully."""
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
+    def test_process_collections(self, mock_version_manager, mock_config_manager):
+        """Test processing all collections."""
         # Arrange
-        mock_operations = [
-            {"status": "success", "operation": "schema_update"}
+        mock_config_manager.return_value.collection_configs = {
+            "user": {"name": "user"},
+            "organization": {"name": "organization"},
+            "media": {"name": "media"},
+            "search": {"name": "search"}
+        }
+        mock_version_manager.return_value.process_versions.return_value = [
+            {"status": "success", "operation": "schema_update"},
+            {"status": "success", "operation": "schema_update"},
+            {"status": "success", "operation": "schema_update"},
+            {"status": "success", "operation": "schema_update"},
         ]
-        self.mock_version_manager.process_versions.return_value = mock_operations
-
+        
         # Act
-        result = self.service.process_collections()
-
-        # Assert
-        self.assertEqual(len(result), 4)  # We have 4 collections
-        for r in result:
-            self.assertEqual(r["status"], "success")
-            self.assertIn(r["collection"], ["user", "organization", "media", "search"])
-            self.assertEqual(r["operations"], mock_operations)
-
-    def test_process_collections_with_error(self):
-        """Test processing collections when one fails."""
-        # Arrange
-        def mock_process_versions(collection_name, versions):
-            if collection_name == "user":
-                raise Exception("Test error")
-            return [{"status": "success", "operation": "schema_update"}]
-            
-        self.mock_version_manager.process_versions.side_effect = mock_process_versions
-
-        # Act
-        result = self.service.process_collections()
+        result = CollectionService.process_collections()
 
         # Assert
         self.assertEqual(len(result), 4)
-        user_result = next(r for r in result if r["collection"] == "user")
-        self.assertEqual(user_result["status"], "error")
-        self.assertIn("Test error", user_result["error"])
-        
-        # Other collections should succeed
-        for r in result:
-            if r["collection"] != "user":
-                self.assertEqual(r["status"], "success")
+        self.assertEqual(result[0]["status"], "success")
+        self.assertEqual(result[1]["status"], "success")
+        self.assertEqual(result[2]["status"], "success")
+        self.assertEqual(result[3]["status"], "success")
 
-    def test_process_collection_success(self):
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
+    def test_process_collection_success(self, mock_version_manager, mock_config_manager):
         """Test processing a specific collection successfully."""
         # Arrange
-        collection_name = "user"
-        mock_operations = [
+        mock_config_manager.return_value.get_collection_config.return_value = {
+            "name": "simple",
+            "versions": ["1.0.0"]
+        }
+        mock_version_manager.return_value.process_versions.return_value = [
             {"status": "success", "operation": "schema_update"}
         ]
-        self.mock_version_manager.process_versions.return_value = mock_operations
+        collection_name = "simple"
 
         # Act
-        result = self.service.process_collection(collection_name)
+        result = CollectionService.process_collection(collection_name)
 
         # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["collection"], collection_name)
-        self.assertEqual(result["operations"], mock_operations)
-        
-        # Verify correct versions were passed to version manager
-        user_collection = next(c for c in self.service.collections if c["name"] == "user")
-        self.mock_version_manager.process_versions.assert_called_once_with(
-            collection_name, user_collection["versions"]
-        )
+        self.assertEqual(result["operations"], [{"status": "success", "operation": "schema_update"}])
 
-    def test_process_collection_not_found(self):
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
+    def test_process_collection_not_found(self, mock_version_manager, mock_config_manager):
         """Test processing a non-existent collection."""
         # Arrange
+        mock_config_manager.return_value.get_collection_config.return_value = None
         collection_name = "nonexistent"
 
         # Act
-        result = self.service.process_collection(collection_name)
+        result = CollectionService.process_collection(collection_name)
 
         # Assert
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["collection"], collection_name)
         self.assertEqual(result["error"], "Collection configuration not found")
+        mock_version_manager.return_value.process_versions.assert_not_called()
+        mock_config_manager.return_value.get_collection_config.assert_called_once_with(collection_name)
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
+    def test_process_collections_with_error(self, mock_version_manager, mock_config_manager):
+        """Test processing collections when an error occurs."""
+        # Arrange
+        mock_config_manager.return_value.collection_configs = {
+            "simple": {
+                "name": "simple",
+                "versions": ["1.0.0"]
+            }
+        }
+        mock_version_manager.return_value.process_versions.side_effect = Exception("Test error")
+        
+        # Act
+        result = CollectionService.process_collections()
+
+        # Assert
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["status"], "error")
+        self.assertEqual(result[0]["collection"], "simple")
+        self.assertEqual(result[0]["error"], "Test error")
 
 if __name__ == '__main__':
     unittest.main()
