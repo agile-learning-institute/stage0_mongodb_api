@@ -1,9 +1,9 @@
-title: search
-description: A search index that is used to support a elastic search polymorphic query service
+title: Search
+description: A search index that is used to support an elastic search polymorphic query service
 type: object
 properties:
   collection_name:
-    description: The name of the collection
+    description: The name of the collection that determines the schema type
     type: word
     required: true
   collection_id:
@@ -13,10 +13,10 @@ properties:
 one_of:
   type_property: collection_name
   schemas:
-    media: 
-      $ref: media.1.0.0.yaml
-    organization: 
-      $ref: organization.1.0.0.yaml
-    user: 
-      $ref: user.1.0.0.yaml
+    media:
+      $ref: media.1.0.0
+    organization:
+      $ref: organization.1.0.0
+    user:
+      $ref: user.1.0.0
   

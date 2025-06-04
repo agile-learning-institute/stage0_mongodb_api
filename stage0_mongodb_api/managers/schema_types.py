@@ -7,7 +7,6 @@ class SchemaType(Enum):
     ARRAY = "array"
     ENUM = "enum"
     ENUM_ARRAY = "enum_array"
-    ONE_OF = "one_of"
 
 class SchemaFormat(Enum):
     """Schema format definitions."""
@@ -39,8 +38,7 @@ class Schema(TypedDict):
     additionalProperties: Optional[bool]        # For object type, default is False
     items: Optional['Schema']                   # Required for array type only
     enums: Optional[str]                        # Required for enum and enum_array types only
-    type_property: Optional[str]                # Required for one_of type only
-    schemas: Optional[Dict[str, 'Schema']]      # Required for one_of type only 
+    one_of: Optional[Dict]                      # Optional for object type, defines polymorphic schemas
 
 class ValidationContext(TypedDict):
     """Context for schema validation."""

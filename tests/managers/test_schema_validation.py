@@ -76,19 +76,19 @@ class TestSchemaValidation(unittest.TestCase):
             "VLD-701",  # Object type validation
             "VLD-801",  # Array type validation
             "VLD-901", "VLD-902",  # Enum type validation
-            "VLD-1001", "VLD-1002",  # OneOf type validation
-            
-            # Untested Edge Cases
-            # "VLD-105",  # Enumerators key type errors
-            # "VLD-107",  # Enumeration key type errors
+            "VLD-1001", "VLD-1002", "VLD-1003",  # OneOf type validation
             
             # Config Manager validation errors
-            # "CFG-001", "CFG-002", "CFG-003",  # Load errors
             "CFG-101",  # Invalid config format
             "CFG-201", "CFG-202",  # Missing required fields
             "CFG-501",  # Invalid version format
             "CFG-601",  # Missing version number
             "CFG-701",  # Invalid version format
+
+            # Untested Edge Cases
+            # "VLD-105",  # Enumerators key type errors
+            # "VLD-107",  # Enumeration key type errors
+            # "CFG-001", "CFG-002", "CFG-003",  # Load errors            
         }
         actual_error_ids = {error.get('error_id') for error in errors if 'error_id' in error}
         missing_error_ids = expected_error_ids - actual_error_ids

@@ -16,6 +16,9 @@ properties:
   last_name:
     description: Users Last Name
     type: word
+  bad_list:
+    description: A bad list
+    type: array
   status:
     description: document status
     type: enum

@@ -30,4 +30,3 @@ properties:
   home_address:
     description: Organization home address
     type: street_address
- 

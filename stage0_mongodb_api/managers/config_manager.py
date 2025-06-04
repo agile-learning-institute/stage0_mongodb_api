@@ -71,11 +71,6 @@ class ConfigManager:
     def validate_configs(self) -> List[Dict]:
         """Validate all loaded collection configurations.
         
-        Validates:
-        1. Required fields are present and have correct types
-        2. No additional properties beyond those defined in schema
-        3. Version format is valid
-        
         Returns:
             List of validation errors, empty if all valid
         """

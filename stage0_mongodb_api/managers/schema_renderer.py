@@ -47,8 +47,6 @@ class SchemaRenderer:
             return SchemaRenderer._resolve_array_type(schema, types, enumerators)
         elif type_name in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
             return SchemaRenderer._resolve_enum_type(schema, types, enumerators)
-        elif type_name == SchemaType.ONE_OF.value:
-            return SchemaRenderer._resolve_one_of_type(schema, types, enumerators)
             
         return schema
 
@@ -61,12 +59,40 @@ class SchemaRenderer:
             "required": []
         }
         
+        # Resolve properties if present
         if "properties" in schema:
             for prop_name, prop_def in schema["properties"].items():
                 resolved["properties"][prop_name] = SchemaRenderer._resolve_schema(prop_def, types, enumerators)
                 
+        # Resolve one_of if present
+        if "one_of" in schema:
+            one_of_def = schema["one_of"]
+            if "type_property" in one_of_def and "schemas" in one_of_def:
+                # Add type property to properties
+                resolved["properties"][one_of_def["type_property"]] = {
+                    "type": "string",
+                    "enum": list(one_of_def["schemas"].keys())
+                }
+                resolved["required"].append(one_of_def["type_property"])
+                
+                # Add schema properties
+                for schema_name, schema_def in one_of_def["schemas"].items():
+                    # If schema is a $ref, resolve the reference
+                    if isinstance(schema_def, dict) and "$ref" in schema_def:
+                        ref_name = schema_def["$ref"]
+                        if ref_name in types:
+                            resolved["properties"][schema_name] = SchemaRenderer._resolve_schema(types[ref_name], types, enumerators)
+                        else:
+                            # If not in types, assume it's a dictionary reference
+                            resolved["properties"][schema_name] = {
+                                "$ref": f"#/definitions/{ref_name}"
+                            }
+                    else:
+                        resolved["properties"][schema_name] = SchemaRenderer._resolve_schema(schema_def, types, enumerators)
+                    
+        # Add required fields
         if "required" in schema:
-            resolved["required"] = schema["required"]
+            resolved["required"].extend(schema["required"])
             
         return resolved
 
@@ -109,28 +135,4 @@ class SchemaRenderer:
                             "enum": list(enum_def.keys())
                         }
                         
-        return resolved
-
-    @staticmethod
-    def _resolve_one_of_type(schema: Dict, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
-        """Resolve a one_of type definition."""
-        resolved = {
-            "type": "object",
-            "properties": {},
-            "required": []
-        }
-        
-        if "type_property" in schema:
-            resolved["properties"][schema["type_property"]] = {
-                "type": "string",
-                "enum": []
-            }
-            resolved["required"].append(schema["type_property"])
-            
-        if "schemas" in schema:
-            for schema_name, schema_def in schema["schemas"].items():
-                resolved["properties"][schema_name] = SchemaRenderer._resolve_schema(schema_def, types, enumerators)
-                if "type_property" in schema:
-                    resolved["properties"][schema["type_property"]]["enum"].append(schema_name)
-                    
         return resolved 

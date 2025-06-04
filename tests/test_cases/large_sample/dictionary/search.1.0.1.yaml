@@ -14,9 +14,9 @@ one_of:
   type_property: collection_name
   schemas:
     media: 
-      $ref: media.1.0.0.yaml
+      $ref: media.1.0.0
     organization: 
-      $ref: organization.1.0.0.yaml
+      $ref: organization.1.0.0
     user: 
-      $ref: user.1.0.1.yaml
+      $ref: user.1.0.1
   
