@@ -1,7 +1,5 @@
 title: Identity
 description: A unique identifier for a document
-json_type:
-  type: string
-  pattern: "^[0-9a-fA-F]{24}$"
+json_type: "not_a_dictionary"
 bson_type:
   bsonType: objectId 

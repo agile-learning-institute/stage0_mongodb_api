@@ -33,19 +33,57 @@ class SchemaValidator:
         """
         errors = []
         errors.extend(SchemaValidator._validate_enumerators(context["enumerators"]))
-        errors.extend(SchemaValidator._validate_dictionaries(context["dictionaries"]))
+        errors.extend(SchemaValidator._validate_types(context["types"], context))
 
         for collection_name, collection in context["collection_configs"].items():
+            # Must have a version list
+            if "versions" not in collection or not isinstance(collection["versions"], list):
+                errors.append({
+                    "error": "invalid_versions",
+                    "error_id": "VLD-001",
+                    "message": "versions must be a list"
+                })
+                continue
+            
             # Validate each version of the collection
             for version_config in collection["versions"]:
-                version = VersionNumber(version_config["version"])
+                if not isinstance(version_config, dict):
+                    errors.append({
+                        "error": "invalid_version_config",
+                        "error_id": "VLD-002",
+                        "version_config": version_config,
+                        "message": "Version config must be a dictionary"
+                    })
+                    continue
+                
+                if "version" not in version_config or not isinstance(version_config["version"], str):
+                    errors.append({
+                        "error": "missing_required_field",
+                        "error_id": "VLD-003",
+                        "field": "version",
+                        "message": "Version config must have a version number"
+                    })
+                    continue
+                
+                try:
+                    version = VersionNumber(version_config["version"])
+                except ValueError as e:
+                    errors.append({
+                        "error": "invalid_version_format",
+                        "error_id": "VLD-005",
+                        "version": version_config["version"],
+                        "message": str(e)
+                    })
+                    continue
+                
                 schema_name = f"{collection_name}.{version.get_schema_version()}"
+                enumerator_version = version.get_enumerator_version()
                 
                 # Validate schema exists
                 if schema_name not in context["dictionaries"]:
                     errors.append({
                         "error": "schema_not_found",
-                        "error_id": "VLD-011",
+                        "error_id": "VLD-004",
                         "schema_name": schema_name,
                         "message": f"Schema not found for collection {collection_name} version {version} in dictionaries"
                     })
@@ -53,201 +91,177 @@ class SchemaValidator:
                     
                 # Validate schema structure and references
                 schema = context["dictionaries"][schema_name]
-                errors.extend(SchemaValidator._validate_schema_references(
-                    schema, 
-                    schema_name, 
-                    version.get_enumerator_version(),
-                    context
-                ))
+                errors.extend(SchemaValidator._validate_complex_type(schema_name, schema, context, enumerator_version))
         
         return errors
 
     @staticmethod
     def _validate_enumerators(enumerators: List[Dict]) -> List[Dict]:
-        """Validate enumerator definitions against the schema."""
-        errors = []
+        """Validate enumerator definitions against the schema.
         
-        # Validate each enumerator version
-        for version in enumerators:
-            # Validate required fields
-            if "name" not in version:
-                errors.append({
-                    "error": "invalid_enumerator_name",
-                    "error_id": "VLD-001",
-                    "name": version.get("name", "unknown"),
-                    "message": "Invalid enumerator name format"
-                })
-            elif not re.match(r'^[A-Z][a-zA-Z0-9_]*$', version["name"]):
-                errors.append({
-                    "error": "invalid_enumerator_name",
-                    "error_id": "VLD-002",
-                    "name": version["name"],
-                    "message": "Invalid enumerator name format"
-                })
-                
-            if "status" not in version:
-                errors.append({
-                    "error": "invalid_enumerator_status",
-                    "error_id": "VLD-003",
-                    "status": version.get("status", "unknown"),
-                    "message": "Invalid enumerator status"
-                })
-            elif version["status"] not in ["Active", "Deprecated"]:
-                errors.append({
-                    "error": "invalid_enumerator_status",
-                    "error_id": "VLD-004",
-                    "status": version["status"],
-                    "message": "Invalid enumerator status"
-                })
-                
-            if "version" not in version:
-                errors.append({
-                    "error": "invalid_enumerator_version",
-                    "error_id": "VLD-005",
-                    "version": version.get("version", "unknown"),
-                    "message": "Invalid enumerator version number"
-                })
-            elif not isinstance(version["version"], int) or version["version"] < 0:
-                errors.append({
-                    "error": "invalid_enumerator_version",
-                    "error_id": "VLD-006",
-                    "version": version["version"],
-                    "message": "Invalid enumerator version number"
-                })
-                
-            if "enumerators" not in version:
-                errors.append({
-                    "error": "invalid_enumerator_structure",
-                    "error_id": "VLD-007",
-                    "enumerator": version.get("name", "unknown"),
-                    "message": "Enumerator must be a dictionary"
-                })
-            elif not isinstance(version["enumerators"], dict):
-                errors.append({
-                    "error": "invalid_enumerator_structure",
-                    "error_id": "VLD-008",
-                    "enumerator": version["name"],
-                    "message": "Enumerator must be a dictionary"
-                })
-            else:
-                # Validate each enumerator definition
-                for enum_name, enum_def in version["enumerators"].items():
-                    if not isinstance(enum_def, dict):
-                        errors.append({
-                            "error": "invalid_enumerator_structure",
-                            "error_id": "VLD-009",
-                            "enumerator": enum_name,
-                            "message": "Enumerator must be a dictionary"
-                        })
-                    else:
-                        # Validate each value has a description
-                        for value, description in enum_def.items():
-                            if not isinstance(description, str):
-                                errors.append({
-                                    "error": "invalid_enumerator_value",
-                                    "error_id": "VLD-010",
-                                    "enumerator": enum_name,
-                                    "value": value,
-                                    "message": "Enumerator value must have a string description"
-                                })
-                                
-        return errors
-
-    @staticmethod
-    def _validate_dictionaries(dictionaries: Dict) -> List[Dict]:
-        """Validate all dictionary definitions.
+        Validates:
+        1. Each version has required fields (version, enumerators)
+        2. Version number is valid
+        3. Enumerator values are properly structured
+        4. Each enumerator value has a string description
         
         Args:
-            dictionaries: Dictionary of dictionary definitions
+            enumerators: List of enumerator version definitions
             
         Returns:
             List of validation errors
         """
         errors = []
-        validated = set()  # Track which dictionaries we've validated
-        validation_stack = set()  # Track dictionaries currently being validated (for cycle detection)
         
-        def validate_dictionary(dict_name: str, dict_def: Dict, path: str) -> List[Dict]:
-            if dict_name in validated:
-                return []  # Already validated this dictionary
+        # Validate each enumerator version
+        for version in enumerators:
+            # Validate version field
+            if "version" not in version:
+                errors.append({
+                    "error": "missing_required_field",
+                    "error_id": "VLD-101",
+                    "field": "version",
+                    "message": "Enumerator version must have a version number"
+                })
+            elif type(version["version"]) != int:
+                errors.append({
+                    "error": "invalid_version_format",
+                    "error_id": "VLD-102",
+                    "version": version["version"],
+                    "message": "Version must be an integer"
+                })
                 
-            if dict_name in validation_stack:
-                return [{
-                    "error": "circular_reference",
-                    "error_id": "VLD-012",
-                    "path": path,
-                    "message": f"Circular reference detected in dictionary: {dict_name}"
-                }]
-                
-            validation_stack.add(dict_name)
-            dict_errors = []
+            # Validate enumerators field
+            if "enumerators" not in version:
+                errors.append({
+                    "error": "missing_required_field",
+                    "error_id": "VLD-103",
+                    "field": "enumerators",
+                    "message": "Enumerator version must have an enumerators definition"
+                })
+            elif not isinstance(version["enumerators"], dict):
+                errors.append({
+                    "error": "invalid_enumerators_format",
+                    "error_id": "VLD-104",
+                    "enumerator": version.get("name", "unknown"),
+                    "message": "Enumerators must be a dictionary of values to descriptions"
+                })
+            else:
+                # Validate each enumerator values
+                for name, enumerations in version["enumerators"].items():
+                    if not isinstance(name, str):
+                        errors.append({
+                            "error": "invalid_enumerator_name",
+                            "error_id": "VLD-105",
+                            "value": str(name),
+                            "message": "Enumerator name must be a string"
+                        })
+                    if not isinstance(enumerations, dict):
+                        errors.append({
+                            "error": "invalid_enumerations",
+                            "error_id": "VLD-106",
+                            "description": enumerations,
+                            "message": "Enumerators bust be an object"
+                        })
+                    else:
+                        for value, description in enumerations.items():
+                            if not isinstance(value, str):
+                                errors.append({
+                                    "error": "invalid_enumerator_value",
+                                    "error_id": "VLD-107",
+                                    "value": str(value),
+                                    "message": "Enumerator value must be a string"
+                                })
+                            if not isinstance(description, str):
+                                errors.append({
+                                    "error": "invalid_enumerator_description",
+                                    "error_id": "VLD-108",
+                                    "description": str(description),
+                                    "message": "Enumerator description must be a string"    
+                                })
+                                
+        return errors
+
+    @staticmethod
+    def _validate_types(types: Dict, context: ValidationContext) -> List[Dict]:
+        """Validate custom type definitions.
+        
+        Args:
+            types: Dictionary of custom type definitions
+            context: Validation context containing all necessary data
             
-            # Validate basic structure
-            if not isinstance(dict_def, dict):
-                dict_errors.append({
-                    "error": "invalid_dictionary",
-                    "error_id": "VLD-013",
-                    "path": path,
-                    "message": "Dictionary must be a valid object"
-                })
-                validation_stack.remove(dict_name)
-                return dict_errors
-                
-            # Validate required fields
-            for field in ["type", "description"]:
-                if field not in dict_def:
-                    dict_errors.append({
-                        "error": "missing_required_field",
-                        "error_id": "VLD-014",
-                        "path": path,
-                        "field": field,
-                        "message": f"Missing required field: {field}"
-                    })
-                    
-            # Validate type is valid
-            if "type" in dict_def and dict_def["type"] not in SchemaValidator.VALID_TYPES:
-                dict_errors.append({
-                    "error": "invalid_type",
-                    "error_id": "VLD-015",
-                    "path": path,
-                    "type": dict_def["type"],
-                    "message": "Invalid type"
-                })
-                
-            # Validate $ref if present
-            if "$ref" in dict_def:
-                ref_name = dict_def["$ref"]
-                if ref_name not in dictionaries:
-                    dict_errors.append({
-                        "error": "invalid_reference",
-                        "error_id": "VLD-016",
-                        "path": path,
-                        "reference": ref_name,
-                        "message": f"Referenced dictionary not found: {ref_name}"
-                    })
-                else:
-                    # Recursively validate referenced dictionary
-                    dict_errors.extend(validate_dictionary(ref_name, dictionaries[ref_name], f"{path}.$ref"))
-                    
-            validation_stack.remove(dict_name)
-            validated.add(dict_name)
-            return dict_errors
+        Returns:
+            List of validation errors
+        """
+        errors = []
+        validated = set()  # Track which types we've validated
         
-        # Validate each dictionary
-        for dict_name, dict_def in dictionaries.items():
-            errors.extend(validate_dictionary(dict_name, dict_def, dict_name))
+        # Validate each type
+        for type_name, type_def in types.items():
+            if type_name in validated:
+                continue
+            if any(key in type_def for key in {"schema", "json_type", "bson_type"}):
+                errors.extend(SchemaValidator._validate_primitive_type(type_name, type_def))
+            else:
+                errors.extend(SchemaValidator._validate_complex_type(type_name, type_def, context))
+            validated.add(type_name)
             
         return errors
 
     @staticmethod
-    def _validate_schema_references(schema: Dict, path: str, enum_version: int, context: ValidationContext, visited: Optional[Set[str]] = None) -> List[Dict]:
-        """Validate schema references and structure.
+    def _validate_primitive_type(type_name: str, type_def: Dict) -> List[Dict]:
+        """Validate a primitive custom type definition."""
+        type_errors = []
+        
+        # Validate schema or json_type/bson_type
+        has_schema = "schema" in type_def
+        has_json_type = "json_type" in type_def
+        has_bson_type = "bson_type" in type_def
+        
+        # must have either schema or both json_type and bson_type
+        if not has_schema and not has_json_type and not has_bson_type:
+            type_errors.append({
+                "error": "invalid_primitive_type",
+                "error_id": "VLD-201",
+                "type": type_name,
+                "message": "Primitive type must have either schema or both json_type and bson_type"
+            })
+            
+        if has_schema and not isinstance(type_def["schema"], dict):
+            type_errors.append({
+                "error": "invalid_primitive_type",
+                "error_id": "VLD-202",
+                "type": type_name,
+                "message": "Primitive type `schema` must be a valid object"
+            })
+
+        if has_json_type and not isinstance(type_def["json_type"], dict):
+            type_errors.append({
+                "error": "invalid_primitive_type",
+                "error_id": "VLD-203",
+                "type": type_name,
+                "message": "Primitive type `json_type` must be a valid object"
+            })
+        
+        if has_bson_type and not isinstance(type_def["bson_type"], dict):
+            type_errors.append({
+                "error": "invalid_primitive_type",
+                "error_id": "VLD-204",
+                "type": type_name,
+                "message": "Primitive type `bson_type` must be a valid object"
+            })
+
+        return type_errors
+            
+    @staticmethod
+    def _validate_complex_type(prop_name: str, prop_def: Dict, context: ValidationContext, enumerator_version: Optional[int] = 0, visited: Optional[Set[str]] = None) -> List[Dict]:
+        """Validate a complex type definition.
         
         Args:
-            schema: Schema to validate
-            path: Current validation path
-            enum_version: Current enumerator version
-            context: Validation context
+            prop_name: Name of the property being validated
+            prop_def: Property definition to validate
+            context: Validation context containing all necessary data
+            enumerator_version: Current enumerator version for enum validation
             visited: Set of already visited paths (for cycle detection)
             
         Returns:
@@ -256,138 +270,193 @@ class SchemaValidator:
         if visited is None:
             visited = set()
             
-        if path in visited:
+        # Check for circular references
+        if prop_name in visited:
             return [{
                 "error": "circular_reference",
-                "error_id": "VLD-017",
-                "path": path,
-                "message": f"Circular reference detected in schema: {path}"
+                "error_id": "VLD-020",
+                "type": prop_name,
+                "message": f"Circular reference detected in type: {prop_name}"
             }]
             
-        visited.add(path)
-        errors = []
+        visited.add(prop_name)
+        try:
+            return SchemaValidator._validate_complex_type_properties(prop_name, prop_def, context, enumerator_version, visited)
+        finally:
+            visited.remove(prop_name)
+            
+    @staticmethod
+    def _validate_complex_type_properties(prop_name: str, prop_def: Dict, context: ValidationContext, enumerator_version: Optional[int], visited: Set[str]) -> List[Dict]:
+        """Internal validation logic for complex types."""
+        type_errors = []
         
         # Validate basic structure
-        if not isinstance(schema, dict):
-            errors.append({
-                "error": "invalid_schema",
-                "error_id": "VLD-018",
-                "path": path,
-                "message": "Schema must be a valid object"
-            })
-            visited.remove(path)
-            return errors
+        if not isinstance(prop_def, dict):
+            return [{
+                "error": "invalid_type",
+                "error_id": "VLD-301",
+                "type": prop_name,
+                "message": "Type must be a valid object"
+            }]
+            
+        # Validate required fields
+        type_errors.extend(SchemaValidator._validate_required_fields(prop_name, prop_def))
+        if type_errors:
+            return type_errors
+            
+        # Validate $ref types
+        if "$ref" in prop_def:
+            return SchemaValidator._validate_ref_type(prop_name, prop_def["$ref"], context)
+            
+        # Validate type is valid
+        if "type" not in prop_def:
+            return type_errors
+            
+        if prop_def["type"] not in SchemaValidator.VALID_TYPES:
+            return SchemaValidator._validate_custom_type(prop_name, prop_def["type"], context)
             
         # Validate type-specific properties
-        if "type" in schema:
-            if schema["type"] == SchemaType.OBJECT.value:
-                errors.extend(SchemaValidator._validate_object_references(schema, path, enum_version, context, visited))
-            elif schema["type"] == SchemaType.ARRAY.value:
-                errors.extend(SchemaValidator._validate_array_references(schema, path, enum_version, context, visited))
-            elif schema["type"] in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
-                errors.extend(SchemaValidator._validate_enum_references(schema, path, enum_version, context))
-                
-        visited.remove(path)
-        return errors
-
+        if prop_def["type"] == SchemaType.OBJECT.value:
+            type_errors.extend(SchemaValidator._validate_object_type(prop_name, prop_def, context, enumerator_version, visited))
+        elif prop_def["type"] == SchemaType.ARRAY.value:
+            type_errors.extend(SchemaValidator._validate_array_type(prop_name, prop_def, context, enumerator_version, visited))
+        elif prop_def["type"] in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
+            type_errors.extend(SchemaValidator._validate_enum_type(prop_name, prop_def, context, enumerator_version))
+        elif prop_def["type"] == SchemaType.ONE_OF.value:
+            type_errors.extend(SchemaValidator._validate_one_of_type(prop_name, prop_def, context, enumerator_version, visited))
+            
+        return type_errors
+        
     @staticmethod
-    def _validate_object_references(schema: Dict, path: str, enum_version: int, context: ValidationContext, visited: Set[str]) -> List[Dict]:
-        """Validate object type references."""
+    def _validate_required_fields(prop_name: str, prop_def: Dict) -> List[Dict]:
+        """Validate required fields in a type definition."""
         errors = []
-        if "properties" not in schema:
-            errors.append({
+        for field in ["type", "description"]:
+            if field not in prop_def:
+                errors.append({
+                    "error": "missing_required_field",
+                    "error_id": "VLD-401",
+                    "type": prop_name,
+                    "field": field,
+                    "message": f"Missing required field: {field}"
+                })
+        return errors
+        
+    @staticmethod
+    def _validate_ref_type(prop_name: str, ref_type: str, context: ValidationContext) -> List[Dict]:
+        """Validate a $ref type reference."""
+        if ref_type not in context["dictionaries"]:
+            return [{
+                "error": "invalid_ref_type",
+                "error_id": "VLD-501",
+                "type": prop_name,
+                "ref": ref_type,
+                "message": f"Referenced type {ref_type} not found in dictionaries"
+            }]
+        return []
+        
+    @staticmethod
+    def _validate_custom_type(prop_name: str, type_name: str, context: ValidationContext) -> List[Dict]:
+        """Validate a custom type reference."""
+        if type_name not in context["types"]:
+            return [{
+                "error": "invalid_type",
+                "error_id": "VLD-601",
+                "type": prop_name,
+                "value": type_name,
+                "message": f"Unknown type: {type_name}"
+            }]
+        return []
+        
+    @staticmethod
+    def _validate_object_type(prop_name: str, prop_def: Dict, context: ValidationContext, enumerator_version: Optional[int], visited: Set[str]) -> List[Dict]:
+        """Validate an object type definition."""
+        if "properties" not in prop_def:
+            return [{
                 "error": "invalid_object_properties",
-                "error_id": "VLD-019",
-                "path": path,
-                "message": "Object type must have properties definition"
-            })
-        else:
-            for prop_name, prop_def in schema["properties"].items():
-                errors.extend(SchemaValidator._validate_schema_references(
-                    prop_def, 
-                    f"{path}.{prop_name}", 
-                    enum_version, 
-                    context,
-                    visited
-                ))
-        return errors
-
-    @staticmethod
-    def _validate_array_references(schema: Dict, path: str, enum_version: int, context: ValidationContext, visited: Set[str]) -> List[Dict]:
-        """Validate array type references."""
+                "error_id": "VLD-701",
+                "type": prop_name,
+                "message": f"Object type {prop_name} must have properties definition"
+            }]
+            
         errors = []
-        if "items" not in schema:
-            errors.append({
-                "error": "invalid_array_items",
-                "error_id": "VLD-020",
-                "path": path,
-                "message": "Array type must have items definition"
-            })
-        else:
-            errors.extend(SchemaValidator._validate_schema_references(
-                schema["items"], 
-                f"{path}.items", 
-                enum_version, 
+        for nested_name, nested_def in prop_def["properties"].items():
+            errors.extend(SchemaValidator._validate_complex_type(
+                f"{prop_name}.{nested_name}", 
+                nested_def, 
                 context,
+                enumerator_version,
                 visited
             ))
         return errors
-
-    @staticmethod
-    def _validate_enum_references(schema: Dict, path: str, enum_version: int, context: ValidationContext) -> List[Dict]:
-        """Validate enum type references."""
-        errors = []
-        if "enums" not in schema:
-            errors.append({
-                "error": "invalid_enum_reference",
-                "error_id": "VLD-021",
-                "path": path,
-                "type": schema["type"],
-                "message": "Enum type must have enums reference"
-            })
-            return errors
-            
-        enum_name = schema["enums"]
         
-        if not context["enumerators"]:
-            errors.append({
-                "error": "unknown_enumerator",
-                "error_id": "VLD-022",
-                "path": path,
-                "enumerator": enum_name,
-                "version": enum_version,
-                "message": "No enumerators available for validation"
-            })
-            return errors
-                
-        # Find the version entry using next() with a generator expression
-        version_entry = next(
-            (entry for entry in context["enumerators"] 
-             if entry["version"] == enum_version and entry["status"] == "Active"),
-            None
-        )
-                
-        if not version_entry:
-            errors.append({
-                "error": "unknown_enumerator",
-                "error_id": "VLD-023",
-                "path": path,
-                "enumerator": enum_name,
-                "version": enum_version,
-                "message": "No active enumerator version found"
-            })
-            return errors
+    @staticmethod
+    def _validate_array_type(prop_name: str, prop_def: Dict, context: ValidationContext, enumerator_version: Optional[int], visited: Set[str]) -> List[Dict]:
+        """Validate an array type definition."""
+        if "items" not in prop_def:
+            return [{
+                "error": "invalid_array_items",
+                "error_id": "VLD-801",
+                "type": prop_name,
+                "message": f"Array type {prop_name} must have items definition"
+            }]
             
-        # Check if enumerator exists in this version
-        if enum_name not in version_entry["enumerators"]:
-            errors.append({
-                "error": "unknown_enumerator",
-                "error_id": "VLD-024",
-                "path": path,
-                "enumerator": enum_name,
-                "version": enum_version,
-                "message": "Unknown enumerator in version"
-            })
-            return errors
-                    
-        return errors 
+        return SchemaValidator._validate_complex_type(
+            f"{prop_name}.items", 
+            prop_def["items"], 
+            context,
+            enumerator_version,
+            visited
+        )
+        
+    @staticmethod
+    def _validate_enum_type(prop_name: str, prop_def: Dict, context: ValidationContext, enumerator_version: Optional[int] = 0) -> List[Dict]:
+        """Validate an enum type definition."""
+        if "enums" not in prop_def:
+            return [{
+                "error": "invalid_enum_reference",
+                "error_id": "VLD-901",
+                "type": prop_name,
+                "message": f"Enum type {prop_name} must have valid enums definition"
+            }]
+            
+        if prop_def["enums"] not in context["enumerators"][enumerator_version]["enumerators"]:
+            return [{
+                "error": "invalid_enum_reference",
+                "error_id": "VLD-902",
+                "type": prop_name,
+                "enum": prop_def["enums"],
+                "message": f"Enum type {prop_def['enums']} not found in version {enumerator_version}"
+            }]
+            
+        return []
+        
+    @staticmethod
+    def _validate_one_of_type(prop_name: str, prop_def: Dict, context: ValidationContext, enumerator_version: Optional[int], visited: Set[str]) -> List[Dict]:
+        """Validate a one_of type definition."""
+        if "schemas" not in prop_def:
+            return [{
+                "error": "invalid_one_of_schemas",
+                "error_id": "VLD-1001",
+                "type": prop_name,
+                "message": f"OneOf type {prop_name} must have valid schemas definition"
+            }]
+            
+        if "type_property" not in prop_def:
+            return [{
+                "error": "invalid_one_of_type_property",
+                "error_id": "VLD-1002",
+                "type": prop_name,
+                "message": f"OneOf type {prop_name} must have valid type_property definition"
+            }]
+            
+        errors = []
+        for schema_name, schema_def in prop_def["schemas"].items():
+            errors.extend(SchemaValidator._validate_complex_type(
+                f"{prop_name}.{schema_name}", 
+                schema_def, 
+                context,
+                enumerator_version,
+                visited
+            ))
+        return errors

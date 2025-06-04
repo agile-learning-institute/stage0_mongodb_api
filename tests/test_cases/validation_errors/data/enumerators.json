@@ -1,14 +1,9 @@
 [
     {
-        "name": "Enumerations",
-        "status": "Deprecated",
         "version": 0,
         "enumerators": []
     },
     {
-        "name": "Enumerations",
-        "status": "Active",
-        "version": 1,
         "enumerators": {
             "default_status": {
                 "active": "Not Deleted",
@@ -38,13 +33,15 @@
                 "digital": "Digital format",
                 "streaming": "Streaming format"
             },
-            "media_quality": ["sd", "hd", "uhd"]
+            "media_quality": {
+                "sd": "Standard definition",
+                "hd": "High definition",
+                "uhd": "Ultra high definition"
+            }
         }
     },
     {
-        "name": "Enumerations",
-        "status": "Active",
-        "version": 2,
+        "version": "2",
         "enumerators": {
             "default_status": {
                 "draft": "Not finalized",
@@ -83,8 +80,6 @@
         }
     },
     {
-        "name": "Enumerations",
-        "status": "Active",
         "version": 3,
         "enumerators": {
             "default_status": {
@@ -146,6 +141,24 @@
                 "in_progress": "Currently being worked on",
                 "blocked": "Cannot proceed",
                 "review": "Needs review"
+            }
+        }
+    },
+    {
+        "version": 4
+    },
+    {
+        "version": 5,
+        "enumerators": []
+    },
+    {
+        "version": 6,
+        "enumerators": {
+            "bad_enumerator": ["draft", "active", "archived"],
+            "enumerator_with_no_values": {},
+            "enumerator_with_bad_values": {
+                "draft": ["Not yet published"],
+                "published": "Available to users"
             }
         }
     }

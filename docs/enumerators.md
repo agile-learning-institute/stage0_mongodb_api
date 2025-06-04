@@ -11,13 +11,6 @@ type: array
 items:
   type: object
   properties:
-    name:
-      type: word
-      description: Name of the enumerator set
-    status:
-      type: enum
-      description: Current status of this enumerator version
-      enums: [Active, Deprecated]
     version:
       type: count
       description: Version number of this enumerator set

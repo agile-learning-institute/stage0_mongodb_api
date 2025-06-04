@@ -5,5 +5,4 @@ schema:
 json_type:
   type: string
   format: date-time
-bson_type:
-  bsonType: date
+bson_type: "not_a_dictionary"

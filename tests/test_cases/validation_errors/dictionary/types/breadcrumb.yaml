@@ -14,7 +14,6 @@ properties:
     description: The date-time when last updated
     type: date-time
     required: true
-  correlation_id:
-    description: The logging correlation ID of the update transaction
-    type: word
-    required: true
+  recursive_reference:
+    description: The invalid reference to the same type
+    type: breadcrumb

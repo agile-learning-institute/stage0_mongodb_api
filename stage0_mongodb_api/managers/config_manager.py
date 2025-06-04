@@ -80,26 +80,13 @@ class ConfigManager:
             List of validation errors, empty if all valid
         """
         errors = []
-        allowed_fields = {
-            "name": str,
-            "versions": list,
-            "title": str,
-            "description": str
-        }
-        allowed_version_fields = {
-            "version": str,
-            "add_indexes": list,
-            "drop_indexes": list,
-            "aggregations": list,
-            "test_data": str
-        }
         
         for filename, config in self.collection_configs.items():
             # Validate required fields
             if not isinstance(config, dict):
                 errors.append({
                     "error": "invalid_config_format",
-                    "error_id": "CFG-004",
+                    "error_id": "CFG-101",
                     "file": filename,
                     "message": "Configuration must be a dictionary"
                 })
@@ -108,7 +95,7 @@ class ConfigManager:
             if "name" not in config:
                 errors.append({
                     "error": "missing_required_field",
-                    "error_id": "CFG-005",
+                    "error_id": "CFG-201",
                     "file": filename,
                     "message": "Configuration must include 'name' field"
                 })
@@ -117,38 +104,18 @@ class ConfigManager:
             if "versions" not in config:
                 errors.append({
                     "error": "missing_required_field",
-                    "error_id": "CFG-006",
+                    "error_id": "CFG-202",
                     "file": filename,
                     "message": "Configuration must include 'versions' field"
                 })
                 continue
-                
-            # Validate field types and check for additional properties
-            for field, value in config.items():
-                if field not in allowed_fields:
-                    errors.append({
-                        "error": "invalid_field",
-                        "error_id": "CFG-007",
-                        "file": filename,
-                        "message": f"Field '{field}' is not allowed in collection configuration"
-                    })
-                    continue
-                    
-                if not isinstance(value, allowed_fields[field]):
-                    errors.append({
-                        "error": "invalid_field_type",
-                        "error_id": "CFG-008",
-                        "file": filename,
-                        "message": f"Field '{field}' must be of type {allowed_fields[field].__name__}"
-                    })
-                    continue
-            
+                            
             # Validate versions
             for version_config in config["versions"]:
                 if not isinstance(version_config, dict):
                     errors.append({
                         "error": "invalid_version_format",
-                        "error_id": "CFG-009",
+                        "error_id": "CFG-501",
                         "file": filename,
                         "message": "Version must be a dictionary"
                     })
@@ -157,7 +124,7 @@ class ConfigManager:
                 if "version" not in version_config:
                     errors.append({
                         "error": "missing_version_number",
-                        "error_id": "CFG-010",
+                        "error_id": "CFG-601",
                         "file": filename,
                         "message": "Version must include 'version' field"
                     })
@@ -169,31 +136,11 @@ class ConfigManager:
                 except ValueError as e:
                     errors.append({
                         "error": "invalid_version_format",
-                        "error_id": "CFG-011",
+                        "error_id": "CFG-701",
                         "file": filename,
                         "message": f"Version {version_config['version']}: {str(e)}"
                     })
                     continue
-                
-                # Check for additional properties in version config
-                for field in version_config:
-                    if field not in allowed_version_fields:
-                        errors.append({
-                            "error": "invalid_field",
-                            "error_id": "CFG-012",
-                            "file": filename,
-                            "message": f"Field '{field}' is not allowed in version configuration"
-                        })
-                        continue
                         
-                    if not isinstance(version_config[field], allowed_version_fields[field]):
-                        errors.append({
-                            "error": "invalid_field_type",
-                            "error_id": "CFG-013",
-                            "file": filename,
-                            "message": f"Field '{field}' must be of type {allowed_version_fields[field].__name__}"
-                        })
-                        continue
-        
         return errors
  

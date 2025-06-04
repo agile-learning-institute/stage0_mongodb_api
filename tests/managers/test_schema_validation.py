@@ -3,6 +3,8 @@ import os
 from stage0_mongodb_api.managers.schema_manager import SchemaManager
 from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_py_utils import Config
+from stage0_mongodb_api.managers.schema_validator import SchemaValidator, SchemaValidationError
+from stage0_mongodb_api.managers.schema_types import SchemaType, ValidationContext
 
 class TestSchemaValidation(unittest.TestCase):
     """Test suite for schema validation functionality."""
@@ -54,26 +56,45 @@ class TestSchemaValidation(unittest.TestCase):
     def test_validation_errors(self):
         """Test validation with all validation errors."""
         # Arrange
-        schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "validation_errors")
-        schema_manager.load_schemas()
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "validation_errors")
+        schema_manager = SchemaManager()
         
         # Act
         errors = schema_manager.validate_schema()
         
         # Assert
         expected_error_ids = {
-            # Schema Manager validation errors
-            "SCH-013", "SCH-014", "SCH-015", "SCH-016", "SCH-017", "SCH-023",
-            "SCH-026", "SCH-033", "SCH-034", "SCH-035", "SCH-036", "SCH-038",
-            "SCH-039", "SCH-040", "SCH-024", "SCH-025", "SCH-027", "SCH-028",
-            "SCH-029",
+            # Schema Validator validation errors
+            "VLD-001", "VLD-002", "VLD-003", "VLD-004", "VLD-005",  # Schema validation errors
+            "VLD-101", "VLD-102", "VLD-103", "VLD-104", "VLD-106",  # Enumerator validation errors
+            "VLD-108",  # Enumerator description type error
+            "VLD-201", "VLD-202", "VLD-203", "VLD-204",  # Primitive type validation errors
+            "VLD-301",  # Complex type basic validation
+            "VLD-401",  # Required fields validation
+            "VLD-501",  # Reference type validation
+            "VLD-601",  # Custom type validation
+            "VLD-701",  # Object type validation
+            "VLD-801",  # Array type validation
+            "VLD-901", "VLD-902",  # Enum type validation
+            "VLD-1001", "VLD-1002",  # OneOf type validation
+            
+            # Untested Edge Cases
+            # "VLD-105",  # Enumerators key type errors
+            # "VLD-107",  # Enumeration key type errors
             
             # Config Manager validation errors
-            "CFG-004", "CFG-005", "CFG-006", "CFG-007", "CFG-008", "CFG-009",
-            "CFG-010", "CFG-011", "CFG-012", "CFG-013"
+            # "CFG-001", "CFG-002", "CFG-003",  # Load errors
+            "CFG-101",  # Invalid config format
+            "CFG-201", "CFG-202",  # Missing required fields
+            "CFG-501",  # Invalid version format
+            "CFG-601",  # Missing version number
+            "CFG-701",  # Invalid version format
         }
         actual_error_ids = {error.get('error_id') for error in errors if 'error_id' in error}
-        self.assertEqual(expected_error_ids, actual_error_ids)
+        missing_error_ids = expected_error_ids - actual_error_ids
+        extra_error_ids = actual_error_ids - expected_error_ids
+        self.assertEqual(missing_error_ids, set())
+        self.assertEqual(extra_error_ids, set())
 
 if __name__ == '__main__':
     unittest.main() 
