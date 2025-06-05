@@ -9,7 +9,7 @@ from stage0_mongodb_api.managers.version_number import VersionNumber
 from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_mongodb_api.managers.schema_renderer import SchemaRenderer
 from stage0_mongodb_api.managers.schema_validator import SchemaValidator, SchemaValidationError
-from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat, Schema, PrimitiveType, ValidationContext
+from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat, Schema, PrimitiveType, SchemaContext
 
 class SchemaError(Exception):
     """Base exception for schema-related errors."""
@@ -167,27 +167,79 @@ class SchemaManager:
         errors = self.config_manager.validate_configs()
         
         # Create validation context
-        context: ValidationContext = {
+        context: SchemaContext = {
             "types": self.types,
             "enumerators": self.enumerators,
             "dictionaries": self.dictionaries,
-            "collection_configs": self.config_manager.collection_configs
+            "collection_configs": self.config_manager.collection_configs,
+            "schema_name": None,
+            "format": None
         }
         
         errors.extend(SchemaValidator.validate_schema(context))
         return errors
         
-    def render_schema(self, schema_name: str, format: SchemaFormat = SchemaFormat.BSON) -> Dict:
-        """Render a schema in the specified format.
+    def render_one(self, collection_name: str, version: str, format: SchemaFormat) -> Dict:
+        """Render a single schema version.
         
         Args:
-            schema_name: Name of the schema to render
+            collection_name: Name of the collection
+            version: Version string (e.g. "1.0.0.1")
             format: Target schema format
             
         Returns:
             Dict containing the rendered schema
         """
-        return SchemaRenderer.render_schema(self, schema_name, format)
+        # Get the collection config
+        collection_config = self.config.get_collection_config(collection_name)
+        if not collection_config:
+            raise ValueError(f"Collection not found: {collection_name}")
+            
+        # Get the schema name
+        schema_name = f"{collection_name}.{version}"
+        
+        # Create schema context
+        context: SchemaContext = {
+            "types": self.types,
+            "dictionaries": self.dictionaries,
+            "enumerators": self.enumerators,
+            "collection_configs": self.config.collection_configs,
+            "schema_name": None,
+            "format": format
+        }
+        
+        return SchemaRenderer.render_schema(schema_name, context)
+
+    def render_all(self) -> Dict[str, Dict[str, Dict]]:
+        """Render all schema versions in both BSON and JSON formats.
+        
+        Returns:
+            Dict mapping collection names to version maps, which map versions to format maps
+        """
+        rendered = {}
+        
+        for collection_name, collection_config in self.config.collection_configs.items():
+            rendered[collection_name] = {}
+            
+            for version in collection_config["versions"]:
+                version_name = f"{collection_name}.{version}"
+                rendered[collection_name][version] = {}
+                
+                # Render in both formats
+                for format in [SchemaFormat.BSON, SchemaFormat.JSON]:
+                    context: SchemaContext = {
+                        "types": self.types,
+                        "dictionaries": self.dictionaries,
+                        "enumerators": self.enumerators,
+                        "collection_configs": self.config.collection_configs,
+                        "schema_name": None,
+                        "format": format
+                    }
+                    rendered[collection_name][version][format.value] = SchemaRenderer.render_schema(
+                        version_name, context
+                    )
+                    
+        return rendered
 
     def apply_schema(self, version_name: str) -> Dict:
         """Apply a schema to a collection.
@@ -208,7 +260,7 @@ class SchemaManager:
 
         [collection_name, version_number] = version_name.split(".")
         try:
-            bson_schema = self.render_schema(version_name, SchemaFormat.BSON)
+            bson_schema = self.render_one(collection_name, version_number, SchemaFormat.BSON)
             self.mongo.apply_schema(collection_name, bson_schema)
         except Exception as e:
             return {

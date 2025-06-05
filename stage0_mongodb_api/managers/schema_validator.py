@@ -68,7 +68,11 @@ class SchemaValidator:
                     continue
                 
                 try:
+                    # Create version number instance and ensure it has the collection name
                     version = VersionNumber(version_config["version"])
+                    if not version.collection_name:
+                        version_str = f"{collection_name}.{version.version}"
+                        version = VersionNumber(version_str)
                 except ValueError as e:
                     errors.append({
                         "error": "invalid_version_format",
@@ -78,7 +82,8 @@ class SchemaValidator:
                     })
                     continue
                 
-                schema_name = f"{collection_name}.{version.get_schema_version()}"
+                # Use get_schema_version() which now handles collection names
+                schema_name = version.get_schema_version()
                 enumerator_version = version.get_enumerator_version()
                 
                 # Validate schema exists

@@ -26,7 +26,7 @@ class VersionManager:
             collection_name: Name of the collection to get version for
         
         Returns:
-            str: Version string in format major.minor.patch.schema
+            str: Version string in format major.minor.patch.schema or collection.major.minor.patch.schema
             
         Raises:
             ValueError: If collection_name is empty or invalid
@@ -41,7 +41,7 @@ class VersionManager:
         )
         
         if not version_docs:
-            return "0.0.0.0"
+            return f"{collection_name}.0.0.0.0"
             
         if len(version_docs) > 1:
             raise RuntimeError(f"Multiple versions found for collection: {collection_name}")
@@ -50,6 +50,10 @@ class VersionManager:
         if not current_version:
             raise RuntimeError(f"Invalid version document for collection: {collection_name}")
             
+        # Ensure version includes collection name
+        version = VersionNumber(current_version)
+        if not version.collection_name:
+            return f"{collection_name}.{current_version}"
         return current_version
 
     def update_version(self, collection_name: str, version: str) -> Dict:
@@ -57,7 +61,7 @@ class VersionManager:
         
         Args:
             collection_name: Name of the collection
-            version: Version string in format major.minor.patch.schema
+            version: Version string in format major.minor.patch.schema or collection.major.minor.patch.schema
             
         Returns:
             Dict containing operation result:
@@ -75,7 +79,11 @@ class VersionManager:
             raise ValueError("Collection name cannot be empty")
             
         # Validate version by attempting to create a VersionNumber instance
-        VersionNumber(version)
+        version_obj = VersionNumber(version)
+        
+        # Ensure version includes collection name
+        if not version_obj.collection_name:
+            version = f"{collection_name}.{version}"
             
         # Upsert version document
         version_doc = self.mongo.upsert_document(
@@ -133,7 +141,7 @@ class VersionManager:
                 if version_number > current_version:
                     logger.info(f"Processing version {str(version_number)} for {collection_name}")
                     operations.extend(self._process_version(collection_name, version))
-                    current_version = self.get_current_version(collection_name)
+                    current_version = VersionNumber(self.get_current_version(collection_name))
                 else:
                     logger.info(f"Skipping version {str(version_number)} for {collection_name} - already processed")
                     

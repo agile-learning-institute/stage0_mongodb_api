@@ -34,18 +34,25 @@ class TestVersionManager(unittest.TestCase):
 
     def test_get_current_version_existing(self):
         """Test getting current version when it exists"""
-        # Arrange
+        # Test with version without collection name
         self.mock_mongo.get_documents.return_value = [{
             "collection_name": "test_collection",
             "current_version": "1.2.3.4"  
         }]
         
-        # Act
         version = self.version_manager.get_current_version("test_collection")
+        self.assertEqual(version, "test_collection.1.2.3.4")
         
-        # Assert
-        self.assertEqual(version, "1.2.3.4")
-        self.mock_mongo.get_documents.assert_called_once_with(
+        # Test with version that already includes collection name
+        self.mock_mongo.get_documents.return_value = [{
+            "collection_name": "test_collection",
+            "current_version": "test_collection.1.2.3.4"  
+        }]
+        
+        version = self.version_manager.get_current_version("test_collection")
+        self.assertEqual(version, "test_collection.1.2.3.4")
+        
+        self.mock_mongo.get_documents.assert_called_with(
             Config.get_instance().VERSION_COLLECTION_NAME,
             match={"collection_name": "test_collection"}
         )
@@ -59,7 +66,7 @@ class TestVersionManager(unittest.TestCase):
         version = self.version_manager.get_current_version("test_collection")
         
         # Assert
-        self.assertEqual(version, "0.0.0.0")
+        self.assertEqual(version, "test_collection.0.0.0.0")
         self.mock_mongo.get_documents.assert_called_once_with(
             Config.get_instance().VERSION_COLLECTION_NAME,
             match={"collection_name": "test_collection"}
@@ -99,28 +106,35 @@ class TestVersionManager(unittest.TestCase):
 
     def test_update_version_valid(self):
         """Test updating version with valid version string"""
-        # Arrange
+        # Test with version without collection name
         self.mock_mongo.upsert_document.return_value = True
         
-        # Act
         result = self.version_manager.update_version("test_collection", "1.2.3.4")
         
-        # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "version_update")
         self.assertEqual(result["collection"], "test_collection")
-        self.assertEqual(result["version"], "1.2.3.4")
-        self.mock_mongo.upsert_document.assert_called_once_with(
+        self.assertEqual(result["version"], "test_collection.1.2.3.4")
+        
+        # Test with version that already includes collection name
+        result = self.version_manager.update_version("test_collection", "test_collection.1.2.3.4")
+        
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["operation"], "version_update")
+        self.assertEqual(result["collection"], "test_collection")
+        self.assertEqual(result["version"], "test_collection.1.2.3.4")
+        
+        self.mock_mongo.upsert_document.assert_called_with(
             Config.get_instance().VERSION_COLLECTION_NAME,
             match={"collection_name": "test_collection"},
-            data={"collection_name": "test_collection", "current_version": "1.2.3.4"}
+            data={"collection_name": "test_collection", "current_version": "test_collection.1.2.3.4"}
         )
 
     def test_update_version_invalid(self):
         """Test updating version with invalid version string"""
         # Arrange
         invalid_versions = [
-            "1.2.3.4.5",  # Too many components
+            "1.2.3.4.5.6",  # Too many components
             "a.b.c.d",    # Non-numeric
             "1.2.3.",     # Trailing dot
             "",           # Empty string
@@ -128,6 +142,11 @@ class TestVersionManager(unittest.TestCase):
             "1..2.3",     # Double dot
             ".1.2.3",     # Leading dot
             "1000.0.0.0", # Exceeds MAX_VERSION
+            "user.1.2.3", # Collection with too few components
+            "user.1.2.3.4.5", # Collection with too many components
+            "user..1.2.3.4", # Collection with double dot
+            "user.1.2.3.4.", # Collection with trailing dot
+            ".user.1.2.3.4", # Collection with leading dot
         ]
         
         # Act & Assert

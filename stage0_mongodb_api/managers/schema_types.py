@@ -1,17 +1,26 @@
 from enum import Enum
 from typing import Dict, Optional, TypedDict, List
 
-class SchemaType(Enum):
+class SchemaType(str, Enum):
     """Schema type definitions."""
     OBJECT = "object"
     ARRAY = "array"
     ENUM = "enum"
     ENUM_ARRAY = "enum_array"
 
-class SchemaFormat(Enum):
+class SchemaFormat(str, Enum):
     """Schema format definitions."""
     BSON = "bson"
     JSON = "json"
+
+class SchemaContext(TypedDict):
+    """Context for schema operations (validation and rendering)."""
+    types: Dict  # Type definitions
+    dictionaries: Dict  # Dictionary definitions
+    enumerators: List[Dict]  # Enumerator definitions
+    collection_configs: Dict  # Collection configurations
+    schema_name: Optional[str]  # Full schema name with version (e.g. "user.1.0.0.1")
+    format: Optional[SchemaFormat]  # Target format (BSON or JSON)
 
 class PrimitiveType(TypedDict):
     """Type definition for primitive types (string, number, boolean, etc).
