@@ -1,6 +1,6 @@
 {
   "bsonType": "object",
-  "required": ["_id", "title", "status", "last_saved"],
+  "required": ["_id", "name", "status"],
   "properties": {
     "_id": {
       "bsonType": "objectId",

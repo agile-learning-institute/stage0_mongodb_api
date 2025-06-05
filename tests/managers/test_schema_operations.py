@@ -2,11 +2,11 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 import json
-from stage0_mongodb_api.managers.schema_manager import SchemaManager, SchemaFormat
+from stage0_mongodb_api.managers.schema_manager import SchemaManager
 from stage0_mongodb_api.managers.config_manager import ConfigManager
 
 class TestSchemaOperations(unittest.TestCase):
-    """Test suite for schema operations (rendering and MongoDB operations)."""
+    """Test suite for schema operations (MongoDB operations)."""
     
     def setUp(self):
         """Set up test fixtures."""
@@ -28,42 +28,6 @@ class TestSchemaOperations(unittest.TestCase):
         with open(file_path, 'r') as f:
             return json.load(f)
             
-    def test_render_small_sample(self):
-        """Test rendering small sample schemas."""
-        # Arrange
-        self.schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "small_sample")
-        self.schema_manager.load_schemas()
-        expected_folder = os.path.join(self.test_cases_dir, "small_sample", "expected")
-        
-        # Process expected schemas
-        for filename in os.listdir(expected_folder):
-            if filename.endswith(".json"):
-                # Act
-                schema_name = os.path.splitext(filename)[0]
-                rendered = self.schema_manager.render_schema(schema_name, SchemaFormat.BSON)
-                
-                # Assert
-                expected_schema = self._load_json(os.path.join(expected_folder, filename))
-                self.assertEqual(rendered, expected_schema)
-                
-    def test_render_large_sample(self):
-        """Test rendering large sample schemas."""
-        # Arrange
-        self.schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "large_sample")
-        self.schema_manager.load_schemas()
-        expected_folder = os.path.join(self.test_cases_dir, "large_sample", "expected", "bson_schema")
-        
-        # Process expected schemas
-        for filename in os.listdir(expected_folder):
-            if filename.endswith(".json"):
-                # Act
-                schema_name = os.path.splitext(filename)[0]
-                rendered = self.schema_manager.render_schema(schema_name, SchemaFormat.BSON)
-                
-                # Assert
-                expected_schema = self._load_json(os.path.join(expected_folder, filename))
-                self.assertEqual(rendered, expected_schema)
-                
     def test_apply_schema_minimum_valid(self):
         """Test applying minimum valid schema."""
         # Arrange

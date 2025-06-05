@@ -1,31 +1,46 @@
-from typing import Dict, List, Optional, Any
-from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat
+from typing import Dict, List, Optional, Any, TypedDict
+from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat, SchemaContext
+from stage0_mongodb_api.managers.version_number import VersionNumber
 
 class SchemaRenderer:
     """Static utility class for rendering schemas in different formats."""
     
     @staticmethod
-    def render_schema(schema: Dict, format: SchemaFormat, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
-        """Render a schema in the specified format."""
-        if format == SchemaFormat.BSON:
-            return SchemaRenderer._render_bson_schema(schema, types, enumerators)
-        elif format == SchemaFormat.JSON:
-            return SchemaRenderer._render_json_schema(schema, types, enumerators)
+    def render_schema(version_name: str, context: SchemaContext) -> Dict:
+        """Render a schema in the specified format.
+        
+        Args:
+            version_name: The version name (collection name + 4-part version number)
+            context: Schema context containing all necessary data and rendering parameters
+            
+        Returns:
+            Dict containing the rendered schema
+        """
+        # Parse the version name
+        version = VersionNumber(version_name)
+        
+        # Get the schema from dictionaries using the schema version
+        schema = context["dictionaries"][version.get_schema_version()]
+        
+        if context["format"] == SchemaFormat.BSON:
+            return SchemaRenderer._render_bson_schema(schema, version.get_enumerator_version(), context)
+        elif context["format"] == SchemaFormat.JSON:
+            return SchemaRenderer._render_json_schema(schema, version.get_enumerator_version(), context)
         else:
-            raise ValueError(f"Unsupported schema format: {format}")
+            raise ValueError(f"Unsupported schema format: {context['format']}")
 
     @staticmethod
-    def _render_bson_schema(schema: Dict, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
+    def _render_bson_schema(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Render a schema in BSON format."""
-        return SchemaRenderer._resolve_schema(schema, types, enumerators)
+        return SchemaRenderer._resolve_schema(schema, enumerator_version, context)
 
     @staticmethod
-    def _render_json_schema(schema: Dict, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
+    def _render_json_schema(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Render a schema in JSON format."""
-        return SchemaRenderer._resolve_schema(schema, types, enumerators)
+        return SchemaRenderer._resolve_schema(schema, enumerator_version, context)
 
     @staticmethod
-    def _resolve_schema(schema: Dict, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
+    def _resolve_schema(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Resolve a schema definition to its primitive type."""
         # Check if this is a primitive type
         if "schema" in schema:
@@ -42,16 +57,16 @@ class SchemaRenderer:
             return schema
             
         if type_name == SchemaType.OBJECT.value:
-            return SchemaRenderer._resolve_object_type(schema, types, enumerators)
+            return SchemaRenderer._resolve_object_type(schema, enumerator_version, context)
         elif type_name == SchemaType.ARRAY.value:
-            return SchemaRenderer._resolve_array_type(schema, types, enumerators)
+            return SchemaRenderer._resolve_array_type(schema, enumerator_version, context)
         elif type_name in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
-            return SchemaRenderer._resolve_enum_type(schema, types, enumerators)
+            return SchemaRenderer._resolve_enum_type(schema, enumerator_version, context)
             
         return schema
 
     @staticmethod
-    def _resolve_object_type(schema: Dict, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
+    def _resolve_object_type(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Resolve an object type definition."""
         resolved = {
             "type": "object",
@@ -62,7 +77,9 @@ class SchemaRenderer:
         # Resolve properties if present
         if "properties" in schema:
             for prop_name, prop_def in schema["properties"].items():
-                resolved["properties"][prop_name] = SchemaRenderer._resolve_schema(prop_def, types, enumerators)
+                resolved["properties"][prop_name] = SchemaRenderer._resolve_schema(
+                    prop_def, enumerator_version, context
+                )
                 
         # Resolve one_of if present
         if "one_of" in schema:
@@ -80,15 +97,19 @@ class SchemaRenderer:
                     # If schema is a $ref, resolve the reference
                     if isinstance(schema_def, dict) and "$ref" in schema_def:
                         ref_name = schema_def["$ref"]
-                        if ref_name in types:
-                            resolved["properties"][schema_name] = SchemaRenderer._resolve_schema(types[ref_name], types, enumerators)
+                        if ref_name in context["types"]:
+                            resolved["properties"][schema_name] = SchemaRenderer._resolve_schema(
+                                context["types"][ref_name], enumerator_version, context
+                            )
                         else:
                             # If not in types, assume it's a dictionary reference
                             resolved["properties"][schema_name] = {
                                 "$ref": f"#/definitions/{ref_name}"
                             }
                     else:
-                        resolved["properties"][schema_name] = SchemaRenderer._resolve_schema(schema_def, types, enumerators)
+                        resolved["properties"][schema_name] = SchemaRenderer._resolve_schema(
+                            schema_def, enumerator_version, context
+                        )
                     
         # Add required fields
         if "required" in schema:
@@ -97,19 +118,21 @@ class SchemaRenderer:
         return resolved
 
     @staticmethod
-    def _resolve_array_type(schema: Dict, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
+    def _resolve_array_type(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Resolve an array type definition."""
         resolved = {
             "type": "array"
         }
         
         if "items" in schema:
-            resolved["items"] = SchemaRenderer._resolve_schema(schema["items"], types, enumerators)
+            resolved["items"] = SchemaRenderer._resolve_schema(
+                schema["items"], enumerator_version, context
+            )
             
         return resolved
 
     @staticmethod
-    def _resolve_enum_type(schema: Dict, types: Optional[Dict] = None, enumerators: Optional[List[Dict]] = None) -> Dict:
+    def _resolve_enum_type(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Resolve an enum type definition."""
         resolved = {
             "type": "string" if schema["type"] == SchemaType.ENUM.value else "array"
@@ -117,22 +140,22 @@ class SchemaRenderer:
         
         if "enums" in schema:
             enum_name = schema["enums"]
-            if enumerators:
-                # Find the active version
-                version_entry = next(
-                    (entry for entry in enumerators 
-                     if entry["status"] == "Active"),
-                    None
-                )
-                
-                if version_entry and enum_name in version_entry["enumerators"]:
-                    enum_def = version_entry["enumerators"][enum_name]
-                    if schema["type"] == SchemaType.ENUM.value:
-                        resolved["enum"] = list(enum_def.keys())
-                    else:
-                        resolved["items"] = {
-                            "type": "string",
-                            "enum": list(enum_def.keys())
-                        }
+            
+            # Find the specified version
+            version_entry = next(
+                (entry for entry in context["enumerators"] 
+                 if entry["version"] == enumerator_version),
+                None
+            )
+            
+            if version_entry and enum_name in version_entry["enumerators"]:
+                enum_def = version_entry["enumerators"][enum_name]
+                if schema["type"] == SchemaType.ENUM.value:
+                    resolved["enum"] = list(enum_def.keys())
+                else:
+                    resolved["items"] = {
+                        "type": "string",
+                        "enum": list(enum_def.keys())
+                    }
                         
         return resolved 
