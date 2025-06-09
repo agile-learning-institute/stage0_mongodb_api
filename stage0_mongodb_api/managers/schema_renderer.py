@@ -15,6 +15,15 @@ class SchemaRenderer:
     @staticmethod
     def _render(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
         """Render a schema definition."""
+        # Handle $ref first - replace with referenced dictionary
+        if "$ref" in schema:
+            return SchemaRenderer._render(
+                context["dictionaries"][schema["$ref"]], 
+                format, 
+                enumerator_version, 
+                context
+            )
+            
         # Handle primitive types
         if "schema" in schema:
             return SchemaRenderer._render_primitive(schema["schema"], format)
@@ -101,35 +110,15 @@ class SchemaRenderer:
         Returns:
             Tuple of (properties dictionary, list of required property names)
         """
-        type_prop = "bsonType" if format == SchemaFormat.BSON else "type"
         properties = {}
-        required = []
-        
-        # Add type property
-        properties[one_of_def["type_property"]] = {
-            type_prop: "string",
-            "enum": list(one_of_def["schemas"].keys())
-        }
-        required.append(one_of_def["type_property"])
         
         # Add schema properties
         for schema_name, schema_def in one_of_def["schemas"].items():
-            if isinstance(schema_def, dict) and "$ref" in schema_def:
-                ref_name = schema_def["$ref"]
-                if ref_name in context["types"]:
-                    properties[schema_name] = SchemaRenderer._render(
-                        context["types"][ref_name], format, enumerator_version, context
-                    )
-                else:
-                    properties[schema_name] = {
-                        "$ref": f"#/definitions/{ref_name}"
-                    }
-            else:
-                properties[schema_name] = SchemaRenderer._render(
-                    schema_def, format, enumerator_version, context
-                )
+            properties[schema_name] = SchemaRenderer._render(
+                schema_def, format, enumerator_version, context
+            )
                 
-        return properties, required
+        return properties, []
         
     @staticmethod
     def _render_array(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
