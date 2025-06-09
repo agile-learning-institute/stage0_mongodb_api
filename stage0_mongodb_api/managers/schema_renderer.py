@@ -37,20 +37,18 @@ class SchemaRenderer:
         
     @staticmethod
     def _render_primitive(schema: Dict, format: SchemaFormat) -> Dict:
-        """Render a primitive type definition."""
+        """Render a primitive type definition.
+        
+        For schema primitives, only convert type to bsonType.
+        For json_type/bson_type primitives, use the provided types directly.
+        """
         rendered = schema.copy()
-        if format == SchemaFormat.BSON and "type" in rendered:
-            type_mapping = {
-                "string": "string",
-                "number": "double",
-                "integer": "int",
-                "boolean": "bool",
-                "array": "array",
-                "object": "object",
-                "null": "null"
-            }
-            rendered["bsonType"] = type_mapping.get(rendered["type"], rendered["type"])
+        
+        # For schema primitives, only convert type to bsonType
+        if format == SchemaFormat.BSON and "type" in rendered and "bsonType" not in rendered:
+            rendered["bsonType"] = rendered["type"]
             del rendered["type"]
+            
         return rendered
         
     @staticmethod
