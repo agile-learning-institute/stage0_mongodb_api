@@ -6,7 +6,7 @@ class SchemaRenderer:
     """Static utility class for rendering schemas in different formats."""
     
     @staticmethod
-    def render_schema(version_name: str, context: SchemaContext) -> Dict:
+    def render_schema(version_name: str, format: SchemaFormat, context: SchemaContext) -> Dict:
         """Render a schema in the specified format.
         
         Args:
@@ -22,17 +22,58 @@ class SchemaRenderer:
         # Get the schema from dictionaries using the schema version
         schema = context["dictionaries"][version.get_schema_version()]
         
-        if context["format"] == SchemaFormat.BSON:
+        if format == SchemaFormat.BSON:
             return SchemaRenderer._render_bson_schema(schema, version.get_enumerator_version(), context)
-        elif context["format"] == SchemaFormat.JSON:
+        elif format == SchemaFormat.JSON:
             return SchemaRenderer._render_json_schema(schema, version.get_enumerator_version(), context)
         else:
-            raise ValueError(f"Unsupported schema format: {context['format']}")
+            raise ValueError(f"Unsupported schema format: {format}")
 
     @staticmethod
     def _render_bson_schema(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
-        """Render a schema in BSON format."""
-        return SchemaRenderer._resolve_schema(schema, enumerator_version, context)
+        """Render a schema in BSON format.
+        
+        BSON schemas use bsonType instead of type and have specific validation rules.
+        See: https://www.mongodb.com/docs/manual/core/schema-validation/
+        """
+        resolved = SchemaRenderer._resolve_schema(schema, enumerator_version, context)
+        
+        # Convert JSON Schema to BSON Schema format
+        if "type" in resolved:
+            # Map JSON types to BSON types
+            type_mapping = {
+                "string": "string",
+                "number": "double",
+                "integer": "int",
+                "boolean": "bool",
+                "array": "array",
+                "object": "object",
+                "null": "null"
+            }
+            resolved["bsonType"] = type_mapping.get(resolved["type"], resolved["type"])
+            del resolved["type"]
+            
+        # Handle required fields at the root level
+        if "required" in resolved:
+            resolved["required"] = resolved["required"]
+            
+        # Handle properties for objects
+        if "properties" in resolved:
+            for prop_name, prop_schema in resolved["properties"].items():
+                if isinstance(prop_schema, dict):
+                    # Recursively convert nested properties
+                    resolved["properties"][prop_name] = SchemaRenderer._render_bson_schema(
+                        prop_schema, enumerator_version, context
+                    )
+                    
+        # Handle array items
+        if "items" in resolved:
+            if isinstance(resolved["items"], dict):
+                resolved["items"] = SchemaRenderer._render_bson_schema(
+                    resolved["items"], enumerator_version, context
+                )
+                
+        return resolved
 
     @staticmethod
     def _render_json_schema(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
@@ -88,6 +129,7 @@ class SchemaRenderer:
                 # Add type property to properties
                 resolved["properties"][one_of_def["type_property"]] = {
                     "type": "string",
+                    "bsonType": "string",
                     "enum": list(one_of_def["schemas"].keys())
                 }
                 resolved["required"].append(one_of_def["type_property"])
@@ -121,7 +163,8 @@ class SchemaRenderer:
     def _resolve_array_type(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Resolve an array type definition."""
         resolved = {
-            "type": "array"
+            "type": "array",
+            "bsonType": "array"
         }
         
         if "items" in schema:
@@ -135,7 +178,8 @@ class SchemaRenderer:
     def _resolve_enum_type(schema: Dict, enumerator_version: int, context: SchemaContext) -> Dict:
         """Resolve an enum type definition."""
         resolved = {
-            "type": "string" if schema["type"] == SchemaType.ENUM.value else "array"
+            "type": "string" if schema["type"] == SchemaType.ENUM.value else "array",
+            "bsonType": "string" if schema["type"] == SchemaType.ENUM.value else "array"
         }
         
         if "enums" in schema:
@@ -155,6 +199,7 @@ class SchemaRenderer:
                 else:
                     resolved["items"] = {
                         "type": "string",
+                        "bsonType": "string",
                         "enum": list(enum_def.keys())
                     }
                         

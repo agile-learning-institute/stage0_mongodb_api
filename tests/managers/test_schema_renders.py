@@ -34,19 +34,27 @@ class TestSchemaRenders(unittest.TestCase):
         # Act
         rendered = schema_manager.render_all()
         
-        # Assert BSON schemas
-        for version_name, schema in rendered["bson"].items():
+        # Assert schemas for each version
+        for version_name, formats in rendered.items():
+            # Assert BSON schema
             expected_bson = self._load_json(
                 os.path.join(self.config.INPUT_FOLDER, "expected", "bson_schema", f"{version_name}.json")
             )
-            self.assertEqual(schema, expected_bson, f"BSON schema mismatch for {version_name}")
+            self.assertEqual(
+                formats["bson"], 
+                expected_bson, 
+                f"BSON schema mismatch {formats['bson']}"
+            )
             
-        # Assert JSON schemas
-        for version_name, schema in rendered["json"].items():
+            # Assert JSON schema
             expected_json = self._load_yaml(
                 os.path.join(self.config.INPUT_FOLDER, "expected", "json_schema", f"{version_name}.yaml")
             )
-            self.assertEqual(schema, expected_json, f"JSON schema mismatch for {version_name}")
+            self.assertEqual(
+                formats["json"], 
+                expected_json, 
+                f"JSON schema mismatch for {version_name}"
+            )
 
     def _load_json(self, file_path: str) -> dict:
         """Helper method to load JSON files."""
