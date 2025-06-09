@@ -53,7 +53,7 @@ class TestSchemaRenders(unittest.TestCase):
             self.assertEqual(
                 formats["json"], 
                 expected_json, 
-                f"JSON schema mismatch for {version_name}"
+                f"JSON schema mismatch for {formats['json']}"
             )
 
     def _load_json(self, file_path: str) -> dict:

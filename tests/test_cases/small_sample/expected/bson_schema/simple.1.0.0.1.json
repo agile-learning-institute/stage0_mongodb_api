@@ -2,18 +2,17 @@
   "bsonType": "object",
   "properties": {
     "_id": {
-      "bsonType": "objectId",
-      "pattern": "^[0-9a-fA-F]{24}$"
+      "bsonType": "objectId"
     },
     "name": {
       "bsonType": "string",
-      "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+      "pattern": "^[a-zA-Z0-9_-]{4,40}$"
     },
     "status": {
       "bsonType": "string",
-      "enum": ["draft", "active", "archived"]
+      "enum": ["active", "archived"]
     }
   },
-  "required": ["_id", "name", "status"], 
+  "required": ["_id", "status"], 
   "additionalProperties": false
 } 

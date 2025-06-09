@@ -5,6 +5,7 @@ properties:
   _id:
     description: The unique identifier for the media
     type: identity
+    required: true
   name:
     description: The name of the document
     type: word
@@ -12,3 +13,4 @@ properties:
     description: The current status of the document
     type: enum
     enums: default_status
+    required: true

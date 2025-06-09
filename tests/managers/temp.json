@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{24}$"
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "archived"]
+    }
+  },
+  "additionalProperties": false,
+  "required": ["_id", "status"]
+}

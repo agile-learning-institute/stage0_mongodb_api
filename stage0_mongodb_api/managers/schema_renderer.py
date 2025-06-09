@@ -1,6 +1,8 @@
 from typing import Dict, List, Optional, Any, TypedDict
 from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat, SchemaContext
 from stage0_mongodb_api.managers.version_number import VersionNumber
+import logging
+logger = logging.getLogger(__name__)
 
 class SchemaRenderer:
     """Utility class for rendering schemas in different formats."""
@@ -25,13 +27,8 @@ class SchemaRenderer:
             )
             
         # Handle primitive types
-        if "schema" in schema:
-            return SchemaRenderer._render_primitive(schema["schema"], format)
-        if "json_schema" in schema:
-            if format == SchemaFormat.JSON:
-                return schema["json_schema"].copy()
-            else:
-                return schema["bson_schema"].copy()
+        if "schema" in schema or "json_type" in schema:
+            return SchemaRenderer._render_primitive(schema, format)
             
         # Handle complex types
         type_name = schema["type"]
@@ -42,7 +39,14 @@ class SchemaRenderer:
         if type_name in [SchemaType.ENUM.value, SchemaType.ENUM_ARRAY.value]:
             return SchemaRenderer._render_enum(schema, format, enumerator_version, context)
             
-        return schema
+        # Handle custom types
+        if type_name in context["types"]:
+            return SchemaRenderer._render(context["types"][type_name], format, enumerator_version, context)
+            
+        # Remove description and return remaining schema
+        rendered = schema.copy()
+        rendered.pop("description", None)
+        return rendered
         
     @staticmethod
     def _render_primitive(schema: Dict, format: SchemaFormat) -> Dict:
@@ -51,18 +55,22 @@ class SchemaRenderer:
         # Schema property - convert type to bsonType for BSON
         if "schema" in schema:
             rendered = schema["schema"].copy()
+            rendered.pop("description", None)
             if format == SchemaFormat.BSON and "type" in rendered:
                 rendered["bsonType"] = rendered["type"]
                 del rendered["type"]
             return rendered
             
         # or Use format-specific schema as-is
-        if format == SchemaFormat.JSON and "json_schema" in schema:
-            return schema["json_schema"].copy()
-        if format == SchemaFormat.BSON and "bson_schema" in schema:
-            return schema["bson_schema"].copy()
-            
-        return schema
+        if format == SchemaFormat.JSON and "json_type" in schema:
+            rendered = schema["json_type"].copy()
+            rendered.pop("description", None)
+            return rendered
+        
+        if format == SchemaFormat.BSON and "bson_type" in schema:
+            rendered = schema["bson_type"].copy()
+            rendered.pop("description", None)
+            return rendered
         
     @staticmethod
     def _render_object(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
