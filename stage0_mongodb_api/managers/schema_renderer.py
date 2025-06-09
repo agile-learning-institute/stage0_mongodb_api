@@ -14,7 +14,7 @@ class SchemaRenderer:
     
     @staticmethod
     def _render(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
-        """Render a schema definition."""
+        """ Recursively render a schema definition."""
         # Handle $ref first - replace with referenced dictionary
         if "$ref" in schema:
             return SchemaRenderer._render(
@@ -27,11 +27,11 @@ class SchemaRenderer:
         # Handle primitive types
         if "schema" in schema:
             return SchemaRenderer._render_primitive(schema["schema"], format)
-        if "json_type" in schema:
-            return SchemaRenderer._render_primitive({
-                "type": schema["json_type"],
-                "bsonType": schema["bson_type"]
-            }, format)
+        if "json_schema" in schema:
+            if format == SchemaFormat.JSON:
+                return schema["json_schema"].copy()
+            else:
+                return schema["bson_schema"].copy()
             
         # Handle complex types
         type_name = schema["type"]
@@ -46,14 +46,9 @@ class SchemaRenderer:
         
     @staticmethod
     def _render_primitive(schema: Dict, format: SchemaFormat) -> Dict:
-        """Render a primitive type definition.
+        """Render a primitive type definition."""
         
-        There are three cases for primitives:
-        1. schema property: Used for both formats, converting type to bsonType for BSON
-        2. json_schema property: Used as-is for JSON format
-        3. bson_schema property: Used as-is for BSON format
-        """
-        # Case 1: schema property - convert type to bsonType for BSON
+        # Schema property - convert type to bsonType for BSON
         if "schema" in schema:
             rendered = schema["schema"].copy()
             if format == SchemaFormat.BSON and "type" in rendered:
@@ -61,7 +56,7 @@ class SchemaRenderer:
                 del rendered["type"]
             return rendered
             
-        # Case 2 & 3: Use format-specific schema as-is
+        # or Use format-specific schema as-is
         if format == SchemaFormat.JSON and "json_schema" in schema:
             return schema["json_schema"].copy()
         if format == SchemaFormat.BSON and "bson_schema" in schema:
