@@ -1,6 +1,5 @@
 {
   "bsonType": "object",
-  "required": ["_id", "name", "status"],
   "properties": {
     "_id": {
       "bsonType": "objectId",
@@ -14,5 +13,7 @@
       "bsonType": "string",
       "enum": ["draft", "active", "archived"]
     }
-  }
+  },
+  "required": ["_id", "name", "status"], 
+  "additionalProperties": false
 } 
