@@ -1,47 +1,61 @@
 {
+  "title": "User Collection",
+  "description": "A user collection for testing the schema system",
   "bsonType": "object",
-  "required": ["_id", "user_name", "status", "last_saved"],
   "properties": {
     "_id": {
-      "bsonType": "objectId",
-      "pattern": "^[0-9a-fA-F]{24}$"
+      "description": "The unique identifier for a user",
+      "bsonType": "objectId"
     },
     "user_name": {
+      "description": "Username",
       "bsonType": "string",
       "pattern": "^[a-zA-Z0-9_-]{4,40}$"
     },
     "first_name": {
+      "description": "Users First Name",
       "bsonType": "string",
       "pattern": "^[a-zA-Z0-9_-]{4,40}$"
     },
     "last_name": {
+      "description": "Users Last Name",
       "bsonType": "string",
       "pattern": "^[a-zA-Z0-9_-]{4,40}$"
     },
     "status": {
+      "description": "document status",
       "bsonType": "string",
-      "enum": ["draft", "active", "archived"]
+      "enum": ["active", "archived"]
     },
     "last_saved": {
+      "title": "Breadcrumb",
+      "description": "The last time this document was saved",
       "bsonType": "object",
-      "required": ["from_ip", "by_user", "at_time", "correlation_id"],
       "properties": {
         "from_ip": {
+          "description": "Http Request remote IP address",
           "bsonType": "string",
           "pattern": "^[a-zA-Z0-9_-]{4,40}$"
         },
         "by_user": {
+          "description": "ID Of User",
           "bsonType": "string",
           "pattern": "^[a-zA-Z0-9_-]{4,40}$"
         },
         "at_time": {
+          "description": "The date-time when last updated",
           "bsonType": "date"
         },
         "correlation_id": {
+          "description": "The logging correlation ID of the update transaction",
           "bsonType": "string",
           "pattern": "^[a-zA-Z0-9_-]{4,40}$"
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": ["from_ip", "by_user", "at_time", "correlation_id"]
     }
-  }
-} 
+  },
+  "additionalProperties": false,
+  "required": ["_id", "user_name", "status", "last_saved"]
+}

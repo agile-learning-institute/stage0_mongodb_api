@@ -1,11 +1,6 @@
-type: object
 title: User Collection
-description: Collection for managing users
-required:
-  - _id
-  - user_name
-  - status
-  - last_saved
+description: A user collection for testing the schema system
+type: object
 properties:
   _id:
     type: string
@@ -32,10 +27,6 @@ properties:
     items:
       type: object
       description: A user category
-      required:
-        - name
-        - category
-        - tags
       properties:
         name:
           type: string
@@ -63,6 +54,11 @@ properties:
               - in_progress
               - blocked
               - review
+      required:
+        - name
+        - category
+        - tags
+      additionalProperties: false
   email:
     type: string
     description: The person's email address
@@ -70,25 +66,37 @@ properties:
   phone:
     type: string
     description: The person's phone number
-    pattern: "^\\+?[1-9]\\d{1,14}$"
+    pattern: "^\\+1[2-9][0-9]{9}$"
   last_saved:
-    type: object
+    title: Breadcrumb
     description: The last time this document was saved
+    type: object
+    properties:
+      from_ip:
+        description: Http Request remote IP address
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      by_user:
+        description: ID Of User
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      at_time:
+        description: The date-time when last updated
+        type: string
+        format: date-time
+      correlation_id:
+        description: The logging correlation ID of the update transaction
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$" 
     required:
       - from_ip
       - by_user
       - at_time
       - correlation_id
-    properties:
-      from_ip:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      by_user:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      at_time:
-        type: string
-        format: date-time
-      correlation_id:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$" 
+    additionalProperties: false
+required:
+  - _id
+  - user_name
+  - status
+  - last_saved
+additionalProperties: false

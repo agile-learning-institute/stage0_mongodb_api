@@ -15,7 +15,7 @@ class TestSchemaRenders(unittest.TestCase):
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
         
     def test_render_simple(self):
-        """Test rendering a simple BSON schema."""
+        """Test simple rendering."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
         schema_manager = SchemaManager()
@@ -32,8 +32,26 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
         
+    def test_render_organization(self):
+        """Test rendering with complex custom types."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "organization.1.0.0.1"
+
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+        
     def test_render_media(self):
-        """Test rendering a user BSON schema."""
+        """Test rendering with complex defined types."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
@@ -50,21 +68,77 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
         
-    def test_render_user_json(self):
-        """Test rendering a user JSON schema."""
+    def test_render_user_1001(self):
+        """Test rendering a complex schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "user.1.0.0.1"
         
         # Act
-        rendered = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
         
         # Assert
-        expected = self._load_yaml(
-            os.path.join(self.config.INPUT_FOLDER, "expected", "json_schema", f"{version_name}.yaml")
-        )
-        self.assertEqual(rendered, expected, "JSON schema mismatch")
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+
+    def test_render_user_1002(self):
+        """Test rendering a complex schema."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "user.1.0.0.2"
+        
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+
+    def test_render_user_1013(self):
+        """Test rendering a complex schema."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "user.1.0.1.3"
+        
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+
+    def test_render_search(self):
+        """Test rendering a complex schema."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "search.1.0.0.1"
+        
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
 
     def _load_bson(self, version_name: str) -> dict:
         """Helper method to load bson schema JSON files."""

@@ -1,52 +1,59 @@
-type: object
 title: User Collection
-description: Collection for managing users
-required:
-  - _id
-  - user_name
-  - status
-  - last_saved
+description: A user collection for testing the schema system
+type: object
 properties:
   _id:
-    type: string
     description: The unique identifier for a user
+    type: string
     pattern: "^[0-9a-fA-F]{24}$"
   user_name:
-    type: string
     description: Username
+    type: string
     pattern: "^[a-zA-Z0-9_-]{4,40}$"
   first_name:
+    description: Users First Name
     type: string
-    description: First Name
     pattern: "^[a-zA-Z0-9_-]{4,40}$"
   last_name:
+    description: Users Last Name
     type: string
-    description: Last Name
     pattern: "^[a-zA-Z0-9_-]{4,40}$"
   status:
+    description: document status
     type: string
-    description: The status
     enum:
       - active
       - archived
   last_saved:
-    type: object
+    title: Breadcrumb
     description: The last time this document was saved
+    type: object
+    properties:
+      from_ip:
+        description: Http Request remote IP address
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      by_user:
+        description: ID Of User
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      at_time:
+        description: The date-time when last updated
+        type: string
+        format: date-time
+      correlation_id:
+        description: The logging correlation ID of the update transaction
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$" 
     required:
       - from_ip
       - by_user
       - at_time
       - correlation_id
-    properties:
-      from_ip:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      by_user:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      at_time:
-        type: string
-        format: date-time
-      correlation_id:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$" 
+    additionalProperties: false
+required:
+  - _id
+  - user_name
+  - status
+  - last_saved
+additionalProperties: false
