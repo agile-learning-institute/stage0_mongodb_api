@@ -1,5 +1,5 @@
 {
-  "description": "A simple collection for testing",
+  "description": "A media item in the system",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -8,17 +8,112 @@
       "pattern": "^[0-9a-fA-F]{24}$",
       "description": "The unique identifier for the media"
     },
-    "name": {
+    "title": {
       "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{4,40}$",
-      "description": "The name of the document"
+      "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$",
+      "description": "The title of the media"
+    },
+    "type": {
+      "description": "The type of media",
+      "type": "string",
+      "enum": [
+        "movie",
+        "tv_show",
+        "documentary",
+        "short"
+      ]
     },
     "status": {
-      "description": "The current status of the document",
+      "description": "The current status of the media",
       "type": "string",
-      "enum": ["active", "archived"]
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ]
+    },
+    "last_saved": {
+      "description": "When the media was last updated",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from_ip": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{4,40}$",
+          "description": "Http Request remote IP address"
+        },
+        "by_user": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{4,40}$",
+          "description": "ID Of User"
+        },
+        "at_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date-time when last updated"
+        },
+        "correlation_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_-]{4,40}$",
+          "description": "The logging correlation ID of the update transaction"
+        }
+      },
+      "title": "Breadcrumb",
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
+    },
+    "tags": {
+      "description": "Tags associated with the media",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "action",
+          "comedy",
+          "drama",
+          "sci_fi",
+          "documentary"
+        ]
+      }
+    },
+    "metadata": {
+      "description": "Additional metadata about the media",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "type": "number",
+          "minimum": 1,
+          "multipleOf": 1,
+          "description": "Duration in minutes"
+        },
+        "format": {
+          "description": "Media format",
+          "type": "string",
+          "enum": [
+            "dvd",
+            "bluray",
+            "digital",
+            "streaming"
+          ]
+        },
+        "quality": {
+          "description": "Quality rating",
+          "type": "string",
+          "enum": ["sd", "hd", "uhd"]
+        }
+      }
     }
   },
-  "title": "Simple",
-  "required": ["_id", "status"]
+  "title": "Media",
+  "required": [
+    "_id",
+    "title",
+    "status",
+    "last_saved"
+  ]
 }
