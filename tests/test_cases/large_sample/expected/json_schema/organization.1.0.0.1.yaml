@@ -1,76 +1,86 @@
+title: Organization
+description: An organization in the system
 type: object
-title: Organization Collection
-description: Collection for managing organizations
-required:
-  - _id
-  - name
-  - status
-  - last_saved
 properties:
   _id:
+    description: The unique identifier for the organization
     type: string
-    description: The unique identifier for an organization
     pattern: "^[0-9a-fA-F]{24}$"
   name:
+    description: The organization name
     type: string
-    description: The name of the organization
     pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
   status:
+    description: The current status of the organization
     type: string
-    description: The status
     enum:
       - active
       - archived
   last_saved:
+    title: Breadcrumb
+    description: When the organization document was last updated
     type: object
-    description: The last time this document was saved
+    properties:
+      from_ip:
+        description: Http Request remote IP address
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      by_user:
+        description: ID Of User
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      at_time:
+        description: The date-time when last updated
+        type: string
+        format: date-time
+      correlation_id:
+        description: The logging correlation ID of the update transaction
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+    additionalProperties: false
     required:
       - from_ip
       - by_user
       - at_time
       - correlation_id
-    properties:
-      from_ip:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      by_user:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      at_time:
-        type: string
-        format: date-time
-      correlation_id:
-        type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
   users:
+    description: Users associated with this organization
     type: array
-    description: A list of enumerated values assigned by the user
     items:
+      description: A user identifier
       type: string
       pattern: "^[0-9a-fA-F]{24}$"
   website:
+    description: Organization website
     type: string
-    description: The website of the organization
-    pattern: "^https?://[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(/\\S*)?$"
+    pattern: "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
   home_address:
+    title: Street Address
     type: object
     description: Organization home address
-    required:
-      - postal_code
     properties:
       street:
+        description: Street address
         type: string
-        description: The street address
         pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
       city:
+        description: City
         type: string
-        description: The city
-        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
       state:
+        description: State or province
         type: string
-        description: The state
-        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
       postal_code:
+        description: Postal code
         type: string
-        description: The postal code
-        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$" 
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+    additionalProperties: false
+    required:
+      - postal_code
+additionalProperties: false
+required:
+  - _id
+  - name
+  - status
+  - last_saved
