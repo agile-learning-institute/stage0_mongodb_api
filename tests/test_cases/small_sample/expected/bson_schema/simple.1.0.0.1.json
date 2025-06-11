@@ -1,18 +1,23 @@
 {
+  "description": "A simple collection for testing",
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
+      "description": "The unique identifier for the media",
       "bsonType": "objectId"
     },
     "name": {
       "bsonType": "string",
-      "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+      "pattern": "^[a-zA-Z0-9_-]{4,40}$",
+      "description": "The name of the document"
     },
     "status": {
+      "description": "The current status of the document",
       "bsonType": "string",
       "enum": ["active", "archived"]
     }
   },
-  "required": ["_id", "status"], 
-  "additionalProperties": false
+  "title": "Simple",
+  "required": ["_id", "status"]
 } 

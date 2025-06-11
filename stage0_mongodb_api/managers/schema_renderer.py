@@ -31,6 +31,7 @@ class SchemaRenderer:
             return SchemaRenderer._render_primitive(schema, format)
             
         # Handle complex types
+        logger.info(f"Rendering schema: {schema}")
         type_name = schema["type"]
         if type_name == SchemaType.OBJECT.value:
             return SchemaRenderer._render_object(schema, format, enumerator_version, context)
@@ -41,12 +42,9 @@ class SchemaRenderer:
             
         # Handle custom types
         if type_name in context["types"]:
-            return SchemaRenderer._render(context["types"][type_name], format, enumerator_version, context)
+            return SchemaRenderer._render_custom_type(schema, format, enumerator_version, context)
             
-        # Remove description and return remaining schema
-        rendered = schema.copy()
-        rendered.pop("description", None)
-        return rendered
+        raise ValueError(f"Unknown schema type: {type_name}")
         
     @staticmethod
     def _render_primitive(schema: Dict, format: SchemaFormat) -> Dict:
@@ -55,7 +53,6 @@ class SchemaRenderer:
         # Schema property - convert type to bsonType for BSON
         if "schema" in schema:
             rendered = schema["schema"].copy()
-            rendered.pop("description", None)
             if format == SchemaFormat.BSON and "type" in rendered:
                 rendered["bsonType"] = rendered["type"]
                 del rendered["type"]
@@ -63,24 +60,26 @@ class SchemaRenderer:
             
         # or Use format-specific schema as-is
         if format == SchemaFormat.JSON and "json_type" in schema:
-            rendered = schema["json_type"].copy()
-            rendered.pop("description", None)
-            return rendered
+            return schema["json_type"].copy()
         
         if format == SchemaFormat.BSON and "bson_type" in schema:
-            rendered = schema["bson_type"].copy()
-            rendered.pop("description", None)
-            return rendered
+            return schema["bson_type"].copy()
         
     @staticmethod
     def _render_object(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
         """Render an object type definition."""
         type_prop = "bsonType" if format == SchemaFormat.BSON else "type"
         rendered = {
+            "description": schema["description"],
             type_prop: "object",
-            "properties": {},
-            "additionalProperties": False
+            "additionalProperties": schema.get("additionalProperties", False),
+            "properties": {}
         }
+        
+        # Add optional title if it exists
+        if "title" in schema:
+            rendered["title"] = schema["title"]
+        
         required = []
         
         # Render properties
@@ -128,6 +127,7 @@ class SchemaRenderer:
         """Render an array type definition."""
         type_prop = "bsonType" if format == SchemaFormat.BSON else "type"
         return {
+            "description": schema["description"],
             type_prop: "array",
             "items": SchemaRenderer._render(schema["items"], format, enumerator_version, context)
         }
@@ -136,24 +136,28 @@ class SchemaRenderer:
     def _render_enum(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
         """Render an enum type definition."""
         type_prop = "bsonType" if format == SchemaFormat.BSON else "type"
-        is_enum = schema["type"] == SchemaType.ENUM.value
-        enum_name = schema["enums"]
+        enumerators = context["enumerators"][enumerator_version]["enumerators"][schema["enums"]]
+        rendered = {"description": schema["description"]}
         
-        # Get enum values from the correct version
-        if enumerator_version >= len(context["enumerators"]) or enum_name not in context["enumerators"][enumerator_version]["enumerators"]:
-            return schema
+        if schema["type"] == SchemaType.ENUM.value:
+            rendered[type_prop] = "string"
+            rendered["enum"] = list(enumerators.keys())
+            return rendered
             
-        enum_def = context["enumerators"][enumerator_version]["enumerators"][enum_name]
-        if is_enum:
-            return {
+        if schema["type"] == SchemaType.ENUM_ARRAY.value:
+            rendered[type_prop] = "array"
+            rendered["items"] = {
                 type_prop: "string",
-                "enum": list(enum_def.keys())
+                "enum": list(enumerators.keys())
             }
-            
-        return {
-            type_prop: "array",
-            "items": {
-                type_prop: "string",
-                "enum": list(enum_def.keys())
-            }
-        } 
+            return rendered
+        
+        raise ValueError(f"Unknown schema type: {schema['type']}")
+    
+    @staticmethod
+    def _render_custom_type(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
+        """Render a custom type definition."""
+        rendered = SchemaRenderer._render(context["types"][schema["type"]], format, enumerator_version, context)
+        rendered["description"] = schema["description"]
+        
+        return rendered

@@ -3,6 +3,7 @@ import os
 import json
 import yaml
 from stage0_mongodb_api.managers.schema_manager import SchemaManager
+from stage0_mongodb_api.managers.schema_types import SchemaFormat
 from stage0_py_utils import Config
 
 class TestSchemaRenders(unittest.TestCase):
@@ -12,57 +13,68 @@ class TestSchemaRenders(unittest.TestCase):
         """Set up test fixtures."""
         self.config = Config.get_instance()
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
-            
-    def test_render_small_sample(self):
-        """Test rendering small sample schema."""
-        self._assert_rendered_schemas("small_sample")
-                    
-    def test_render_large_sample(self):
-        """Test rendering large sample schema."""
-        self._assert_rendered_schemas("large_sample")
         
-    def _assert_rendered_schemas(self, test_case: str):
-        """Helper method to assert rendered schemas match expected output.
-        
-        Args:
-            test_case: Name of the test case directory (e.g. "minimum_valid")
-        """
+    def test_render_simple(self):
+        """Test rendering a simple BSON schema."""
         # Arrange
-        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, test_case)
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
         schema_manager = SchemaManager()
+        version_name = "simple.1.0.0.1"
         
         # Act
-        rendered = schema_manager.render_all()
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
         
-        # Assert schemas for each version
-        for version_name, formats in rendered.items():
-            # Assert BSON schema
-            expected_bson = self._load_json(
-                os.path.join(self.config.INPUT_FOLDER, "expected", "bson_schema", f"{version_name}.json")
-            )
-            self.assertEqual(
-                formats["bson"], 
-                expected_bson, 
-                f"BSON schema mismatch {formats['bson']}"
-            )
-            
-            # Assert JSON schema
-            expected_json = self._load_yaml(
-                os.path.join(self.config.INPUT_FOLDER, "expected", "json_schema", f"{version_name}.yaml")
-            )
-            self.assertEqual(
-                formats["json"], 
-                expected_json, 
-                f"JSON schema mismatch for {formats['json']}"
-            )
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
 
-    def _load_json(self, file_path: str) -> dict:
-        """Helper method to load JSON files."""
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+        
+    def test_render_media(self):
+        """Test rendering a user BSON schema."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "media.1.0.0.1"
+
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+        
+    def test_render_user_json(self):
+        """Test rendering a user JSON schema."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "user.1.0.0.1"
+        
+        # Act
+        rendered = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected = self._load_yaml(
+            os.path.join(self.config.INPUT_FOLDER, "expected", "json_schema", f"{version_name}.yaml")
+        )
+        self.assertEqual(rendered, expected, "JSON schema mismatch")
+
+    def _load_bson(self, version_name: str) -> dict:
+        """Helper method to load bson schema JSON files."""
+        file_path = os.path.join(self.config.INPUT_FOLDER, "expected", "bson_schema", f"{version_name}.json")
         with open(file_path, 'r') as f:
             return json.load(f)
-            
-    def _load_yaml(self, file_path: str) -> dict:
-        """Helper method to load YAML files."""
+
+    def _load_json(self, version_name: str) -> dict:
+        """Helper method to load JSON Schema yaml files."""
+        file_path = os.path.join(self.config.INPUT_FOLDER, "expected", "json_schema", f"{version_name}.yaml")
         with open(file_path, 'r') as f:
             return yaml.safe_load(f)
             

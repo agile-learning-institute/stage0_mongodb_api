@@ -1,19 +1,24 @@
 {
+  "description": "A simple collection for testing",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
       "type": "string",
-      "pattern": "^[0-9a-fA-F]{24}$"
+      "pattern": "^[0-9a-fA-F]{24}$",
+      "description": "The unique identifier for the media"
     },
     "name": {
       "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+      "pattern": "^[a-zA-Z0-9_-]{4,40}$",
+      "description": "The name of the document"
     },
     "status": {
+      "description": "The current status of the document",
       "type": "string",
       "enum": ["active", "archived"]
     }
   },
-  "additionalProperties": false,
+  "title": "Simple",
   "required": ["_id", "status"]
 }
