@@ -114,18 +114,12 @@ versions:
 Note: Schema validation is always replaced during processing, while index management, migrations, and test data loading are optional steps that only execute if specified in the configuration and enabled in the service settings.
 
 ### Collection Configuration
-The API uses a versioned configuration format for collections:
+The API uses a [versioned configuration format](./collection_config_schema.yaml) for collections:
 
 ```yaml
 name: users                    # Collection name
 versions:                      # List of version configurations in chronological order
   - version: "1.0.0.1"         # Version string (major.minor.patch.schema)
-    add_indexes:               # Optional list of indexes to add
-      - name: email_unique
-        key:
-          email: 1
-        options:
-          unique: true
     drop_indexes:              # Optional list of index names to drop
       - oldStatusIndex
     aggregations:              # Optional list of aggregation pipelines
@@ -137,14 +131,20 @@ versions:                      # List of version configurations in chronological
             into: users
             on: _id
             whenMatched: replace
+    add_indexes:               # Optional list of indexes to add
+      - name: email_unique
+        key:
+          email: 1
+        options:
+          unique: true
     test_data: users-1.0.0.1   # Optional test data file name
 ```
 
 Each version configuration can include:
 - `version`: Required version string in format major.minor.patch.schema
-- `add_indexes`: Optional list of indexes to add (see [MongoDB Indexes](https://www.mongodb.com/docs/manual/indexes/))
 - `drop_indexes`: Optional list of index names to drop
 - `aggregations`: Optional list of aggregation pipelines (see [MongoDB Aggregation](https://www.mongodb.com/docs/manual/aggregation/))
+- `add_indexes`: Optional list of indexes to add (see [MongoDB Indexes](https://www.mongodb.com/docs/manual/indexes/))
 - `test_data`: Optional name of test data file for this version
 
 ### Advanced Configuration
