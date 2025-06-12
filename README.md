@@ -60,7 +60,7 @@ The API provides endpoints for managing MongoDB collections, including:
 - Index management
 - Data migrations
 
-For detailed API examples, see [CURL_EXAMPLES.md](CURL_EXAMPLES.md).
+For detailed API examples, see [CURL_EXAMPLES.md](./docs/CURL_EXAMPLES.md).
 
 ### Example Collection Configuration
 ```yaml
