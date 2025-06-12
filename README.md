@@ -61,22 +61,7 @@ The API provides endpoints for managing MongoDB collections, including:
 - Data migrations
 
 For detailed API examples, see [CURL_EXAMPLES.md](./docs/CURL_EXAMPLES.md).
-
-### Example Collection Configuration
-```yaml
-name: sample
-versions:
-  - version: "1.0.0.0"
-    testData: "sample-1.0.0.1"
-    addIndexes:
-      - name: nameIndex
-        keys:
-          userName: 1
-        options:
-          unique: true
-```
-
-## [Reference Documentation](./docs/REFERENCE.md) - Complete Reference documentation
+For detailed usage information see [REFERENCE.md](./docs/REFERENCE.md).
 
 ## Contributing
 

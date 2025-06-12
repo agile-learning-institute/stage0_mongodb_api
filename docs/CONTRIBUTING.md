@@ -22,7 +22,6 @@ stage0_mongodb_api/
 │   ├── REFERENCE.md          # Main reference documentation
 │   ├── CONTRIBUTING.md       # Contributing Guide
 │   ├── CURL_EXAMPLES.md      # API usage examples
-│   ├── config.md             # Service Configuration Options
 │   ├── openapi.yaml          # API Documentation
 │   └── index.html            # HTML container for OpenAPI documentation
 ├── README.md                 # Overview and Usage
