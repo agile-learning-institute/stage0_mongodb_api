@@ -122,12 +122,48 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
 
-    def test_render_search(self):
+    def test_render_search_1001(self):
         """Test rendering a complex schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "search.1.0.0.1"
+        
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+
+    def test_render_search_1002(self):
+        """Test rendering a complex schema."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "search.1.0.0.2"
+        
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+
+    def test_render_search_1013(self):
+        """Test rendering a complex schema."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        schema_manager = SchemaManager()
+        version_name = "search.1.0.1.3"
         
         # Act
         rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)

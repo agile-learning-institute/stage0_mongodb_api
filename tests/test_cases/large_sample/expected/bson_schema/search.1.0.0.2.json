@@ -1,211 +1,258 @@
 {
+  "title": "search",
+  "description": "A search index that is used to support a elastic search polymorphic query service",
   "bsonType": "object",
-  "required": ["collection_name", "collection_id"],
   "properties": {
     "collection_name": {
+      "description": "The name of the collection",
       "bsonType": "string",
-      "pattern": "^[a-zA-Z0-9_-]{2,40}$",
-      "enum": ["media", "organization", "user"]
+      "pattern": "^[a-zA-Z0-9_-]{4,40}$"
     },
     "collection_id": {
-      "bsonType": "objectId",
-      "pattern": "^[0-9a-fA-F]{24}$"
+      "description": "The unique identifier for this source document",
+      "bsonType": "objectId"
+    },
+    "media": {
+      "title": "Media",
+      "description": "A media item in the system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for the media",
+          "bsonType": "objectId"
+        },
+        "title": {
+          "description": "The title of the media",
+          "bsonType": "string",
+          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+        },
+        "type": {
+          "description": "The type of media",
+          "bsonType": "string",
+          "enum": ["movie", "tv_show", "documentary", "short"]
+        },
+        "status": {
+          "description": "The current status of the media",
+          "bsonType": "string",
+          "enum": ["draft", "published", "archived"]
+        },
+        "last_saved": {
+          "title": "Breadcrumb",
+          "description": "When the media was last updated",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["from_ip", "by_user", "at_time", "correlation_id"]
+        },
+        "tags": {
+          "description": "Tags associated with the media",
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": ["action", "comedy", "drama", "sci_fi", "documentary"]
+          }
+        },
+        "metadata": {
+          "description": "Additional metadata about the media",
+          "bsonType": "object",
+          "properties": {
+            "duration": {
+              "bsonType": "int",
+              "minimum": 1,
+              "description": "Duration in minutes"
+            },
+            "format": {
+              "description": "Media format",
+              "bsonType": "string",
+              "enum": ["dvd", "bluray", "digital", "streaming"]
+            },
+            "quality": {
+              "description": "Quality rating",
+              "bsonType": "string",
+              "enum": ["sd", "hd", "uhd"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "required": ["_id", "title", "status", "last_saved"]
+    },
+    "organization": {
+      "title": "Organization",
+      "description": "An organization in the system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for the organization",
+          "bsonType": "objectId"
+        },
+        "name": {
+          "description": "The organization name",
+          "bsonType": "string",
+          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+        },
+        "status": {
+          "description": "The current status of the organization",
+          "bsonType": "string",
+          "enum": ["draft", "active", "archived"]
+        },
+        "last_saved": {
+          "title": "Breadcrumb",
+          "description": "When the organization document was last updated",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["from_ip", "by_user", "at_time", "correlation_id"]
+        },
+        "users": {
+          "description": "Users associated with this organization",
+          "bsonType": "array",
+          "items": {
+            "description": "A user identifier",
+            "bsonType": "objectId"
+          }
+        },
+        "website": {
+          "description": "Organization website",
+          "bsonType": "string",
+          "pattern": "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
+        },
+        "home_address": {
+          "title": "Street Address",
+          "description": "Organization home address",
+          "bsonType": "object",
+          "properties": {
+            "street": {
+              "description": "Street address",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+            },
+            "city": {
+              "description": "City",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "state": {
+              "description": "State or province",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "postal_code": {
+              "description": "Postal code",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["postal_code"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["_id", "name", "status", "last_saved"]
+    },
+    "user": {
+      "title": "User Collection",
+      "description": "A user collection for testing the schema system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for a user",
+          "bsonType": "objectId"
+        },
+        "user_name": {
+          "description": "Username",
+          "bsonType": "string",
+          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+        },
+        "first_name": {
+          "description": "Users First Name",
+          "bsonType": "string",
+          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+        },
+        "last_name": {
+          "description": "Users Last Name",
+          "bsonType": "string",
+          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+        },
+        "status": {
+          "description": "document status",
+          "bsonType": "string",
+          "enum": ["draft", "active", "archived"]
+        },
+        "last_saved": {
+          "title": "Breadcrumb",
+          "description": "The last time this document was saved",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "bsonType": "string",
+              "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["from_ip", "by_user", "at_time", "correlation_id"]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["_id", "user_name", "status", "last_saved"]
     }
   },
-  "oneOf": [
-    {
-      "if": {
-        "properties": { "collection_name": { "const": "media" } }
-      },
-      "then": {
-        "properties": {
-          "_id": {
-            "bsonType": "objectId",
-            "pattern": "^[0-9a-fA-F]{24}$"
-          },
-          "title": {
-            "bsonType": "string",
-            "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-          },
-          "type": {
-            "bsonType": "string",
-            "enum": ["image", "video", "audio", "document"]
-          },
-          "status": {
-            "bsonType": "string",
-            "enum": ["draft", "active", "archived"]
-          },
-          "last_saved": {
-            "bsonType": "object",
-            "required": ["from_ip", "by_user", "at_time", "correlation_id"],
-            "properties": {
-              "from_ip": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              },
-              "by_user": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              },
-              "at_time": {
-                "bsonType": "date"
-              },
-              "correlation_id": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              }
-            }
-          },
-          "tags": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "string",
-              "enum": ["featured", "popular", "trending", "new", "updated"]
-            }
-          },
-          "metadata": {
-            "bsonType": "object",
-            "properties": {
-              "duration": {
-                "bsonType": "int",
-                "minimum": 0
-              },
-              "format": {
-                "bsonType": "string",
-                "enum": ["mp4", "mp3", "jpg", "png", "pdf"]
-              },
-              "quality": {
-                "bsonType": "string",
-                "enum": ["low", "medium", "high", "ultra"]
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": { "collection_name": { "const": "organization" } }
-      },
-      "then": {
-        "properties": {
-          "_id": {
-            "bsonType": "objectId",
-            "pattern": "^[0-9a-fA-F]{24}$"
-          },
-          "name": {
-            "bsonType": "string",
-            "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-          },
-          "status": {
-            "bsonType": "string",
-            "enum": ["draft", "active", "archived"]
-          },
-          "last_saved": {
-            "bsonType": "object",
-            "required": ["from_ip", "by_user", "at_time", "correlation_id"],
-            "properties": {
-              "from_ip": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              },
-              "by_user": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              },
-              "at_time": {
-                "bsonType": "date"
-              },
-              "correlation_id": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              }
-            }
-          },
-          "users": {
-            "bsonType": "array",
-            "items": {
-              "bsonType": "objectId"
-            }
-          },
-          "website": {
-            "bsonType": "string",
-            "pattern": "^https?://[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}(?:\\.[a-zA-Z]{2,})?$"
-          },
-          "home_address": {
-            "bsonType": "object",
-            "required": ["postal_code"],
-            "properties": {
-              "street": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-              },
-              "city": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{2,40}$"
-              },
-              "state": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{2,40}$"
-              },
-              "postal_code": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{2,40}$"
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": { "collection_name": { "const": "user" } }
-      },
-      "then": {
-        "properties": {
-          "_id": {
-            "bsonType": "objectId",
-            "pattern": "^[0-9a-fA-F]{24}$"
-          },
-          "user_name": {
-            "bsonType": "string",
-            "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-          },
-          "first_name": {
-            "bsonType": "string",
-            "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-          },
-          "last_name": {
-            "bsonType": "string",
-            "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-          },
-          "status": {
-            "bsonType": "string",
-            "enum": ["draft", "active", "archived"]
-          },
-          "last_saved": {
-            "bsonType": "object",
-            "required": ["from_ip", "by_user", "at_time", "correlation_id"],
-            "properties": {
-              "from_ip": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              },
-              "by_user": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              },
-              "at_time": {
-                "bsonType": "date"
-              },
-              "correlation_id": {
-                "bsonType": "string",
-                "pattern": "^[a-zA-Z0-9_-]{4,40}$"
-              }
-            }
-          }
-        }
-      }
-    }
-  ]
-} 
+  "additionalProperties": false,
+  "required": ["collection_name", "collection_id"]
+}

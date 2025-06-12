@@ -1,79 +1,73 @@
+title: search
+description: A search index that is used to support a elastic search polymorphic query service
 type: object
-title: Search Collection
-description: Collection for managing search operations
-required:
-  - collection_name
-  - collection_id
 properties:
   collection_name:
-    type: string
     description: The name of the collection
-    pattern: "^[a-zA-Z0-9_-]{4,40}$"
-    enum:
-      - media
-      - organization
-      - user
-  collection_id:
     type: string
-    description: The unique identifier for a collection
+    pattern: "^[a-zA-Z0-9_-]{4,40}$"
+  collection_id:
+    description: The unique identifier for this source document
+    type: string
     pattern: "^[0-9a-fA-F]{24}$"
   media:
+    title: Media
+    description: A media item in the system
     type: object
-    description: Media collection
-    required:
-      - _id
-      - title
-      - type
-      - status
-      - last_saved
     properties:
       _id:
+        description: The unique identifier for the media
         type: string
-        description: The unique identifier for a media
         pattern: "^[0-9a-fA-F]{24}$"
       title:
-        type: string
         description: The title of the media
+        type: string
         pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
       type:
-        type: string
         description: The type of media
+        type: string
         enum:
           - movie
           - tv_show
           - documentary
           - short
       status:
+        description: The current status of the media
         type: string
-        description: The status
         enum:
           - draft
           - published
           - archived
       last_saved:
+        title: Breadcrumb
+        description: When the media was last updated
         type: object
-        description: The last time this document was saved
+        properties:
+          from_ip:
+            description: Http Request remote IP address
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          by_user:
+            description: ID Of User
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          at_time:
+            description: The date-time when last updated
+            type: string
+            format: date-time
+          correlation_id:
+            description: The logging correlation ID of the update transaction
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
         required:
           - from_ip
           - by_user
           - at_time
           - correlation_id
-        properties:
-          from_ip:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
-          by_user:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
-          at_time:
-            type: string
-            format: date-time
-          correlation_id:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        additionalProperties: false
       tags:
+        description: Tags associated with the media
         type: array
-        description: A list of enumerated values assigned by the user
         items:
           type: string
           enum:
@@ -83,154 +77,186 @@ properties:
             - sci_fi
             - documentary
       metadata:
+        description: Additional metadata about the media
         type: object
-        description: The metadata for the media
         properties:
-          duration:
+          duration: 
+            description: Duration in minutes
             type: number
-            description: The duration of the media in seconds
+            minimum: 1
+            multipleOf: 1
           format:
+            description: Media format
             type: string
-            description: The format of the media
             enum:
               - dvd
               - bluray
               - digital
               - streaming
           quality:
+            description: Quality rating
             type: string
-            description: The quality of the media
             enum:
               - sd
               - hd
               - uhd
+        additionalProperties: false
+    required:
+      - _id
+      - title
+      - status
+      - last_saved
+    additionalProperties: false
   organization:
+    title: Organization
+    description: An organization in the system
     type: object
-    description: Organization collection
+    properties:
+      _id:
+        type: string
+        description: The unique identifier for the organization
+        pattern: "^[0-9a-fA-F]{24}$"
+      name:
+        description: The organization name
+        type: string
+        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+      status:
+        description: The current status of the organization
+        type: string
+        enum:
+          - draft
+          - active
+          - archived
+      last_saved:
+        title: Breadcrumb
+        description: When the organization document was last updated
+        type: object
+        properties:
+          from_ip:
+            description: Http Request remote IP address
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          by_user:
+            description: ID Of User
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          at_time:
+            description: The date-time when last updated
+            type: string
+            format: date-time
+          correlation_id:
+            description: The logging correlation ID of the update transaction
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        required:
+          - from_ip
+          - by_user
+          - at_time
+          - correlation_id
+        additionalProperties: false
+      users:
+        description: Users associated with this organization
+        type: array
+        items:
+          description: A user identifier
+          type: string
+          pattern: "^[0-9a-fA-F]{24}$"
+      website:
+        description: Organization website
+        type: string
+        pattern: "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
+      home_address:
+        title: Street Address
+        description: Organization home address
+        type: object
+        properties:
+          street:
+            description: Street address
+            type: string
+            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          city:
+            description: City
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          state:
+            description: State or province
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          postal_code:
+            description: Postal code
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        required:
+          - postal_code
+        additionalProperties: false
     required:
       - _id
       - name
       - status
       - last_saved
+    additionalProperties: false
+  user:
+    title: User Collection
+    description: A user collection for testing the schema system
+    type: object
     properties:
       _id:
+        description: The unique identifier for a user
         type: string
-        description: The unique identifier for an organization
         pattern: "^[0-9a-fA-F]{24}$"
-      name:
+      user_name:
+        description: Username
         type: string
-        description: The name of the organization
-        pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      first_name:
+        description: Users First Name
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+      last_name:
+        description: Users Last Name
+        type: string
+        pattern: "^[a-zA-Z0-9_-]{4,40}$"
       status:
+        description: document status
         type: string
-        description: The status
         enum:
           - draft
           - active
           - archived
       last_saved:
+        title: Breadcrumb
         type: object
         description: The last time this document was saved
+        properties:
+          from_ip:
+            description: Http Request remote IP address
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          by_user:
+            description: ID Of User
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          at_time:
+            description: The date-time when last updated
+            type: string
+            format: date-time
+          correlation_id:
+            description: The logging correlation ID of the update transaction
+            type: string
+            pattern: "^[a-zA-Z0-9_-]{4,40}$" 
         required:
           - from_ip
           - by_user
           - at_time
           - correlation_id
-        properties:
-          from_ip:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
-          by_user:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
-          at_time:
-            type: string
-            format: date-time
-          correlation_id:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      users:
-        type: array
-        description: A list of enumerated values assigned by the user
-        items:
-          type: string
-          pattern: "^[0-9a-fA-F]{24}$"
-      website:
-        type: string
-        description: The website of the organization
-        pattern: "^https?://[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(/\\S*)?$"
-      home_address:
-        type: object
-        description: Organization home address
-        required:
-          - postal_code
-        properties:
-          street:
-            type: string
-            description: The street address
-            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-          city:
-            type: string
-            description: The city
-            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-          state:
-            type: string
-            description: The state
-            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-          postal_code:
-            type: string
-            description: The postal code
-            pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-  user:
-    type: object
-    description: User collection
+        additionalProperties: false
     required:
       - _id
       - user_name
       - status
       - last_saved
-    properties:
-      _id:
-        type: string
-        description: The unique identifier for a user
-        pattern: "^[0-9a-fA-F]{24}$"
-      user_name:
-        type: string
-        description: Username
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      first_name:
-        type: string
-        description: First Name
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      last_name:
-        type: string
-        description: Last Name
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
-      status:
-        type: string
-        description: The status
-        enum:
-          - draft
-          - active
-          - archived
-      last_saved:
-        type: object
-        description: The last time this document was saved
-        required:
-          - from_ip
-          - by_user
-          - at_time
-          - correlation_id
-        properties:
-          from_ip:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
-          by_user:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$"
-          at_time:
-            type: string
-            format: date-time
-          correlation_id:
-            type: string
-            pattern: "^[a-zA-Z0-9_-]{4,40}$" 
+    additionalProperties: false
+required:
+  - collection_name
+  - collection_id
+additionalProperties: false
