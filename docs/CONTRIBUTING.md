@@ -7,27 +7,25 @@ Thank you for your interest in contributing to the stage0_mongodb_api project! T
 ```
 stage0_mongodb_api/
 ├── stage0_mongodb_api/       # Main package directory
-│   ├── managers/             # Database managers
+│   ├── managers/             # Schema managers
 │   ├── routes/               # API route handlers
 │   ├── services/             # Business logic services
-│   ├── server.py             # Main server application
-│   └── __init__.py
+│   └── server.py             # Main server application
 ├── tests/                    # Test directory
 │   ├── managers/             # Tests for database managers
 │   ├── routes/               # Tests for API routes
 │   ├── services/             # Tests for business logic
 │   ├── test_server.py        # Server tests
-│   ├── test_cases/           # Schema test cases
+│   ├── test_cases/           # Schema test case data
 │   └── stepci.yaml           # StepCI configuration
 ├── docs/                     # Documentation
 │   ├── REFERENCE.md          # Main reference documentation
-│   ├── CONTRIBUTING.md       # Collection configuration guide
-│   ├── schema.md             # Schema language documentation
-│   ├── types.md              # Custom types documentation
-│   ├── versioning.md         # Version management guide
-│   └── schemas/              # Schema definitions
+│   ├── CONTRIBUTING.md       # Contributing Guide
+│   ├── CURL_EXAMPLES.md      # API usage examples
+│   ├── config.md             # Service Configuration Options
+│   ├── openapi.yaml          # API Documentation
+│   └── index.html            # HTML container for OpenAPI documentation
 ├── README.md                 # Overview and Usage
-└── CURL_EXAMPLES.md          # API usage examples
 ```
 
 ## Development Setup
@@ -75,31 +73,30 @@ The schema system uses test input folders to validate functionality. Each test c
 ```
 tests/test_cases/
   case_name/
-    collections/              # Collection configurations
-      user.yaml              # User collection config
-      media.yaml             # Media collection config
+    collections/             # Collection configurations
+      user.yaml              
+      media.yaml             
     dictionary/              # Schema definitions
       types/                 # Custom types
         word.yaml
         timestamp.yaml
-      user.1.0.0.yaml        # Schema version
+      user.1.0.0.yaml        
     data/                    # Test data
       enumerators.json       # Enumerator definitions
-      users.1.0.0.1.json     # Test data version
-    expected/
-      validation.json                # Expected validation errors
-      user.1.0.0.1.json_schema.json  # Expected JSON schema
-      user.1.0.0.1.bson_schema.json  # Expected BSON schema
-      media.1.0.0.1.json_schema.json # Expected JSON schema
-      media.1.0.0.1.bson_schema.json # Expected BSON schema
+      users.1.0.0.1.json     
+    expected/                # Expected Render Output
+      bson_schema/
+        user.1.0.0.1.json    
+        media.1.0.0.1.json   
+      json_schema/
+        user.1.0.0.1.yaml    
+        media.1.0.0.1.yaml   
 ```
 
 2. **Test Organization**:
    - Each test case has its own directory
    - Input files mirror the production structure
    - Expected outputs are stored in the `expected` directory
-   - Validation results are a list of errors (empty list for success)
-   - Schema outputs are organized by collection
 
 ## Development Standards
 
