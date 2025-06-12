@@ -2,29 +2,23 @@
 
 This document provides an overview of the stage0_mongodb_api service, which extends the Simple Schema standard with MongoDB-specific features.
 
-## Documentation Structure
-
 ### Core Concepts
-- [Simple Schema Documentation](../../stage0/SIMPLE_SCHEMA.md) - The base schema language and concepts
-- [API Extensions](#api-extensions) - How this API extends Simple Schema
-- [Configuration](#configuration) - Environment and service configuration
-
-### API Reference
+- [Stage0 Simple Schema](https://github.com/agile-learning-institute/stage0/blob/main/SIMPLE_SCHEMA.md) - The base schema language and concepts
 - [REST API](./openapi.yaml) - OpenAPI documentation
-- [Configuration Options](./config.md) - Environment variables and settings
 
-## API Extensions
+## Stage0 Simple Schema Extensions
 
 ### Version Management
-The API extends Simple Schema's three-part versioning with a fourth component for schema versioning:
+The API extends Simple Schema's version-less structures with a four component version:
 - `major.minor.patch.schema`
-  - First three components follow Simple Schema versioning
-  - Fourth component tracks schema-specific changes
+  - First three components follow traditional major/minor/patch semantic versioning
+  - Fourth component tracks enumerators version
 
 This extension enables:
-- Independent versioning of enumerator definitions
+- Versioning of dictionaries and enumerators
 - Collection-specific schema version tracking
 - Version state management in MongoDB
+- MongoDB Collection Schema Validation
 
 ### Enumerator Support
 The API extends Simple Schema's enumerator support with:
@@ -32,16 +26,11 @@ The API extends Simple Schema's enumerator support with:
 - MongoDB-based enumerator storage
 - Collection-specific enumerator version selection
 
-### Custom Types
-The API implements Simple Schema's custom type system with:
-- MongoDB-specific type validation
-- BSON schema generation
-- Immutable type definitions
-
 ### Collection Processing
 The core of collection processing is implementing a new schema validation configuration. 
 - See [this article](https://www.mongodb.com/community/forums/t/best-practices-for-schema-management-migrations-and-scaling-in-mongodb/306805) for Mongo schema management best practices
 - See [this article](https://www.mongodb.com/blog/post/building-with-patterns-the-schema-versioning-pattern) for schema versioning best practices. 
+
 The API processes collections in the following order:
 
 1. **Version Check**
@@ -71,7 +60,6 @@ The API processes collections in the following order:
 6. **Schema Application**
    - Applies new schema validation
    - Updates collection version
-   - Records deployment timestamp
 
 7. **Test Data Loading** (Optional)
    - Loads test data if specified in version configuration
@@ -86,11 +74,15 @@ Example processing sequence:
 name: users
 versions:
   - version: "1.0.0.1"
+    addIndexes:
+      - name: statusIndex
+        key:
+          status: 1
   - version: "1.0.0.2"
     # 1. Remove existing schema validation
     # 2. Drop indexes if requested
     dropIndexes:
-      - oldStatusIndex
+      - statusIndex
     # 3. Run migrations
     aggregations:
       - - $match:
@@ -102,7 +94,7 @@ versions:
             on: _id
     # 4. Create new Indexes
     addIndexes:
-      - name: newStatusIndex
+      - name: statusIndex
         key:
           status: 1
           updatedAt: -1
@@ -114,34 +106,17 @@ versions:
 Note: Schema validation is always replaced during processing, while index management, migrations, and test data loading are optional steps that only execute if specified in the configuration and enabled in the service settings.
 
 ### Collection Configuration
-The API uses a [versioned configuration format](./collection_config_schema.yaml) for collections:
+The API uses a [versioned collection configuration file](./collection_config_schema.yaml) to configure collection validation, and indexing. A very simple collection configuration file just list the version numbers. 
 
 ```yaml
-name: users                    # Collection name
-versions:                      # List of version configurations in chronological order
-  - version: "1.0.0.1"         # Version string (major.minor.patch.schema)
-    drop_indexes:              # Optional list of index names to drop
-      - oldStatusIndex
-    aggregations:              # Optional list of aggregation pipelines
-      - - $match:
-            status: "active"
-        - $set:
-            status: "ACTIVE"
-        - $merge:
-            into: users
-            on: _id
-            whenMatched: replace
-    add_indexes:               # Optional list of indexes to add
-      - name: email_unique
-        key:
-          email: 1
-        options:
-          unique: true
-    test_data: users-1.0.0.1   # Optional test data file name
+name: users              # Collection name
+versions:                # List of version configurations
+  - version: "1.0.0.1"   # (major.minor.patch.enums)
+  - version: "1.0.0.2"
+  - version: "1.0.1.3"
 ```
 
-Each version configuration can include:
-- `version`: Required version string in format major.minor.patch.schema
+Each version configuration can optionally include:
 - `drop_indexes`: Optional list of index names to drop
 - `aggregations`: Optional list of aggregation pipelines (see [MongoDB Aggregation](https://www.mongodb.com/docs/manual/aggregation/))
 - `add_indexes`: Optional list of indexes to add (see [MongoDB Indexes](https://www.mongodb.com/docs/manual/indexes/))
@@ -195,7 +170,6 @@ Best Practices:
 - Backup data before migrations
 - Test migrations thoroughly
 - Monitor resource usage during large migrations
-- 
 
 ## Configuration
 
