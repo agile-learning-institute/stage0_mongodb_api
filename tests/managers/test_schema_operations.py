@@ -10,86 +10,144 @@ class TestSchemaOperations(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
-        self.config_manager = ConfigManager()
-        self.schema_manager = SchemaManager(self.config_manager)
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
-        
-        # Mock MongoIO for apply/remove schema tests
-        self.mongo_patcher = patch('stage0_py_utils.MongoIO')
-        self.mock_mongo = self.mongo_patcher.start()
-        self.mock_mongo.get_instance.return_value = MagicMock()
-        
-    def tearDown(self):
-        """Clean up test fixtures."""
-        self.mongo_patcher.stop()
         
     def _load_json(self, file_path: str) -> dict:
         """Helper method to load JSON files."""
         with open(file_path, 'r') as f:
             return json.load(f)
-            
-    def test_apply_schema_minimum_valid(self):
-        """Test applying minimum valid schema."""
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_apply_schema_success(self, mock_mongo):
+        """Test successful schema application."""
         # Arrange
-        self.schema_manager.config_manager.schema_dir = os.path.join(self.test_cases_dir, "minimum_valid")
-        self.schema_manager.load_schemas()
-        
-        # Load expected BSON schema
-        bson_schema = self._load_json(os.path.join(self.test_cases_dir, "minimum_valid", "expected", "dictionary", "user.1.0.0.bson.json"))
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
+        schema_manager = SchemaManager()
+        mock_mongo.get_instance.return_value = MagicMock()
         
         # Act
-        result = self.schema_manager.apply_schema("test_collection", bson_schema)
+        result = schema_manager.apply_schema("simple.1.0.0.1")
         
         # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "apply_schema")
-        self.assertEqual(result["collection"], "test_collection")
-        self.assertEqual(result["schema"], bson_schema)
-        self.mock_mongo.get_instance.return_value.update_document.assert_called_once_with(
-            "test_collection",
-            set_data={"validator": {"$jsonSchema": bson_schema}}
-        )
-        
-    def test_apply_schema_error(self):
-        """Test schema application error handling."""
+        self.assertEqual(result["collection"], "simple")
+        self.assertIn("schema", result)
+        mock_mongo.get_instance.return_value.apply_schema.assert_called_once()
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_apply_schema_empty_version(self, mock_mongo):
+        """Test applying schema with empty version name."""
         # Arrange
-        self.mock_mongo.get_instance.return_value.update_document.side_effect = Exception("MongoDB error")
+        schema_manager = SchemaManager(self.config)
         
         # Act
-        result = self.schema_manager.apply_schema("test_collection", {})
+        result = schema_manager.apply_schema("")
         
         # Assert
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["operation"], "apply_schema")
-        self.assertEqual(result["collection"], "test_collection")
-        self.assertIn("MongoDB error", result["message"])
+        self.assertEqual(result["collection"], "")
+        self.assertIn("cannot be empty", result["message"])
+        mock_mongo.get_instance.return_value.apply_schema.assert_not_called()
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_apply_schema_invalid_format(self, mock_mongo):
+        """Test applying schema with invalid version format."""
+        # Arrange
+        schema_manager = SchemaManager(self.config)
         
-    def test_remove_schema_success(self):
+        # Act
+        result = schema_manager.apply_schema("invalid_format")
+        
+        # Assert
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["operation"], "apply_schema")
+        self.assertEqual(result["collection"], "invalid_format")
+        self.assertIn("Invalid version name format", result["message"])
+        mock_mongo.get_instance.return_value.apply_schema.assert_not_called()
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_apply_schema_not_found(self, mock_mongo):
+        """Test applying non-existent schema."""
+        # Arrange
+        schema_manager = SchemaManager(self.config)
+        
+        # Act
+        result = schema_manager.apply_schema("nonexistent.1.0.0")
+        
+        # Assert
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["operation"], "apply_schema")
+        self.assertEqual(result["collection"], "nonexistent")
+        self.assertIn("No schema found", result["message"])
+        mock_mongo.get_instance.return_value.apply_schema.assert_not_called()
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_apply_schema_mongo_error(self, mock_mongo):
+        """Test schema application with MongoDB error."""
+        # Arrange
+        schema_manager = SchemaManager(self.config)
+        schema_manager.load_schemas()
+        mock_mongo.get_instance.return_value = MagicMock()
+        mock_mongo.get_instance.return_value.apply_schema.side_effect = Exception("MongoDB error")
+        
+        # Act
+        result = schema_manager.apply_schema("simple.1.0.0.1")
+        
+        # Assert
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["operation"], "apply_schema")
+        self.assertEqual(result["collection"], "simple")
+        self.assertIn("MongoDB error", result["message"])
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_remove_schema_success(self, mock_mongo):
         """Test successful schema removal."""
         # Arrange
-        self.mock_mongo.get_instance.return_value.remove_schema.return_value = None
+        schema_manager = SchemaManager(self.config)
+        mock_mongo.get_instance.return_value = MagicMock()
         
         # Act
-        result = self.schema_manager.remove_schema("test_collection")
+        result = schema_manager.remove_schema("simple")
         
         # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "remove_schema")
-        self.assertEqual(result["collection"], "test_collection")
-        self.mock_mongo.get_instance.return_value.remove_schema.assert_called_once_with("test_collection")
-        
-    def test_remove_schema_error(self):
-        """Test schema removal error handling."""
+        self.assertEqual(result["collection"], "simple")
+        mock_mongo.get_instance.return_value.remove_schema.assert_called_once_with("simple")
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_remove_schema_empty_name(self, mock_mongo):
+        """Test schema removal with empty collection name."""
         # Arrange
-        self.mock_mongo.get_instance.return_value.remove_schema.side_effect = Exception("MongoDB error")
+        schema_manager = SchemaManager(self.config)
         
         # Act
-        result = self.schema_manager.remove_schema("test_collection")
+        result = schema_manager.remove_schema("")
         
         # Assert
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["operation"], "remove_schema")
-        self.assertEqual(result["collection"], "test_collection")
+        self.assertEqual(result["collection"], "")
+        self.assertIn("cannot be empty", result["message"])
+        mock_mongo.get_instance.return_value.remove_schema.assert_not_called()
+
+    @patch('stage0_py_utils.MongoIO')
+    def test_remove_schema_mongo_error(self, mock_mongo):
+        """Test schema removal with MongoDB error."""
+        # Arrange
+        schema_manager = SchemaManager(self.config)
+        mock_mongo.get_instance.return_value = MagicMock()
+        mock_mongo.get_instance.return_value.remove_schema.side_effect = Exception("MongoDB error")
+        
+        # Act
+        result = schema_manager.remove_schema("simple")
+        
+        # Assert
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["operation"], "remove_schema")
+        self.assertEqual(result["collection"], "simple")
         self.assertIn("MongoDB error", result["message"])
 
 if __name__ == '__main__':

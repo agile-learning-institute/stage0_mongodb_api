@@ -1,36 +1,203 @@
 # MongoDB Schema Management Reference
 
-This document provides an overview of the stage0_mongodb_api service. For detailed documentation, please refer to the following sections:
+This document provides an overview of the stage0_mongodb_api service, which extends the Simple Schema standard with MongoDB-specific features.
 
 ## Documentation Structure
 
 ### Core Concepts
-- [Data Directory Structure](./structure.md) - Overview of the input folder organization
-- [Version Management](./versioning.md) - Details about version numbering and management
-- [Schema Language](./schema.md) - Documentation of the Simple Schema language
-
-### Configuration
-- [Collection Configuration](./collection_config.md) - How to configure collections and versions
-- [AdvancedCollection Configuration](./advanced_collection_config.md) - Data migrations
-- [Custom Types](./types.md) - Available custom types and how to create new ones
-- [Enumerators](./enumerators.md) - Working with enumerator types and values
-- [Processing Guide](./processing.md) - How the service processes collections
-- [Index Management](./indexes.md) - Managing database indexes
+- [Simple Schema Documentation](../../stage0/SIMPLE_SCHEMA.md) - The base schema language and concepts
+- [API Extensions](#api-extensions) - How this API extends Simple Schema
+- [Configuration](#configuration) - Environment and service configuration
 
 ### API Reference
 - [REST API](./openapi.yaml) - OpenAPI documentation
 - [Configuration Options](./config.md) - Environment variables and settings
 
-## Quick Start
-NOTE: Future update to use a template repo and containerized API/UI
+## API Extensions
 
-1. Set up your input folder structure as described in [Data Directory Structure](./structure.md)
-2. Configure your collections using the [Collection Configuration](./collection_config.md) format
-3. Define your schemas using the [Schema Language](./schema.md)
-4. Set environment variables as documented in [Configuration Options](./config.md)
-5. Run the service to process your collections
+### Version Management
+The API extends Simple Schema's three-part versioning with a fourth component for schema versioning:
+- `major.minor.patch.schema`
+  - First three components follow Simple Schema versioning
+  - Fourth component tracks schema-specific changes
 
-## Environment Variables
+This extension enables:
+- Independent versioning of enumerator definitions
+- Collection-specific schema version tracking
+- Version state management in MongoDB
+
+### Enumerator Support
+The API extends Simple Schema's enumerator support with:
+- Versioned enumerator definitions
+- MongoDB-based enumerator storage
+- Collection-specific enumerator version selection
+
+### Custom Types
+The API implements Simple Schema's custom type system with:
+- MongoDB-specific type validation
+- BSON schema generation
+- Immutable type definitions
+
+### Collection Processing
+The core of collection processing is implementing a new schema validation configuration. 
+- See [this article](https://www.mongodb.com/community/forums/t/best-practices-for-schema-management-migrations-and-scaling-in-mongodb/306805) for Mongo schema management best practices
+- See [this article](https://www.mongodb.com/blog/post/building-with-patterns-the-schema-versioning-pattern) for schema versioning best practices. 
+The API processes collections in the following order:
+
+1. **Version Check**
+   - Retrieves current version from MongoDB
+   - Compares with target version
+   - Proceeds only if version update is needed
+
+2. **Schema Removal**
+   - Removes existing schema validation
+   - Preserves collection data
+   - Prepares for schema update
+
+3. **Index Removal** (Optional)
+   - Removes indexes specified in `dropIndexes`
+   - Skips if no index changes specified
+
+4. **Data Migration** (Optional)
+   - Executes aggregation pipelines in order
+   - Applies data transformations
+   - Updates documents in place
+   - Skips if no migrations specified
+
+5. **Index Creation** (Optional)
+   - Creates new indexes specified in `addIndexes`
+   - Skips if no index changes specified
+
+6. **Schema Application**
+   - Applies new schema validation
+   - Updates collection version
+   - Records deployment timestamp
+
+7. **Test Data Loading** (Optional)
+   - Loads test data if specified in version configuration
+   - Only executes if test data loading is enabled
+   - Skips if no test data specified
+
+Example processing sequence:
+```yaml
+# Current version: 1.0.0.1
+# Target version: 1.0.0.2
+
+name: users
+versions:
+  - version: "1.0.0.1"
+  - version: "1.0.0.2"
+    # 1. Remove existing schema validation
+    # 2. Drop indexes if requested
+    dropIndexes:
+      - oldStatusIndex
+    # 3. Run migrations
+    aggregations:
+      - - $match:
+            status: "pending"
+        - $set:
+            status: "PENDING"
+        - $merge:
+            into: users
+            on: _id
+    # 4. Create new Indexes
+    addIndexes:
+      - name: newStatusIndex
+        key:
+          status: 1
+          updatedAt: -1
+    # 5. Apply new schema validation v1.0.0.2
+    # 6. Load test data (if enabled)
+    test_data: users-1.0.0.2
+```
+
+Note: Schema validation is always replaced during processing, while index management, migrations, and test data loading are optional steps that only execute if specified in the configuration and enabled in the service settings.
+
+### Collection Configuration
+The API uses a versioned configuration format for collections:
+
+```yaml
+name: users                    # Collection name
+versions:                      # List of version configurations in chronological order
+  - version: "1.0.0.1"         # Version string (major.minor.patch.schema)
+    add_indexes:               # Optional list of indexes to add
+      - name: email_unique
+        key:
+          email: 1
+        options:
+          unique: true
+    drop_indexes:              # Optional list of index names to drop
+      - oldStatusIndex
+    aggregations:              # Optional list of aggregation pipelines
+      - - $match:
+            status: "active"
+        - $set:
+            status: "ACTIVE"
+        - $merge:
+            into: users
+            on: _id
+            whenMatched: replace
+    test_data: users-1.0.0.1   # Optional test data file name
+```
+
+Each version configuration can include:
+- `version`: Required version string in format major.minor.patch.schema
+- `add_indexes`: Optional list of indexes to add (see [MongoDB Indexes](https://www.mongodb.com/docs/manual/indexes/))
+- `drop_indexes`: Optional list of index names to drop
+- `aggregations`: Optional list of aggregation pipelines (see [MongoDB Aggregation](https://www.mongodb.com/docs/manual/aggregation/))
+- `test_data`: Optional name of test data file for this version
+
+### Advanced Configuration
+The API supports advanced collection configurations for data migrations and complex indexes:
+
+1. **Data Migrations**
+   ```yaml
+   versions:
+     - version: "1.0.1.0"
+       aggregations:
+         - - $match:
+               status: "active"
+           - $set:
+               status: "ACTIVE"
+           - $merge:
+               into: users
+               on: _id
+               whenMatched: replace
+   ```
+   See [MongoDB Aggregation Pipeline](https://www.mongodb.com/docs/manual/aggregation/) for available stages and operators.
+
+2. **Complex Indexes**
+   ```yaml
+   versions:
+     - version: "1.0.0.1"
+       addIndexes:
+         - name: contentSearch
+           key:
+             title: "text"
+             description: "text"
+           options:
+             weights:
+               title: 10
+               description: 5
+         - name: userStatus
+           key:
+             status: 1
+             lastLogin: -1
+             email: 1
+           options:
+             unique: true
+             sparse: true
+   ```
+   See [MongoDB Index Types](https://www.mongodb.com/docs/manual/indexes/) for available index types and Options
+
+Best Practices:
+- Increment versions appropriately
+- Backup data before migrations
+- Test migrations thoroughly
+- Monitor resource usage during large migrations
+- 
+
+## Configuration
 
 The service is configured through environment variables:
 - `MONGO_DB_NAME`: The name of the MongoDB database
@@ -40,3 +207,14 @@ The service is configured through environment variables:
 - `EXIT_AFTER_PROCESSING`: Set to "false" to expose the API after processing
 
 For detailed configuration options, see [Configuration Options](./config.md).
+
+## Quick Start
+
+1. Review the [Simple Schema Documentation](../../stage0/SIMPLE_SCHEMA.md)
+2. Set up your input folder structure following Simple Schema conventions
+3. Configure your environment variables
+4. Run the service to process your collections
+
+## Related Documentation
+- [Contributing Guide](./CONTRIBUTING.md) - Development and contribution guidelines
+- [Simple Schema Documentation](../../stage0/SIMPLE_SCHEMA.md) - Base schema language
