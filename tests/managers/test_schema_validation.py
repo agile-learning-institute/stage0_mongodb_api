@@ -1,5 +1,6 @@
 import unittest
 import os
+from unittest.mock import MagicMock, patch
 from stage0_mongodb_api.managers.schema_manager import SchemaManager
 from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_py_utils import Config
@@ -14,9 +15,11 @@ class TestSchemaValidation(unittest.TestCase):
         self.config = Config.get_instance()
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
         
-    def test_validate_minimum_valid(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_validate_minimum_valid(self, mock_get_instance):
         """Test validation of minimum valid schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "minimum_valid")
         schema_manager = SchemaManager()
         
@@ -27,10 +30,12 @@ class TestSchemaValidation(unittest.TestCase):
         self.assertEqual(schema_manager.load_errors, [])
         self.assertEqual(errors, [])
         
-    def test_validate_small_sample(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_validate_small_sample(self, mock_get_instance):
         """Test validation of small sample schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
+        mock_get_instance.return_value = MagicMock()
         schema_manager = SchemaManager()
         
         # Act
@@ -40,10 +45,12 @@ class TestSchemaValidation(unittest.TestCase):
         self.assertEqual(schema_manager.load_errors, [])
         self.assertEqual(errors, [])
         
-    def test_validate_large_sample(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_validate_large_sample(self, mock_get_instance):
         """Test validation of large sample schema."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
+        mock_get_instance.return_value = MagicMock()
         schema_manager = SchemaManager()
         
         # Act
@@ -53,10 +60,12 @@ class TestSchemaValidation(unittest.TestCase):
         self.assertEqual(schema_manager.load_errors, [])
         self.assertEqual(errors, [])
         
-    def test_validation_errors(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_validation_errors(self, mock_get_instance):
         """Test validation with all validation errors."""
         # Arrange
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "validation_errors")
+        mock_get_instance.return_value = MagicMock()
         schema_manager = SchemaManager()
         
         # Act

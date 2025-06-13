@@ -1,15 +1,14 @@
-from typing import Dict, List, Optional, Union, TypedDict, Set
-from enum import Enum
-from stage0_py_utils import MongoIO, Config
-import yaml
+from typing import Dict, List, Set
 import os
 import re
+import yaml
 import json
-from stage0_mongodb_api.managers.version_number import VersionNumber
+from stage0_py_utils import Config, MongoIO
 from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_mongodb_api.managers.schema_renderer import SchemaRenderer
-from stage0_mongodb_api.managers.schema_validator import SchemaValidator, SchemaValidationError
-from stage0_mongodb_api.managers.schema_types import SchemaType, SchemaFormat, Schema, PrimitiveType, SchemaContext
+from stage0_mongodb_api.managers.schema_validator import SchemaValidator
+from stage0_mongodb_api.managers.schema_types import SchemaContext, SchemaFormat
+from stage0_mongodb_api.managers.version_number import VersionNumber
 
 class SchemaError(Exception):
     """Base exception for schema-related errors."""
@@ -25,6 +24,7 @@ class SchemaManager:
             config_manager: Configuration manager instance
         """
         self.config = Config.get_instance()
+        self.mongo = MongoIO.get_instance()
         self.config_manager = ConfigManager()
         self.types: Dict = {}
         self.enumerators: List[Dict] = []
@@ -228,23 +228,27 @@ class SchemaManager:
         Returns:
             Dict containing operation result
         """
-        if not version_name:
+        try:
+            # Parse version using VersionNumber class
+            version = VersionNumber(version_name)
+            collection_name = version.collection_name
+            version_number = version.version
+
+            # Render and apply schema
+            bson_schema = self.render_one(version_name, SchemaFormat.BSON)
+            self.mongo.apply_schema(collection_name, bson_schema)
+        except ValueError as e:
             return {
                 "status": "error",
                 "operation": "apply_schema",
                 "collection": version_name,
-                "message": "Collection name cannot be empty"
+                "message": f"Invalid version format: {str(e)}"
             }
-
-        [collection_name, version_number] = version_name.split(".")
-        try:
-            bson_schema = self.render_one(collection_name, version_number, SchemaFormat.BSON)
-            self.mongo.apply_schema(collection_name, bson_schema)
         except Exception as e:
             return {
                 "status": "error",
                 "operation": "apply_schema",
-                "collection": collection_name,
+                "collection": version_name,
                 "message": str(e)
             }
         
@@ -255,30 +259,34 @@ class SchemaManager:
             "schema": bson_schema
         }
 
-    def remove_schema(self, collection_name: str) -> Dict:
+    def remove_schema(self, version_name: str) -> Dict:
         """Remove schema validation from a collection.
         
         Args:
-            collection_name: Name of the collection
+            version_name: Name of the collection version (e.g. user.1.0.0.1)
             
         Returns:
             Dict containing operation result
         """
-        if not collection_name:
+        try:
+            # Parse version using VersionNumber class
+            version = VersionNumber(version_name)
+            collection_name = version.collection_name
+
+            # Remove schema validation
+            self.mongo.remove_schema(collection_name)
+        except ValueError as e:
             return {
                 "status": "error",
                 "operation": "remove_schema",
-                "collection": collection_name,
-                "message": "Collection name cannot be empty"
+                "collection": version_name,
+                "message": f"Invalid version format: {str(e)}"
             }
-            
-        try:
-            self.mongo.remove_schema(collection_name)
         except Exception as e:
             return {
                 "status": "error",
                 "operation": "remove_schema",
-                "collection": collection_name,
+                "collection": version_name,
                 "message": str(e)
             }
 

@@ -1,6 +1,7 @@
 import unittest
 import os
 import json
+from unittest.mock import MagicMock, patch
 import yaml
 from stage0_mongodb_api.managers.schema_manager import SchemaManager
 from stage0_mongodb_api.managers.schema_types import SchemaFormat
@@ -14,9 +15,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.config = Config.get_instance()
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
         
-    def test_render_simple(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_simple(self, mock_get_instance):
         """Test simple rendering."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
         schema_manager = SchemaManager()
         version_name = "simple.1.0.0.1"
@@ -32,9 +35,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
         
-    def test_render_organization(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_organization(self, mock_get_instance):
         """Test rendering with complex custom types."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "organization.1.0.0.1"
@@ -50,9 +55,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
         
-    def test_render_media(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_media(self, mock_get_instance):
         """Test rendering with complex defined types."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "media.1.0.0.1"
@@ -68,9 +75,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
         
-    def test_render_user_1001(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_user_1001(self, mock_get_instance):
         """Test rendering a complex schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "user.1.0.0.1"
@@ -86,9 +95,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
 
-    def test_render_user_1002(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_user_1002(self, mock_get_instance):
         """Test rendering a complex schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "user.1.0.0.2"
@@ -104,9 +115,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
 
-    def test_render_user_1013(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_user_1013(self, mock_get_instance):
         """Test rendering a complex schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "user.1.0.1.3"
@@ -122,9 +135,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
 
-    def test_render_search_1001(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_search_1001(self, mock_get_instance):
         """Test rendering a complex schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "search.1.0.0.1"
@@ -140,9 +155,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
 
-    def test_render_search_1002(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_search_1002(self, mock_get_instance):
         """Test rendering a complex schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "search.1.0.0.2"
@@ -158,9 +175,11 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
 
-    def test_render_search_1013(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_search_1013(self, mock_get_instance):
         """Test rendering a complex schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         schema_manager = SchemaManager()
         version_name = "search.1.0.1.3"

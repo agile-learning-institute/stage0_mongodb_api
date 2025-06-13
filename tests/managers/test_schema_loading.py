@@ -1,7 +1,7 @@
 import unittest
 import os
+from unittest.mock import MagicMock, patch
 from stage0_mongodb_api.managers.schema_manager import SchemaManager
-from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_py_utils import Config
 
 class TestSchemaLoading(unittest.TestCase):
@@ -12,9 +12,11 @@ class TestSchemaLoading(unittest.TestCase):
         self.config = Config.get_instance()
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
         
-    def test_load_minimum_valid(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_load_minimum_valid(self, mock_get_instance):
         """Test loading minimum valid schema structure."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "minimum_valid")
         
         # Act
@@ -26,9 +28,11 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(len(schema_manager.types), 0)
         self.assertEqual(len(schema_manager.enumerators), 0)
         
-    def test_load_small_sample(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_load_small_sample(self, mock_get_instance):
         """Test loading small sample schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "small_sample")
         
         # Act
@@ -40,9 +44,11 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(len(schema_manager.types), 2)
         self.assertEqual(len(schema_manager.enumerators), 2)
         
-    def test_load_large_sample(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_load_large_sample(self, mock_get_instance):
         """Test loading large sample schema."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "large_sample")
         
         # Act
@@ -54,9 +60,11 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(len(schema_manager.types), 10)
         self.assertEqual(len(schema_manager.enumerators), 4)
         
-    def test_empty_input(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_empty_input(self, mock_get_instance):
         """Test loading with empty input."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "empty_input")
         
         # Act
@@ -70,9 +78,11 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(missing_error_ids, set(), f"Missing error IDs: {missing_error_ids}")
         self.assertEqual(extra_error_ids, set(), f"Extra error IDs: {extra_error_ids}")
 
-    def test_missing_sub_folders(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_missing_sub_folders(self, mock_get_instance):
         """Test loading with empty sub-folders."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "missing_folders")
         
         # Act
@@ -86,9 +96,11 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(missing_error_ids, set(), f"Missing error IDs: {missing_error_ids}")
         self.assertEqual(extra_error_ids, set(), f"Extra error IDs: {extra_error_ids}")
 
-    def test_load_errors(self):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_load_errors(self, mock_get_instance):
         """Test loading with unparsable input files."""
         # Arrange
+        mock_get_instance.return_value = MagicMock()
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "unparsable_files")
         
         # Act
