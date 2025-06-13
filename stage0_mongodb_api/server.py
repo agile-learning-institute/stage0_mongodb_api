@@ -3,6 +3,7 @@ import signal
 from flask import Flask
 from stage0_py_utils import Config, MongoIO, MongoJSONEncoder
 from prometheus_flask_exporter import PrometheusMetrics
+from stage0_mongodb_api.managers.schema_manager import SchemaManager
 
 # Initialize Singletons
 config = Config.get_instance()
@@ -48,6 +49,27 @@ signal.signal(signal.SIGINT, handle_exit)
 
 # Start the server
 if __name__ == "__main__":
+    if config.AUTO_PROCESS:
+        logger.info(f"============= Auto Processing is Enabled ===============")
+        schema_manager = SchemaManager()
+        if len(schema_manager.load_errors) > 0:
+            logger.error(f"Auto Processing Failed to Load Schema! {schema_manager.load_errors}")
+            exit(1)
+
+        validate_errors = schema_manager.validate_schema()
+        if len(validate_errors) > 0:
+            logger.error(f"Auto Processing Failed to Validate Schema! {validate_errors}")
+            exit(1)
+
+        processing_output = schema_manager.process_schema()
+        logger.info(f"Processing Output: {processing_output}")
+        logger.info(f"============= Auto Processing is Completed ===============")
+
+    if config.EXIT_AFTER_PROCESSING:
+        logger.info(f"============= Exiting After Processing ===============")
+        exit(0)
+
+    logger.info(f"============= Starting Server ===============")
     logger.info(f"Starting Flask server on port {config.MONGODB_API_PORT}...")
     app.run(host="0.0.0.0", port=config.MONGODB_API_PORT)
     
