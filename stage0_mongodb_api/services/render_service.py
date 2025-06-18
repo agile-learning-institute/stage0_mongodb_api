@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 from stage0_mongodb_api.managers.schema_manager import SchemaManager, SchemaFormat
-from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_mongodb_api.managers.version_number import VersionNumber
 import logging
 

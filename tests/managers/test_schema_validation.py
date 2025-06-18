@@ -67,12 +67,14 @@ class TestSchemaValidation(unittest.TestCase):
         self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "validation_errors")
         mock_get_instance.return_value = MagicMock()
         schema_manager = SchemaManager()
+        config_manager = ConfigManager()
         
         # Act
-        errors = schema_manager.validate_schema()
+        schema_errors = schema_manager.validate_schema()
+        config_errors = config_manager.validate_configs()
         
-        # Assert
-        expected_error_ids = {
+        # Assert - Schema validation errors
+        expected_schema_error_ids = {
             # Schema Validator validation errors
             "VLD-001", "VLD-002", "VLD-003", "VLD-004", "VLD-005",  # Schema validation errors
             "VLD-101", "VLD-102", "VLD-103", "VLD-104", "VLD-106",  # Enumerator validation errors
@@ -86,24 +88,27 @@ class TestSchemaValidation(unittest.TestCase):
             "VLD-801",  # Array type validation
             "VLD-901", "VLD-902",  # Enum type validation
             "VLD-1001", "VLD-1002", "VLD-1003",  # OneOf type validation
-            
+        }
+        actual_schema_error_ids = {error.get('error_id') for error in schema_errors if 'error_id' in error}
+        missing_schema_error_ids = expected_schema_error_ids - actual_schema_error_ids
+        extra_schema_error_ids = actual_schema_error_ids - expected_schema_error_ids
+        self.assertEqual(missing_schema_error_ids, set())
+        self.assertEqual(extra_schema_error_ids, set())
+        
+        # Assert - Config validation errors
+        expected_config_error_ids = {
             # Config Manager validation errors
             "CFG-101",  # Invalid config format
             "CFG-201", "CFG-202",  # Missing required fields
             "CFG-501",  # Invalid version format
             "CFG-601",  # Missing version number
             "CFG-701",  # Invalid version format
-
-            # Untested Edge Cases
-            # "VLD-105",  # Enumerators key type errors
-            # "VLD-107",  # Enumeration key type errors
-            # "CFG-001", "CFG-002", "CFG-003",  # Load errors            
         }
-        actual_error_ids = {error.get('error_id') for error in errors if 'error_id' in error}
-        missing_error_ids = expected_error_ids - actual_error_ids
-        extra_error_ids = actual_error_ids - expected_error_ids
-        self.assertEqual(missing_error_ids, set())
-        self.assertEqual(extra_error_ids, set())
+        actual_config_error_ids = {error.get('error_id') for error in config_errors if 'error_id' in error}
+        missing_config_error_ids = expected_config_error_ids - actual_config_error_ids
+        extra_config_error_ids = actual_config_error_ids - expected_config_error_ids
+        self.assertEqual(missing_config_error_ids, set())
+        self.assertEqual(extra_config_error_ids, set())
 
 if __name__ == '__main__':
     unittest.main() 

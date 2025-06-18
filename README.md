@@ -1,6 +1,41 @@
 # stage0_mongodb_api
 
-This API implements index, schema, and migration management services for a MongoDB database. Schemas are described using the stage0 Simple Schema standard. 
+This API implements index, schema, and migration management services for a MongoDB database. 
+Schemas are described using the [stage0 Simple Schema](https://github.com/agile-learning-institute/stage0/blob/main/SIMPLE_SCHEMA.md) standard. 
+
+## Architecture Overview
+
+The API is built around a modular manager system that provides clear separation of concerns:
+
+### Application Entry Point
+
+- **server.py** - Main Flask application entry point that initializes the API server, registers routes, and handles startup/shutdown logic
+
+### API Layer
+
+- **Routes** - Flask Blueprint modules that handle HTTP requests and responses
+  - **collection_routes.py** - Collection management endpoints (`/api/collections`)
+  - **render_routes.py** - Schema rendering endpoints (`/api/render`)
+  - **config_routes.py** - Configuration endpoints (`/api/config`) from stage0_py_utils
+
+- **Services** - Business logic layer that coordinates operations between routes and managers
+  - **collection_service.py** - Collection processing and management operations
+  - **render_service.py** - Schema rendering operations
+
+### Core Managers
+
+- **ConfigManager** - Loads collection configurations and orchestrates version processing workflows
+- **VersionManager** - Tracks collection versions in MongoDB and provides version comparison
+- **SchemaManager** - Handles schema loading, validation, rendering, and application to MongoDB
+- **IndexManager** - Manages MongoDB index creation and deletion
+- **MigrationManager** - Executes data migration pipelines using MongoDB aggregations
+
+### Supporting Components
+
+- **VersionNumber** - Parses and compares version strings (major.minor.patch.enumerator)
+- **SchemaRenderer** - Renders schemas in JSON and BSON formats
+- **SchemaValidator** - Validates schema definitions and configurations
+- **SchemaTypes** - Type definitions and enums for schema operations
 
 ## Prerequisites
 
@@ -37,7 +72,17 @@ export EXIT_AFTER_PROCESSING=false
 
 4. Run the API:
 ```bash
+# Start API server
 pipenv run local
+
+# Start with custom input folder
+INPUT_FOLDER=./tests/test_cases/small_sample pipenv run local
+
+# Run in debug mode
+pipenv run debug
+
+# Process all collections and exit (batch mode)
+pipenv run batch
 ```
 
 ## Configuration
@@ -46,22 +91,43 @@ The API is configured through environment variables:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MONGO_DB_NAME` | MongoDB database name | - |
-| `MONGO_CONNECTION_STRING` | MongoDB connection string | - |
-| `INPUT_FOLDER` | Directory containing configurations | - |
-| `AUTO_PROCESS` | Process configurations on startup | false |
-| `EXIT_AFTER_PROCESSING` | Exit after processing or expose API | false |
+| `MONGO_DB_NAME` | MongoDB database name | `stage0` |
+| `MONGO_CONNECTION_STRING` | MongoDB connection string | `mongodb://root:example@localhost:27017/?tls=false&directConnection=true` |
+| `INPUT_FOLDER` | Directory containing configurations | `./stage0_input` |
+| `AUTO_PROCESS` | Process configurations on startup | `false` |
+| `EXIT_AFTER_PROCESSING` | Exit after processing or expose API | `false` |
+| `LOGGING_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR) | `INFO` |
 
 ## API Usage
 
 The API provides endpoints for managing MongoDB collections, including:
-- Collection configuration
-- Schema management
-- Index management
-- Data migrations
+- Collection configuration management
+- Schema validation and application
+- Index creation and deletion
+- Data migrations via aggregation pipelines
+- Version tracking and processing
 
 For detailed API examples, see [CURL_EXAMPLES.md](./docs/CURL_EXAMPLES.md).
 For detailed usage information see [REFERENCE.md](./docs/REFERENCE.md).
+
+## Development Workflow
+
+### Running Tests
+```bash
+pipenv run test
+```
+
+### API Testing with StepCI
+```bash
+pipenv run stepci
+pipenv run load  # Load testing
+```
+
+### Container Deployment
+```bash
+pipenv run build
+pipenv run container
+```
 
 ## Contributing
 

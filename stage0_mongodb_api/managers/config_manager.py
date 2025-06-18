@@ -4,16 +4,21 @@ import yaml
 import os
 import logging
 from stage0_mongodb_api.managers.version_number import VersionNumber
+from stage0_mongodb_api.managers.version_manager import VersionManager
+from stage0_mongodb_api.managers.schema_manager import SchemaManager
+from stage0_mongodb_api.managers.index_manager import IndexManager
+from stage0_mongodb_api.managers.migration_manager import MigrationManager
 
 logger = logging.getLogger(__name__)
 
 class ConfigManager:
-    """Manages collection configurations and version resolution.
+    """Manages collection configurations and version processing.
     
     This class handles:
     1. Loading and validating collection configurations
     2. Resolving schema and enumerator versions
-    3. Providing configuration data to other services
+    3. Processing version updates for collections
+    4. Coordinating schema, index, and migration operations
     """
     
     def __init__(self):
@@ -21,7 +26,13 @@ class ConfigManager:
         self.config = Config.get_instance()
         self.collection_configs: Dict[str, Dict] = {}
         self.load_errors: List[Dict] = []
+        self.version_manager = VersionManager()
+        self.index_manager = IndexManager()
+        self.migration_manager = MigrationManager()
         self._load_collection_configs()
+        
+        # Create schema manager with our collection configs
+        self.schema_manager = SchemaManager(self.collection_configs)
         
     def _load_collection_configs(self) -> None:
         """Load collection configurations from the input folder.
@@ -138,4 +149,146 @@ class ConfigManager:
                     continue
                         
         return errors
+
+    def get_collection_config(self, collection_name: str) -> Optional[Dict]:
+        """Get a specific collection configuration.
+        
+        Args:
+            collection_name: Name of the collection to retrieve
+            
+        Returns:
+            Dict containing the collection configuration, or None if not found
+        """
+        return self.collection_configs.get(collection_name)
+
+    def process_collection_versions(self, collection_name: str) -> List[Dict]:
+        """Process all pending versions for a collection.
+        
+        This method coordinates the processing workflow by:
+        1. Getting current version from database
+        2. Identifying pending versions from config
+        3. Processing each version in sequence
+        4. Updating version records
+        
+        Args:
+            collection_name: Name of the collection to process
+            
+        Returns:
+            List[Dict]: List of operation results
+            
+        Raises:
+            ValueError: If collection_name is empty or not found in configs
+        """
+        if not collection_name:
+            raise ValueError("Collection name cannot be empty")
+            
+        if collection_name not in self.collection_configs:
+            raise ValueError(f"Collection '{collection_name}' not found in configurations")
+            
+        collection_config = self.collection_configs[collection_name]
+        versions = collection_config.get("versions", [])
+        
+        if not versions:
+            logger.warning(f"No versions found for collection: {collection_name}")
+            return []
+            
+        operations = []
+        current_version = VersionNumber(self.version_manager.get_current_version(collection_name))
+        
+        try:
+            # Process each version in sequence
+            for version_config in versions:
+                version_number = VersionNumber(version_config.get("version"))
+                
+                # Only process versions greater than current version
+                if version_number > current_version:
+                    logger.info(f"Processing version {str(version_number)} for {collection_name}")
+                    operations.extend(self._process_version(collection_name, version_config))
+                    current_version = VersionNumber(self.version_manager.get_current_version(collection_name))
+                else:
+                    logger.info(f"Skipping version {str(version_number)} for {collection_name} - already processed")
+                    
+        except Exception as e:
+            logger.error(f"Error during version processing for {collection_name}: {str(e)}")
+            operations.append({
+                "status": "error",
+                "operation": "version_processing",
+                "collection": collection_name,
+                "version": "unknown",
+                "error": f"Error during version processing: {str(e)}"
+            })
+            
+        return operations
+        
+    def _process_version(self, collection_name: str, version_config: Dict) -> List[Dict]:
+        """Process a single version configuration for a collection.
+        
+        Args:
+            collection_name: Name of the collection
+            version_config: Version configuration to process
+            
+        Returns:
+            List[Dict]: List of operation results, including any errors that occurred
+        """
+        operations = []
+
+        try:
+            # Required: Remove existing schema validation
+            operations.append(self.schema_manager.remove_schema(collection_name))
+            
+            # Optional: Process drop_indexes if present
+            if "drop_indexes" in version_config:
+                for index in version_config["drop_indexes"]:
+                    operations.append(self.index_manager.drop_index(collection_name, index))
+                
+            # Optional: Process aggregations if present
+            if "aggregations" in version_config:
+                for pipeline in version_config["aggregations"]:
+                    operations.append(self.migration_manager.run_migration(collection_name, pipeline))
+                
+            # Optional: Process add_indexes if present
+            if "add_indexes" in version_config:
+                for index in version_config["add_indexes"]:
+                    operations.append(self.index_manager.create_index(collection_name, index))
+                
+            # Required: Apply schema validation
+            operations.append(self.schema_manager.apply_schema(collection_name, version_config.get("schema")))
+                
+            # Update version if version string is present
+            if "version" in version_config:
+                operations.append(self.version_manager.update_version(collection_name, version_config["version"]))
+                
+        except Exception as e:
+            logger.error(f"Error processing version for {collection_name}: {str(e)}")
+            operations.append({
+                "status": "error",
+                "operation": "version_processing",
+                "collection": collection_name,
+                "version": version_config.get("version", "unknown"),
+                "error": str(e)
+            })
+        
+        return operations
+
+    def process_all_collections(self) -> Dict[str, List[Dict]]:
+        """Process all collections that have pending versions.
+        
+        Returns:
+            Dict[str, List[Dict]]: Dictionary mapping collection names to their operation results
+        """
+        results = {}
+        
+        for collection_name in self.collection_configs.keys():
+            try:
+                results[collection_name] = self.process_collection_versions(collection_name)
+            except Exception as e:
+                logger.error(f"Error processing collection {collection_name}: {str(e)}")
+                results[collection_name] = [{
+                    "status": "error",
+                    "operation": "collection_processing",
+                    "collection": collection_name,
+                    "error": str(e)
+                }]
+                
+        return results
  

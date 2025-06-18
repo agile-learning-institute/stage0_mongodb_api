@@ -26,8 +26,7 @@ class TestCollectionServices(unittest.TestCase):
         self.assertIn("simple", result)
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
-    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
-    def test_process_collections(self, mock_version_manager, mock_config_manager):
+    def test_process_collections(self, mock_config_manager):
         """Test processing all collections."""
         # Arrange
         mock_config_manager.return_value.collection_configs = {
@@ -36,7 +35,7 @@ class TestCollectionServices(unittest.TestCase):
             "media": {"name": "media"},
             "search": {"name": "search"}
         }
-        mock_version_manager.return_value.process_versions.return_value = [
+        mock_config_manager.return_value.process_collection_versions.return_value = [
             {"status": "success", "operation": "schema_update"},
             {"status": "success", "operation": "schema_update"},
             {"status": "success", "operation": "schema_update"},
@@ -54,15 +53,14 @@ class TestCollectionServices(unittest.TestCase):
         self.assertEqual(result[3]["status"], "success")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
-    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
-    def test_process_collection_success(self, mock_version_manager, mock_config_manager):
+    def test_process_collection_success(self, mock_config_manager):
         """Test processing a specific collection successfully."""
         # Arrange
         mock_config_manager.return_value.get_collection_config.return_value = {
             "name": "simple",
             "versions": ["1.0.0"]
         }
-        mock_version_manager.return_value.process_versions.return_value = [
+        mock_config_manager.return_value.process_collection_versions.return_value = [
             {"status": "success", "operation": "schema_update"}
         ]
         collection_name = "simple"
@@ -76,8 +74,7 @@ class TestCollectionServices(unittest.TestCase):
         self.assertEqual(result["operations"], [{"status": "success", "operation": "schema_update"}])
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
-    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
-    def test_process_collection_not_found(self, mock_version_manager, mock_config_manager):
+    def test_process_collection_not_found(self, mock_config_manager):
         """Test processing a non-existent collection."""
         # Arrange
         mock_config_manager.return_value.get_collection_config.return_value = None
@@ -90,12 +87,11 @@ class TestCollectionServices(unittest.TestCase):
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["collection"], collection_name)
         self.assertEqual(result["error"], "Collection configuration not found")
-        mock_version_manager.return_value.process_versions.assert_not_called()
+        mock_config_manager.return_value.process_collection_versions.assert_not_called()
         mock_config_manager.return_value.get_collection_config.assert_called_once_with(collection_name)
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
-    @patch('stage0_mongodb_api.services.collection_service.VersionManager')
-    def test_process_collections_with_error(self, mock_version_manager, mock_config_manager):
+    def test_process_collections_with_error(self, mock_config_manager):
         """Test processing collections when an error occurs."""
         # Arrange
         mock_config_manager.return_value.collection_configs = {
@@ -104,7 +100,7 @@ class TestCollectionServices(unittest.TestCase):
                 "versions": ["1.0.0"]
             }
         }
-        mock_version_manager.return_value.process_versions.side_effect = Exception("Test error")
+        mock_config_manager.return_value.process_collection_versions.side_effect = Exception("Test error")
         
         # Act
         result = CollectionService.process_collections()

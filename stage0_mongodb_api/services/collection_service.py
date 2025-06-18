@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional
 import logging
 from stage0_py_utils import Config
-from stage0_mongodb_api.managers.version_manager import VersionManager
 from stage0_mongodb_api.managers.config_manager import ConfigManager
 
 logger = logging.getLogger(__name__)
@@ -60,7 +59,6 @@ class CollectionService:
             }
         """
         config_manager = ConfigManager()
-        version_manager = VersionManager()
         
         # Get collection configuration
         collection = config_manager.get_collection_config(collection_name)
@@ -71,8 +69,8 @@ class CollectionService:
                 "error": "Collection configuration not found"
             }
             
-        # Process versions through version manager
-        operations = version_manager.process_versions(collection_name, collection.get("versions", []))
+        # Process collection versions through config manager
+        operations = config_manager.process_collection_versions(collection_name)
             
         return {
             "status": "success",

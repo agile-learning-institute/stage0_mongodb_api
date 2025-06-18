@@ -13,18 +13,12 @@ class TestVersionManager(unittest.TestCase):
         self.mock_mongo_instance = self.mongo_patcher.start()
         self.mock_mongo_instance.return_value = self.mock_mongo
         
-        # Patch SchemaManager to prevent file system access
-        self.schema_manager_patcher = patch('stage0_mongodb_api.managers.version_manager.SchemaManager')
-        self.mock_schema_manager = self.schema_manager_patcher.start()
-        self.mock_schema_manager.return_value = MagicMock()
-        
         # Create VersionManager after mocks are set up
         self.version_manager = VersionManager()
 
     def tearDown(self):
         """Clean up test fixtures"""
         self.mongo_patcher.stop()
-        self.schema_manager_patcher.stop()
 
     def test_get_current_version_empty_collection_name(self):
         """Test getting current version with empty collection name"""

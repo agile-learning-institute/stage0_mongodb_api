@@ -1,14 +1,16 @@
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Optional
 import os
 import re
 import yaml
 import json
+import logging
 from stage0_py_utils import Config, MongoIO
-from stage0_mongodb_api.managers.config_manager import ConfigManager
 from stage0_mongodb_api.managers.schema_renderer import SchemaRenderer
 from stage0_mongodb_api.managers.schema_validator import SchemaValidator
 from stage0_mongodb_api.managers.schema_types import SchemaContext, SchemaFormat
 from stage0_mongodb_api.managers.version_number import VersionNumber
+
+logger = logging.getLogger(__name__)
 
 class SchemaError(Exception):
     """Base exception for schema-related errors."""
@@ -17,24 +19,29 @@ class SchemaError(Exception):
 class SchemaManager:
     """Manager class for handling schema operations."""
     
-    def __init__(self):
+    def __init__(self, collection_configs: Optional[Dict[str, Dict]] = None):
         """Initialize the schema manager.
         
         Args:
-            config_manager: Configuration manager instance
+            collection_configs: Optional collection configurations. If not provided,
+                               will be loaded from the input folder.
         """
         self.config = Config.get_instance()
         self.mongo = MongoIO.get_instance()
-        self.config_manager = ConfigManager()
+        self.collection_configs = collection_configs or {}
         self.types: Dict = {}
         self.enumerators: List[Dict] = []
         self.dictionaries: Dict = {}
 
         # Load all schema definitions
-        self.load_errors: List[Dict] = self.config_manager.load_errors
+        self.load_errors: List[Dict] = []
         self.load_errors.extend(self._load_types())
         self.load_errors.extend(self._load_enumerators())
         self.load_errors.extend(self._load_dictionaries())
+        
+        # If collection_configs wasn't provided, load them
+        if not self.collection_configs:
+            self._load_collection_configs()
         
     def _load_types(self) -> List[Dict]:
         """Load type definitions.
@@ -158,20 +165,65 @@ class SchemaManager:
             })
         return errors
             
+    def _load_collection_configs(self) -> None:
+        """Load collection configurations from the input folder.
+        
+        This method is only called if collection_configs is not provided in the constructor.
+        """
+        collections_folder = os.path.join(self.config.INPUT_FOLDER, "collections")
+        logger.info(f"Loading collections from {collections_folder}")
+        
+        if not os.path.exists(collections_folder):
+            self.load_errors.append({
+                "error": "directory_not_found",
+                "error_id": "CFG-001",
+                "path": collections_folder,
+                "message": "Collections directory not found"
+            })
+            return
+            
+        # Load all YAML files from collections folder
+        for file in os.listdir(collections_folder):
+            if not file.endswith(".yaml"):
+                continue
+                
+            file_path = os.path.join(collections_folder, file)
+            try:
+                with open(file_path, "r") as f:
+                    data = yaml.safe_load(f)
+                    key = os.path.splitext(file)[0]
+                    self.collection_configs[key] = data
+            except yaml.YAMLError as e:
+                self.load_errors.append({
+                    "error": "parse_error",
+                    "error_id": "CFG-002",
+                    "file": file,
+                    "message": str(e)
+                })
+            except Exception as e:
+                self.load_errors.append({
+                    "error": "load_error",
+                    "error_id": "CFG-003",
+                    "file": file,
+                    "message": str(e)
+                })
+                
+        logger.info(f"Loaded {len(self.collection_configs)} collection configurations")
+        
     def validate_schema(self) -> List[Dict]:
         """Validate all loaded schema definitions.
         
         Returns:
             List of validation errors
         """
-        errors = self.config_manager.validate_configs()
+        errors = []
         
         # Create validation context
         context: SchemaContext = {
             "types": self.types,
             "enumerators": self.enumerators,
             "dictionaries": self.dictionaries,
-            "collection_configs": self.config_manager.collection_configs,
+            "collection_configs": self.collection_configs,
             "schema_name": None,
             "format": None
         }
@@ -194,7 +246,7 @@ class SchemaManager:
             "types": self.types,
             "dictionaries": self.dictionaries,
             "enumerators": self.enumerators,
-            "collection_configs": self.config_manager.collection_configs
+            "collection_configs": self.collection_configs
         }
         
         return SchemaRenderer.render_schema(schema_name, format, context)
@@ -207,7 +259,7 @@ class SchemaManager:
         """
         rendered = {}
         
-        for collection_name, collection_config in self.config_manager.collection_configs.items():
+        for collection_name, collection_config in self.collection_configs.items():
             for version_config in collection_config["versions"]:
                 # Get version string and ensure it has collection name
                 version_name = f"{collection_name}.{version_config["version"]}"
