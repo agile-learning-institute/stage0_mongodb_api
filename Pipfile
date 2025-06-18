@@ -10,7 +10,6 @@ batch = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api AUTO_PROCESS=True EXIT_AFTE
 start = "sh -c 'stage0 down && stage0 up mongodb && pipenv run local'"
 test = "python -m unittest discover -s ./tests -p 'test_*.py'"
 stepci = "stepci run ./tests/stepci.yaml"
-load = "stepci run ./tests/stepci.yaml --loadtest"
 build = "docker build --tag ghcr.io/agile-learning-institute/stage0_mongodb_api:latest ."
 container = "sh -c 'stage0 down && pipenv run build && stage0 up stage0-mongodb-api'"
 
