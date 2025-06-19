@@ -114,17 +114,18 @@ paths:
                 items:
                   type: object
 
-  /api/render/json_schema/{name}:
+  /api/render/json_schema/{schema_name}:
     get:
-      summary: Get a Json Schema rendered for a collection
-      description: Json Schema 
+      summary: Get a Json Schema rendered for a schema
+      description: Json Schema for a specific schema version (e.g., "collection.1.0.0.1")
       operationId: render_json_schema
       parameters:
-        - name: name
+        - name: schema_name
           in: path
           required: true
           schema:
             type: string
+            description: Complete schema name including version (e.g., "collection.1.0.0.1")
       responses:
         '200':
           description: Schema
@@ -133,7 +134,7 @@ paths:
               schema:
                 type: object
         '404':
-          description: Collection not found
+          description: Schema not found
           content:
             application/json:
               schema:
@@ -147,17 +148,18 @@ paths:
                 items:
                   type: object
 
-  /api/render/bson_schema/{name}:
+  /api/render/bson_schema/{schema_name}:
     get:
-      summary: Get a Bson Schema rendered for a collection
-      description: Bson Schema 
+      summary: Get a Bson Schema rendered for a schema
+      description: Bson Schema for a specific schema version (e.g., "collection.1.0.0.1")
       operationId: render_bson_schema
       parameters:
-        - name: name
+        - name: schema_name
           in: path
           required: true
           schema:
             type: string
+            description: Complete schema name including version (e.g., "collection.1.0.0.1")
       responses:
         '200':
           description: Schema
@@ -166,7 +168,7 @@ paths:
               schema:
                 type: object
         '404':
-          description: Collection not found
+          description: Schema not found
           content:
             application/json:
               schema:
@@ -180,17 +182,18 @@ paths:
                 items:
                   type: object
 
-  /api/render/openapi/{name}:
+  /api/render/openapi/{schema_name}:
     get:
-      summary: Get a OpenAPI rendered for a collection
-      description: OpenAPI Specification
+      summary: Get a OpenAPI rendered for a schema
+      description: OpenAPI Specification for a specific schema version (e.g., "collection.1.0.0.1")
       operationId: render_openapi
       parameters:
-        - name: name
+        - name: schema_name
           in: path
           required: true
           schema:
             type: string
+            description: Complete schema name including version (e.g., "collection.1.0.0.1")
       responses:
         '200':
           description: OpenAPI Specification
@@ -199,7 +202,7 @@ paths:
               schema:
                 type: object
         '404':
-          description: Collection not found
+          description: Schema not found
           content:
             application/json:
               schema:
