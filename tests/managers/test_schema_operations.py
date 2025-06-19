@@ -77,31 +77,13 @@ class TestSchemaOperations(unittest.TestCase):
         schema_manager = SchemaManager()
         
         # Act
-        result = schema_manager.remove_schema("simple.1.0.0.1")
+        result = schema_manager.remove_schema("simple")
         
         # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "remove_schema")
         self.assertEqual(result["collection"], "simple")
         mock_mongo.remove_schema.assert_called_once_with("simple")
-
-    @patch('stage0_py_utils.MongoIO.get_instance')
-    def test_remove_schema_value_error(self, mock_get_instance):
-        """Test removing schema with invalid version name."""
-        # Arrange
-        mock_mongo = MagicMock()
-        mock_get_instance.return_value = mock_mongo
-        schema_manager = SchemaManager()
-        
-        # Act
-        result = schema_manager.remove_schema("invalid_format")
-        
-        # Assert
-        self.assertEqual(result["status"], "error") 
-        self.assertEqual(result["operation"], "remove_schema")
-        self.assertEqual(result["collection"], "invalid_format")
-        self.assertIn("Invalid version format", result["message"])
-        mock_mongo.remove_schema.assert_not_called()
 
     @patch('stage0_py_utils.MongoIO.get_instance')
     def test_remove_schema_exception(self, mock_get_instance):

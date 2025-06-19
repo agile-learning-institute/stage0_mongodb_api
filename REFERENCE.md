@@ -77,6 +77,7 @@ The API is configured through environment variables. With the exception of INPUT
 | `MONGO_CONNECTION_STRING` | MongoDB connection string | `mongodb://root:example@localhost:27017/?tls=false&directConnection=true` |
 | `VERSION_COLLECTION_NAME`| MongoDB Version Collection name | `CollectionVersions` |
 | `INPUT_FOLDER` | Directory containing configurations | `/input` |
+| `LOAD_TEST_DATA` | Load Test data during processing | `false` |
 | `AUTO_PROCESS` | Process configurations on startup | `false` |
 | `EXIT_AFTER_PROCESSING` | Exit after processing | `false` |
 | `LOGGING_LEVEL` | Logging level (DEBUG, INFO, WARNING, ERROR) | `INFO` |

@@ -6,7 +6,7 @@ name = "pypi"
 [scripts]
 local = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api python3 -m server'"
 debug = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api LOGGING_LEVEL=DEBUG python3 -m server'"
-batch = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api AUTO_PROCESS=True EXIT_AFTER_PROCESSING=True python3 -m server'"
+batch = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api AUTO_PROCESS=True EXIT_AFTER_PROCESSING=True LOAD_TEST_DATA=True python3 -m server'"
 start = "sh -c 'stage0 down && stage0 up mongodb && pipenv run local'"
 test = "python -m unittest discover -s ./tests -p 'test_*.py'"
 stepci_observability = "stepci run ./tests/stepci/observability.yaml"

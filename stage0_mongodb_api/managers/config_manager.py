@@ -252,6 +252,18 @@ class ConfigManager:
                 
             # Update version if version string is present
             operations.append(self.version_manager.update_version(collection_name, version_config["version"]))
+            
+            # Optional: Load test data if enabled and present
+            if "test_data" in version_config and self.config.LOAD_TEST_DATA:
+                data_file = os.path.join(self.config.INPUT_FOLDER, "test_data", version_config["test_data"])
+                results = self.mongo_io.load_test_data(collection_name, data_file)
+                operations.append({
+                    "status": "success",
+                    "operation": "load_test_data",
+                    "collection": collection_name,
+                    "test_data": str(data_file),
+                    "results": results
+                })
                 
         except Exception as e:
             logger.error(f"Error processing version for {collection_name}: {str(e)}")
