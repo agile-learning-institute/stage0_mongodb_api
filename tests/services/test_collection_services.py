@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import os
-from stage0_mongodb_api.services.collection_service import CollectionService
+from stage0_mongodb_api.services.collection_service import CollectionService, CollectionNotFoundError, CollectionProcessingError
 from stage0_py_utils import Config
 
 class TestCollectionServices(unittest.TestCase):
@@ -12,63 +12,136 @@ class TestCollectionServices(unittest.TestCase):
         self.test_cases_dir = os.path.join(os.path.dirname(__file__), "..", "test_cases")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
-    def test_list_collections_small_sample(self, mock_config_manager):
-        """Test listing all collections using simple data."""
-        # Arrange
+    def test_list_collections_success(self, mock_config_manager):
+        """Test listing all collections successfully."""
         mock_config_manager.return_value.collection_configs = {"simple": {}}
-        
-        # Act
-        result = CollectionService.list_collections()
-
-        # Assert
-        self.assertEqual(len(result), 1)  # Small sample has 1 collection
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        with patch('stage0_mongodb_api.services.collection_service.VersionManager') as mock_version_manager:
+            mock_version_manager.get_version_string.return_value = "simple.1.0.0.1"
+            result = CollectionService.list_collections()
+        self.assertEqual(len(result), 1)
         self.assertIsInstance(result, dict)
         self.assertIn("simple", result)
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
-    def test_process_collections(self, mock_config_manager):
-        """Test processing all collections."""
-        # Arrange
+    def test_list_collections_load_error(self, mock_config_manager):
+        """Test listing collections with load errors."""
+        mock_config_manager.return_value.load_errors = [{"error": "load_error"}]
+        with self.assertRaises(CollectionProcessingError) as context:
+            CollectionService.list_collections()
+        self.assertEqual(context.exception.collection_name, "collections")
+        self.assertEqual(context.exception.errors, [{"error": "load_error"}])
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_list_collections_validation_error(self, mock_config_manager):
+        """Test listing collections with validation errors."""
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = [{"error": "validation_error"}]
+        with self.assertRaises(CollectionProcessingError) as context:
+            CollectionService.list_collections()
+        self.assertEqual(context.exception.collection_name, "collections")
+        self.assertEqual(context.exception.errors, [{"error": "validation_error"}])
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_get_collection_success(self, mock_config_manager):
+        """Test getting a collection successfully."""
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        mock_config_manager.return_value.get_collection_config.return_value = {"name": "simple"}
+        result = CollectionService.get_collection("simple")
+        self.assertEqual(result, {"name": "simple"})
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_get_collection_not_found(self, mock_config_manager):
+        """Test getting a collection that does not exist."""
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        mock_config_manager.return_value.get_collection_config.return_value = None
+        with self.assertRaises(CollectionNotFoundError):
+            CollectionService.get_collection("nonexistent")
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_get_collection_load_error(self, mock_config_manager):
+        """Test getting a collection with load errors."""
+        mock_config_manager.return_value.load_errors = [{"error": "load_error"}]
+        with self.assertRaises(CollectionProcessingError) as context:
+            CollectionService.get_collection("simple")
+        self.assertEqual(context.exception.collection_name, "simple")
+        self.assertEqual(context.exception.errors, [{"error": "load_error"}])
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_get_collection_validation_error(self, mock_config_manager):
+        """Test getting a collection with validation errors."""
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = [{"error": "validation_error"}]
+        with self.assertRaises(CollectionProcessingError) as context:
+            CollectionService.get_collection("simple")
+        self.assertEqual(context.exception.collection_name, "simple")
+        self.assertEqual(context.exception.errors, [{"error": "validation_error"}])
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_process_collections_success(self, mock_config_manager):
+        """Test processing all collections successfully."""
         mock_config_manager.return_value.collection_configs = {
             "user": {"name": "user"},
             "organization": {"name": "organization"},
             "media": {"name": "media"},
             "search": {"name": "search"}
         }
-        mock_config_manager.return_value.process_collection_versions.return_value = [
-            {"status": "success", "operation": "schema_update"},
-            {"status": "success", "operation": "schema_update"},
-            {"status": "success", "operation": "schema_update"},
-            {"status": "success", "operation": "schema_update"},
-        ]
-        
-        # Act
-        result = CollectionService.process_collections()
-
-        # Assert
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        with patch.object(CollectionService, 'process_collection', return_value={"status": "success", "collection": "user", "operations": []}) as mock_proc:
+            result = CollectionService.process_collections()
         self.assertEqual(len(result), 4)
-        self.assertEqual(result[0]["status"], "success")
-        self.assertEqual(result[1]["status"], "success")
-        self.assertEqual(result[2]["status"], "success")
-        self.assertEqual(result[3]["status"], "success")
+        mock_proc.assert_called()
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_process_collections_with_error(self, mock_config_manager):
+        """Test processing collections when an error occurs."""
+        mock_config_manager.return_value.collection_configs = {
+            "simple": {
+                "name": "simple",
+                "versions": ["1.0.0"]
+            }
+        }
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        with patch.object(CollectionService, 'process_collection', side_effect=Exception("Test error")):
+            result = CollectionService.process_collections()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["status"], "error")
+        self.assertEqual(result[0]["collection"], "simple")
+        self.assertEqual(result[0]["error"], "Test error")
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_process_collections_skips_not_found(self, mock_config_manager):
+        """Test process_collections skips collections that raise CollectionNotFoundError."""
+        mock_config_manager.return_value.collection_configs = {
+            "user": {"name": "user"},
+            "ghost": {"name": "ghost"}
+        }
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        def side_effect(name, token=None):
+            if name == "ghost":
+                raise CollectionNotFoundError(name)
+            return {"status": "success", "collection": name, "operations": []}
+        with patch.object(CollectionService, 'process_collection', side_effect=side_effect):
+            result = CollectionService.process_collections()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["collection"], "user")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collection_success(self, mock_config_manager):
         """Test processing a specific collection successfully."""
-        # Arrange
-        mock_config_manager.return_value.get_collection_config.return_value = {
-            "name": "simple",
-            "versions": ["1.0.0"]
-        }
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
         mock_config_manager.return_value.process_collection_versions.return_value = [
             {"status": "success", "operation": "schema_update"}
         ]
         collection_name = "simple"
-
-        # Act
         result = CollectionService.process_collection(collection_name)
-
-        # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["collection"], collection_name)
         self.assertEqual(result["operations"], [{"status": "success", "operation": "schema_update"}])
@@ -76,40 +149,24 @@ class TestCollectionServices(unittest.TestCase):
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collection_not_found(self, mock_config_manager):
         """Test processing a non-existent collection."""
-        # Arrange
-        mock_config_manager.return_value.get_collection_config.return_value = None
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        mock_config_manager.return_value.process_collection_versions.side_effect = ValueError("Collection 'nonexistent' not found in configurations")
         collection_name = "nonexistent"
-
-        # Act
-        result = CollectionService.process_collection(collection_name)
-
-        # Assert
-        self.assertEqual(result["status"], "error")
-        self.assertEqual(result["collection"], collection_name)
-        self.assertEqual(result["error"], "Collection configuration not found")
-        mock_config_manager.return_value.process_collection_versions.assert_not_called()
-        mock_config_manager.return_value.get_collection_config.assert_called_once_with(collection_name)
+        with self.assertRaises(CollectionNotFoundError):
+            CollectionService.process_collection(collection_name)
+        mock_config_manager.return_value.process_collection_versions.assert_called_once_with(collection_name)
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
-    def test_process_collections_with_error(self, mock_config_manager):
-        """Test processing collections when an error occurs."""
-        # Arrange
-        mock_config_manager.return_value.collection_configs = {
-            "simple": {
-                "name": "simple",
-                "versions": ["1.0.0"]
-            }
-        }
-        mock_config_manager.return_value.process_collection_versions.side_effect = Exception("Test error")
-        
-        # Act
-        result = CollectionService.process_collections()
-
-        # Assert
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["status"], "error")
-        self.assertEqual(result[0]["collection"], "simple")
-        self.assertEqual(result[0]["error"], "Test error")
+    def test_process_collection_processing_error(self, mock_config_manager):
+        """Test process_collection raises CollectionProcessingError for generic errors."""
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        mock_config_manager.return_value.process_collection_versions.side_effect = Exception("Some error")
+        with self.assertRaises(CollectionProcessingError) as context:
+            CollectionService.process_collection("simple")
+        self.assertEqual(context.exception.collection_name, "simple")
+        self.assertEqual(context.exception.errors[0]["message"], "Some error")
 
 if __name__ == '__main__':
     unittest.main()
