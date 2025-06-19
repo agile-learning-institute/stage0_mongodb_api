@@ -40,7 +40,7 @@ def handle_exit(signum, frame):
     logger.info("Closing MongoDB connection.")
     mongo.disconnect()
 
-    logger.info("Shutdown complete.")
+    logger.info("============= Shutdown complete. ===============")
     sys.exit(0)  
 
 # Register the signal handler
