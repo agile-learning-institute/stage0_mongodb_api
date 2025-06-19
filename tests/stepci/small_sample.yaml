@@ -1,0 +1,149 @@
+name: mongodb_api_small_sample
+version: "1.0"
+env:
+  host: localhost:8582
+
+tests:
+  collections:
+    name: Collections
+    steps:
+      - name: List Collections
+        http:
+          url: http://${{env.host}}/api/collections/
+          method: GET
+          check:
+            status: /200/
+            schema:
+              type: "object"
+              properties:
+                simple:
+                  type: "string"
+      - name: GET A Collection
+        http:
+          url: http://${{env.host}}/api/collections/simple
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                versions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      version:
+                        type: string
+                      test_data:
+                        type: string
+                      add_indexes:
+                        type: array
+                      drop_indexes:
+                        type: array
+                        items:
+                          type: string
+                      aggregations:
+                        type: array
+              required:
+                - name
+                - versions
+      - name: Process All Collections
+        http:
+          url: http://${{env.host}}/api/collections/
+          method: POST
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  collection:
+                    type: string
+                  operations:
+                    type: array
+                  status:
+                    type: string
+              required:
+                - collection
+                - operations
+                - status
+      - name: Process A Collection
+        http:
+          url: http://${{env.host}}/api/collections/simple
+          method: POST
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            schema:
+              type: object
+              properties:
+                collection:
+                  type: string
+                operations:
+                  type: array
+                status:
+                  type: string
+            required:
+              - collection
+              - operations
+              - status
+  render:
+    name: Test Render endpoints
+    steps:
+      - name: Render JSON Schema
+        http:
+          url: http://${{env.host}}/api/render/json_schema/simple.1.0.0.1
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+              title: "Simple"
+              description: "A simple collection for testing"
+              type: "object"
+              properties._id.description: "The unique identifier for the media"
+              properties._id.pattern: "^[0-9a-fA-F]{24}$"
+              properties._id.type: "string"
+              properties.name.description: "The name of the document"
+              properties.name.pattern: "^[a-zA-Z0-9_-]{4,40}$"
+              properties.name.type: "string"
+              properties.status.description: "The current status of the document"
+              properties.status.enum[0]: "active"
+              properties.status.enum[1]: "archived"
+              properties.status.type: "string"
+              required[0]: "_id"
+              required[1]: "status"
+              additionalProperties: false
+      - name: Render BSON Schema
+        http:
+          url: http://${{env.host}}/api/render/bson_schema/simple.1.0.0.1
+          method: GET
+          headers:
+            Content-Type: application/json          
+          check:
+            status: /200/
+            jsonpath:
+              title: "Simple"
+              description: "A simple collection for testing"
+              bsonType: "object"
+              properties._id.bsonType: "objectId"
+              properties._id.description: "The unique identifier for the media"
+              properties.name.bsonType: "string"
+              properties.name.description: "The name of the document"
+              properties.name.pattern: "^[a-zA-Z0-9_-]{4,40}$"
+              properties.status.bsonType: "string"
+              properties.status.description: "The current status of the document"
+              properties.status.enum[0]: "active"
+              properties.status.enum[1]: "archived"
+              required[0]: "_id"
+              required[1]: "status"
+              additionalProperties: false

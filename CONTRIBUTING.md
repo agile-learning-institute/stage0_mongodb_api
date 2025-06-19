@@ -6,7 +6,7 @@ This document provides information for developers contributing to the stage0_mon
 
 This project follows the [Stage0 development standards](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/docs/contributing.md) and implements [API standards](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/docs/api-standards.md) for consistency across the platform. The service is designed with [configurability](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/docs/service-configurability.md) and [observability](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/docs/service-observability.md) in mind.
 
-## Architecture Overview
+## Separation of Concerns
 
 ### Application Entry Point
 
@@ -63,6 +63,7 @@ pipenv run test --with-coverage
 
 # Select a test_case for the server
 export INPUT_FOLDER=./tests/test_cases/small_sample
+export INPUT_FOLDER=./tests/test_cases/large_sample
 
 # Set Debug Mode
 export LOGGING_LEVEL=DEBUG
@@ -82,8 +83,10 @@ pipenv run debug
 # Run in Batch mode (process and shut down)
 pipenv run batch
 
-# Run StepCI API black box testing
-pipenv run stepci
+# Run StepCI black box testing
+pipenv run stepci_observability
+pipenv run stepci_small_sample
+pipenv run stepci_large_sample
 
 # Build the API Docker Image
 pipenv run build
@@ -96,20 +99,21 @@ pipenv run container
 
 ### Test Structure
 
-The `tests/` directory contains comprehensive test coverage:
+The `tests/` directory contains python unit tests, stepci black box, and testing data.
 
 ```
 tests/
-├── managers/           # Manager class tests
-├── routes/            # API endpoint tests
-├── services/          # Service layer tests
-├── test_cases/        # Test data and configurations
-│   ├── small_sample/  # Minimal test configuration
+├── test_server.py     # Server.py unit tests
+├── managers/          # Manager class unit tests
+├── routes/            # Route class unit tests
+├── services/          # Service layer unit tests
+├── test_cases/        # Test data 
+│   ├── small_sample/  # Simple test configuration
 │   ├── large_sample/  # Complex test configuration
-│   └── validation_errors/ # Error scenario tests
-└── test_server.py     # Server integration tests
+│   ├── empty_input/   # Load Error testing
+│   ├── .../           # Additional test cases
 ```
-
+ 
 ### Test Cases
 
 The `tests/test_cases/` directory contains test scenarios:
@@ -118,44 +122,43 @@ The `tests/test_cases/` directory contains test scenarios:
 - **large_sample**: Complex multi-collection setup with relationships and advanced features
 - **validation_errors**: Test cases for error handling and validation scenarios
 - **minimum_valid**: Empty configuration for edge case testing
+If you need a new set of test data to validate features you are adding, feel free to add a new test case folder. Take note of these unit tests that use the test data. 
 
 ### Load and Validation Errors
  Load and validation unit testing leverages test cases with known errors. Assertions validate that the errors were thrown using the unique identifier thrown in the code. If you introduce new testing, make sure you add new unique identifiers here.
 
 ### Rendering Tests
- Rendering tests for both the small_sample and large_sample test cases is done using the expected output found in the expected/json_schema and expected/bson_schema folders. 
+ Rendering tests for both the small_sample and large_sample test cases is done using the expected output found in the `tests/test_cases/{case}/expected/json_schema` and `expected/bson_schema` folders. If your new test case needs to include rendering tests, you can add the expected output there and extend the rendering unit tests.
 
 ## CURL Examples
 
-### Collection Management Endpoints
-
 ```bash
-# Collection Endpoints
-# List Collections
-GET /api/collections
-# Returns all configured collections and their current status.
-
-# Process All Collections
-POST /api/collections/process
-
-# Process Specific Collection
-POST /api/collections/{collection_name}/process
-
-# Schema Rendering Endpoints
-# Render BSON Schema
-GET /api/render/bson_schema/{collection_name}
-
-# Render JSON Schema
-GET /api/render/json_schema/{collection_name}
-
-# Render OpenAPI Specification
-GET /api/render/openapi/{collection_name}
-
-# Configuration Endpoints
 # Get Configuration
-GET /api/config
+curl -X GET /api/config
 
 # Health Check
-GET /health
+curl -X GET /health
+
+# List Collections
+curl -X GET /api/collections/
+
+# Get a Collection Config
+curl -X GET /api/collections/{collection_name}
+
+# Process All Collections
+curl -X POST /api/collections/
+
+# Process Specific Collection
+curl -X POST /api/collections/{collection_name}
+
+# Render BSON Schema
+curl -X GET /api/render/bson_schema/{version_name}
+
+# Render JSON Schema
+curl -X GET /api/render/json_schema/{version_name}
+
+# Render OpenAPI Specification
+curl -X GET /api/render/openapi/{version_name}
+
 ```
 
