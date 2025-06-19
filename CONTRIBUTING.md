@@ -42,9 +42,7 @@ This project follows the [Stage0 development standards](https://github.com/agile
 
 ### Prerequisites
 
-- Python 3.8 or later
-- Pipenv
-- MongoDB (local or Docker)
+- Stage0 [Developers Edition](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/README.md)
 
 ### Installation
 

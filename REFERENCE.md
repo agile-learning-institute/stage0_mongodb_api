@@ -68,12 +68,14 @@ I'm doing all right, maybe I'll come drop by tomorrow again?
 
 ## Configuration Reference
 
-The API is configured through environment variables:
+The API is configured through environment variables. With the exception of INPUT_FOLDER, the default values for most values should be all you need for local development:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
+| `MONGODB_API_PORT` | API Port number | `8582` |
 | `MONGO_DB_NAME` | MongoDB database name | `stage0` |
 | `MONGO_CONNECTION_STRING` | MongoDB connection string | `mongodb://root:example@localhost:27017/?tls=false&directConnection=true` |
+| `VERSION_COLLECTION_NAME`| MongoDB Version Collection name | `CollectionVersions` |
 | `INPUT_FOLDER` | Directory containing configurations | `/input` |
 | `AUTO_PROCESS` | Process configurations on startup | `false` |
 | `EXIT_AFTER_PROCESSING` | Exit after processing | `false` |
