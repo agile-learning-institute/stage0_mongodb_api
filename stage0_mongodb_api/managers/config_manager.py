@@ -186,19 +186,15 @@ class ConfigManager:
             raise ValueError(f"Collection '{collection_name}' not found in configurations")
             
         collection_config = self.collection_configs[collection_name]
-        versions = collection_config.get("versions", [])
-        
-        if not versions:
-            logger.warning(f"No versions found for collection: {collection_name}")
-            return []
-            
+        versions = collection_config.get("versions", [])        
         operations = []
-        current_version = VersionNumber(self.version_manager.get_current_version(collection_name))
         
         try:
             # Process each version in sequence
             for version_config in versions:
+                current_version = VersionManager.get_current_version(collection_name)
                 version_number = VersionNumber(version_config.get("version"))
+                operations.append(f"Evaluating version {version_number}")
                 
                 # Only process versions greater than current version
                 if version_number > current_version:
@@ -252,11 +248,10 @@ class ConfigManager:
                     operations.append(self.index_manager.create_index(collection_name, index))
                 
             # Required: Apply schema validation
-            operations.append(self.schema_manager.apply_schema(collection_name, version_config.get("schema")))
+            operations.append(self.schema_manager.apply_schema(f"{collection_name}.{version_config.get("version")}"))
                 
             # Update version if version string is present
-            if "version" in version_config:
-                operations.append(self.version_manager.update_version(collection_name, version_config["version"]))
+            operations.append(self.version_manager.update_version(collection_name, version_config["version"]))
                 
         except Exception as e:
             logger.error(f"Error processing version for {collection_name}: {str(e)}")

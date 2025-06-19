@@ -67,6 +67,9 @@ export INPUT_FOLDER=./tests/test_cases/small_sample
 # Set Debug Mode
 export LOGGING_LEVEL=DEBUG
 
+# Change the testing database name
+export MONGO_DB_NAME=test_database
+
 # Start API server (starts MongoDB container first)
 pipenv run start
 
@@ -126,55 +129,33 @@ The `tests/test_cases/` directory contains test scenarios:
 
 ### Collection Management Endpoints
 
-#### List Collections
 ```bash
+# Collection Endpoints
+# List Collections
 GET /api/collections
-```
-Returns all configured collections and their current status.
+# Returns all configured collections and their current status.
 
-#### Process All Collections
-```bash
+# Process All Collections
 POST /api/collections/process
-```
-Processes all collections that have pending versions.
 
-#### Process Specific Collection
-```bash
+# Process Specific Collection
 POST /api/collections/{collection_name}/process
-```
-Processes a specific collection.
 
-### Schema Rendering Endpoints
-
-#### Render BSON Schema
-```bash
+# Schema Rendering Endpoints
+# Render BSON Schema
 GET /api/render/bson_schema/{collection_name}
-```
-Returns the BSON schema for a collection.
 
-#### Render JSON Schema
-```bash
+# Render JSON Schema
 GET /api/render/json_schema/{collection_name}
-```
-Returns the JSON schema for a collection.
 
-#### Render OpenAPI Specification
-```bash
+# Render OpenAPI Specification
 GET /api/render/openapi/{collection_name}
-```
-Returns the OpenAPI specification for a collection.
 
-### Configuration Endpoints
-
-#### Get Configuration
-```bash
+# Configuration Endpoints
+# Get Configuration
 GET /api/config
-```
-Returns the current configuration settings.
 
-#### Health Check
-```bash
+# Health Check
 GET /health
 ```
-Returns the health status of the API.
 

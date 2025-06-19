@@ -284,7 +284,6 @@ class SchemaManager:
             # Parse version using VersionNumber class
             version = VersionNumber(version_name)
             collection_name = version.collection_name
-            version_number = version.version
 
             # Render and apply schema
             bson_schema = self.render_one(version_name, SchemaFormat.BSON)
@@ -311,34 +310,30 @@ class SchemaManager:
             "schema": bson_schema
         }
 
-    def remove_schema(self, version_name: str) -> Dict:
+    def remove_schema(self, collection_name: str) -> Dict:
         """Remove schema validation from a collection.
         
         Args:
-            version_name: Name of the collection version (e.g. user.1.0.0.1)
+            collection_name: Name of the collection (e.g. user)
             
         Returns:
             Dict containing operation result
         """
         try:
-            # Parse version using VersionNumber class
-            version = VersionNumber(version_name)
-            collection_name = version.collection_name
-
             # Remove schema validation
             self.mongo.remove_schema(collection_name)
         except ValueError as e:
             return {
                 "status": "error",
                 "operation": "remove_schema",
-                "collection": version_name,
+                "collection": collection_name,
                 "message": f"Invalid version format: {str(e)}"
             }
         except Exception as e:
             return {
                 "status": "error",
                 "operation": "remove_schema",
-                "collection": version_name,
+                "collection": collection_name,
                 "message": str(e)
             }
 

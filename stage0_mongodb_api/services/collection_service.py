@@ -52,7 +52,7 @@ class CollectionService:
         # Create a dict of collection name: version string
         collections = {}
         for collection_name, collection in config_manager.collection_configs.items():
-            collections[collection_name] = VersionManager.get_version_string(collection_name)
+            collections[collection_name] = VersionManager.get_current_version(collection_name)
         return collections
 
     @staticmethod
