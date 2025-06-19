@@ -7,7 +7,7 @@ from stage0_mongodb_api.managers.version_number import VersionNumber
 logger = logging.getLogger(__name__)
 
 class VersionManager:
-    """Class for managing collection version tracking in MongoDB.
+    """Static class for managing collection version tracking in MongoDB.
     
     This class focuses on:
     1. Reading current versions from the database
@@ -15,11 +15,8 @@ class VersionManager:
     3. Version comparison and validation
     """
     
-    def __init__(self):
-        self.mongo = MongoIO.get_instance()
-        self.config = Config.get_instance()
-    
-    def get_current_version(self, collection_name: str) -> str:
+    @staticmethod
+    def get_current_version(collection_name: str) -> str:
         """Get the current version of a collection.
         
         Args:
@@ -35,8 +32,11 @@ class VersionManager:
         if not collection_name:
             raise ValueError("Collection name cannot be empty")
             
-        version_docs = self.mongo.get_documents(
-            self.config.VERSION_COLLECTION_NAME,
+        mongo = MongoIO.get_instance()
+        config = Config.get_instance()
+            
+        version_docs = mongo.get_documents(
+            config.VERSION_COLLECTION_NAME,
             match={"collection_name": collection_name}
         )
         
@@ -56,7 +56,8 @@ class VersionManager:
             return f"{collection_name}.{current_version}"
         return current_version
 
-    def update_version(self, collection_name: str, version: str) -> Dict:
+    @staticmethod
+    def update_version(collection_name: str, version: str) -> Dict:
         """Update the version of a collection.
         
         Args:
@@ -85,9 +86,12 @@ class VersionManager:
         if not version_obj.collection_name:
             version = f"{collection_name}.{version}"
             
+        mongo = MongoIO.get_instance()
+        config = Config.get_instance()
+            
         # Upsert version document
-        version_doc = self.mongo.upsert_document(
-            self.config.VERSION_COLLECTION_NAME,
+        version_doc = mongo.upsert_document(
+            config.VERSION_COLLECTION_NAME,
             match={"collection_name": collection_name},
             data={"collection_name": collection_name, "current_version": version}
         )
@@ -102,7 +106,8 @@ class VersionManager:
             "version": version
         }
 
-    def get_pending_versions(self, collection_name: str, available_versions: List[str]) -> List[str]:
+    @staticmethod
+    def get_pending_versions(collection_name: str, available_versions: List[str]) -> List[str]:
         """Get list of versions that need to be processed for a collection.
         
         Args:
@@ -112,7 +117,7 @@ class VersionManager:
         Returns:
             List[str]: List of version strings that are newer than current version
         """
-        current_version = VersionNumber(self.get_current_version(collection_name))
+        current_version = VersionNumber(VersionManager.get_current_version(collection_name))
         pending_versions = []
         
         for version_str in available_versions:
