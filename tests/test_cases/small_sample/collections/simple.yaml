@@ -3,3 +3,4 @@ description: Collection for testing
 name: simple
 versions:
   - version: "1.0.0.1"
+    test_data: simple.1.0.0.1.json

@@ -1,5 +1,12 @@
-{
-  "_id": {"$oid": "A00000000000000000000001"},
-  "name": "testDocument",
-  "status": "active"
-} 
+[
+  {
+    "_id": {"$oid": "A00000000000000000000001"},
+    "name": "testDocument1",
+    "status": "active"
+  },
+  {
+    "_id": {"$oid": "A00000000000000000000002"},
+    "name": "testDocument2",
+    "status": "archived"
+  }
+]

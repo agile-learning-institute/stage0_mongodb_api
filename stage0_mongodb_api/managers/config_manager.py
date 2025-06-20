@@ -3,6 +3,7 @@ from stage0_py_utils import Config
 import yaml
 import os
 import logging
+from stage0_py_utils import MongoIO
 from stage0_mongodb_api.managers.version_number import VersionNumber
 from stage0_mongodb_api.managers.version_manager import VersionManager
 from stage0_mongodb_api.managers.schema_manager import SchemaManager
@@ -24,6 +25,7 @@ class ConfigManager:
     def __init__(self):
         """Initialize the config manager."""
         self.config = Config.get_instance()
+        self.mongo_io = MongoIO()
         self.collection_configs: Dict[str, Dict] = {}
         self.load_errors: List[Dict] = []
         self.version_manager = VersionManager()
@@ -255,7 +257,7 @@ class ConfigManager:
             
             # Optional: Load test data if enabled and present
             if "test_data" in version_config and self.config.LOAD_TEST_DATA:
-                data_file = os.path.join(self.config.INPUT_FOLDER, "test_data", version_config["test_data"])
+                data_file = os.path.join(self.config.INPUT_FOLDER, "data", version_config["test_data"])
                 results = self.mongo_io.load_test_data(collection_name, data_file)
                 operations.append({
                     "status": "success",
