@@ -134,31 +134,31 @@ If you need a new set of test data to validate features you are adding, feel fre
 
 ```bash
 # Get Configuration
-curl -X GET /api/config
+curl -X GET http://localhost:8582/api/config
 
 # Health Check
-curl -X GET /health
+curl -X GET http://localhost:8582/health
 
 # List Collections
-curl -X GET /api/collections/
+curl -X GET http://localhost:8582/api/collections/
 
 # Get a Collection Config
-curl -X GET /api/collections/{collection_name}
+curl -X GET http://localhost:8582/api/collections/{collection_name}
 
 # Process All Collections
-curl -X POST /api/collections/
+curl -X POST http://localhost:8582/api/collections/
 
 # Process Specific Collection
-curl -X POST /api/collections/{collection_name}
+curl -X POST http://localhost:8582/api/collections/{collection_name}
 
 # Render BSON Schema
-curl -X GET /api/render/bson_schema/{version_name}
+curl -X GET http://localhost:8582/api/render/bson_schema/{version_name}
 
 # Render JSON Schema
-curl -X GET /api/render/json_schema/{version_name}
+curl -X GET http://localhost:8582/api/render/json_schema/{version_name}
 
 # Render OpenAPI Specification
-curl -X GET /api/render/openapi/{version_name}
+curl -X GET http://localhost:8582/api/render/openapi/{version_name}
 
 ```
 

@@ -201,7 +201,14 @@ class ConfigManager:
                 # Only process versions greater than current version
                 if version_number > current_version:
                     logger.info(f"Processing version {str(version_number)} for {collection_name}")
-                    operations.extend(self._process_version(collection_name, version_config))
+                    version_operations = self._process_version(collection_name, version_config)
+                    operations.extend(version_operations)
+                    
+                    # Check if any operation in this version failed
+                    if any(isinstance(op, dict) and op.get("status") == "error" for op in version_operations):
+                        logger.error(f"Version {version_number} processing failed for {collection_name}, stopping version processing")
+                        break
+                        
                     current_version = VersionNumber(self.version_manager.get_current_version(collection_name))
                 else:
                     logger.info(f"Skipping version {str(version_number)} for {collection_name} - already processed")
@@ -237,35 +244,31 @@ class ConfigManager:
             # Optional: Process drop_indexes if present
             if "drop_indexes" in version_config:
                 for index in version_config["drop_indexes"]:
+                    operations.append(f"Dropping index {index} for {collection_name}")
                     operations.append(self.index_manager.drop_index(collection_name, index))
                 
             # Optional: Process aggregations if present
             if "aggregations" in version_config:
                 for pipeline in version_config["aggregations"]:
+                    operations.append(f"Running Aggregation Pipeline for {collection_name}")
                     operations.append(self.migration_manager.run_migration(collection_name, pipeline))
                 
             # Optional: Process add_indexes if present
             if "add_indexes" in version_config:
-                for index in version_config["add_indexes"]:
-                    operations.append(self.index_manager.create_index(collection_name, index))
+                operations.append(f"Creating indexes for {collection_name}")
+                operations.append(self.index_manager.create_index(collection_name, version_config["add_indexes"]))
                 
             # Required: Apply schema validation
+            operations.append(f"Applying schema for {collection_name}")
             operations.append(self.schema_manager.apply_schema(f"{collection_name}.{version_config.get("version")}"))
                 
             # Update version if version string is present
+            operations.append(f"Updating version for {collection_name}")
             operations.append(self.version_manager.update_version(collection_name, version_config["version"]))
             
             # Optional: Load test data if enabled and present
             if "test_data" in version_config and self.config.LOAD_TEST_DATA:
-                data_file = os.path.join(self.config.INPUT_FOLDER, "data", version_config["test_data"])
-                results = self.mongo_io.load_test_data(collection_name, data_file)
-                operations.append({
-                    "status": "success",
-                    "operation": "load_test_data",
-                    "collection": collection_name,
-                    "test_data": str(data_file),
-                    "results": results
-                })
+                operations.append(self._load_test_data(collection_name, version_config["test_data"]))
                 
         except Exception as e:
             logger.error(f"Error processing version for {collection_name}: {str(e)}")
@@ -273,11 +276,53 @@ class ConfigManager:
                 "status": "error",
                 "operation": "version_processing",
                 "collection": collection_name,
-                "version": version_config.get("version", "unknown"),
                 "error": str(e)
             })
         
         return operations
+
+    def _load_test_data(self, collection_name: str, test_data_file: str) -> Dict:
+        """Load test data for a collection.
+        
+        Args:
+            collection_name: Name of the collection
+            test_data_file: Name of the test data file
+            
+        Returns:
+            Dict containing operation result with proper error handling for bulk write errors
+        """
+        from stage0_py_utils.mongo_utils.mongo_io import TestDataLoadError
+        try:
+            data_file = os.path.join(self.config.INPUT_FOLDER, "data", test_data_file)
+            results = self.mongo_io.load_test_data(collection_name, data_file)
+            
+            return {
+                "status": "success",
+                "operation": "load_test_data",
+                "collection": collection_name,
+                "test_data": str(data_file),
+                "results": results
+            }
+            
+        except TestDataLoadError as e:
+            return {
+                "status": "error",
+                "operation": "load_test_data",
+                "collection": collection_name,
+                "test_data": str(data_file),
+                "error": str(e),
+                "details": e.details
+            }
+        except Exception as e:
+            error_message = str(e)
+            logger.error(f"Failed to load test data for {collection_name}: {error_message}")
+            return {
+                "status": "error",
+                "operation": "load_test_data",
+                "collection": collection_name,
+                "test_data": str(data_file),
+                "error": error_message
+            }
 
     def process_all_collections(self) -> Dict[str, List[Dict]]:
         """Process all collections that have pending versions.

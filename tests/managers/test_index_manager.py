@@ -22,15 +22,15 @@ class TestIndexManager(unittest.TestCase):
         mock_mongo.get_instance.return_value = MagicMock()
         
         # Act
-        result = IndexManager.create_index(self.collection_name, self.index_config)
+        result = IndexManager.create_index(self.collection_name, [self.index_config])
         
         # Assert
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "create_index")
         self.assertEqual(result["collection"], self.collection_name)
-        self.assertEqual(result["index"], self.index_name)
+        self.assertIn(self.index_name, result["indexes"])
         mock_mongo.get_instance.return_value.create_index.assert_called_once_with(
-            self.collection_name, self.index_config
+            self.collection_name, [self.index_config]
         )
 
     def test_create_index_missing_name(self):
@@ -40,7 +40,7 @@ class TestIndexManager(unittest.TestCase):
         
         # Act & Assert
         with self.assertRaises(ValueError) as context:
-            IndexManager.create_index(self.collection_name, config_without_name)
+            IndexManager.create_index(self.collection_name, [config_without_name])
         self.assertEqual(str(context.exception), "Index configuration must include 'name' field")
 
     def test_create_index_missing_key(self):
@@ -50,7 +50,7 @@ class TestIndexManager(unittest.TestCase):
         
         # Act & Assert
         with self.assertRaises(ValueError) as context:
-            IndexManager.create_index(self.collection_name, config_without_key)
+            IndexManager.create_index(self.collection_name, [config_without_key])
         self.assertEqual(str(context.exception), "Index configuration must include 'key' field")
 
     @patch('stage0_mongodb_api.managers.index_manager.MongoIO')

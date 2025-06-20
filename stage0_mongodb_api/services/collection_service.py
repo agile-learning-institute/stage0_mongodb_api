@@ -180,9 +180,15 @@ class CollectionService:
                 "error_id": "API-005",
                 "message": str(e)
             }])
-            
+        
+        # Check if any operations have an error status
+        has_errors = any(
+            isinstance(op, dict) and op.get("status") == "error" 
+            for op in operations
+        )
+        
         return {
-            "status": "success",
+            "status": "error" if has_errors else "success",
             "collection": collection_name,
             "operations": operations
         }

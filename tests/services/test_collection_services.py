@@ -168,5 +168,55 @@ class TestCollectionServices(unittest.TestCase):
         self.assertEqual(context.exception.collection_name, "simple")
         self.assertEqual(context.exception.errors[0]["message"], "Some error")
 
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_process_collection_returns_error_status_when_operations_fail(self, mock_config_manager):
+        """Test that process_collection returns error status when operations contain errors."""
+        # Arrange
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        
+        # Mock operations that include an error
+        mock_operations = [
+            {"status": "success", "operation": "remove_schema"},
+            {"status": "error", "operation": "apply_schema", "error": "Schema validation failed"},
+            {"status": "success", "operation": "update_version"}
+        ]
+        mock_config_manager.return_value.process_collection_versions.return_value = mock_operations
+        
+        collection_name = "test_collection"
+
+        # Act
+        result = CollectionService.process_collection(collection_name)
+
+        # Assert
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["collection"], collection_name)
+        self.assertEqual(result["operations"], mock_operations)
+
+    @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
+    def test_process_collection_returns_success_status_when_all_operations_succeed(self, mock_config_manager):
+        """Test that process_collection returns success status when all operations succeed."""
+        # Arrange
+        mock_config_manager.return_value.load_errors = None
+        mock_config_manager.return_value.validate_configs.return_value = []
+        
+        # Mock operations that all succeed
+        mock_operations = [
+            {"status": "success", "operation": "remove_schema"},
+            {"status": "success", "operation": "apply_schema"},
+            {"status": "success", "operation": "update_version"}
+        ]
+        mock_config_manager.return_value.process_collection_versions.return_value = mock_operations
+        
+        collection_name = "test_collection"
+
+        # Act
+        result = CollectionService.process_collection(collection_name)
+
+        # Assert
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["collection"], collection_name)
+        self.assertEqual(result["operations"], mock_operations)
+
 if __name__ == '__main__':
     unittest.main()

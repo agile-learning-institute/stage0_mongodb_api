@@ -5,15 +5,12 @@ class IndexManager:
     """Manages MongoDB indexes for collections."""
     
     @staticmethod
-    def create_index(collection_name: str, index_config: Dict) -> Dict:
-        """Create an index based on configuration.
+    def create_index(collection_name: str, index_configs: list) -> Dict:
+        """Create one or more indexes based on configuration.
         
         Args:
             collection_name: Name of the collection
-            index_config: Index configuration dictionary passed directly to MongoDB.
-                See MongoDB's [Index Specifications](https://www.mongodb.com/docs/manual/reference/method/db.collection.createIndex/)
-                for details on supported options.
-                Must contain 'name' and 'key' fields.
+            index_configs: List of index configuration dictionaries. Each dict must contain 'name' and 'key' fields.
         
         Returns:
             Dict containing operation result:
@@ -21,25 +18,26 @@ class IndexManager:
                 "status": "success",
                 "operation": "create_index",
                 "collection": str,
-                "index": str
+                "indexes": List[str]
             }
             
         Raises:
-            ValueError: If index_config is missing required fields
+            ValueError: If any index_config is missing required fields
         """
-        if "name" not in index_config:
-            raise ValueError("Index configuration must include 'name' field")
-        if "key" not in index_config:
-            raise ValueError("Index configuration must include 'key' field")
-            
+        for idx in index_configs:
+            if "name" not in idx:
+                raise ValueError("Index configuration must include 'name' field")
+            if "key" not in idx:
+                raise ValueError("Index configuration must include 'key' field")
+        
         mongo = MongoIO.get_instance()
-        mongo.create_index(collection_name, index_config)
+        mongo.create_index(collection_name, index_configs)
         
         return {
             "status": "success",
             "operation": "create_index",
             "collection": collection_name,
-            "index": index_config["name"]
+            "indexes": [idx["name"] for idx in index_configs]
         }
 
     @staticmethod
