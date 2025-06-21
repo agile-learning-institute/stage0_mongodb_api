@@ -290,24 +290,24 @@ class SchemaManager:
             self.mongo.apply_schema(collection_name, bson_schema)
         except ValueError as e:
             return {
-                "status": "error",
                 "operation": "apply_schema",
                 "collection": version_name,
-                "message": f"Invalid version format: {str(e)}"
+                "message": f"Invalid version format: {str(e)}",
+                "status": "error"
             }
         except Exception as e:
             return {
-                "status": "error",
                 "operation": "apply_schema",
                 "collection": version_name,
-                "message": str(e)
+                "message": str(e),
+                "status": "error"
             }
         
         return {
-            "status": "success",
             "operation": "apply_schema",
             "collection": collection_name,
-            "schema": bson_schema
+            "schema": bson_schema,
+            "status": "success"
         }
 
     def remove_schema(self, collection_name: str) -> Dict:
@@ -324,21 +324,21 @@ class SchemaManager:
             self.mongo.remove_schema(collection_name)
         except ValueError as e:
             return {
-                "status": "error",
                 "operation": "remove_schema",
                 "collection": collection_name,
-                "message": f"Invalid version format: {str(e)}"
+                "message": f"Invalid version format: {str(e)}",
+                "status": "error"
             }
         except Exception as e:
             return {
-                "status": "error",
                 "operation": "remove_schema",
                 "collection": collection_name,
-                "message": str(e)
+                "message": str(e),
+                "status": "error"
             }
 
         return {
-            "status": "success",
             "operation": "remove_schema",
-            "collection": collection_name
+            "collection": collection_name,
+            "status": "success"
         } 

@@ -177,10 +177,10 @@ class ConfigManager:
             except Exception as e:
                 logger.error(f"Error processing collection {collection_name}: {str(e)}")
                 results[collection_name] = [{
-                    "status": "error",
                     "operation": "collection_processing",
                     "collection": collection_name,
-                    "error": str(e)
+                    "error": str(e),
+                    "status": "error"
                 }]
                 
         return results
@@ -238,11 +238,11 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"Error during version processing for {collection_name}: {str(e)}")
             operations.append({
-                "status": "error",
                 "operation": "version_processing",
                 "collection": collection_name,
                 "version": "unknown",
-                "error": f"Error during version processing: {str(e)}"
+                "error": f"Error during version processing: {str(e)}",
+                "status": "error"
             })
             
         return operations
@@ -329,31 +329,31 @@ class ConfigManager:
             results = self.mongo_io.load_test_data(collection_name, data_file)
             
             return {
-                "status": "success",
                 "operation": "load_test_data",
                 "collection": collection_name,
                 "test_data": str(data_file),
-                "results": results
+                "results": results,
+                "status": "success"
             }
             
         except TestDataLoadError as e:
             return {
-                "status": "error",
                 "operation": "load_test_data",
                 "collection": collection_name,
                 "test_data": str(data_file),
                 "error": str(e),
-                "details": e.details
+                "details": e.details,
+                "status": "error"
             }
         except Exception as e:
             error_message = str(e)
             logger.error(f"Failed to load test data for {collection_name}: {error_message}")
             return {
-                "status": "error",
                 "operation": "load_test_data",
                 "collection": collection_name,
                 "test_data": str(data_file),
-                "error": error_message
+                "error": error_message,
+                "status": "error"
             }
 
     def _assert_no_errors(self, operations: List[Dict]) -> None:

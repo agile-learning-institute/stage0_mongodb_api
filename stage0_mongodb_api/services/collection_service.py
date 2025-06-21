@@ -188,7 +188,7 @@ class CollectionService:
         )
         
         return {
-            "status": "error" if has_errors else "success",
             "collection": collection_name,
-            "operations": operations
+            "operations": operations,
+            "status": "error" if has_errors else "success"
         }

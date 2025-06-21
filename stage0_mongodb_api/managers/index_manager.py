@@ -62,18 +62,18 @@ class IndexManager:
             mongo.drop_index(collection_name, index_name)
         except Exception as e:
             return {
-                "status": "success",
                 "operation": "drop_index",
                 "collection": collection_name,
                 "index": index_name,
-                "error": str(e)
+                "error": str(e),
+                "status": "success"
             }
         
         return {
-            "status": "success",
             "operation": "drop_index",
             "collection": collection_name,
-            "index": index_name
+            "index": index_name,
+            "status": "success"
         }
 
     @staticmethod
@@ -96,8 +96,8 @@ class IndexManager:
         indexes = mongo.get_indexes(collection_name=collection_name)        
         
         return {
-            "status": "success",
             "operation": "list_indexes",
             "collection": collection_name,
-            "indexes": indexes
+            "indexes": indexes,
+            "status": "success"
         }

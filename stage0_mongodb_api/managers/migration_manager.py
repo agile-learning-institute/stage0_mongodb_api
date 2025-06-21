@@ -43,22 +43,22 @@ class MigrationManager:
             # Execute the entire pipeline at once
             mongo.execute_pipeline(collection_name, pipeline_stages)
             return {
-                "status": "success",
-                "operation": "migration",
-                "collection": collection_name,
-                "pipeline": {
-                    "name": pipeline_name,
-                    "stages": len(pipeline_stages)
-                }
-            }
-        except Exception as e:
-            return {
-                "status": "error",
                 "operation": "migration",
                 "collection": collection_name,
                 "pipeline": {
                     "name": pipeline_name,
                     "stages": len(pipeline_stages)
                 },
-                "error": str(e)
+                "status": "success"
+            }
+        except Exception as e:
+            return {
+                "operation": "migration",
+                "collection": collection_name,
+                "pipeline": {
+                    "name": pipeline_name,
+                    "stages": len(pipeline_stages)
+                },
+                "error": str(e),
+                "status": "error"
             } 
