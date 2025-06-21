@@ -67,10 +67,10 @@ class VersionManager:
         Returns:
             Dict containing operation result:
             {
-                "status": "success",
                 "operation": "version_update",
                 "collection": str,
-                "version": str
+                "version": str,
+                "status": "success"
             }
             
         Raises:
@@ -100,10 +100,10 @@ class VersionManager:
             raise RuntimeError(f"Failed to update version for collection: {collection_name}")
         
         return {
-            "status": "success",
             "operation": "version_update",
             "collection": collection_name,
-            "version": version
+            "version": version,
+            "status": "success"
         }
 
     @staticmethod
