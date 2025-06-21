@@ -96,16 +96,14 @@ class DatabaseUtil:
                 "status": "error"
             }
     
-    def compare_database_with_files(self, base_path: str = "tests/test_cases/large_sample/data") -> Dict[str, Any]:
+    def compare_database_with_files(self) -> Dict[str, Any]:
         """Compare database contents with JSON files.
         
-        Args:
-            base_path: Base path to look for JSON files
-            
         Returns:
             Dict containing comparison results
         """
         try:
+            base_path = os.path.join(self.config.INPUT_FOLDER, self.db_name)
             base_path = Path(base_path)
             if not base_path.exists():
                 raise ValueError(f"Base path does not exist: {base_path}")
@@ -256,17 +254,43 @@ class DatabaseUtil:
         
         return expected_copy == actual_copy
     
-    def harvest_database(self, output_path: str = "tests/harvested_data") -> Dict[str, Any]:
+    def harvest_database(self, output_path: Optional[str] = None) -> Dict[str, Any]:
         """Harvest all database contents to JSON files.
         
         Args:
-            output_path: Directory to save harvested JSON files
+            output_path: Directory to save harvested JSON files (defaults to input folder)
             
         Returns:
             Dict containing harvest results
         """
         try:
+            if output_path is None:
+                output_path = os.path.join(self.config.INPUT_FOLDER, self.db_name)
+            
             output_path = Path(output_path)
+            
+            # Check if files already exist and prompt for replacement
+            existing_files = []
+            for collection_name in self.mongo.client[self.db_name].list_collection_names():
+                potential_file = output_path / f"{collection_name}.json"
+                if potential_file.exists():
+                    existing_files.append(str(potential_file))
+            
+            if existing_files:
+                print(f"⚠️  Found existing files in {output_path}:")
+                for file in existing_files:
+                    print(f"   - {file}")
+                confirm = input("Replace existing files? (y/N): ")
+                if confirm.lower() not in ['y', 'yes']:
+                    return {
+                        "operation": "harvest_database",
+                        "database": self.db_name,
+                        "output_path": str(output_path),
+                        "message": "Operation cancelled by user",
+                        "timestamp": datetime.now().isoformat(),
+                        "status": "cancelled"
+                    }
+            
             output_path.mkdir(parents=True, exist_ok=True)
             
             results = {
@@ -343,10 +367,8 @@ def main():
     parser = argparse.ArgumentParser(description="Database utility for testing")
     parser.add_argument("command", choices=["drop", "compare", "harvest"], 
                        help="Command to execute")
-    parser.add_argument("--base-path", default="tests/test_cases/large_sample/data",
-                       help="Base path for comparison files")
-    parser.add_argument("--output-path", default="tests/harvested_data",
-                       help="Output path for harvested data")
+    parser.add_argument("--output-path", 
+                       help="Output path for harvested data (defaults to input folder / database name)")
     parser.add_argument("--passphrase", 
                        help="Passphrase for silent database drop: DROP_DROWSSAP_YEK")
     
@@ -367,7 +389,7 @@ def main():
                 return
     
     elif args.command == "compare":
-        result = util.compare_database_with_files(args.base_path)
+        result = util.compare_database_with_files()
         
     elif args.command == "harvest":
         result = util.harvest_database(args.output_path)

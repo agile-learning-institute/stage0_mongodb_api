@@ -1,0 +1,62 @@
+[
+  {
+    "_id": {
+      "$oid": "b00000000000000000000001"
+    },
+    "name": "Acme Corporation",
+    "status": "active",
+    "last_saved": {
+      "from_ip": "127.0.0.1",
+      "by_user": "system",
+      "at_time": {
+        "$date": "2024-01-01T00:00:00Z"
+      },
+      "correlation_id": "corr_004"
+    },
+    "users": [
+      {
+        "$oid": "a00000000000000000000001"
+      },
+      {
+        "$oid": "a00000000000000000000002"
+      }
+    ],
+    "website": "https://acme.com",
+    "home_address": {
+      "street": "123 Main Street",
+      "city": "Metropolis",
+      "state": "CA",
+      "postal_code": "90210"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "b00000000000000000000002"
+    },
+    "name": "Beep Beep Bird Food",
+    "status": "active",
+    "last_saved": {
+      "from_ip": "127.0.0.2",
+      "by_user": "A00000000000000000000001",
+      "at_time": {
+        "$date": "2024-01-01T00:00:00Z"
+      },
+      "correlation_id": "corr_004"
+    },
+    "users": [
+      {
+        "$oid": "a00000000000000000000003"
+      },
+      {
+        "$oid": "a00000000000000000000004"
+      }
+    ],
+    "website": "https://beepbeepbirdfood.com",
+    "home_address": {
+      "street": "123 Bird Street",
+      "city": "Birdville",
+      "state": "FL",
+      "postal_code": "33142"
+    }
+  }
+]

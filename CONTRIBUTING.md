@@ -61,15 +61,16 @@ pipenv run test
 # Run unit tests with coverage
 pipenv run test --with-coverage
 
+# Change the testing database name
+export MONGO_DB_NAME=test_database
+# NOTE: Must be test_database for db-compare to work
+
 # Select a test_case for the server
 export INPUT_FOLDER=./tests/test_cases/small_sample
 export INPUT_FOLDER=./tests/test_cases/large_sample
 
 # Set Debug Mode
 export LOGGING_LEVEL=DEBUG
-
-# Change the testing database name
-export MONGO_DB_NAME=test_database
 
 # Start API server (starts MongoDB container first)
 pipenv run start
@@ -95,13 +96,20 @@ pipenv run db-compare
 # Harvest current state to INPUT_FOLDER/MONGO_DB_NAME
 pipenv run db-harvest
 
-# Run StepCI black box testing 
-pipenv run stepci_observability
-pipenv run stepci_small_sample
-pipenv run stepci_large_sample
+# Combine DB actions with Batch testing 
+pipenv run db-drop-silent 
+pipenv run batch 
+pipenv run db-compare
 
-# Combine DB actions with StepCI testing - see test_cases small & large
-pipenv run db-drop-silent && pipenv run stepci_observability && pipenv run db-compare
+# Run StepCI black box testing 
+pipenv run stepci-observability
+pipenv run stepci-small
+pipenv run stepci-large
+
+# Combine DB actions with StepCI testing 
+pipenv run db-drop-silent 
+pipenv run stepci_large
+pipenv run db-compare
 
 # Build the API Docker Image
 pipenv run build
