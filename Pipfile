@@ -14,6 +14,10 @@ stepci_small_sample = "stepci run ./tests/stepci/small_sample.yaml"
 stepci_large_sample = "stepci run ./tests/stepci/large_sample.yaml"
 build = "docker build --tag ghcr.io/agile-learning-institute/stage0_mongodb_api:latest ."
 container = "sh -c 'stage0 down && pipenv run build && stage0 up stage0-mongodb-api'"
+db-drop = "python tests/db_util.py drop"
+db-drop-silent = "python tests/db_util.py drop --passphrase DROP_DROWSSAP_YEK"
+db-compare = "python tests/db_util.py compare --base-path stage0_input/data"
+db-harvest = "python tests/db_util.py harvest --output-path tests/harvested_data"
 
 [packages]
 python-dotenv = "*"

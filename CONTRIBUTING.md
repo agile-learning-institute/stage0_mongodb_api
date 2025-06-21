@@ -83,10 +83,25 @@ pipenv run debug
 # Run in Batch mode (process and shut down)
 pipenv run batch
 
-# Run StepCI black box testing
+#####################
+# Black Box Testing #
+
+# Silent drop MONGO_DB_NAME for automation
+pipenv run db-drop-silent
+
+# Compare with INPUT_FOLDER/MONGO_DB_NAME
+pipenv run db-compare
+
+# Harvest current state to INPUT_FOLDER/MONGO_DB_NAME
+pipenv run db-harvest
+
+# Run StepCI black box testing 
 pipenv run stepci_observability
 pipenv run stepci_small_sample
 pipenv run stepci_large_sample
+
+# Combine DB actions with StepCI testing - see test_cases small & large
+pipenv run db-drop-silent && pipenv run stepci_observability && pipenv run db-compare
 
 # Build the API Docker Image
 pipenv run build
