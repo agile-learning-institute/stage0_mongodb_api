@@ -268,6 +268,7 @@ class ConfigManager:
             
             # Optional: Load test data if enabled and present
             if "test_data" in version_config and self.config.LOAD_TEST_DATA:
+                operations.append(f"Loading test data for {collection_name} - {version_config['test_data']}")
                 operations.append(self._load_test_data(collection_name, version_config["test_data"]))
                 
         except Exception as e:
