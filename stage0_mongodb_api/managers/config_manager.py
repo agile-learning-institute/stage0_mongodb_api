@@ -274,9 +274,10 @@ class ConfigManager:
                 
             # Optional: Process aggregations if present
             if "aggregations" in version_config:
-                for pipeline in version_config["aggregations"]:
-                    operations.append(f"Running Aggregation Pipeline for {collection_name}")
-                    operations.append(self.migration_manager.run_migration(collection_name, pipeline))
+                for migration in version_config["aggregations"]:
+                    pipeline_name = migration.get("name", "unnamed_pipeline")
+                    operations.append(f"Running Aggregation Pipeline '{pipeline_name}' for {collection_name}")
+                    operations.append(self.migration_manager.run_migration(collection_name, migration))
                     self._assert_no_errors(operations)
                 
             # Optional: Process add_indexes if present

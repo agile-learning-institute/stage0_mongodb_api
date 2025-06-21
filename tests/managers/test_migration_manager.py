@@ -6,98 +6,95 @@ class TestMigrationManager(unittest.TestCase):
     """Test cases for the MigrationManager class."""
 
     def setUp(self):
-        """Set up test fixtures."""
         self.collection_name = "test_collection"
-        self.migration = [
-            {"$match": {"status": "active"}},
-            {"$set": {"status": "inactive"}}
-        ]
 
-    @patch('stage0_mongodb_api.managers.migration_manager.MongoIO')
-    def test_run_migration(self, mock_mongo):
-        """Test running a migration pipeline."""
-        # Arrange
-        mock_mongo.get_instance.return_value = MagicMock()
-        
-        # Act
-        result = MigrationManager.run_migration(self.collection_name, self.migration)
-        
-        # Assert
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_run_migration_single_pipeline(self, mock_get_instance):
+        """Test running a single migration pipeline."""
+        mock_mongo = MagicMock()
+        mock_get_instance.return_value = mock_mongo
+        migration = {
+            "name": "test_pipeline",
+            "pipeline": [
+                {"$addFields": {"test_field": "value"}},
+                {"$out": "test_collection"}
+            ]
+        }
+        result = MigrationManager.run_migration(self.collection_name, migration)
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "migration")
         self.assertEqual(result["collection"], self.collection_name)
-        self.assertEqual(result["stages"], len(self.migration))
-        
-        # Verify each pipeline stage was executed
-        mock_mongo.get_instance.return_value.execute_pipeline.assert_has_calls([
-            unittest.mock.call(self.collection_name, self.migration[0]),
-            unittest.mock.call(self.collection_name, self.migration[1])
-        ])
-        self.assertEqual(
-            mock_mongo.get_instance.return_value.execute_pipeline.call_count,
-            len(self.migration)
-        )
+        self.assertEqual(result["pipeline"]["name"], "test_pipeline")
+        self.assertEqual(result["pipeline"]["stages"], 2)
+        self.assertEqual(mock_mongo.execute_pipeline.call_count, 1)
+        mock_mongo.execute_pipeline.assert_called_once_with(self.collection_name, migration["pipeline"])
+
+    def test_run_migration_empty_migration(self):
+        """Test that empty migration raises ValueError."""
+        with self.assertRaises(ValueError) as context:
+            MigrationManager.run_migration(self.collection_name, {})
+        self.assertIn("Migration must contain a 'pipeline' field", str(context.exception))
+
+    def test_run_migration_missing_pipeline(self):
+        """Test that migration without pipeline field raises ValueError."""
+        migration = {"name": "test_pipeline"}
+        with self.assertRaises(ValueError) as context:
+            MigrationManager.run_migration(self.collection_name, migration)
+        self.assertIn("Migration must contain a 'pipeline' field", str(context.exception))
 
     def test_run_migration_empty_pipeline(self):
-        """Test that running an empty migration pipeline raises an exception."""
-        # Arrange
-        empty_migration = []
-        
-        # Act & Assert
+        """Test that empty pipeline raises ValueError."""
+        migration = {
+            "name": "empty_pipeline",
+            "pipeline": []
+        }
         with self.assertRaises(ValueError) as context:
-            MigrationManager.run_migration(self.collection_name, empty_migration)
-        self.assertEqual(str(context.exception), "Migration pipeline cannot be empty")
+            MigrationManager.run_migration(self.collection_name, migration)
+        self.assertIn("Pipeline 'empty_pipeline' cannot be empty", str(context.exception))
 
-    @patch('stage0_mongodb_api.managers.migration_manager.MongoIO')
-    def test_run_migration_single_stage(self, mock_mongo):
-        """Test running a migration with a single pipeline stage."""
-        # Arrange
-        mock_mongo.get_instance.return_value = MagicMock()
-        single_stage_migration = [{"$match": {"status": "active"}}]
-        
-        # Act
-        result = MigrationManager.run_migration(self.collection_name, single_stage_migration)
-        
-        # Assert
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_run_migration_unnamed_pipeline(self, mock_get_instance):
+        """Test running a migration pipeline without a name."""
+        mock_mongo = MagicMock()
+        mock_get_instance.return_value = mock_mongo
+        migration = {
+            "pipeline": [
+                {"$addFields": {"test_field": "value"}},
+                {"$out": "test_collection"}
+            ]
+        }
+        result = MigrationManager.run_migration(self.collection_name, migration)
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "migration")
         self.assertEqual(result["collection"], self.collection_name)
-        self.assertEqual(result["stages"], 1)
-        mock_mongo.get_instance.return_value.execute_pipeline.assert_called_once_with(
-            self.collection_name, single_stage_migration[0]
-        )
+        self.assertEqual(result["pipeline"]["name"], "unnamed_pipeline")
+        self.assertEqual(result["pipeline"]["stages"], 2)
+        self.assertEqual(mock_mongo.execute_pipeline.call_count, 1)
+        mock_mongo.execute_pipeline.assert_called_once_with(self.collection_name, migration["pipeline"])
 
-    @patch('stage0_mongodb_api.managers.migration_manager.MongoIO')
-    def test_run_migration_complex_pipeline(self, mock_mongo):
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_run_migration_complex_pipeline(self, mock_get_instance):
         """Test running a complex migration pipeline with multiple stages."""
-        # Arrange
-        mock_mongo.get_instance.return_value = MagicMock()
-        complex_migration = [
-            {"$match": {"status": "active"}},
-            {"$set": {"status": "inactive"}},
-            {"$set": {"updated_at": "$$NOW"}},
-            {"$unset": ["old_field"]},
-            {"$merge": {"into": "archive"}}
-        ]
-        
-        # Act
-        result = MigrationManager.run_migration(self.collection_name, complex_migration)
-        
-        # Assert
+        mock_mongo = MagicMock()
+        mock_get_instance.return_value = mock_mongo
+        migration = {
+            "name": "complex_pipeline",
+            "pipeline": [
+                {"$match": {"status": "active"}},
+                {"$set": {"status": "inactive"}},
+                {"$set": {"updated_at": "$$NOW"}},
+                {"$unset": ["old_field"]},
+                {"$merge": {"into": "archive"}}
+            ]
+        }
+        result = MigrationManager.run_migration(self.collection_name, migration)
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "migration")
         self.assertEqual(result["collection"], self.collection_name)
-        self.assertEqual(result["stages"], len(complex_migration))
-        
-        # Verify each pipeline stage was executed in order
-        mock_mongo.get_instance.return_value.execute_pipeline.assert_has_calls([
-            unittest.mock.call(self.collection_name, stage)
-            for stage in complex_migration
-        ])
-        self.assertEqual(
-            mock_mongo.get_instance.return_value.execute_pipeline.call_count,
-            len(complex_migration)
-        )
+        self.assertEqual(result["pipeline"]["name"], "complex_pipeline")
+        self.assertEqual(result["pipeline"]["stages"], 5)
+        self.assertEqual(mock_mongo.execute_pipeline.call_count, 1)
+        mock_mongo.execute_pipeline.assert_called_once_with(self.collection_name, migration["pipeline"])
 
 if __name__ == '__main__':
     unittest.main() 

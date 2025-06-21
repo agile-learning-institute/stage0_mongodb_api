@@ -5,15 +5,16 @@ class MigrationManager:
     """Manages data migrations for collections using MongoDB aggregation pipelines."""
     
     @staticmethod
-    def run_migration(collection_name: str, migration: List[Dict]) -> Dict:
-        """Run a migration pipeline on a collection.
+    def run_migration(collection_name: str, migration: Dict) -> Dict:
+        """Run a single migration pipeline on a collection.
         
         Args:
             collection_name: Name of the collection
-            migration: List of MongoDB aggregation pipeline stages.
+            migration: Migration configuration containing:
+                - name: str (optional) - Name of the pipeline for logging
+                - pipeline: List[Dict] - MongoDB aggregation pipeline stages
                 See MongoDB's [Aggregation Pipeline](https://www.mongodb.com/docs/manual/core/aggregation-pipeline/)
                 for details on supported stages.
-                Must not be empty.
         
         Returns:
             Dict containing operation result:
@@ -21,24 +22,43 @@ class MigrationManager:
                 "status": "success",
                 "operation": "migration",
                 "collection": str,
-                "stages": int  # Number of pipeline stages executed
+                "pipeline": Dict  # Pipeline result with name and stages
             }
             
         Raises:
-            ValueError: If migration is empty
+            ValueError: If migration is invalid or pipeline is empty
         """
-        if not migration:
-            raise ValueError("Migration pipeline cannot be empty")
-            
+        if not migration or "pipeline" not in migration:
+            raise ValueError("Migration must contain a 'pipeline' field")
+        
+        pipeline_name = migration.get("name", "unnamed_pipeline")
+        pipeline_stages = migration["pipeline"]
+        
+        if not pipeline_stages:
+            raise ValueError(f"Pipeline '{pipeline_name}' cannot be empty")
+        
         mongo = MongoIO.get_instance()
         
-        # Execute each pipeline stage in sequence
-        for stage in migration:
-            mongo.execute_pipeline(collection_name, stage)
-        
-        return {
-            "status": "success",
-            "operation": "migration",
-            "collection": collection_name,
-            "stages": len(migration)
-        } 
+        try:
+            # Execute the entire pipeline at once
+            mongo.execute_pipeline(collection_name, pipeline_stages)
+            return {
+                "status": "success",
+                "operation": "migration",
+                "collection": collection_name,
+                "pipeline": {
+                    "name": pipeline_name,
+                    "stages": len(pipeline_stages)
+                }
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "operation": "migration",
+                "collection": collection_name,
+                "pipeline": {
+                    "name": pipeline_name,
+                    "stages": len(pipeline_stages)
+                },
+                "error": str(e)
+            } 

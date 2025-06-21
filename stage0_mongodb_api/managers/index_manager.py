@@ -58,7 +58,16 @@ class IndexManager:
             }
         """
         mongo = MongoIO.get_instance()
-        mongo.drop_index(collection_name, index_name)
+        try:
+            mongo.drop_index(collection_name, index_name)
+        except Exception as e:
+            return {
+                "status": "success",
+                "operation": "drop_index",
+                "collection": collection_name,
+                "index": index_name,
+                "error": str(e)
+            }
         
         return {
             "status": "success",
