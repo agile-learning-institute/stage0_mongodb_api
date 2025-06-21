@@ -25,12 +25,12 @@
         "from_ip": {
           "description": "Http Request remote IP address",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         },
         "by_user": {
           "description": "ID Of User",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         },
         "at_time": {
           "description": "The date-time when last updated",
@@ -39,7 +39,7 @@
         "correlation_id": {
           "description": "The logging correlation ID of the update transaction",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         }
       },
       "additionalProperties": false,
@@ -71,17 +71,17 @@
         "city": {
           "description": "City",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         },
         "state": {
           "description": "State or province",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[A-Z]{2}$"
         },
         "postal_code": {
           "description": "Postal code",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         }
       },
       "additionalProperties": false,

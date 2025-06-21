@@ -1,30 +1,30 @@
 {
-  "title": "search",
   "description": "A search index that is used to support a elastic search polymorphic query service",
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "collection_name": {
-      "description": "The name of the collection",
+      "pattern": "^[^\\s]{4,40}$",
       "bsonType": "string",
-      "pattern": "^[^\\s]{4,40}$"
+      "description": "The name of the collection"
     },
     "collection_id": {
-      "description": "The unique identifier for this source document",
-      "bsonType": "objectId"
+      "bsonType": "objectId",
+      "description": "The unique identifier for this source document"
     },
     "media": {
-      "title": "Media",
       "description": "A media item in the system",
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "_id": {
-          "description": "The unique identifier for the media",
-          "bsonType": "objectId"
+          "bsonType": "objectId",
+          "description": "The unique identifier for the media"
         },
         "title": {
-          "description": "The title of the media",
+          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          "description": "The title of the media"
         },
         "type": {
           "description": "The type of media",
@@ -46,31 +46,31 @@
           ]
         },
         "last_saved": {
-          "title": "Breadcrumb",
           "description": "When the media was last updated",
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "from_ip": {
-              "description": "Http Request remote IP address",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "Http Request remote IP address"
             },
             "by_user": {
-              "description": "ID Of User",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "ID Of User"
             },
             "at_time": {
-              "description": "The date-time when last updated",
-              "bsonType": "date"
+              "bsonType": "date",
+              "description": "The date-time when last updated"
             },
             "correlation_id": {
-              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "The logging correlation ID of the update transaction"
             }
           },
-          "additionalProperties": false,
+          "title": "Breadcrumb",
           "required": [
             "from_ip",
             "by_user",
@@ -95,6 +95,7 @@
         "metadata": {
           "description": "Additional metadata about the media",
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "duration": {
               "bsonType": "int",
@@ -120,11 +121,10 @@
                 "uhd"
               ]
             }
-          },
-          "additionalProperties": false
+          }
         }
       },
-      "additionalProperties": false,
+      "title": "Media",
       "required": [
         "_id",
         "title",
@@ -133,18 +133,18 @@
       ]
     },
     "organization": {
-      "title": "Organization",
       "description": "An organization in the system",
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "_id": {
-          "description": "The unique identifier for the organization",
-          "bsonType": "objectId"
+          "bsonType": "objectId",
+          "description": "The unique identifier for the organization"
         },
         "name": {
-          "description": "The organization name",
+          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          "description": "The organization name"
         },
         "status": {
           "description": "The current status of the organization",
@@ -156,31 +156,31 @@
           ]
         },
         "last_saved": {
-          "title": "Breadcrumb",
           "description": "When the organization document was last updated",
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "from_ip": {
-              "description": "Http Request remote IP address",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "Http Request remote IP address"
             },
             "by_user": {
-              "description": "ID Of User",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "ID Of User"
             },
             "at_time": {
-              "description": "The date-time when last updated",
-              "bsonType": "date"
+              "bsonType": "date",
+              "description": "The date-time when last updated"
             },
             "correlation_id": {
-              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "The logging correlation ID of the update transaction"
             }
           },
-          "additionalProperties": false,
+          "title": "Breadcrumb",
           "required": [
             "from_ip",
             "by_user",
@@ -192,46 +192,46 @@
           "description": "Users associated with this organization",
           "bsonType": "array",
           "items": {
-            "description": "A user identifier",
-            "bsonType": "objectId"
+            "bsonType": "objectId",
+            "description": "A user identifier"
           }
         },
         "website": {
-          "description": "Organization website",
+          "pattern": "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
           "bsonType": "string",
-          "pattern": "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
+          "description": "Organization website"
         },
         "home_address": {
-          "title": "Street Address",
           "description": "Organization home address",
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "street": {
-              "description": "Street address",
+              "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$",
               "bsonType": "string",
-              "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+              "description": "Street address"
             },
             "city": {
-              "description": "City",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "City"
             },
             "state": {
-              "description": "State or province",
+              "pattern": "^[A-Z]{2}$",
               "bsonType": "string",
-              "pattern": "^[A-Z]{2}$"
+              "description": "State or province"
             },
             "postal_code": {
-              "description": "Postal code",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "Postal code"
             }
           },
-          "additionalProperties": false,
+          "title": "Street Address",
           "required": ["postal_code"]
         }
       },
-      "additionalProperties": false,
+      "title": "Organization",
       "required": [
         "_id",
         "name",
@@ -240,23 +240,23 @@
       ]
     },
     "user": {
-      "title": "User Collection",
       "description": "A user collection for testing the schema system",
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "_id": {
-          "description": "The unique identifier for a user",
-          "bsonType": "objectId"
+          "bsonType": "objectId",
+          "description": "The unique identifier for a user"
         },
         "user_name": {
-          "description": "Username",
+          "pattern": "^[^\\s]{4,40}$",
           "bsonType": "string",
-          "pattern": "^[^\\s]{4,40}$"
+          "description": "Username"
         },
         "full_name": {
-          "description": "Users Full Name",
+          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          "description": "Users Full Name"
         },
         "status": {
           "description": "The status",
@@ -273,11 +273,12 @@
           "items": {
             "description": "A user category",
             "bsonType": "object",
+            "additionalProperties": false,
             "properties": {
               "name": {
-                "description": "Category Name assigned by the user",
+                "pattern": "^[^\\s]{4,40}$",
                 "bsonType": "string",
-                "pattern": "^[^\\s]{4,40}$"
+                "description": "Category Name assigned by the user"
               },
               "category": {
                 "description": "The category type assigned by the user",
@@ -311,64 +312,63 @@
               "name",
               "category",
               "tags"
-            ],
-            "additionalProperties": false
+            ]
           }
         },
         "email": {
-          "description": "The person's email address",
+          "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          "description": "The person's email address"
         },
         "phone": {
-          "description": "The person's phone number",
+          "pattern": "^\\+1[2-9][0-9]{9}$",
           "bsonType": "string",
-          "pattern": "^\\+1[2-9][0-9]{9}$"
+          "description": "The person's phone number"
         },
         "last_saved": {
-          "title": "Breadcrumb",
           "description": "The last time this document was saved",
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "from_ip": {
-              "description": "Http Request remote IP address",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "Http Request remote IP address"
             },
             "by_user": {
-              "description": "ID Of User",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "ID Of User"
             },
             "at_time": {
-              "description": "The date-time when last updated",
-              "bsonType": "date"
+              "bsonType": "date",
+              "description": "The date-time when last updated"
             },
             "correlation_id": {
-              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^[^\\s]{4,40}$",
               "bsonType": "string",
-              "pattern": "^[^\\s]{4,40}$"
+              "description": "The logging correlation ID of the update transaction"
             }
           },
+          "title": "Breadcrumb",
           "required": [
             "from_ip",
             "by_user",
             "at_time",
             "correlation_id"
-          ],
-          "additionalProperties": false
+          ]
         }
       },
+      "title": "User Collection",
       "required": [
         "_id",
         "user_name",
         "status",
         "last_saved"
-      ],
-      "additionalProperties": false
+      ]
     }
   },
-  "additionalProperties": false,
+  "title": "search",
   "required": [
     "collection_name",
     "collection_id"

@@ -57,7 +57,7 @@ class TestSchemaLoading(unittest.TestCase):
         # Assert
         self.assertEqual(schema_manager.load_errors, [])
         self.assertEqual(len(schema_manager.dictionaries), 6)
-        self.assertEqual(len(schema_manager.types), 10)
+        self.assertEqual(len(schema_manager.types), 11)
         self.assertEqual(len(schema_manager.enumerators), 4)
         
     @patch('stage0_py_utils.MongoIO.get_instance')

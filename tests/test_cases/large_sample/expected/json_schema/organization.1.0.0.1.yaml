@@ -24,11 +24,11 @@ properties:
       from_ip:
         description: Http Request remote IP address
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[^\\s]{4,40}$"
       by_user:
         description: ID Of User
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[^\\s]{4,40}$"
       at_time:
         description: The date-time when last updated
         type: string
@@ -36,7 +36,7 @@ properties:
       correlation_id:
         description: The logging correlation ID of the update transaction
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[^\\s]{4,40}$"
     additionalProperties: false
     required:
       - from_ip
@@ -66,15 +66,15 @@ properties:
       city:
         description: City
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[^\\s]{4,40}$"
       state:
         description: State or province
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[A-Z]{2}$"
       postal_code:
         description: Postal code
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[^\\s]{4,40}$"
     additionalProperties: false
     required:
       - postal_code

@@ -10,7 +10,7 @@
     "user_name": {
       "description": "Username",
       "bsonType": "string",
-      "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+      "pattern": "^[^\\s]{4,40}$"
     },
     "full_name": {
       "description": "Users Full Name",
@@ -32,7 +32,7 @@
           "name": {
             "description": "Category Name assigned by the user",
             "bsonType": "string",
-            "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+            "pattern": "^[^\\s]{4,40}$"
           },
           "category": {
             "description": "The category type assigned by the user",
@@ -71,12 +71,12 @@
         "from_ip": {
           "description": "Http Request remote IP address",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         },
         "by_user": {
           "description": "ID Of User",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         },
         "at_time": {
           "description": "The date-time when last updated",
@@ -85,7 +85,7 @@
         "correlation_id": {
           "description": "The logging correlation ID of the update transaction",
           "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9_-]{4,40}$"
+          "pattern": "^[^\\s]{4,40}$"
         }
       },
       "required": ["from_ip", "by_user", "at_time", "correlation_id"],

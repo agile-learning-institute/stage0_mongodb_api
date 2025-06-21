@@ -9,7 +9,7 @@ properties:
   user_name:
     type: string
     description: Username
-    pattern: "^[a-zA-Z0-9_-]{4,40}$"
+    pattern: "^[^\\s]{4,40}$"
   full_name:
     type: string
     description: Users Full Name
@@ -31,7 +31,7 @@ properties:
         name:
           type: string
           description: Category Name assigned by the user
-          pattern: "^[a-zA-Z0-9_-]{4,40}$"
+          pattern: "^[^\\s]{4,40}$"
         category:
           type: string
           description: The category type assigned by the user
@@ -75,11 +75,11 @@ properties:
       from_ip:
         description: Http Request remote IP address
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[^\\s]{4,40}$"
       by_user:
         description: ID Of User
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$"
+        pattern: "^[^\\s]{4,40}$"
       at_time:
         description: The date-time when last updated
         type: string
@@ -87,7 +87,7 @@ properties:
       correlation_id:
         description: The logging correlation ID of the update transaction
         type: string
-        pattern: "^[a-zA-Z0-9_-]{4,40}$" 
+        pattern: "^[^\\s]{4,40}$" 
     required:
       - from_ip
       - by_user

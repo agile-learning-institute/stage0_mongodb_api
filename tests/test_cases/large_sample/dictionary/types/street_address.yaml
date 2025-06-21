@@ -10,7 +10,7 @@ properties:
     type: word
   state:
     description: State or province
-    type: word
+    type: state_code
   postal_code:
     description: Postal code
     type: word

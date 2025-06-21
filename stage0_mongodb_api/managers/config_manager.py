@@ -163,6 +163,28 @@ class ConfigManager:
         """
         return self.collection_configs.get(collection_name)
 
+    def process_all_collections(self) -> Dict[str, List[Dict]]:
+        """Process all collections that have pending versions.
+        
+        Returns:
+            Dict[str, List[Dict]]: Dictionary mapping collection names to their operation results
+        """
+        results = {}
+        
+        for collection_name in self.collection_configs.keys():
+            try:
+                results[collection_name] = self.process_collection_versions(collection_name)
+            except Exception as e:
+                logger.error(f"Error processing collection {collection_name}: {str(e)}")
+                results[collection_name] = [{
+                    "status": "error",
+                    "operation": "collection_processing",
+                    "collection": collection_name,
+                    "error": str(e)
+                }]
+                
+        return results
+
     def process_collection_versions(self, collection_name: str) -> List[Dict]:
         """Process all pending versions for a collection.
         
@@ -239,38 +261,46 @@ class ConfigManager:
 
         try:
             # Required: Remove existing schema validation
+            operations.append(f"Removing schema validation for {collection_name}")
             operations.append(self.schema_manager.remove_schema(collection_name))
+            self._assert_no_errors(operations)
             
             # Optional: Process drop_indexes if present
             if "drop_indexes" in version_config:
                 for index in version_config["drop_indexes"]:
                     operations.append(f"Dropping index {index} for {collection_name}")
                     operations.append(self.index_manager.drop_index(collection_name, index))
+                    self._assert_no_errors(operations)
                 
             # Optional: Process aggregations if present
             if "aggregations" in version_config:
                 for pipeline in version_config["aggregations"]:
                     operations.append(f"Running Aggregation Pipeline for {collection_name}")
                     operations.append(self.migration_manager.run_migration(collection_name, pipeline))
+                    self._assert_no_errors(operations)
                 
             # Optional: Process add_indexes if present
             if "add_indexes" in version_config:
                 operations.append(f"Creating indexes for {collection_name}")
                 operations.append(self.index_manager.create_index(collection_name, version_config["add_indexes"]))
+                self._assert_no_errors(operations)
                 
             # Required: Apply schema validation
             operations.append(f"Applying schema for {collection_name}")
             operations.append(self.schema_manager.apply_schema(f"{collection_name}.{version_config.get("version")}"))
+            self._assert_no_errors(operations)
                 
-            # Update version if version string is present
-            operations.append(f"Updating version for {collection_name}")
-            operations.append(self.version_manager.update_version(collection_name, version_config["version"]))
-            
             # Optional: Load test data if enabled and present
             if "test_data" in version_config and self.config.LOAD_TEST_DATA:
                 operations.append(f"Loading test data for {collection_name} - {version_config['test_data']}")
                 operations.append(self._load_test_data(collection_name, version_config["test_data"]))
+                self._assert_no_errors(operations)
                 
+            # Update version if version string is present
+            operations.append(f"Updating version for {collection_name}")
+            operations.append(self.version_manager.update_version(collection_name, version_config["version"]))
+            self._assert_no_errors(operations)
+            
         except Exception as e:
             logger.error(f"Error processing version for {collection_name}: {str(e)}")
             operations.append({
@@ -325,25 +355,17 @@ class ConfigManager:
                 "error": error_message
             }
 
-    def process_all_collections(self) -> Dict[str, List[Dict]]:
-        """Process all collections that have pending versions.
+    def _assert_no_errors(self, operations: List[Dict]) -> None:
+        """Check the last operation for errors and raise an exception if found.
         
-        Returns:
-            Dict[str, List[Dict]]: Dictionary mapping collection names to their operation results
+        Args:
+            operations: List of operations to check
+            
+        Raises:
+            Exception: If the last operation has status "error"
         """
-        results = {}
-        
-        for collection_name in self.collection_configs.keys():
-            try:
-                results[collection_name] = self.process_collection_versions(collection_name)
-            except Exception as e:
-                logger.error(f"Error processing collection {collection_name}: {str(e)}")
-                results[collection_name] = [{
-                    "status": "error",
-                    "operation": "collection_processing",
-                    "collection": collection_name,
-                    "error": str(e)
-                }]
-                
-        return results
+        if operations and isinstance(operations[-1], dict) and operations[-1].get("status") == "error":
+            error_op = operations[-1]
+            raise Exception(f"Operation failed: {error_op.get('operation', 'unknown')} - {error_op.get('error', 'Unknown error')}")
+
  
