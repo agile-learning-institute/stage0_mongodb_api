@@ -115,12 +115,8 @@ pipenv run db-compare
 # Build the API Docker Image
 pipenv run build
 
-# Run API Docker Image + a MongoDB Image
+# Build & run the API Docker Container
 pipenv run container
-
-# Stop the API and DB containers
-pipenv run down
-
 ```
 
 ## Testing

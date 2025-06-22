@@ -26,6 +26,7 @@ services:
       MONGO_DB_NAME: test_database
       MONGODB_API_PORT: 8582
       AUTO_PROCESS: True
+      EXIT_AFTER_PROCESSING: True
       LOAD_TEST_DATA: True
     depends_on:
       mongodb-server:

@@ -1,0 +1,35 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[scripts]
+local = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api python3 -m server'"
+debug = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api LOGGING_LEVEL=DEBUG python3 -m server'"
+batch = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api AUTO_PROCESS=True EXIT_AFTER_PROCESSING=True LOAD_TEST_DATA=True python3 -m server'"
+start = "sh -c 'stage0 down && stage0 up mongodb && pipenv run local'"
+test = "python -m unittest discover -s ./tests -p 'test_*.py'"
+stepci-observability = "stepci run ./tests/stepci/observability.yaml"
+stepci-small = "stepci run ./tests/stepci/small_sample.yaml"
+stepci-large = "stepci run ./tests/stepci/large_sample.yaml"
+db-drop = "python tests/db_util.py drop"
+db-drop-silent = "python tests/db_util.py drop --passphrase DROP_DROWSSAP_YEK"
+db-compare = "python tests/db_util.py compare"
+db-harvest = "python tests/db_util.py harvest"
+build = "docker build --tag ghcr.io/agile-learning-institute/stage0_mongodb_api:latest ."
+container = "docker compose up --detach"
+down = "docker compose down"
+
+[packages]
+python-dotenv = "*"
+flask = "*"
+prometheus-flask-exporter = "*"
+pymongo = "*"
+stage0-py-utils = "*"
+pyyaml = ">=6.0.1"
+stage0-mongodb-api = {file = ".", editable = true}
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
