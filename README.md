@@ -5,9 +5,9 @@ Schemas are described using the [stage0 Simple Schema]() standard.
 
 ## Quick Start for Users
 
-- Read [Simple Schema](https://github.com/agile-learning-institute/stage0/blob/main/SIMPLE_SCHEMA.md) to understand the Schema Language
+- Read about [Simple Schema](https://github.com/agile-learning-institute/stage0/blob/main/SIMPLE_SCHEMA.md) to understand the Schema Language
 - Read the [Reference](./REFERENCE.md) that describes how the utility works. 
-- Use [Template](https://github.com/agile-learning-institute/stage0_template_mongodb_api) to create your system mongodb_api 
+- Use the [Template](https://github.com/agile-learning-institute/stage0_template_mongodb_api) to create your system mongodb_api 
 
 ## Quick Start for Contributors
 
