@@ -62,13 +62,17 @@ Examples:
 
 ## Schema Processing
 
-The API processes collection configurations to manage MongoDB schemas, indexes, and data migrations. "Processing" a collection involves:
-
-I'm doing all right, maybe I'll come drop by tomorrow again?
+The API processes collection configurations to manage MongoDB schemas, indexes, and data migrations. "Processing" a collection involves, first determining if the schema version in the collection configuration is greater than the current version, and if so then:
+- Removing any existing schema validation
+- Remove specified indexes (optional)
+- Run defined migrations (optional)
+- Add any new indexes (optional)
+- Apply new Schema Validation
+- Load Test Data (optional)
 
 ## Configuration Reference
 
-The API is configured through environment variables. With the exception of INPUT_FOLDER, the default values for most values should be all you need for local development:
+The API is configured through environment variables.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
