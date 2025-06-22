@@ -3,8 +3,16 @@ from unittest.mock import patch, MagicMock
 import signal
 import sys
 
-# Patch MongoIO before importing server
-with patch('stage0_py_utils.MongoIO.get_instance') as mock_get_instance:
+# Mock Config to prevent auto-processing during tests
+mock_config = MagicMock()
+mock_config.AUTO_PROCESS = False
+mock_config.EXIT_AFTER_PROCESSING = False
+mock_config.MONGODB_API_PORT = 8582
+mock_config.BUILT_AT = "test"
+
+# Patch both Config and MongoIO before importing server
+with patch('stage0_py_utils.Config.get_instance', return_value=mock_config), \
+     patch('stage0_py_utils.MongoIO.get_instance') as mock_get_instance:
     mock_get_instance.return_value = MagicMock()
     from stage0_mongodb_api.server import app, handle_exit
 

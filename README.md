@@ -1,7 +1,13 @@
 # stage0_mongodb_api
 
-This API implements index, schema, and migration management services for a MongoDB database. 
-Schemas are described using the [stage0 Simple Schema](https://github.com/agile-learning-institute/stage0/blob/main/SIMPLE_SCHEMA.md) standard. 
+This project builds a Utility Container that implements index, schema, and migration management services for a MongoDB database. 
+Schemas are described using the [stage0 Simple Schema]() standard. 
+
+## Quick Start for Users
+
+- Read [Simple Schema](https://github.com/agile-learning-institute/stage0/blob/main/SIMPLE_SCHEMA.md) to understand the Schema Language
+- Read the [Reference](./REFERENCE.md) that describes how the utility works. 
+- Use [Template](https://github.com/agile-learning-institute/stage0_template_mongodb_api) to create your system mongodb_api 
 
 ## Quick Start for Contributors
 
@@ -21,7 +27,7 @@ pipenv install
 pipenv run test
 
 # Start development server
-pipenv run start
+pipenv run local
 ```
 
 ## Documentation
@@ -31,10 +37,3 @@ pipenv run start
 - **[API Standards](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/docs/api-standards.md)** - Stage0 API standards
 - **[Collection Config Schema](./docs/collection_config_schema.yaml)** - Configuration file specification
 
-## Project Status
-
-- ✅ Core functionality implemented
-- ✅ Unit test coverage (77/77 tests passing)
-- 🔄 End-to-End testing is underway
-- 🔄 Documentation improvements in progress
-- 📋 Template repository for users (planned)

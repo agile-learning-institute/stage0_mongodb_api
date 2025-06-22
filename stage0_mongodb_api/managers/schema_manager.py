@@ -209,7 +209,7 @@ class SchemaManager:
                 })
                 
         logger.info(f"Loaded {len(self.collection_configs)} collection configurations")
-        
+            
     def validate_schema(self) -> List[Dict]:
         """Validate all loaded schema definitions.
         

@@ -62,7 +62,7 @@ class CollectionService:
         Args:
             collection_name: Name of the collection to get
             token: Authentication token for RBAC enforcement
-            
+        
         Returns:
             Dict containing collection configuration
             
@@ -93,7 +93,7 @@ class CollectionService:
         
         Args:
             token: Authentication token for RBAC enforcement
-            
+        
         Returns:
             List of processing results for each collection
             
@@ -186,7 +186,7 @@ class CollectionService:
             isinstance(op, dict) and op.get("status") == "error" 
             for op in operations
         )
-        
+            
         return {
             "collection": collection_name,
             "operations": operations,

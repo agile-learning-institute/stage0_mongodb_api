@@ -148,6 +148,17 @@ class DatabaseUtil:
                         "message": f"No JSON file found for collection '{collection}'"
                     })
             
+            # Check if any comparisons failed and update overall status
+            failed_comparisons = [
+                comp for comp in results["comparisons"] 
+                if comp["status"] not in ["match", "success"]
+            ]
+            
+            if failed_comparisons:
+                results["status"] = "error"
+                results["error"] = f"{len(failed_comparisons)} comparison(s) failed"
+                results["failed_count"] = len(failed_comparisons)
+            
             return results
             
         except Exception as e:

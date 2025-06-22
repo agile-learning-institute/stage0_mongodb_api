@@ -36,7 +36,7 @@ class MigrationManager:
         
         if not pipeline_stages:
             raise ValueError(f"Pipeline '{pipeline_name}' cannot be empty")
-        
+            
         mongo = MongoIO.get_instance()
         
         try:

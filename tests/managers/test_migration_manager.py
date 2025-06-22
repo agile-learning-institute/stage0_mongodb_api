@@ -80,12 +80,12 @@ class TestMigrationManager(unittest.TestCase):
         migration = {
             "name": "complex_pipeline",
             "pipeline": [
-                {"$match": {"status": "active"}},
-                {"$set": {"status": "inactive"}},
-                {"$set": {"updated_at": "$$NOW"}},
-                {"$unset": ["old_field"]},
-                {"$merge": {"into": "archive"}}
-            ]
+            {"$match": {"status": "active"}},
+            {"$set": {"status": "inactive"}},
+            {"$set": {"updated_at": "$$NOW"}},
+            {"$unset": ["old_field"]},
+            {"$merge": {"into": "archive"}}
+        ]
         }
         result = MigrationManager.run_migration(self.collection_name, migration)
         self.assertEqual(result["status"], "success")

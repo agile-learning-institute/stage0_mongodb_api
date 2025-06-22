@@ -107,6 +107,7 @@ pipenv run stepci-small
 pipenv run stepci-large
 
 # Combine DB actions with StepCI testing 
+export INPUT_FOLDER=./tests/test_cases/large_sample
 pipenv run db-drop-silent 
 pipenv run stepci_large
 pipenv run db-compare
