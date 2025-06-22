@@ -8,7 +8,7 @@ local = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api python3 -m server'"
 debug = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api LOGGING_LEVEL=DEBUG python3 -m server'"
 batch = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api AUTO_PROCESS=True EXIT_AFTER_PROCESSING=True LOAD_TEST_DATA=True python3 -m server'"
 start = "sh -c 'stage0 down && stage0 up mongodb && pipenv run local'"
-test = "python -m unittest discover -s ./tests -p 'test_*.py'"
+test = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api LOGGING_LEVEL=CRITICAL coverage run -m unittest discover -s ./tests -p \"test_*.py\" -v && echo \"\\n=== COVERAGE REPORT ===\" && coverage report && coverage html'"
 stepci-observability = "stepci run ./tests/stepci/observability.yaml"
 stepci-small = "stepci run ./tests/stepci/small_sample.yaml"
 stepci-large = "stepci run ./tests/stepci/large_sample.yaml"
@@ -30,6 +30,7 @@ pyyaml = ">=6.0.1"
 stage0-mongodb-api = {file = ".", editable = true}
 
 [dev-packages]
+coverage = "*"
 
 [requires]
 python_version = "3.12"

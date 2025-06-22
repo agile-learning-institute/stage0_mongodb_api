@@ -55,6 +55,9 @@ cd stage0_mongodb_api
 ### Developer Commands
 
 ```bash
+# Install dependencies
+pipenv install --dev
+
 # Run Unit Tests
 pipenv run test
 
