@@ -58,11 +58,8 @@ cd stage0_mongodb_api
 # Install dependencies
 pipenv install --dev
 
-# Run Unit Tests
+# Run Unit Tests and generate coverage report
 pipenv run test
-
-# Run unit tests with coverage
-pipenv run test --with-coverage
 
 # Change the testing database name
 export MONGO_DB_NAME=test_database
@@ -74,9 +71,6 @@ export INPUT_FOLDER=./tests/test_cases/large_sample
 
 # Set Debug Mode
 export LOGGING_LEVEL=DEBUG
-
-# Start API server (starts MongoDB container first)
-pipenv run start
 
 # Start API server if database is already running
 pipenv run local
@@ -153,6 +147,7 @@ The `tests/test_cases/` directory contains test scenarios:
 - **large_sample**: Complex multi-collection setup with relationships and advanced features
 - **validation_errors**: Test cases for error handling and validation scenarios
 - **minimum_valid**: Empty configuration for edge case testing
+
 If you need a new set of test data to validate features you are adding, feel free to add a new test case folder. Take note of these unit tests that use the test data. 
 
 ### Load and Validation Errors
