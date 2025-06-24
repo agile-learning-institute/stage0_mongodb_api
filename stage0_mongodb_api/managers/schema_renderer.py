@@ -17,21 +17,12 @@ class SchemaRenderer:
     @staticmethod
     def _render(schema: Dict, format: SchemaFormat, enumerator_version: int, context: SchemaContext) -> Dict:
         """ Recursively render a schema definition."""
-        # Handle $ref first - replace with referenced dictionary
-        if "$ref" in schema:
-            return SchemaRenderer._render(
-                context["dictionaries"][schema["$ref"]], 
-                format, 
-                enumerator_version, 
-                context
-            )
-            
         # Handle primitive types
         if "schema" in schema or "json_type" in schema:
             return SchemaRenderer._render_primitive(schema, format)
             
         # Handle complex types
-        logger.info(f"Rendering schema: {schema}")
+        logger.debug(f"Rendering schema: {schema}")
         type_name = schema["type"]
         if type_name == SchemaType.OBJECT.value:
             return SchemaRenderer._render_object(schema, format, enumerator_version, context)

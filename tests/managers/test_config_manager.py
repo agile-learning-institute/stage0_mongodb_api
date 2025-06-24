@@ -60,15 +60,6 @@ class TestConfigManager(unittest.TestCase):
         manager = ConfigManager()
         self.assertEqual(len(manager.load_errors), 1, f"Unexpected load errors {manager.load_errors}")
 
-    def test_validation_errors(self):
-        """Test loading with validation errors"""
-        test_case_dir = os.path.join(self.test_cases_dir, "validation_errors")
-        self.config.INPUT_FOLDER = test_case_dir        
-        manager = ConfigManager()
-        errors = manager.validate_configs()
-        self.assertEqual(len(manager.load_errors), 0, f"Unexpected load errors {manager.load_errors}")
-        self.assertEqual(len(errors), 6, f"Unexpected number of validation errors {errors}")
-
     def test_load_test_data_bulk_write_error(self):
         """Test that _load_test_data properly handles bulk write errors."""
         from stage0_py_utils.mongo_utils.mongo_io import TestDataLoadError

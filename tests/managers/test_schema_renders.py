@@ -36,6 +36,25 @@ class TestSchemaRenders(unittest.TestCase):
         self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
         
     @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_render_nested_refs(self, mock_get_instance):
+        """Test rendering of nested $refs."""
+        # Arrange
+        mock_get_instance.return_value = MagicMock()
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "complex_refs")
+        schema_manager = SchemaManager()
+        version_name = "workshop.1.0.0.1"
+        
+        # Act
+        rendered_bson = schema_manager.render_one(version_name, SchemaFormat.BSON)
+        rendered_json = schema_manager.render_one(version_name, SchemaFormat.JSON)
+        
+        # Assert
+        expected_bson = self._load_bson(version_name)
+        expected_json = self._load_json(version_name)
+        self.assertEqual(rendered_bson, expected_bson, f"BSON schema mismatch, rendered: {rendered_bson}")
+        self.assertEqual(rendered_json, expected_json, f"JSON schema mismatch, rendered: {rendered_json}")
+        
+    @patch('stage0_py_utils.MongoIO.get_instance')
     def test_render_organization(self, mock_get_instance):
         """Test rendering with complex custom types."""
         # Arrange

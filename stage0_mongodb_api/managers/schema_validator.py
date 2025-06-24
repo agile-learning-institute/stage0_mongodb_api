@@ -310,13 +310,6 @@ class SchemaValidator:
             }])
             return type_errors
             
-        # Validate $ref types
-        if "$ref" in prop_def:
-            ref_errors = SchemaValidator._validate_ref_type(prop_name, prop_def["$ref"], context)
-            if ref_errors:
-                type_errors.extend(ref_errors)
-                return type_errors
-            
         # Validate required fields
         type_errors.extend(SchemaValidator._validate_required_fields(prop_name, prop_def))
         if type_errors:
@@ -349,19 +342,6 @@ class SchemaValidator:
                     "message": f"Missing required field: {field}"
                 })
         return errors
-        
-    @staticmethod
-    def _validate_ref_type(prop_name: str, ref_type: str, context: ValidationContext) -> List[Dict]:
-        """Validate a $ref type reference."""
-        if ref_type not in context["dictionaries"]:
-            return [{
-                "error": "invalid_ref_type",
-                "error_id": "VLD-501",
-                "type": prop_name,
-                "ref": ref_type,
-                "message": f"Referenced type {ref_type} not found in dictionaries"
-            }]
-        return []
         
     @staticmethod
     def _validate_custom_type(prop_name: str, type_name: str, context: ValidationContext) -> List[Dict]:
@@ -484,20 +464,14 @@ class SchemaValidator:
             
         # Validate each schema in the one_of definition
         for schema_name, schema_def in one_of_def["schemas"].items():
-            # If schema is a $ref, validate the reference
-            if isinstance(schema_def, dict) and "$ref" in schema_def:
-                ref_errors = SchemaValidator._validate_ref_type(f"{prop_name}.{schema_name}", schema_def["$ref"], context)
-                if ref_errors:
-                    errors.extend(ref_errors)
-            else:
-                # Otherwise validate as a complex type
-                errors.extend(SchemaValidator._validate_complex_type(
-                    f"{prop_name}.{schema_name}", 
-                    schema_def, 
-                    context,
-                    enumerator_version,
-                    visited
-                ))
+            # Validate as a complex type (all $ref objects will have been resolved during loading)
+            errors.extend(SchemaValidator._validate_complex_type(
+                f"{prop_name}.{schema_name}", 
+                schema_def, 
+                context,
+                enumerator_version,
+                visited
+            ))
             
         return errors
  

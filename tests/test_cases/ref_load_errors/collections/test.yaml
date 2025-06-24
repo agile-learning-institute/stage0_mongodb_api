@@ -1,0 +1,5 @@
+title: Test Collection
+name: test
+versions:
+  - version: 1.0.0
+    description: Test version with $ref errors 

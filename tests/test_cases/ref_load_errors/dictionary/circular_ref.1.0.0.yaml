@@ -1,0 +1,6 @@
+title: Circular Reference Test
+description: A schema with a circular reference
+type: object
+properties:
+  self_ref:
+    $ref: circular_ref.1.0.0 
