@@ -25,7 +25,7 @@ class ConfigManager:
     def __init__(self):
         """Initialize the config manager."""
         self.config = Config.get_instance()
-        self.mongo_io = MongoIO()
+        self.mongo_io = MongoIO.get_instance()
         self.collection_configs: Dict[str, Dict] = {}
         self.load_errors: List[Dict] = []
         self.version_manager = VersionManager()

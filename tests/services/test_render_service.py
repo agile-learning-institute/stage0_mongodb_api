@@ -74,13 +74,16 @@ class TestRenderService(unittest.TestCase):
         # Assert
         self.assertEqual(result, expected_message)
 
+    @patch('stage0_mongodb_api.managers.schema_manager.MongoIO')
     @patch('stage0_mongodb_api.services.render_service.ConfigManager')
-    def test_render_json_schema_load_errors(self, mock_config_manager_class):
-        """Test JSON schema rendering with load errors."""
+    def test_render_json_schema_load_errors(self, mock_config_manager_class, mock_mongoio_class):
+        # This ensures that any call to MongoIO.get_instance() returns a mock
+        mock_mongoio_class.get_instance.return_value = MagicMock()
+
         # Arrange
         schema_name = "test_collection.1.0.0.1"
         load_errors = [{"error": "load_error", "message": "Failed to load config"}]
-        
+
         mock_config_manager = MagicMock()
         mock_config_manager.load_errors = load_errors
         mock_config_manager_class.return_value = mock_config_manager
@@ -92,13 +95,16 @@ class TestRenderService(unittest.TestCase):
         self.assertEqual(context.exception.schema_name, schema_name)
         self.assertEqual(context.exception.errors, load_errors)
 
+    @patch('stage0_mongodb_api.managers.schema_manager.MongoIO')
     @patch('stage0_mongodb_api.services.render_service.ConfigManager')
-    def test_render_bson_schema_validation_errors(self, mock_config_manager_class):
-        """Test BSON schema rendering with validation errors."""
+    def test_render_bson_schema_validation_errors(self, mock_config_manager_class, mock_mongoio_class):
+        # This ensures that any call to MongoIO.get_instance() returns a mock
+        mock_mongoio_class.get_instance.return_value = MagicMock()
+
         # Arrange
         schema_name = "test_collection.1.0.0.1"
         validation_errors = [{"error": "validation_error", "message": "Invalid schema"}]
-        
+
         mock_config_manager = MagicMock()
         mock_config_manager.load_errors = []
         mock_config_manager.validate_configs.return_value = validation_errors

@@ -1,4 +1,4 @@
-version: '3.1'
+# docker-compose.yaml for stage0_mongodb_api testing
 
 services:
   mongodb-server:
