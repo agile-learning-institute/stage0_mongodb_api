@@ -170,10 +170,16 @@ class ConfigManager:
             Dict[str, List[Dict]]: Dictionary mapping collection names to their operation results
         """
         results = {}
+        any_collection_failed = False
         
         for collection_name in self.collection_configs.keys():
             try:
                 results[collection_name] = self.process_collection_versions(collection_name)
+                
+                # Check if this collection had any errors
+                if any(isinstance(op, dict) and op.get("status") == "error" for op in results[collection_name]):
+                    any_collection_failed = True
+                    
             except Exception as e:
                 logger.error(f"Error processing collection {collection_name}: {str(e)}")
                 results[collection_name] = [{
@@ -182,6 +188,23 @@ class ConfigManager:
                     "error": str(e),
                     "status": "error"
                 }]
+                any_collection_failed = True
+                
+        # Add final overall status operation
+        overall_status = "error" if any_collection_failed else "success"
+        overall_message = "Some collections failed to process" if any_collection_failed else "All collections processed successfully"
+        
+        # Add the overall status to each collection's results
+        for collection_name in results.keys():
+            results[collection_name].append({
+                "operation": "overall_status",
+                "status": overall_status,
+                "message": overall_message,
+                "collections_processed": len(self.collection_configs),
+                "collections_failed": sum(1 for result in results.values() 
+                                        if any(isinstance(op, dict) and op.get("status") == "error" 
+                                              for op in result))
+            })
                 
         return results
 
