@@ -1,4 +1,4 @@
-from typing import Dict, List, Set, Optional
+from typing import Dict, List, Set, Optional, Any
 import os
 import re
 import yaml
@@ -42,6 +42,10 @@ class SchemaManager:
         # If collection_configs wasn't provided, load them
         if not self.collection_configs:
             self._load_collection_configs()
+            
+        # Resolve $ref values in dictionaries (after all dictionaries are loaded)
+        ref_errors = self._resolve_refs()
+        self.load_errors.extend(ref_errors)
         
     def _load_types(self) -> List[Dict]:
         """Load type definitions.
@@ -165,6 +169,91 @@ class SchemaManager:
             })
         return errors
             
+    def _resolve_refs(self) -> List[Dict]:
+        """Resolve all $ref values in loaded dictionaries.
+        
+        This method recursively traverses all dictionary definitions and replaces
+        $ref objects with the actual referenced dictionary content.
+        
+        Returns:
+            List of errors encountered during resolution
+        """
+        ref_errors = []
+        
+        # Create a temporary copy of dictionaries for resolution
+        resolved = {}
+        
+        for dict_name, dict_def in self.dictionaries.items():
+            resolved_def, errors = self._resolve_refs_in_object(dict_def, dict_name, set())
+            resolved[dict_name] = resolved_def
+            ref_errors.extend(errors)
+            
+        self.dictionaries = resolved
+        
+        return ref_errors
+        
+    def _resolve_refs_in_object(self, obj: Any, dict_name: str, visited: Set[str]) -> tuple[Any, List[Dict]]:
+        """Recursively resolve $ref values in an object.
+        
+        Args:
+            obj: The object to resolve $ref values in
+            dict_name: The name of the dictionary being resolved
+            visited: Set of already visited paths (for cycle detection)
+            
+        Returns:
+            Tuple of (resolved_object, list_of_errors)
+        """
+        errors = []
+        if isinstance(obj, dict):
+            # Check if this is a $ref object
+            if "$ref" in obj:
+                ref_name = obj["$ref"]
+                if ref_name in visited:
+                    errors.append({
+                        "error": "circular_reference",
+                        "error_id": "SCH-013",
+                        "dict_name": dict_name,
+                        "ref_name": ref_name,
+                        "message": f"Circular reference detected: {ref_name}"
+                    })
+                    return obj, errors
+                elif ref_name not in self.dictionaries:
+                    errors.append({
+                        "error": "ref_not_found",
+                        "error_id": "SCH-014",
+                        "dict_name": dict_name,
+                        "ref_name": ref_name,
+                        "message": f"Referenced dictionary not found: {ref_name}"
+                    })
+                    return obj, errors
+                else:
+                    # Resolve the reference - replace the entire object with the referenced content
+                    visited.add(ref_name)
+                    resolved, ref_errors = self._resolve_refs_in_object(self.dictionaries[ref_name], dict_name, visited)
+                    visited.remove(ref_name)
+                    errors.extend(ref_errors)
+                    return resolved, errors
+                    
+            # Otherwise, recursively resolve all values in the dictionary
+            resolved = {}
+            for key, value in obj.items():
+                resolved_value, value_errors = self._resolve_refs_in_object(value, dict_name, visited)
+                resolved[key] = resolved_value
+                errors.extend(value_errors)
+            return resolved, errors
+            
+        elif isinstance(obj, list):
+            # Recursively resolve all items in the list
+            resolved_items = []
+            for item in obj:
+                resolved_item, item_errors = self._resolve_refs_in_object(item, dict_name, visited)
+                resolved_items.append(resolved_item)
+                errors.extend(item_errors)
+            return resolved_items, errors
+        else:
+            # Primitive value, return as-is
+            return obj, errors
+
     def _load_collection_configs(self) -> None:
         """Load collection configurations from the input folder.
         

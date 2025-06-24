@@ -114,5 +114,23 @@ class TestSchemaLoading(unittest.TestCase):
         self.assertEqual(missing_error_ids, set(), f"Missing error IDs: {missing_error_ids}")
         self.assertEqual(extra_error_ids, set(), f"Extra error IDs: {extra_error_ids}")
         
+    @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_ref_resolution_errors(self, mock_get_instance):
+        """Test loading with $ref resolution errors."""
+        # Arrange
+        mock_get_instance.return_value = MagicMock()
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "validation_errors")
+        
+        # Act
+        schema_manager = SchemaManager()
+        
+        # Assert
+        expected_error_ids = {"SCH-014"}  # Only missing reference, no circular reference in this test case
+        actual_error_ids = {error.get('error_id') for error in schema_manager.load_errors if 'error_id' in error}
+        missing_error_ids = expected_error_ids - actual_error_ids
+        extra_error_ids = actual_error_ids - expected_error_ids
+        self.assertEqual(missing_error_ids, set(), f"Missing error IDs: {missing_error_ids}")
+        self.assertEqual(extra_error_ids, set(), f"Extra error IDs: {extra_error_ids}")
+        
 if __name__ == '__main__':
     unittest.main() 

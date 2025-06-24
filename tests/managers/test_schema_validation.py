@@ -61,6 +61,21 @@ class TestSchemaValidation(unittest.TestCase):
         self.assertEqual(errors, [])
         
     @patch('stage0_py_utils.MongoIO.get_instance')
+    def test_validate_complex_refs(self, mock_get_instance):
+        """Test validation of complex nested $refs."""
+        # Arrange
+        self.config.INPUT_FOLDER = os.path.join(self.test_cases_dir, "complex_refs")
+        mock_get_instance.return_value = MagicMock()
+        schema_manager = SchemaManager()
+        
+        # Act
+        errors = schema_manager.validate_schema()
+        
+        # Assert
+        self.assertEqual(schema_manager.load_errors, [])
+        self.assertEqual(errors, [])
+        
+    @patch('stage0_py_utils.MongoIO.get_instance')
     def test_validation_errors(self, mock_get_instance):
         """Test validation with all validation errors."""
         # Arrange
@@ -82,7 +97,6 @@ class TestSchemaValidation(unittest.TestCase):
             "VLD-201", "VLD-202", "VLD-203", "VLD-204",  # Primitive type validation errors
             "VLD-301",  # Complex type basic validation
             "VLD-401",  # Required fields validation
-            "VLD-501",  # Reference type validation
             "VLD-601",  # Custom type validation
             "VLD-701",  # Object type validation
             "VLD-801",  # Array type validation
