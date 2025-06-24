@@ -1,3 +1,4 @@
+import json
 import sys
 import signal
 from flask import Flask
@@ -47,7 +48,7 @@ if config.AUTO_PROCESS:
 
     # Process all collections
     processing_output = config_manager.process_all_collections()
-    logger.info(f"Processing Output: {processing_output}")
+    logger.info(f"Processing Output: {json.dumps(processing_output, indent=4)}")
     logger.info(f"============= Auto Processing is Completed ===============")
 
 if config.EXIT_AFTER_PROCESSING:
