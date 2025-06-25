@@ -116,7 +116,8 @@ class TestVersionManager(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "version_update")
         self.assertEqual(result["collection"], "test_collection")
-        self.assertEqual(result["version"], "test_collection.1.2.3.4")
+        self.assertEqual(result["details_type"], "version")
+        self.assertEqual(result["details"]["version"], "test_collection.1.2.3.4")
         
         # Test with version that already includes collection name
         result = VersionManager.update_version("test_collection", "test_collection.1.2.3.4")
@@ -124,7 +125,8 @@ class TestVersionManager(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "version_update")
         self.assertEqual(result["collection"], "test_collection")
-        self.assertEqual(result["version"], "test_collection.1.2.3.4")
+        self.assertEqual(result["details_type"], "version")
+        self.assertEqual(result["details"]["version"], "test_collection.1.2.3.4")
         
         mock_mongo.upsert_document.assert_called_with(
             Config.get_instance().VERSION_COLLECTION_NAME,

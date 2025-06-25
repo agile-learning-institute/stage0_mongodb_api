@@ -65,13 +65,7 @@ class VersionManager:
             version: Version string in format major.minor.patch.schema or collection.major.minor.patch.schema
             
         Returns:
-            Dict containing operation result:
-            {
-                "operation": "version_update",
-                "collection": str,
-                "version": str,
-                "status": "success"
-            }
+            Dict containing operation result in consistent format
             
         Raises:
             ValueError: If version format is invalid or collection_name is empty
@@ -102,7 +96,11 @@ class VersionManager:
         return {
             "operation": "version_update",
             "collection": collection_name,
-            "version": version,
+            "message": f"Version updated to {version} for {collection_name}",
+            "details_type": "version",
+            "details": {
+                "version": version
+            },
             "status": "success"
         }
 

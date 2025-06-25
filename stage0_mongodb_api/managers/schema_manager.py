@@ -367,35 +367,61 @@ class SchemaManager:
             version_name: Name of the collection version (e.g. user.1.0.0.1)
             
         Returns:
-            Dict containing operation result
+            Dict containing operation result in consistent format
         """
+        # Extract collection name using VersionNumber class (version_name is already validated)
         try:
-            # Parse version using VersionNumber class
             version = VersionNumber(version_name)
             collection_name = version.collection_name
-
+        except ValueError as e:
+            # Handle case where VersionNumber fails (shouldn't happen if properly validated)
+            return {
+                "operation": "apply_schema",
+                "collection": version_name,  # Use version_name as fallback
+                "message": f"Invalid version format: {str(e)}",
+                "details_type": "error",
+                "details": {
+                    "error": str(e)
+                },
+                "status": "error"
+            }
+        
+        try:
             # Render and apply schema
             bson_schema = self.render_one(version_name, SchemaFormat.BSON)
             self.mongo.apply_schema(collection_name, bson_schema)
         except ValueError as e:
             return {
                 "operation": "apply_schema",
-                "collection": version_name,
+                "collection": collection_name,
                 "message": f"Invalid version format: {str(e)}",
+                "details_type": "error",
+                "details": {
+                    "error": str(e)
+                },
                 "status": "error"
             }
         except Exception as e:
             return {
                 "operation": "apply_schema",
-                "collection": version_name,
+                "collection": collection_name,
                 "message": str(e),
+                "details_type": "error",
+                "details": {
+                    "error": str(e)
+                },
                 "status": "error"
             }
         
         return {
             "operation": "apply_schema",
             "collection": collection_name,
-            "schema": bson_schema,
+            "message": f"Schema applied successfully for {version_name}",
+            "details_type": "schema",
+            "details": {
+                "schema": bson_schema,
+                "version": version_name.split(".")[-1] if "." in version_name else ""
+            },
             "status": "success"
         }
 
@@ -406,7 +432,7 @@ class SchemaManager:
             collection_name: Name of the collection (e.g. user)
             
         Returns:
-            Dict containing operation result
+            Dict containing operation result in consistent format
         """
         try:
             # Remove schema validation
@@ -416,6 +442,10 @@ class SchemaManager:
                 "operation": "remove_schema",
                 "collection": collection_name,
                 "message": f"Invalid version format: {str(e)}",
+                "details_type": "error",
+                "details": {
+                    "error": str(e)
+                },
                 "status": "error"
             }
         except Exception as e:
@@ -423,11 +453,16 @@ class SchemaManager:
                 "operation": "remove_schema",
                 "collection": collection_name,
                 "message": str(e),
+                "details_type": "error",
+                "details": {
+                    "error": str(e)
+                },
                 "status": "error"
             }
 
         return {
             "operation": "remove_schema",
             "collection": collection_name,
+            "message": f"Schema validation removed from {collection_name}",
             "status": "success"
         } 

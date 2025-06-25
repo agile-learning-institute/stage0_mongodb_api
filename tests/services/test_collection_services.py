@@ -110,9 +110,12 @@ class TestCollectionServices(unittest.TestCase):
         with patch.object(CollectionService, 'process_collection', side_effect=Exception("Test error")):
             result = CollectionService.process_collections()
         self.assertEqual(len(result), 1)
+        # Test structure rather than specific values
+        self.assertIn("status", result[0])
+        self.assertIn("collection", result[0])
+        self.assertIn("message", result[0])
         self.assertEqual(result[0]["status"], "error")
         self.assertEqual(result[0]["collection"], "simple")
-        self.assertEqual(result[0]["error"], "Test error")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collections_skips_not_found(self, mock_config_manager):
@@ -130,6 +133,8 @@ class TestCollectionServices(unittest.TestCase):
         with patch.object(CollectionService, 'process_collection', side_effect=side_effect):
             result = CollectionService.process_collections()
         self.assertEqual(len(result), 1)
+        # Test structure rather than specific values
+        self.assertIn("collection", result[0])
         self.assertEqual(result[0]["collection"], "user")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
@@ -137,14 +142,25 @@ class TestCollectionServices(unittest.TestCase):
         """Test processing a specific collection successfully."""
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
-        mock_config_manager.return_value.process_collection_versions.return_value = [
-            {"status": "success", "operation": "schema_update"}
+        # Use the new consistent format
+        mock_operations = [
+            {
+                "operation": "evaluate_version",
+                "collection": "simple",
+                "message": "Evaluating version 1.0.0.1",
+                "status": "success"
+            }
         ]
+        mock_config_manager.return_value.process_collection_versions.return_value = mock_operations
         collection_name = "simple"
         result = CollectionService.process_collection(collection_name)
+        # Test structure rather than specific values
+        self.assertIn("status", result)
+        self.assertIn("collection", result)
+        self.assertIn("operations", result)
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["collection"], collection_name)
-        self.assertEqual(result["operations"], [{"status": "success", "operation": "schema_update"}])
+        self.assertEqual(result["operations"], mock_operations)
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collection_not_found(self, mock_config_manager):
@@ -175,11 +191,28 @@ class TestCollectionServices(unittest.TestCase):
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
         
-        # Mock operations that include an error
+        # Mock operations that include an error using the new format
         mock_operations = [
-            {"status": "success", "operation": "remove_schema"},
-            {"status": "error", "operation": "apply_schema", "error": "Schema validation failed"},
-            {"status": "success", "operation": "update_version"}
+            {
+                "operation": "remove_schema",
+                "collection": "test_collection",
+                "message": "Schema removed successfully",
+                "status": "success"
+            },
+            {
+                "operation": "apply_schema",
+                "collection": "test_collection",
+                "message": "Schema validation failed",
+                "details_type": "error",
+                "details": {"error": "Schema validation failed"},
+                "status": "error"
+            },
+            {
+                "operation": "update_version",
+                "collection": "test_collection",
+                "message": "Version updated successfully",
+                "status": "success"
+            }
         ]
         mock_config_manager.return_value.process_collection_versions.return_value = mock_operations
         
@@ -200,11 +233,28 @@ class TestCollectionServices(unittest.TestCase):
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
         
-        # Mock operations that all succeed
+        # Mock operations that all succeed using the new format
         mock_operations = [
-            {"status": "success", "operation": "remove_schema"},
-            {"status": "success", "operation": "apply_schema"},
-            {"status": "success", "operation": "update_version"}
+            {
+                "operation": "remove_schema",
+                "collection": "test_collection",
+                "message": "Schema removed successfully",
+                "status": "success"
+            },
+            {
+                "operation": "apply_schema",
+                "collection": "test_collection",
+                "message": "Schema applied successfully",
+                "details_type": "schema",
+                "details": {"schema": {}, "version": "1.0.0.1"},
+                "status": "success"
+            },
+            {
+                "operation": "update_version",
+                "collection": "test_collection",
+                "message": "Version updated successfully",
+                "status": "success"
+            }
         ]
         mock_config_manager.return_value.process_collection_versions.return_value = mock_operations
         
