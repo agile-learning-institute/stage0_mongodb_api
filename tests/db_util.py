@@ -192,9 +192,20 @@ class DatabaseUtil:
             # Convert ObjectIds to strings for comparison
             actual_data = json.loads(json_util.dumps(actual_data))
             
+            # Remove _id fields from both expected and actual data
+            expected_data_no_id = []
+            for doc in expected_data:
+                doc_copy = {k: v for k, v in doc.items() if k != '_id'}
+                expected_data_no_id.append(doc_copy)
+            
+            actual_data_no_id = []
+            for doc in actual_data:
+                doc_copy = {k: v for k, v in doc.items() if k != '_id'}
+                actual_data_no_id.append(doc_copy)
+            
             # Compare document counts
-            expected_count = len(expected_data)
-            actual_count = len(actual_data)
+            expected_count = len(expected_data_no_id)
+            actual_count = len(actual_data_no_id)
             
             if expected_count != actual_count:
                 return {
@@ -210,8 +221,8 @@ class DatabaseUtil:
             matches = 0
             mismatches = []
             
-            for i, (expected, actual) in enumerate(zip(expected_data, actual_data)):
-                if self._documents_match(expected, actual):
+            for i, (expected, actual) in enumerate(zip(expected_data_no_id, actual_data_no_id)):
+                if expected == actual:
                     matches += 1
                 else:
                     mismatches.append({
@@ -248,22 +259,6 @@ class DatabaseUtil:
                 "error": str(e),
                 "message": f"Error comparing collection: {str(e)}"
             }
-    
-    def _documents_match(self, expected: Dict, actual: Dict) -> bool:
-        """Compare two documents for equality.
-        
-        Args:
-            expected: Expected document
-            actual: Actual document
-            
-        Returns:
-            True if documents match, False otherwise
-        """
-        # Remove _id field for comparison (it's auto-generated)
-        expected_copy = {k: v for k, v in expected.items() if k != '_id'}
-        actual_copy = {k: v for k, v in actual.items() if k != '_id'}
-        
-        return expected_copy == actual_copy
     
     def harvest_database(self, output_path: Optional[str] = None) -> Dict[str, Any]:
         """Harvest all database contents to JSON files.

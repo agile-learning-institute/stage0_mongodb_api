@@ -76,7 +76,7 @@ The API is configured through environment variables.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MONGODB_API_PORT` | API Port number | `8582` |
+| `MONGODB_API_PORT` | API Port number | `8081` |
 | `MONGO_DB_NAME` | MongoDB database name | `stage0` |
 | `MONGO_CONNECTION_STRING` | MongoDB connection string | `mongodb://root:example@localhost:27017/?tls=false&directConnection=true` |
 | `VERSION_COLLECTION_NAME`| MongoDB Version Collection name | `CollectionVersions` |
