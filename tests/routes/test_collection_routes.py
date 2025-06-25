@@ -15,10 +15,10 @@ class TestCollectionRoutes(unittest.TestCase):
     def test_list_collections_success(self, mock_collection_service):
         """Test listing all collections successfully"""
         # Arrange
-        mock_collections = {
-            "users": "1.0.0.1",
-            "organizations": "1.0.0.1"
-        }
+        mock_collections = [
+            {"collection_name": "users", "version": "1.0.0.1"},
+            {"collection_name": "organizations", "version": "1.0.0.1"}
+        ]
         mock_collection_service.list_collections.return_value = mock_collections
 
         # Act

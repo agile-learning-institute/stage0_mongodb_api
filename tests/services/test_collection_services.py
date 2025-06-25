@@ -18,11 +18,12 @@ class TestCollectionServices(unittest.TestCase):
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
         with patch('stage0_mongodb_api.services.collection_service.VersionManager') as mock_version_manager:
-            mock_version_manager.get_version_string.return_value = "simple.1.0.0.1"
+            mock_version_manager.get_current_version.return_value = "simple.1.0.0.1"
             result = CollectionService.list_collections()
         self.assertEqual(len(result), 1)
-        self.assertIsInstance(result, dict)
-        self.assertIn("simple", result)
+        self.assertIsInstance(result, list)
+        self.assertEqual(result[0]["collection_name"], "simple")
+        self.assertEqual(result[0]["version"], "simple.1.0.0.1")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_list_collections_load_error(self, mock_config_manager):
