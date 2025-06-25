@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 def create_collection_routes():
     blueprint = Blueprint('collections', __name__)
 
-    @blueprint.route('', methods=['GET'])
+    @blueprint.route('/', methods=['GET'])
     def list_collections():
         """List all configured collections"""
         token = create_flask_token()
@@ -29,7 +29,7 @@ def create_collection_routes():
                 "message": str(e)
             }]), 500
 
-    @blueprint.route('', methods=['POST'])
+    @blueprint.route('/', methods=['POST'])
     def process_collections():
         """Process all configured collections"""
         token = create_flask_token()
@@ -50,7 +50,7 @@ def create_collection_routes():
                 "message": str(e)
             }]), 500
 
-    @blueprint.route('<collection_name>', methods=['GET'])
+    @blueprint.route('/<collection_name>/', methods=['GET'])
     def get_collection(collection_name):
         """Get a specific collection configuration"""
         token = create_flask_token()
@@ -74,7 +74,7 @@ def create_collection_routes():
                 "message": str(e)
             }]), 500
 
-    @blueprint.route('<collection_name>', methods=['POST'])
+    @blueprint.route('/<collection_name>/', methods=['POST'])
     def process_collection(collection_name):
         """Process a specific collection"""
         token = create_flask_token()

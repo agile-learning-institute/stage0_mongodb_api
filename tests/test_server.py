@@ -22,6 +22,10 @@ class TestServer(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.app = app.test_client()
+        # Patch MongoIO for every test to ensure no real DB connection
+        patcher = patch('stage0_py_utils.MongoIO.get_instance', return_value=MagicMock())
+        self.addCleanup(patcher.stop)
+        self.mock_mongo = patcher.start()
 
     def test_app_initialization(self):
         """Test Flask app initialization."""
@@ -47,11 +51,11 @@ class TestServer(unittest.TestCase):
 
     def test_collection_routes_registered(self):
         """Test collection routes are registered."""
-        # Act
-        response = self.app.get('/api/collections')
-
-        # Assert
-        self.assertNotEqual(response.status_code, 404)
+        with patch('stage0_mongodb_api.routes.collection_routes.CollectionService.list_collections', return_value=[{"collection_name": "dummy", "version": "1.0.0"}]):
+            # Act
+            response = self.app.get('/api/collections/')
+            # Assert
+            self.assertEqual(response.status_code, 200)
 
     def test_render_routes_registered(self):
         """Test render routes are registered."""
