@@ -124,6 +124,7 @@ class CollectionService:
                 results.append({
                     "status": "error",
                     "collection": collection_name,
+                    "message": str(e),
                     "error": str(e)
                 })
         return results

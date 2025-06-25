@@ -28,7 +28,8 @@ class TestIndexManager(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "create_index")
         self.assertEqual(result["collection"], self.collection_name)
-        self.assertIn(self.index_name, result["indexes"])
+        self.assertEqual(result["details_type"], "index")
+        self.assertIn(self.index_name, result["details"]["indexes"])
         mock_mongo.get_instance.return_value.create_index.assert_called_once_with(
             self.collection_name, [self.index_config]
         )
@@ -66,7 +67,8 @@ class TestIndexManager(unittest.TestCase):
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "drop_index")
         self.assertEqual(result["collection"], self.collection_name)
-        self.assertEqual(result["index"], self.index_name)
+        self.assertEqual(result["details_type"], "index")
+        self.assertEqual(result["details"]["index"], self.index_name)
         mock_mongo.get_instance.return_value.drop_index.assert_called_once_with(
             self.collection_name, self.index_name
         )

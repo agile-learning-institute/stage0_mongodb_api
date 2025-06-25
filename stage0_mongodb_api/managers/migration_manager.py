@@ -17,13 +17,7 @@ class MigrationManager:
                 for details on supported stages.
         
         Returns:
-            Dict containing operation result:
-            {
-                "status": "success",
-                "operation": "migration",
-                "collection": str,
-                "pipeline": Dict  # Pipeline result with name and stages
-            }
+            Dict containing operation result in consistent format
             
         Raises:
             ValueError: If migration is invalid or pipeline is empty
@@ -45,9 +39,13 @@ class MigrationManager:
             return {
                 "operation": "migration",
                 "collection": collection_name,
-                "pipeline": {
-                    "name": pipeline_name,
-                    "stages": len(pipeline_stages)
+                "message": f"Migration pipeline '{pipeline_name}' completed successfully",
+                "details_type": "migration",
+                "details": {
+                    "pipeline": {
+                        "name": pipeline_name,
+                        "stages": len(pipeline_stages)
+                    }
                 },
                 "status": "success"
             }
@@ -55,10 +53,14 @@ class MigrationManager:
             return {
                 "operation": "migration",
                 "collection": collection_name,
-                "pipeline": {
-                    "name": pipeline_name,
-                    "stages": len(pipeline_stages)
+                "message": str(e),
+                "details_type": "error",
+                "details": {
+                    "error": str(e),
+                    "pipeline": {
+                        "name": pipeline_name,
+                        "stages": len(pipeline_stages)
+                    }
                 },
-                "error": str(e),
                 "status": "error"
             } 

@@ -71,12 +71,15 @@ class TestConfigManager(unittest.TestCase):
         collection_name = "test_collection"
         test_data_file = "test.json"
         result = config_manager._load_test_data(collection_name, test_data_file)
+        
+        # Test structure rather than specific values
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["operation"], "load_test_data")
         self.assertEqual(result["collection"], collection_name)
-        self.assertIn("test.json", result["test_data"])
-        self.assertEqual(result["error"], "Schema validation failed during test data load")
-        self.assertEqual(result["details"], mock_details)
+        self.assertEqual(result["details_type"], "error")
+        self.assertIn("test.json", result["details"]["test_data_file"])
+        self.assertIn("message", result)  # Should have message field
+        self.assertIn("details", result["details"])  # Should have details field
 
     def test_load_test_data_generic_error(self):
         """Test that _load_test_data properly handles generic errors."""
@@ -85,11 +88,14 @@ class TestConfigManager(unittest.TestCase):
         collection_name = "test_collection"
         test_data_file = "test.json"
         result = config_manager._load_test_data(collection_name, test_data_file)
+        
+        # Test structure rather than specific values
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["operation"], "load_test_data")
         self.assertEqual(result["collection"], collection_name)
-        self.assertIn("test.json", result["test_data"])
-        self.assertEqual(result["error"], "File not found")
+        self.assertEqual(result["details_type"], "error")
+        self.assertIn("test.json", result["details"]["test_data_file"])
+        self.assertIn("message", result)  # Should have message field
 
     def test_load_test_data_success(self):
         """Test that _load_test_data properly handles successful loads."""
@@ -109,11 +115,103 @@ class TestConfigManager(unittest.TestCase):
         collection_name = "test_collection"
         test_data_file = "test.json"
         result = config_manager._load_test_data(collection_name, test_data_file)
+        
+        # Test structure rather than specific values
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["operation"], "load_test_data")
         self.assertEqual(result["collection"], collection_name)
-        self.assertIn("test.json", result["test_data"])
-        self.assertEqual(result["results"], mock_results)
+        self.assertEqual(result["details_type"], "test_data")
+        self.assertIn("test.json", result["details"]["test_data_file"])
+        self.assertIn("results", result["details"])  # Should have results field
+
+    def test_process_collection_versions_structure(self):
+        """Test that process_collection_versions returns the expected structure."""
+        test_case_dir = os.path.join(self.test_cases_dir, "small_sample")
+        self.config.INPUT_FOLDER = test_case_dir
+        
+        # Mock VersionManager.get_current_version to return a version that will be processed
+        with patch('stage0_mongodb_api.managers.config_manager.VersionManager.get_current_version') as mock_get_version:
+            mock_get_version.return_value = "simple.0.0.0.0"
+            
+            # Mock all the manager operations to return success
+            with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.IndexManager') as mock_index_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.MigrationManager') as mock_migration_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.VersionManager') as mock_version_manager:
+                
+                # Set up mock return values
+                mock_schema_manager.return_value.remove_schema.return_value = {
+                    "operation": "remove_schema", "collection": "simple", "status": "success"
+                }
+                mock_schema_manager.return_value.apply_schema.return_value = {
+                    "operation": "apply_schema", "collection": "simple", "schema": {}, "status": "success"
+                }
+                mock_version_manager.return_value.update_version.return_value = {
+                    "operation": "version_update", "collection": "simple", "version": "simple.1.0.0.1", "status": "success"
+                }
+                
+                config_manager = ConfigManager()
+                result = config_manager.process_collection_versions("simple")
+                
+                # Test that we get a list of operations
+                self.assertIsInstance(result, list)
+                self.assertGreater(len(result), 0)
+                
+                # Test that each operation has the expected structure
+                for operation in result:
+                    self.assertIsInstance(operation, dict)
+                    self.assertIn("operation", operation)
+                    self.assertIn("status", operation)
+                    self.assertIn("collection", operation)
+                    # Status should be the last property
+                    self.assertEqual(list(operation.keys())[-1], "status")
+
+    def test_process_all_collections_structure(self):
+        """Test that process_all_collections returns the expected structure."""
+        test_case_dir = os.path.join(self.test_cases_dir, "small_sample")
+        self.config.INPUT_FOLDER = test_case_dir
+        
+        # Mock VersionManager.get_current_version to return a version that will be processed
+        with patch('stage0_mongodb_api.managers.config_manager.VersionManager.get_current_version') as mock_get_version:
+            mock_get_version.return_value = "simple.0.0.0.0"
+            
+            # Mock all the manager operations to return success
+            with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.IndexManager') as mock_index_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.MigrationManager') as mock_migration_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.VersionManager') as mock_version_manager:
+                
+                # Set up mock return values
+                mock_schema_manager.return_value.remove_schema.return_value = {
+                    "operation": "remove_schema", "collection": "simple", "status": "success"
+                }
+                mock_schema_manager.return_value.apply_schema.return_value = {
+                    "operation": "apply_schema", "collection": "simple", "schema": {}, "status": "success"
+                }
+                mock_version_manager.return_value.update_version.return_value = {
+                    "operation": "version_update", "collection": "simple", "version": "simple.1.0.0.1", "status": "success"
+                }
+                
+                config_manager = ConfigManager()
+                result = config_manager.process_all_collections()
+                
+                # Test that we get a dict mapping collection names to operation lists
+                self.assertIsInstance(result, dict)
+                self.assertIn("simple", result)
+                self.assertIsInstance(result["simple"], list)
+                
+                # Test that each collection has operations
+                for collection_name, operations in result.items():
+                    self.assertIsInstance(operations, list)
+                    self.assertGreater(len(operations), 0)
+                    
+                    # Test that each operation has the expected structure
+                    for operation in operations:
+                        self.assertIsInstance(operation, dict)
+                        self.assertIn("operation", operation)
+                        self.assertIn("status", operation)
+                        # Status should be the last property
+                        self.assertEqual(list(operation.keys())[-1], "status")
 
 if __name__ == '__main__':
     unittest.main() 

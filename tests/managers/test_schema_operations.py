@@ -65,7 +65,7 @@ class TestSchemaOperations(unittest.TestCase):
         # Assert
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["operation"], "apply_schema")
-        self.assertEqual(result["collection"], "simple.1.0.0.1")
+        self.assertEqual(result["collection"], "simple")
         self.assertIn("mock exception", result["message"])
 
     @patch('stage0_py_utils.MongoIO.get_instance')

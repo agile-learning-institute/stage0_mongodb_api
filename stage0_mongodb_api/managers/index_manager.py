@@ -13,13 +13,7 @@ class IndexManager:
             index_configs: List of index configuration dictionaries. Each dict must contain 'name' and 'key' fields.
         
         Returns:
-            Dict containing operation result:
-            {
-                "status": "success",
-                "operation": "create_index",
-                "collection": str,
-                "indexes": List[str]
-            }
+            Dict containing operation result in consistent format
             
         Raises:
             ValueError: If any index_config is missing required fields
@@ -34,10 +28,15 @@ class IndexManager:
         mongo.create_index(collection_name, index_configs)
         
         return {
-            "status": "success",
             "operation": "create_index",
             "collection": collection_name,
-            "indexes": [idx["name"] for idx in index_configs]
+            "message": f"Created {len(index_configs)} index(es) for {collection_name}",
+            "details_type": "index",
+            "details": {
+                "indexes": [idx["name"] for idx in index_configs],
+                "index_configs": index_configs
+            },
+            "status": "success"
         }
 
     @staticmethod
@@ -49,13 +48,7 @@ class IndexManager:
             index_name: Name of the index to drop
         
         Returns:
-            Dict containing operation result:
-            {
-                "status": "success",
-                "operation": "drop_index",
-                "collection": str,
-                "index": str
-            }
+            Dict containing operation result in consistent format
         """
         mongo = MongoIO.get_instance()
         try:
@@ -64,15 +57,23 @@ class IndexManager:
             return {
                 "operation": "drop_index",
                 "collection": collection_name,
-                "index": index_name,
-                "error": str(e),
-                "status": "success"
+                "message": str(e),
+                "details_type": "error",
+                "details": {
+                    "error": str(e),
+                    "index": index_name
+                },
+                "status": "error"
             }
         
         return {
             "operation": "drop_index",
             "collection": collection_name,
-            "index": index_name,
+            "message": f"Dropped index '{index_name}' from {collection_name}",
+            "details_type": "index",
+            "details": {
+                "index": index_name
+            },
             "status": "success"
         }
 
