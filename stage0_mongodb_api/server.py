@@ -30,6 +30,10 @@ def handle_exit(signum, frame):
 signal.signal(signal.SIGTERM, handle_exit)
 signal.signal(signal.SIGINT, handle_exit)
 
+# Initialize Flask App
+app = Flask(__name__)
+app.json = MongoJSONEncoder(app)
+
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
 if config.AUTO_PROCESS:
     logger.info(f"============= Auto Processing is Enabled ===============")
@@ -48,16 +52,12 @@ if config.AUTO_PROCESS:
 
     # Process all collections
     processing_output = config_manager.process_all_collections()
-    logger.info(f"Processing Output: {json.dumps(processing_output, indent=4)}")
+    logger.info(f"Processing Output: {app.json.dumps(processing_output)}")
     logger.info(f"============= Auto Processing is Completed ===============")
 
 if config.EXIT_AFTER_PROCESSING:
     logger.info(f"============= Exiting After Processing ===============")
     sys.exit(0)
-
-# Initialize Flask App
-app = Flask(__name__)
-app.json = MongoJSONEncoder(app)
 
 # Apply Prometheus monitoring middleware
 metrics = PrometheusMetrics(app, path='/api/health')

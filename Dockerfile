@@ -31,11 +31,10 @@ RUN pip install -e .
 RUN pip install gunicorn
 
 # Expose the port the app will run on
-EXPOSE 8582
+EXPOSE 8081
 
 # Set Environment Variables
 ENV PYTHONPATH=/opt/stage0_mongodb_api/stage0_mongodb_api
 
 # Command to run the application using Gunicorn 
-CMD exec gunicorn --bind 0.0.0.0:8582 --timeout 120 --preload stage0_mongodb_api.server:app
-#CMD exec gunicorn --bind 0.0.0.0:8582 --workers 1 --timeout 120 --preload stage0_mongodb_api.server:app
+CMD exec gunicorn --bind 0.0.0.0:8081 --timeout 120 --preload stage0_mongodb_api.server:app

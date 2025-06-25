@@ -7,7 +7,7 @@ import sys
 mock_config = MagicMock()
 mock_config.AUTO_PROCESS = False
 mock_config.EXIT_AFTER_PROCESSING = False
-mock_config.MONGODB_API_PORT = 8582
+mock_config.MONGODB_API_PORT = 8081
 mock_config.BUILT_AT = "test"
 
 # Patch both Config and MongoIO before importing server

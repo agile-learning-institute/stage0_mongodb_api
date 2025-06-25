@@ -61,6 +61,9 @@ pipenv install --dev
 # Run Unit Tests and generate coverage report
 pipenv run test
 
+# Run a backing mongo database
+pipenv run database
+
 # Change the testing database name
 export MONGO_DB_NAME=test_database
 # NOTE: Must be test_database for db-compare to work
@@ -105,8 +108,10 @@ pipenv run stepci-large
 
 # Combine DB actions with StepCI testing 
 export INPUT_FOLDER=./tests/test_cases/large_sample
+pipenv run local
+# Then in a different window
 pipenv run db-drop-silent 
-pipenv run stepci_large
+pipenv run stepci-large
 pipenv run db-compare
 
 # Build the API Docker Image
@@ -160,31 +165,31 @@ If you need a new set of test data to validate features you are adding, feel fre
 
 ```bash
 # Get Configuration
-curl -X GET http://localhost:8582/api/config
+curl -X GET http://localhost:8081/api/config
 
 # Health Check
-curl -X GET http://localhost:8582/health
+curl -X GET http://localhost:8081/health
 
 # List Collections
-curl -X GET http://localhost:8582/api/collections/
+curl -X GET http://localhost:8081/api/collections/
 
 # Get a Collection Config
-curl -X GET http://localhost:8582/api/collections/{collection_name}
+curl -X GET http://localhost:8081/api/collections/{collection_name}
 
 # Process All Collections
-curl -X POST http://localhost:8582/api/collections/
+curl -X POST http://localhost:8081/api/collections/
 
 # Process Specific Collection
-curl -X POST http://localhost:8582/api/collections/{collection_name}
+curl -X POST http://localhost:8081/api/collections/{collection_name}
 
 # Render BSON Schema
-curl -X GET http://localhost:8582/api/render/bson_schema/{version_name}
+curl -X GET http://localhost:8081/api/render/bson_schema/{version_name}
 
 # Render JSON Schema
-curl -X GET http://localhost:8582/api/render/json_schema/{version_name}
+curl -X GET http://localhost:8081/api/render/json_schema/{version_name}
 
 # Render OpenAPI Specification
-curl -X GET http://localhost:8582/api/render/openapi/{version_name}
+curl -X GET http://localhost:8081/api/render/openapi/{version_name}
 
 ```
 

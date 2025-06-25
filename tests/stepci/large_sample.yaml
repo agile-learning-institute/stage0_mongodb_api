@@ -1,7 +1,7 @@
 name: mongodb_api_large_sample
 version: "1.0"
 env:
-  host: localhost:8582
+  host: localhost:8081
 
 tests:
   collections:
