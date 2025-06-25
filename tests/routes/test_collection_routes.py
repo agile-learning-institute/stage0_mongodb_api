@@ -22,7 +22,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.list_collections.return_value = mock_collections
 
         # Act
-        response = self.client.get('/api/collections/')
+        response = self.client.get('/api/collections')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -37,7 +37,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.list_collections.side_effect = CollectionProcessingError("collections", errors)
 
         # Act
-        response = self.client.get('/api/collections/')
+        response = self.client.get('/api/collections')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -50,7 +50,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.list_collections.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/collections/')
+        response = self.client.get('/api/collections')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -68,7 +68,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.process_collections.return_value = mock_results
 
         # Act
-        response = self.client.post('/api/collections/')
+        response = self.client.post('/api/collections')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -83,7 +83,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.process_collections.side_effect = CollectionProcessingError("collections", errors)
 
         # Act
-        response = self.client.post('/api/collections/')
+        response = self.client.post('/api/collections')
 
         # Assert
         self.assertEqual(response.status_code, 500)
