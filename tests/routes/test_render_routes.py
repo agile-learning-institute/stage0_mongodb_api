@@ -20,7 +20,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_json_schema.return_value = mock_schema
 
         # Act
-        response = self.client.get(f'/api/render/json_schema/{schema_name}')
+        response = self.client.get(f'/api/render/json_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -36,7 +36,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_bson_schema.return_value = mock_schema
 
         # Act
-        response = self.client.get(f'/api/render/bson_schema/{schema_name}')
+        response = self.client.get(f'/api/render/bson_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -52,7 +52,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_openapi.return_value = expected_message
 
         # Act
-        response = self.client.get(f'/api/render/openapi/{schema_name}')
+        response = self.client.get(f'/api/render/openapi/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -67,7 +67,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_json_schema.side_effect = RenderNotFoundError(schema_name)
 
         # Act
-        response = self.client.get(f'/api/render/json_schema/{schema_name}')
+        response = self.client.get(f'/api/render/json_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 404)
@@ -82,7 +82,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_bson_schema.side_effect = RenderNotFoundError(schema_name)
 
         # Act
-        response = self.client.get(f'/api/render/bson_schema/{schema_name}')
+        response = self.client.get(f'/api/render/bson_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 404)
@@ -98,7 +98,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_json_schema.side_effect = RenderProcessingError(schema_name, errors)
 
         # Act
-        response = self.client.get(f'/api/render/json_schema/{schema_name}')
+        response = self.client.get(f'/api/render/json_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -114,7 +114,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_bson_schema.side_effect = RenderProcessingError(schema_name, errors)
 
         # Act
-        response = self.client.get(f'/api/render/bson_schema/{schema_name}')
+        response = self.client.get(f'/api/render/bson_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -129,7 +129,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_openapi.side_effect = RenderNotFoundError(schema_name)
 
         # Act
-        response = self.client.get(f'/api/render/openapi/{schema_name}')
+        response = self.client.get(f'/api/render/openapi/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 404)
@@ -145,7 +145,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_openapi.side_effect = RenderProcessingError(schema_name, errors)
 
         # Act
-        response = self.client.get(f'/api/render/openapi/{schema_name}')
+        response = self.client.get(f'/api/render/openapi/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -160,7 +160,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_json_schema.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get(f'/api/render/json_schema/{schema_name}')
+        response = self.client.get(f'/api/render/json_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -176,7 +176,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_bson_schema.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get(f'/api/render/bson_schema/{schema_name}')
+        response = self.client.get(f'/api/render/bson_schema/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -192,7 +192,7 @@ class TestRenderRoutes(unittest.TestCase):
         mock_render_service.render_openapi.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get(f'/api/render/openapi/{schema_name}')
+        response = self.client.get(f'/api/render/openapi/{schema_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
