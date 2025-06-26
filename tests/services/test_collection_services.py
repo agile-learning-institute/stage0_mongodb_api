@@ -14,7 +14,16 @@ class TestCollectionServices(unittest.TestCase):
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_list_collections_success(self, mock_config_manager):
         """Test listing all collections successfully."""
-        mock_config_manager.return_value.collection_configs = {"simple": {}}
+        mock_config_manager.return_value.collection_configs = {
+            "simple": {
+                "name": "simple",
+                "versions": [
+                    {"version": "1.0.0.1"},
+                    {"version": "1.0.0.2"},
+                    {"version": "1.0.0.3"}
+                ]
+            }
+        }
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
         with patch('stage0_mongodb_api.services.collection_service.VersionManager') as mock_version_manager:
@@ -24,6 +33,7 @@ class TestCollectionServices(unittest.TestCase):
         self.assertIsInstance(result, list)
         self.assertEqual(result[0]["collection_name"], "simple")
         self.assertEqual(result[0]["version"], "simple.1.0.0.1")
+        self.assertEqual(result[0]["targeted_version"], "simple.1.0.0.3")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_list_collections_load_error(self, mock_config_manager):

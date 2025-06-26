@@ -9,7 +9,7 @@ tests:
     steps:
       - name: Process A Collection
         http:
-          url: http://${{env.host}}/api/collections/user
+          url: http://${{env.host}}/api/collections/user/
           method: POST
           headers:
             Content-Type: application/json          
@@ -29,14 +29,24 @@ tests:
           method: GET
           check:
             status: /200/
-            jsonpath:
-              media: "media.1.0.0.1"
-              organization: "organization.1.0.0.1"
-              search: "search.1.0.1.3"
-              user: "user.1.0.1.3"
+            schema:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  collection_name:
+                    type: "string"
+                  version:
+                    type: "string"
+                  targeted_version:
+                    type: "string"
+                required:
+                  - collection_name
+                  - version
+                  - targeted_version
       - name: GET A Collection
         http:
-          url: http://${{env.host}}/api/collections/user
+          url: http://${{env.host}}/api/collections/user/
           method: GET
           headers:
             Content-Type: application/json          
@@ -74,7 +84,7 @@ tests:
     steps:
       - name: Render User BSON Schema
         http:
-          url: http://${{env.host}}/api/render/bson_schema/user.1.0.0.1
+          url: http://${{env.host}}/api/render/bson_schema/user.1.0.0.1/
           method: GET
           headers:
             Content-Type: application/json          
@@ -201,7 +211,7 @@ tests:
               required[3]: "last_saved"
       - name: Render organization BSON Schema
         http:
-          url: http://${{env.host}}/api/render/bson_schema/organization.1.0.0.1
+          url: http://${{env.host}}/api/render/bson_schema/organization.1.0.0.1/
           method: GET
           headers:
             Content-Type: application/json          
@@ -270,7 +280,7 @@ tests:
               required[3]: "last_saved"
       - name: Render Search BSON Schema
         http:
-          url: http://${{env.host}}/api/render/bson_schema/search.1.0.0.1
+          url: http://${{env.host}}/api/render/bson_schema/search.1.0.0.1/
           method: GET
           headers:
             Content-Type: application/json          
@@ -462,7 +472,7 @@ tests:
     steps:
       - name: Render User JSON Schema
         http:
-          url: http://${{env.host}}/api/render/json_schema/user.1.0.1.3
+          url: http://${{env.host}}/api/render/json_schema/user.1.0.1.3/
           method: GET
           headers:
             Content-Type: application/json          
@@ -546,7 +556,7 @@ tests:
               required[3]: "last_saved"
       - name: Render media JSON Schema
         http:
-          url: http://${{env.host}}/api/render/json_schema/media.1.0.0.1
+          url: http://${{env.host}}/api/render/json_schema/media.1.0.0.1/
           method: GET
           headers:
             Content-Type: application/json          
@@ -620,79 +630,15 @@ tests:
               properties.last_saved.required[3]: "correlation_id"
       - name: Render organization JSON Schema
         http:
-          url: http://${{env.host}}/api/render/json_schema/organization.1.0.0.1
+          url: http://${{env.host}}/api/render/json_schema/organization.1.0.0.1/
           method: GET
           headers:
             Content-Type: application/json          
           check:
             status: /200/
-            # jsonpath:
-            #   title: "Organization"
-            #   description: "An organization in the system"
-            #   type: "object"
-            #   additionalProperties: false
-            #   properties._id.type: "string"
-            #   properties._id.description: "The unique identifier for the organization"
-            #   properties._id.pattern: "^[0-9a-fA-F]{24}$"
-            #   properties.name.type: "string"
-            #   properties.name.description: "The organization name"
-            #   properties.name.pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-            #   properties.status.type: "string"
-            #   properties.status.description: "The current status of the organization"
-            #   properties.status.enum[0]: "active"
-            #   properties.status.enum[1]: "archived"
-            #   properties.website.type: "string"
-            #   properties.website.description: "Organization website"
-            #   properties.website.pattern: "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
-            #   properties.users.type: "array"
-            #   properties.users.description: "Users associated with this organization"
-            #   properties.users.items.type: "string"
-            #   properties.users.items.description: "A user identifier"
-            #   properties.users.items.pattern: "^[0-9a-fA-F]{24}$"
-            #   properties.home_address.type: "object"
-            #   properties.home_address.title: "Street Address"
-            #   properties.home_address.description: "Organization home address"
-            #   properties.home_address.additionalProperties: false
-            #   properties.home_address.properties.street.type: "string"
-            #   properties.home_address.properties.street.description: "Street address"
-            #   properties.home_address.properties.street.pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
-            #   properties.home_address.properties.city.type: "string"
-            #   properties.home_address.properties.city.description: "City"
-            #   properties.home_address.properties.city.pattern: "^[^\\s]{4,40}$"
-            #   properties.home_address.properties.state.type: "string"
-            #   properties.home_address.properties.state.description: "State or province"
-            #   properties.home_address.properties.state.pattern: "^[A-Z]{2}$"
-            #   properties.home_address.properties.postal_code.type: "string"
-            #   properties.home_address.properties.postal_code.description: "Postal code"
-            #   properties.home_address.properties.postal_code.pattern: "^[^\\s]{4,40}$"
-            #   properties.home_address.required[0]: "postal_code"
-            #   properties.last_saved.type: "object"
-            #   properties.last_saved.title: "Breadcrumb"
-            #   properties.last_saved.description: "When the organization document was last updated"
-            #   properties.last_saved.additionalProperties: false
-            #   properties.last_saved.properties.from_ip.type: "string"
-            #   properties.last_saved.properties.from_ip.description: "Http Request remote IP address"
-            #   properties.last_saved.properties.from_ip.pattern: "^[^\\s]{4,40}$"
-            #   properties.last_saved.properties.by_user.type: "string"
-            #   properties.last_saved.properties.by_user.description: "ID Of User"
-            #   properties.last_saved.properties.by_user.pattern: "^[^\\s]{4,40}$"
-            #   properties.last_saved.properties.at_time.type: "string"
-            #   properties.last_saved.properties.at_time.description: "The date-time when last updated"
-            #   properties.last_saved.properties.at_time.format: "date-time"
-            #   properties.last_saved.properties.correlation_id.type: "string"
-            #   properties.last_saved.properties.correlation_id.description: "The logging correlation ID of the update transaction"
-            #   properties.last_saved.properties.correlation_id.pattern: "^[^\\s]{4,40}$"
-            #   properties.last_saved.required[0]: "from_ip"
-            #   properties.last_saved.required[1]: "by_user"
-            #   properties.last_saved.required[2]: "at_time"
-            #   properties.last_saved.required[3]: "correlation_id"
-            #   properties.last_saved.required[0]: "_id"
-            #   properties.last_saved.required[1]: "name"
-            #   properties.last_saved.required[2]: "status"
-            #   properties.last_saved.required[3]: "last_saved"
       - name: Render Search JSON Schema
         http:
-          url: http://${{env.host}}/api/render/json_schema/search.1.0.0.1
+          url: http://${{env.host}}/api/render/json_schema/search.1.0.0.1/
           method: GET
           headers:
             Content-Type: application/json          

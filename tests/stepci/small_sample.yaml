@@ -22,9 +22,12 @@ tests:
                     type: "string"
                   version:
                     type: "string"
+                  targeted_version:
+                    type: "string"
                 required:
                   - collection_name
                   - version
+                  - targeted_version
       - name: GET A Collection
         http:
           url: http://${{env.host}}/api/collections/simple

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def create_render_routes():
     blueprint = Blueprint('renders', __name__)
 
-    @blueprint.route('json_schema/<schema_name>', methods=['GET'])
+    @blueprint.route('json_schema/<schema_name>/', methods=['GET'])
     def render_json_schema(schema_name):
         """Render Json Schema for a schema"""
         token = create_flask_token()
@@ -34,7 +34,7 @@ def create_render_routes():
                 "message": str(e)
             }]), 500
 
-    @blueprint.route('bson_schema/<schema_name>', methods=['GET'])
+    @blueprint.route('bson_schema/<schema_name>/', methods=['GET'])
     def render_bson_schema(schema_name):
         """Render Bson Schema for a schema"""
         token = create_flask_token()
@@ -58,7 +58,7 @@ def create_render_routes():
                 "message": str(e)
             }]), 500
 
-    @blueprint.route('openapi/<schema_name>', methods=['GET'])
+    @blueprint.route('openapi/<schema_name>/', methods=['GET'])
     def render_openapi(schema_name):
         """Render OpenAPI for a schema"""
         token = create_flask_token()

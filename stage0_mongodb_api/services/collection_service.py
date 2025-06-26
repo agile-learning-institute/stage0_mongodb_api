@@ -33,7 +33,7 @@ class CollectionService:
             token: Authentication token for RBAC enforcement
             
         Returns:
-            List of dictionaries with collection_name and version
+            List of dictionaries with collection_name, version, and targeted_version
             
         Raises:
             CollectionProcessingError: If there are load or validation errors
@@ -52,9 +52,17 @@ class CollectionService:
         # Create a list of collection objects matching the OpenAPI schema
         collections = []
         for collection_name, collection in config_manager.collection_configs.items():
+            # Get current version
+            current_version = VersionManager.get_current_version(collection_name)
+            
+            # Get targeted version (last version in the versions array)
+            versions = collection.get("versions", [])
+            targeted_version = f"{collection_name}.{versions[-1]['version']}" if versions else None
+            
             collections.append({
                 "collection_name": collection_name,
-                "version": VersionManager.get_current_version(collection_name)
+                "version": current_version,
+                "targeted_version": targeted_version
             })
         return collections
 

@@ -16,9 +16,9 @@ db-drop-silent = "python tests/db_util.py drop --passphrase DROP_DROWSSAP_YEK"
 db-compare = "python tests/db_util.py compare"
 db-harvest = "python tests/db_util.py harvest"
 build = "docker build --tag ghcr.io/agile-learning-institute/stage0_mongodb_api:latest ."
-database = "docker compose --profile mongodb up --detach"
-container = "docker compose --profile all up --detach"
-down = "docker compose down stage0_mongodb_api mongodb"
+service = "sh -c 'pipenv run down && docker compose --profile mongodb up --detach && echo `Visit http://localhost:8082/`'"
+database = "sh -c 'pipenv run down && docker compose --profile mongodb-only up --detach'"
+down = "docker compose down mongodb_spa mongodb_api mongodb"
 
 [packages]
 python-dotenv = "*"
