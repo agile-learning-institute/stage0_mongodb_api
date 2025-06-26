@@ -49,7 +49,8 @@ class ConfigManager:
             self.load_errors.append({
                 "error": "directory_not_found",
                 "error_id": "CFG-001",
-                "path": collections_folder
+                "path": collections_folder,
+                "message": f"Collections directory not found: {collections_folder}"
             })
             return
             
@@ -149,6 +150,11 @@ class ConfigManager:
                         "message": f"Version {version_config['version']}: {str(e)}"
                     })
                     continue
+                        
+        # Add schema validation errors if schema manager is available
+        if hasattr(self, "schema_manager") and self.schema_manager:
+            schema_errors = self.schema_manager.validate_schema()
+            errors.extend(schema_errors)
                         
         return errors
 
