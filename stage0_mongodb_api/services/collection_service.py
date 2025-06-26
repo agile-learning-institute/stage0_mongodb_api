@@ -26,14 +26,14 @@ class CollectionService:
     """
     
     @staticmethod
-    def list_collections(token: Dict = None) -> Dict:
+    def list_collections(token: Dict = None) -> List[Dict]:
         """List all configured collections.
         
         Args:
             token: Authentication token for RBAC enforcement
             
         Returns:
-            Dictionary of collection name: version string
+            List of dictionaries with collection_name and version
             
         Raises:
             CollectionProcessingError: If there are load or validation errors
@@ -49,10 +49,13 @@ class CollectionService:
         if validation_errors:
             raise CollectionProcessingError("collections", validation_errors)
             
-        # Create a dict of collection name: version string
-        collections = {}
+        # Create a list of collection objects matching the OpenAPI schema
+        collections = []
         for collection_name, collection in config_manager.collection_configs.items():
-            collections[collection_name] = VersionManager.get_current_version(collection_name)
+            collections.append({
+                "collection_name": collection_name,
+                "version": VersionManager.get_current_version(collection_name)
+            })
         return collections
 
     @staticmethod

@@ -50,7 +50,7 @@ def create_collection_routes():
                 "message": str(e)
             }]), 500
 
-    @blueprint.route('/<collection_name>', methods=['GET'])
+    @blueprint.route('/<collection_name>/', methods=['GET'])
     def get_collection(collection_name):
         """Get a specific collection configuration"""
         token = create_flask_token()
@@ -74,7 +74,7 @@ def create_collection_routes():
                 "message": str(e)
             }]), 500
 
-    @blueprint.route('/<collection_name>', methods=['POST'])
+    @blueprint.route('/<collection_name>/', methods=['POST'])
     def process_collection(collection_name):
         """Process a specific collection"""
         token = create_flask_token()

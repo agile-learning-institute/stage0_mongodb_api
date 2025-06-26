@@ -28,7 +28,6 @@ services:
     environment:
       MONGO_CONNECTION_STRING: mongodb://mongodb:27017/?replicaSet=rs0
       MONGO_DB_NAME: test_database
-      MONGODB_API_PORT: 8081
       AUTO_PROCESS: True
       LOAD_TEST_DATA: True
     depends_on:

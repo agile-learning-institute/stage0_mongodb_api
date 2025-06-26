@@ -15,10 +15,10 @@ class TestCollectionRoutes(unittest.TestCase):
     def test_list_collections_success(self, mock_collection_service):
         """Test listing all collections successfully"""
         # Arrange
-        mock_collections = {
-            "users": "1.0.0.1",
-            "organizations": "1.0.0.1"
-        }
+        mock_collections = [
+            {"collection_name": "users", "version": "1.0.0.1"},
+            {"collection_name": "organizations", "version": "1.0.0.1"}
+        ]
         mock_collection_service.list_collections.return_value = mock_collections
 
         # Act
@@ -98,12 +98,12 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.get_collection.return_value = mock_collection
 
         # Act
-        response = self.client.get(f'/api/collections/users')
+        response = self.client.get(f'/api/collections/{collection_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, mock_collection)
-        mock_collection_service.get_collection.assert_called_once()
+        mock_collection_service.get_collection.assert_called_once_with(collection_name, mock_collection_service.get_collection.call_args[0][1])
 
     @patch('stage0_mongodb_api.routes.collection_routes.CollectionService')
     def test_get_collection_not_found(self, mock_collection_service):
@@ -113,7 +113,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.get_collection.side_effect = CollectionNotFoundError(collection_name)
 
         # Act
-        response = self.client.get(f'/api/collections/{collection_name}')
+        response = self.client.get(f'/api/collections/{collection_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 404)
@@ -128,7 +128,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.get_collection.side_effect = CollectionProcessingError(collection_name, errors)
 
         # Act
-        response = self.client.get(f'/api/collections/{collection_name}')
+        response = self.client.get(f'/api/collections/{collection_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -147,12 +147,12 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.process_collection.return_value = mock_result
 
         # Act
-        response = self.client.post(f'/api/collections/{collection_name}')
+        response = self.client.post(f'/api/collections/{collection_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, mock_result)
-        mock_collection_service.process_collection.assert_called_once()
+        mock_collection_service.process_collection.assert_called_once_with(collection_name, mock_collection_service.process_collection.call_args[0][1])
 
     @patch('stage0_mongodb_api.routes.collection_routes.CollectionService')
     def test_process_specific_collection_not_found(self, mock_collection_service):
@@ -162,7 +162,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.process_collection.side_effect = CollectionNotFoundError(collection_name)
 
         # Act
-        response = self.client.post(f'/api/collections/{collection_name}')
+        response = self.client.post(f'/api/collections/{collection_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 404)
@@ -177,7 +177,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.process_collection.side_effect = CollectionProcessingError(collection_name, errors)
 
         # Act
-        response = self.client.post(f'/api/collections/{collection_name}')
+        response = self.client.post(f'/api/collections/{collection_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -191,7 +191,7 @@ class TestCollectionRoutes(unittest.TestCase):
         mock_collection_service.process_collection.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.post(f'/api/collections/{collection_name}')
+        response = self.client.post(f'/api/collections/{collection_name}/')
 
         # Assert
         self.assertEqual(response.status_code, 500)

@@ -34,6 +34,9 @@ signal.signal(signal.SIGINT, handle_exit)
 app = Flask(__name__)
 app.json = MongoJSONEncoder(app)
 
+# Configure Flask to be strict about trailing slashes
+app.url_map.strict_slashes = False
+
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
 if config.AUTO_PROCESS:
     logger.info(f"============= Auto Processing is Enabled ===============")

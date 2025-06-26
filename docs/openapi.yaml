@@ -366,14 +366,6 @@ components:
                   - default
                   - file
                   - environment
-        versions:
-          type: array
-          description: List of version information
-          items:
-            type: object
-        enumerators:
-          type: object
-          description: Dictionary of enumerations
         token:
           type: object
           properties:
