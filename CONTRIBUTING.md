@@ -44,17 +44,30 @@ This project follows the [Stage0 development standards](https://github.com/agile
 
 - Stage0 [Developers Edition](https://github.com/agile-learning-institute/stage0/blob/main/developer_edition/README.md)
 
-### Installation
+### Quick Start
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone git@github.com:agile-learning-institute/stage0_mongodb_api.git
 cd stage0_mongodb_api
+pipenv run service
+# Open http://localhost:8082/
 ```
 
 ### Developer Commands
 
 ```bash
+# Configure environment for testing
+export MONGO_DB_NAME=test_database
+export MONGO_CONNECTION_STRING=mongodb://localhost:27017/?replicaSet=rs0
+
+# Select a test_case for the server
+export INPUT_FOLDER=./tests/test_cases/small_sample
+export INPUT_FOLDER=./tests/test_cases/large_sample
+
+# Set Debug Mode if needed
+export LOGGING_LEVEL=DEBUG
+
 # Install dependencies
 pipenv install --dev
 
@@ -64,64 +77,55 @@ pipenv run test
 # Run a backing mongo database
 pipenv run database
 
-# Change the testing database name
-export MONGO_DB_NAME=test_database
-# NOTE: Must be test_database for db-compare to work
-
-# Select a test_case for the server
-export INPUT_FOLDER=./tests/test_cases/small_sample
-export INPUT_FOLDER=./tests/test_cases/large_sample
-
-# Set Debug Mode
-export LOGGING_LEVEL=DEBUG
-
-# Start API server if database is already running
+## All run locally commands assume the database is running
+# Start server locally**
 pipenv run local
 
-# Start with debugging
-pipenv run debug
+# Start locally with debugging 
+pipenv run debug 
 
-# Run in Batch mode (process and shut down)
+# Run locally in Batch mode (process and shut down)
 pipenv run batch
+
+# Build container after code changes
+pipenv run build
+
+# Start Containerized Stack (Database, API, and SPA)
+pipenv run service
+
+# Stop the testing containers
+pipenv run down
 
 #####################
 # Black Box Testing #
 
-# Silent drop MONGO_DB_NAME for automation
-pipenv run db-drop-silent
-
-# Compare with INPUT_FOLDER/MONGO_DB_NAME
-pipenv run db-compare
-
-# Harvest current state to INPUT_FOLDER/MONGO_DB_NAME
-pipenv run db-harvest
-
-# Combine DB actions with Batch testing 
-pipenv run db-drop-silent 
-pipenv run batch 
-pipenv run db-compare
+# MongoDB Utilities
+pipenv run db-drop-silent   # drop the testing database
+pipenv run db-compare       # Compare the database to a know set of data
+pipenv run db-harvest       # Update the set of known data from the database
 
 # Run StepCI black box testing 
 pipenv run stepci-observability
 pipenv run stepci-small
 pipenv run stepci-large
 
-# Combine DB actions with StepCI testing 
-export INPUT_FOLDER=./tests/test_cases/large_sample
-pipenv run local
-# Then in a different window
+# Combine DB actions with Batch testing 
 pipenv run db-drop-silent 
+pipenv run db-compare                   # Should fail
+pipenv run batch 
+pipenv run db-compare                   # Should pass
+
+# Combine DB actions, containerized runtime, and StepCI testing 
+pipenv run service
+pipenv run db-compare                   # Should fail
 pipenv run stepci-large
-pipenv run db-compare
+pipenv run db-compare                   # Should pass
 
-# Build the API Docker Image
-pipenv run build
-
-# Run API Docker Image + a MongoDB Image
-pipenv run container
-
-# Stop the API and DB containers
-pipenv run down
+# Use the SPA to find errors and test configuration
+pipenv run service      # if it's not already running
+pipenv run db-compare   # Should fail
+# visit http://localhost:8082 and "process all"
+pipenv run db-compare   # Should pass
 
 ```
 
