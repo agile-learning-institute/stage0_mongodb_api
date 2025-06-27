@@ -26,7 +26,7 @@ services:
   # MongoDB configuration Service
   ##################################
   mongodb_api:
-    image: ghcr.io/agile-learning-institute/stage0_mongo_api:latest
+    image: ghcr.io/agile-learning-institute/stage0_mongodb_api:latest
     restart: no
     ports:
       - 8081:8081
@@ -35,6 +35,7 @@ services:
       AUTO_PROCESS: False
       LOAD_TEST_DATA: True
       MONGO_DB_NAME: test_database
+      MONGODB_API_PORT: 8081
     volumes:
       - ${INPUT_FOLDER:-./tests/test_cases/large_sample}:/input
     depends_on:
@@ -48,7 +49,7 @@ services:
     image: ghcr.io/agile-learning-institute/stage0_mongodb_spa:latest
     restart: no
     environment:
-      MONGODB_API_HOST: stage0_mongodb_api
+      MONGODB_API_HOST: mongodb_api
       MONGODB_API_PORT: 8081
       MONGODB_SPA_PORT: 8082
     ports:

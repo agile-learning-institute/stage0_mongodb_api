@@ -24,9 +24,6 @@ COPY --from=build /app/ /opt/stage0_mongodb_api/
 COPY Pipfile Pipfile.lock /opt/stage0_mongodb_api/
 RUN pip install pipenv && pipenv install --deploy --system
 
-# Install the package in development mode
-RUN pip install -e .
-
 # Install Gunicorn for running the Flask app in production
 RUN pip install gunicorn
 
@@ -35,6 +32,7 @@ EXPOSE 8081
 
 # Set Environment Variables
 ENV PYTHONPATH=/opt/stage0_mongodb_api/stage0_mongodb_api
+ENV MONGODB_API_PORT=8081
 
 # Command to run the application using Gunicorn 
-CMD exec gunicorn --bind 0.0.0.0:8081 --timeout 120 --preload stage0_mongodb_api.server:app
+CMD exec gunicorn --bind 0.0.0.0:${MONGODB_API_PORT} --timeout 120 --preload stage0_mongodb_api.server:app
