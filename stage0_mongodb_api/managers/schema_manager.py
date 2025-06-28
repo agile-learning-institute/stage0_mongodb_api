@@ -54,7 +54,7 @@ class SchemaManager:
             List of load errors
         """
         errors = []
-        types_dir = os.path.join(self.config.INPUT_FOLDER, "dictionary", "types")
+        types_dir = os.path.join(self.config.INPUT_FOLDER, "types")
         if not os.path.exists(types_dir):
             errors.append({
                 "error": "directory_not_found",
