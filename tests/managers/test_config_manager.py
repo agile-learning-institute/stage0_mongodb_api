@@ -219,72 +219,89 @@ class TestConfigManager(unittest.TestCase):
         self.config.INPUT_FOLDER = test_case_dir
         self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
         
-        # Mock MongoIO upsert_document to return success
-        self.mock_mongoio_get_instance.return_value.upsert_document.return_value = {
-            "acknowledged": True,
-            "matched_count": 1,
-            "modified_count": 1
-        }
+        # Mock schema_manager to return test enumerators
+        mock_enumerators = [
+            {"version": 0, "enumerators": {}},
+            {"version": 1, "enumerators": {"default_status": ["active", "archived"]}}
+        ]
         
-        config_manager = ConfigManager()
-        result = config_manager._process_enumerators()
+        # Reset and mock MongoIO upsert_document to return the input document
+        self.mock_mongoio_get_instance.return_value.upsert_document.reset_mock()
+        def upsert_side_effect(collection, filter, document):
+            return document
+        self.mock_mongoio_get_instance.return_value.upsert_document.side_effect = upsert_side_effect
         
-        # Test that we get the expected structure
-        self.assertEqual(result["status"], "success")
-        self.assertEqual(result["operation"], "process_enumerators")
-        self.assertEqual(result["collection"], "Enumerators")
-        self.assertEqual(result["details_type"], "enumerators")
-        self.assertIn("processed_count", result["details"])
-        self.assertIn("total_versions", result["details"])
-        self.assertIn("enumerator_file", result["details"])
-        
-        # Should have processed 2 versions from small_sample enumerators.json
-        self.assertEqual(result["details"]["processed_count"], 2)
-        self.assertEqual(result["details"]["total_versions"], 2)
+        with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager_class:
+            # Create a mock schema manager instance
+            mock_schema_manager = MagicMock()
+            mock_schema_manager.enumerators = mock_enumerators
+            mock_schema_manager_class.return_value = mock_schema_manager
+            
+            config_manager = ConfigManager()
+            result = config_manager._process_enumerators()
+            
+            # Test that we get the expected success structure
+            self.assertEqual(result["operation"], "process_enumerators")
+            self.assertEqual(result["collection"], "Enumerators")
+            self.assertEqual(result["status"], "success")
+            self.assertEqual(result["details_type"], "success")
+            self.assertEqual(result["details"]["processed_count"], 2)
+            self.assertEqual(result["details"]["total_count"], 2)
+            
+            # Verify upsert_document was called for each enumerator
+            self.assertEqual(
+                self.mock_mongoio_get_instance.return_value.upsert_document.call_count, 2
+            )
 
     def test_process_enumerators_file_not_found(self):
-        """Test that _process_enumerators handles missing enumerators file."""
-        test_case_dir = os.path.join(self.test_cases_dir, "minimum_valid")  # No enumerators.json
-        self.config.INPUT_FOLDER = test_case_dir
-        self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
-        
-        # Mock MongoIO upsert_document to return success for empty array
-        self.mock_mongoio_get_instance.return_value.upsert_document.return_value = {
-            "acknowledged": True,
-            "matched_count": 0,
-            "modified_count": 0
-        }
-        
-        config_manager = ConfigManager()
-        result = config_manager._process_enumerators()
-        
-        # Test that we get the expected success structure for empty enumerators
-        self.assertEqual(result["status"], "success")
-        self.assertEqual(result["operation"], "process_enumerators")
-        self.assertEqual(result["collection"], "Enumerators")
-        self.assertEqual(result["details_type"], "enumerators")
-        self.assertIn("processed_count", result["details"])
-        self.assertIn("total_versions", result["details"])
-        self.assertIn("enumerator_file", result["details"])
-        self.assertEqual(result["details"]["processed_count"], 0)
-        self.assertEqual(result["details"]["total_versions"], 0)
-
-    def test_process_enumerators_invalid_format(self):
-        """Test that _process_enumerators handles invalid JSON format."""
+        """Test that _process_enumerators handles empty enumerators list."""
         test_case_dir = os.path.join(self.test_cases_dir, "minimum_valid")
         self.config.INPUT_FOLDER = test_case_dir
         self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
         
-        # Create a temporary invalid enumerators.json file
-        import tempfile
-        import json
-        with tempfile.TemporaryDirectory() as temp_dir:
-            self.config.INPUT_FOLDER = temp_dir
-            os.makedirs(os.path.join(temp_dir, "data"), exist_ok=True)
+        # Reset and mock MongoIO upsert_document to return success for empty array
+        self.mock_mongoio_get_instance.return_value.upsert_document.reset_mock()
+        self.mock_mongoio_get_instance.return_value.upsert_document.return_value = {
+            "version": 0,
+            "enumerators": {}
+        }
+        
+        with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager_class:
+            # Create a mock schema manager instance with empty enumerators
+            mock_schema_manager = MagicMock()
+            mock_schema_manager.enumerators = []
+            mock_schema_manager_class.return_value = mock_schema_manager
             
-            # Create invalid enumerators.json (not a list)
-            with open(os.path.join(temp_dir, "data", "enumerators.json"), "w") as f:
-                json.dump({"invalid": "format"}, f)
+            config_manager = ConfigManager()
+            result = config_manager._process_enumerators()
+            
+            # Test that we get the expected success structure for empty list
+            self.assertEqual(result["operation"], "process_enumerators")
+            self.assertEqual(result["collection"], "Enumerators")
+            self.assertEqual(result["status"], "success")
+            self.assertEqual(result["details_type"], "success")
+            self.assertEqual(result["details"]["processed_count"], 0)
+            self.assertEqual(result["details"]["total_count"], 0)
+            
+            # Verify upsert_document was not called since list is empty
+            self.assertEqual(
+                self.mock_mongoio_get_instance.return_value.upsert_document.call_count, 0
+            )
+
+    def test_process_enumerators_invalid_format(self):
+        """Test that _process_enumerators handles invalid enumerators format."""
+        test_case_dir = os.path.join(self.test_cases_dir, "minimum_valid")
+        self.config.INPUT_FOLDER = test_case_dir
+        self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
+        
+        # Mock schema_manager to return invalid enumerators (not a list)
+        mock_enumerators = {"invalid": "format"}  # Not a list
+        
+        with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager_class:
+            # Create a mock schema manager instance with invalid enumerators
+            mock_schema_manager = MagicMock()
+            mock_schema_manager.enumerators = mock_enumerators
+            mock_schema_manager_class.return_value = mock_schema_manager
             
             config_manager = ConfigManager()
             result = config_manager._process_enumerators()
@@ -296,6 +313,7 @@ class TestConfigManager(unittest.TestCase):
             self.assertEqual(result["details_type"], "error")
             self.assertIn("error", result["details"])
             self.assertEqual(result["details"]["expected"], "list")
+            self.assertEqual(result["details"]["actual"], "dict")
 
     def test_process_all_collections_includes_enumerators(self):
         """Test that process_all_collections includes enumerators processing."""
@@ -303,12 +321,17 @@ class TestConfigManager(unittest.TestCase):
         self.config.INPUT_FOLDER = test_case_dir
         self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
         
-        # Mock MongoIO upsert_document to return success
-        self.mock_mongoio_get_instance.return_value.upsert_document.return_value = {
-            "acknowledged": True,
-            "matched_count": 1,
-            "modified_count": 1
-        }
+        # Mock schema_manager to return test enumerators
+        mock_enumerators = [
+            {"version": 0, "enumerators": {}},
+            {"version": 1, "enumerators": {"default_status": ["active", "archived"]}}
+        ]
+        
+        # Reset and mock MongoIO upsert_document to return the input document
+        self.mock_mongoio_get_instance.return_value.upsert_document.reset_mock()
+        def upsert_side_effect(collection, filter, document):
+            return document
+        self.mock_mongoio_get_instance.return_value.upsert_document.side_effect = upsert_side_effect
         
         # Mock VersionManager.get_current_version to return a version that will be processed
         with patch('stage0_mongodb_api.managers.config_manager.VersionManager.get_current_version') as mock_get_version:
@@ -320,7 +343,8 @@ class TestConfigManager(unittest.TestCase):
                  patch('stage0_mongodb_api.managers.config_manager.MigrationManager') as mock_migration_manager, \
                  patch('stage0_mongodb_api.managers.config_manager.VersionManager') as mock_version_manager:
                 
-                # Set up mock return values
+                # Set up mock schema manager with enumerators
+                mock_schema_manager.return_value.enumerators = mock_enumerators
                 mock_schema_manager.return_value.remove_schema.return_value = {
                     "operation": "remove_schema", "collection": "simple", "status": "success"
                 }
