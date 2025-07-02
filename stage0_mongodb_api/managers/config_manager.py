@@ -178,6 +178,15 @@ class ConfigManager:
         results = {}
         any_collection_failed = False
         
+        # Process enumerators first
+        enumerators_result = self._process_enumerators()
+        results["enumerators"] = [enumerators_result]
+        
+        # Check if enumerators processing failed
+        if enumerators_result.get("status") == "error":
+            any_collection_failed = True
+        
+        # Process all collections
         for collection_name in self.collection_configs.keys():
             try:
                 results[collection_name] = self.process_collection_versions(collection_name)
@@ -475,6 +484,60 @@ class ConfigManager:
                 "details": {
                     "error": error_message,
                     "test_data_file": str(data_file)
+                },
+                "status": "error"
+            }
+
+    def _process_enumerators(self) -> Dict:
+        """Process enumerators from the enumerators.json file.
+        
+        Returns:
+            Dict containing operation result in consistent format
+        """
+        try:
+            # Use the already-loaded enumerators from schema_manager
+            enumerators = self.schema_manager.enumerators
+            
+            # Process each enumerator version
+            processed_count = 0
+            
+            for document in enumerators:
+                version = document.get("version")
+                    
+                # Upsert the document using version as the key
+                result = self.mongo_io.upsert_document(
+                    self.config.ENUMERATORS_COLLECTION_NAME,
+                    {"version": version},
+                    document
+                )
+                
+                # upsert_document returns the document itself, so if we get a result, it succeeded
+                if result and isinstance(result, dict):
+                    processed_count += 1
+                else:
+                    raise Exception(f"Failed to upsert version {version}")
+            
+            return {
+                "operation": "process_enumerators",
+                "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                "message": f"Successfully processed {processed_count} enumerator versions",
+                "details_type": "success",
+                "details": {
+                    "processed_count": processed_count,
+                    "total_count": len(enumerators)
+                },
+                "status": "success"
+            }
+                
+        except Exception as e:
+            return {
+                "operation": "process_enumerators",
+                "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                "message": f"Error processing enumerators: {str(e)}",
+                "details_type": "error",
+                "details": {
+                    "error": str(e),
+                    "error_type": type(e).__name__
                 },
                 "status": "error"
             }

@@ -213,5 +213,100 @@ class TestConfigManager(unittest.TestCase):
                         # Status should be the last property
                         self.assertEqual(list(operation.keys())[-1], "status")
 
+    def test_process_enumerators_success(self):
+        """Test that _process_enumerators successfully processes enumerators."""
+        test_case_dir = os.path.join(self.test_cases_dir, "small_sample")
+        self.config.INPUT_FOLDER = test_case_dir
+        self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
+        
+        # Mock schema_manager to return test enumerators
+        mock_enumerators = [
+            {"version": 0, "enumerators": {}},
+            {"version": 1, "enumerators": {"default_status": ["active", "archived"]}}
+        ]
+        
+        # Reset and mock MongoIO upsert_document to return the input document
+        self.mock_mongoio_get_instance.return_value.upsert_document.reset_mock()
+        def upsert_side_effect(collection, filter, document):
+            return document
+        self.mock_mongoio_get_instance.return_value.upsert_document.side_effect = upsert_side_effect
+        
+        with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager_class:
+            # Create a mock schema manager instance
+            mock_schema_manager = MagicMock()
+            mock_schema_manager.enumerators = mock_enumerators
+            mock_schema_manager_class.return_value = mock_schema_manager
+            
+            config_manager = ConfigManager()
+            result = config_manager._process_enumerators()
+            
+            # Test that we get the expected success structure
+            self.assertEqual(result["operation"], "process_enumerators")
+            self.assertEqual(result["collection"], "Enumerators")
+            self.assertEqual(result["status"], "success")
+            self.assertEqual(result["details_type"], "success")
+            self.assertEqual(result["details"]["processed_count"], 2)
+            self.assertEqual(result["details"]["total_count"], 2)
+            
+            # Verify upsert_document was called for each enumerator
+            self.assertEqual(
+                self.mock_mongoio_get_instance.return_value.upsert_document.call_count, 2
+            )
+
+    def test_process_all_collections_includes_enumerators(self):
+        """Test that process_all_collections includes enumerators processing."""
+        test_case_dir = os.path.join(self.test_cases_dir, "small_sample")
+        self.config.INPUT_FOLDER = test_case_dir
+        self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
+        
+        # Mock schema_manager to return test enumerators
+        mock_enumerators = [
+            {"version": 0, "enumerators": {}},
+            {"version": 1, "enumerators": {"default_status": ["active", "archived"]}}
+        ]
+        
+        # Reset and mock MongoIO upsert_document to return the input document
+        self.mock_mongoio_get_instance.return_value.upsert_document.reset_mock()
+        def upsert_side_effect(collection, filter, document):
+            return document
+        self.mock_mongoio_get_instance.return_value.upsert_document.side_effect = upsert_side_effect
+        
+        # Mock VersionManager.get_current_version to return a version that will be processed
+        with patch('stage0_mongodb_api.managers.config_manager.VersionManager.get_current_version') as mock_get_version:
+            mock_get_version.return_value = "simple.0.0.0.0"
+            
+            # Mock all the manager operations to return success
+            with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.IndexManager') as mock_index_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.MigrationManager') as mock_migration_manager, \
+                 patch('stage0_mongodb_api.managers.config_manager.VersionManager') as mock_version_manager:
+                
+                # Set up mock schema manager with enumerators
+                mock_schema_manager.return_value.enumerators = mock_enumerators
+                mock_schema_manager.return_value.remove_schema.return_value = {
+                    "operation": "remove_schema", "collection": "simple", "status": "success"
+                }
+                mock_schema_manager.return_value.apply_schema.return_value = {
+                    "operation": "apply_schema", "collection": "simple", "schema": {}, "status": "success"
+                }
+                mock_version_manager.return_value.update_version.return_value = {
+                    "operation": "version_update", "collection": "simple", "version": "simple.1.0.0.1", "status": "success"
+                }
+                
+                config_manager = ConfigManager()
+                result = config_manager.process_all_collections()
+                
+                # Test that we get a dict with enumerators and collections
+                self.assertIsInstance(result, dict)
+                self.assertIn("enumerators", result)
+                self.assertIn("simple", result)
+                
+                # Test that enumerators processing is included
+                enumerators_result = result["enumerators"]
+                self.assertIsInstance(enumerators_result, list)
+                self.assertEqual(len(enumerators_result), 2)  # enumerators result + overall_status
+                self.assertEqual(enumerators_result[0]["operation"], "process_enumerators")
+                self.assertEqual(enumerators_result[0]["status"], "success")
+
 if __name__ == '__main__':
     unittest.main() 

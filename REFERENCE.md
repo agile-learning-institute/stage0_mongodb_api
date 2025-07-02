@@ -70,6 +70,55 @@ The API processes collection configurations to manage MongoDB schemas, indexes, 
 - Apply new Schema Validation
 - Load Test Data (optional)
 
+## Enumerators Processing
+
+The API processes enumerators from the `data/enumerators.json` file during the "process all" operation. This processing:
+
+- Loads enumerator definitions from `INPUT_FOLDER/data/enumerators.json`
+- Validates the structure of each enumerator version
+- Up-serts enumerator documents into the database using the `ENUMERATORS_COLLECTION_NAME` collection
+- Uses the `version` field as the key for upsert operations
+
+### Enumerators File Format
+
+The `enumerators.json` file contains an array of enumerator version objects:
+
+```json
+[
+    {
+        "version": 0,
+        "name": "Enumerations",
+        "status": "Deprecated",
+        "enumerators": {}
+    },
+    {
+        "version": 1,
+        "name": "Enumerations", 
+        "status": "Active",
+        "enumerators": {
+            "default_status": {
+                "active": "Not Deleted",
+                "archived": "Soft Delete Indicator"
+            },
+            "media_type": {
+                "movie": "A motion picture",
+                "tv_show": "A television series"
+            }
+        }
+    }
+]
+```
+
+### Enumerators Processing Workflow
+
+When processing all collections, the API:
+
+1. **Processes Enumerators First**: Loads and up-serts all enumerator versions from `enumerators.json`
+2. **Processes Collections**: Then processes all configured collections as usual
+3. **Reports Results**: Includes enumerators processing results in the overall operation results
+
+The enumerators processing is included in the "process all" operation results under the `"enumerators"` key, with the same operation result format as collection processing.
+
 ## Configuration Reference
 
 The API is configured through environment variables.
@@ -80,6 +129,7 @@ The API is configured through environment variables.
 | `MONGO_DB_NAME` | MongoDB database name | `stage0` |
 | `MONGO_CONNECTION_STRING` | MongoDB connection string | `mongodb://root:example@localhost:27017/?tls=false&directConnection=true` |
 | `VERSION_COLLECTION_NAME`| MongoDB Version Collection name | `CollectionVersions` |
+| `ENUMERATORS_COLLECTION_NAME` | MongoDB Enumerators Collection name | `Enumerators` |
 | `INPUT_FOLDER` | Directory containing configurations | `/input` |
 | `LOAD_TEST_DATA` | Load Test data during processing | `false` |
 | `AUTO_PROCESS` | Process configurations on startup | `false` |
