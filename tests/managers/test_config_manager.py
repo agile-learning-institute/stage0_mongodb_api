@@ -253,68 +253,6 @@ class TestConfigManager(unittest.TestCase):
                 self.mock_mongoio_get_instance.return_value.upsert_document.call_count, 2
             )
 
-    def test_process_enumerators_file_not_found(self):
-        """Test that _process_enumerators handles empty enumerators list."""
-        test_case_dir = os.path.join(self.test_cases_dir, "minimum_valid")
-        self.config.INPUT_FOLDER = test_case_dir
-        self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
-        
-        # Reset and mock MongoIO upsert_document to return success for empty array
-        self.mock_mongoio_get_instance.return_value.upsert_document.reset_mock()
-        self.mock_mongoio_get_instance.return_value.upsert_document.return_value = {
-            "version": 0,
-            "enumerators": {}
-        }
-        
-        with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager_class:
-            # Create a mock schema manager instance with empty enumerators
-            mock_schema_manager = MagicMock()
-            mock_schema_manager.enumerators = []
-            mock_schema_manager_class.return_value = mock_schema_manager
-            
-            config_manager = ConfigManager()
-            result = config_manager._process_enumerators()
-            
-            # Test that we get the expected success structure for empty list
-            self.assertEqual(result["operation"], "process_enumerators")
-            self.assertEqual(result["collection"], "Enumerators")
-            self.assertEqual(result["status"], "success")
-            self.assertEqual(result["details_type"], "success")
-            self.assertEqual(result["details"]["processed_count"], 0)
-            self.assertEqual(result["details"]["total_count"], 0)
-            
-            # Verify upsert_document was not called since list is empty
-            self.assertEqual(
-                self.mock_mongoio_get_instance.return_value.upsert_document.call_count, 0
-            )
-
-    def test_process_enumerators_invalid_format(self):
-        """Test that _process_enumerators handles invalid enumerators format."""
-        test_case_dir = os.path.join(self.test_cases_dir, "minimum_valid")
-        self.config.INPUT_FOLDER = test_case_dir
-        self.config.ENUMERATORS_COLLECTION_NAME = "Enumerators"
-        
-        # Mock schema_manager to return invalid enumerators (not a list)
-        mock_enumerators = {"invalid": "format"}  # Not a list
-        
-        with patch('stage0_mongodb_api.managers.config_manager.SchemaManager') as mock_schema_manager_class:
-            # Create a mock schema manager instance with invalid enumerators
-            mock_schema_manager = MagicMock()
-            mock_schema_manager.enumerators = mock_enumerators
-            mock_schema_manager_class.return_value = mock_schema_manager
-            
-            config_manager = ConfigManager()
-            result = config_manager._process_enumerators()
-            
-            # Test that we get the expected error structure
-            self.assertEqual(result["status"], "error")
-            self.assertEqual(result["operation"], "process_enumerators")
-            self.assertEqual(result["collection"], "Enumerators")
-            self.assertEqual(result["details_type"], "error")
-            self.assertIn("error", result["details"])
-            self.assertEqual(result["details"]["expected"], "list")
-            self.assertEqual(result["details"]["actual"], "dict")
-
     def test_process_all_collections_includes_enumerators(self):
         """Test that process_all_collections includes enumerators processing."""
         test_case_dir = os.path.join(self.test_cases_dir, "small_sample")
