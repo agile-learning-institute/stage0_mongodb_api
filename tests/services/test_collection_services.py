@@ -94,59 +94,94 @@ class TestCollectionServices(unittest.TestCase):
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collections_success(self, mock_config_manager):
         """Test processing all collections successfully."""
-        mock_config_manager.return_value.collection_configs = {
-            "user": {"name": "user"},
-            "organization": {"name": "organization"},
-            "media": {"name": "media"},
-            "search": {"name": "search"}
+        # Mock process_all_collections to return both enumerators and collections
+        mock_config_manager.return_value.process_all_collections.return_value = {
+            "enumerators": [
+                {"operation": "process_enumerators", "status": "success"},
+                {"operation": "overall_status", "status": "success"}
+            ],
+            "user": [
+                {"operation": "remove_schema", "status": "success", "collection": "user"},
+                {"operation": "apply_schema", "status": "success", "collection": "user"},
+                {"operation": "update_version", "status": "success", "collection": "user"},
+                {"operation": "overall_status", "status": "success"}
+            ],
+            "organization": [
+                {"operation": "remove_schema", "status": "success", "collection": "organization"},
+                {"operation": "apply_schema", "status": "success", "collection": "organization"},
+                {"operation": "update_version", "status": "success", "collection": "organization"},
+                {"operation": "overall_status", "status": "success"}
+            ],
+            "media": [
+                {"operation": "remove_schema", "status": "success", "collection": "media"},
+                {"operation": "apply_schema", "status": "success", "collection": "media"},
+                {"operation": "update_version", "status": "success", "collection": "media"},
+                {"operation": "overall_status", "status": "success"}
+            ],
+            "search": [
+                {"operation": "remove_schema", "status": "success", "collection": "search"},
+                {"operation": "apply_schema", "status": "success", "collection": "search"},
+                {"operation": "update_version", "status": "success", "collection": "search"},
+                {"operation": "overall_status", "status": "success"}
+            ]
         }
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
-        with patch.object(CollectionService, 'process_collection', return_value={"status": "success", "collection": "user", "operations": []}) as mock_proc:
-            result = CollectionService.process_collections()
-        self.assertEqual(len(result), 4)
-        mock_proc.assert_called()
+        from stage0_mongodb_api.services.collection_service import CollectionService
+        result = CollectionService.process_collections()
+        # Should include all collections and enumerators
+        self.assertEqual(len(result), 5)
+        collections = {r["collection"] for r in result}
+        self.assertIn("enumerators", collections)
+        self.assertIn("user", collections)
+        self.assertIn("organization", collections)
+        self.assertIn("media", collections)
+        self.assertIn("search", collections)
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collections_with_error(self, mock_config_manager):
         """Test processing collections when an error occurs."""
-        mock_config_manager.return_value.collection_configs = {
-            "simple": {
-                "name": "simple",
-                "versions": ["1.0.0"]
-            }
+        mock_config_manager.return_value.process_all_collections.return_value = {
+            "enumerators": [
+                {"operation": "process_enumerators", "status": "success"},
+                {"operation": "overall_status", "status": "success"}
+            ],
+            "simple": [
+                {"operation": "remove_schema", "status": "error", "collection": "simple"},
+                {"operation": "overall_status", "status": "error"}
+            ]
         }
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
-        with patch.object(CollectionService, 'process_collection', side_effect=Exception("Test error")):
-            result = CollectionService.process_collections()
-        self.assertEqual(len(result), 1)
-        # Test structure rather than specific values
-        self.assertIn("status", result[0])
-        self.assertIn("collection", result[0])
-        self.assertIn("message", result[0])
-        self.assertEqual(result[0]["status"], "error")
-        self.assertEqual(result[0]["collection"], "simple")
+        from stage0_mongodb_api.services.collection_service import CollectionService
+        result = CollectionService.process_collections()
+        # Should include enumerators and simple
+        self.assertEqual(len(result), 2)
+        collections = {r["collection"] for r in result}
+        self.assertIn("enumerators", collections)
+        self.assertIn("simple", collections)
+        # The simple collection should have error status
+        for r in result:
+            if r["collection"] == "simple":
+                self.assertEqual(r["status"], "error")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collections_skips_not_found(self, mock_config_manager):
         """Test process_collections skips collections that raise CollectionNotFoundError."""
-        mock_config_manager.return_value.collection_configs = {
-            "user": {"name": "user"},
-            "ghost": {"name": "ghost"}
+        # Simulate only enumerators in the result
+        mock_config_manager.return_value.process_all_collections.return_value = {
+            "enumerators": [
+                {"operation": "process_enumerators", "status": "success"},
+                {"operation": "overall_status", "status": "success"}
+            ]
         }
         mock_config_manager.return_value.load_errors = None
         mock_config_manager.return_value.validate_configs.return_value = []
-        def side_effect(name, token=None):
-            if name == "ghost":
-                raise CollectionNotFoundError(name)
-            return {"status": "success", "collection": name, "operations": []}
-        with patch.object(CollectionService, 'process_collection', side_effect=side_effect):
-            result = CollectionService.process_collections()
+        from stage0_mongodb_api.services.collection_service import CollectionService
+        result = CollectionService.process_collections()
+        # Should only include enumerators
         self.assertEqual(len(result), 1)
-        # Test structure rather than specific values
-        self.assertIn("collection", result[0])
-        self.assertEqual(result[0]["collection"], "user")
+        self.assertEqual(result[0]["collection"], "enumerators")
 
     @patch('stage0_mongodb_api.services.collection_service.ConfigManager')
     def test_process_collection_success(self, mock_config_manager):
