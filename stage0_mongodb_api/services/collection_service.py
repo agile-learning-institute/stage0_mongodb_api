@@ -106,7 +106,7 @@ class CollectionService:
             token: Authentication token for RBAC enforcement
         
         Returns:
-            List of processing results for each collection
+            List of processing results for each collection and enumerators
             
         Raises:
             CollectionProcessingError: If there are load or validation errors
@@ -122,22 +122,24 @@ class CollectionService:
         if validation_errors:
             raise CollectionProcessingError("collections", validation_errors)
         
+        # Use process_all_collections to include enumerators processing
+        all_results = config_manager.process_all_collections()
+        
+        # Convert the dictionary format to list format for API consistency
         results = []
-        for collection_name, collection in config_manager.collection_configs.items():
-            try:
-                result = CollectionService.process_collection(collection_name, token)
-                results.append(result)
-            except CollectionNotFoundError:
-                # Skip collections that don't exist
-                continue
-            except Exception as e:
-                logger.error(f"Error processing collection {collection_name}: {str(e)}")
-                results.append({
-                    "status": "error",
-                    "collection": collection_name,
-                    "message": str(e),
-                    "error": str(e)
-                })
+        for collection_name, operations in all_results.items():
+            # Check if any operations have an error status
+            has_errors = any(
+                isinstance(op, dict) and op.get("status") == "error" 
+                for op in operations
+            )
+            
+            results.append({
+                "collection": collection_name,
+                "operations": operations,
+                "status": "error" if has_errors else "success"
+            })
+        
         return results
 
     @staticmethod

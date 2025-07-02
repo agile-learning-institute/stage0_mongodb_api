@@ -178,6 +178,15 @@ class ConfigManager:
         results = {}
         any_collection_failed = False
         
+        # Process enumerators first
+        enumerators_result = self._process_enumerators()
+        results["enumerators"] = [enumerators_result]
+        
+        # Check if enumerators processing failed
+        if enumerators_result.get("status") == "error":
+            any_collection_failed = True
+        
+        # Process all collections
         for collection_name in self.collection_configs.keys():
             try:
                 results[collection_name] = self.process_collection_versions(collection_name)
@@ -475,6 +484,148 @@ class ConfigManager:
                 "details": {
                     "error": error_message,
                     "test_data_file": str(data_file)
+                },
+                "status": "error"
+            }
+
+    def _process_enumerators(self) -> Dict:
+        """Process enumerators from the enumerators.json file.
+        
+        This method loads enumerators from the data/enumerators.json file and up-serts
+        them into the database using the version as the key for upsert operations.
+        
+        Returns:
+            Dict containing operation result in consistent format
+        """
+        import json
+        
+        try:
+            enumerator_file = os.path.join(self.config.INPUT_FOLDER, "data", "enumerators.json")
+            
+            # Check if enumerators file exists
+            if not os.path.exists(enumerator_file):
+                return {
+                    "operation": "process_enumerators",
+                    "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                    "message": f"Enumerators file not found: {enumerator_file}",
+                    "details_type": "error",
+                    "details": {
+                        "error": "File not found",
+                        "enumerator_file": str(enumerator_file)
+                    },
+                    "status": "error"
+                }
+            
+            # Load enumerators from file
+            with open(enumerator_file, 'r') as f:
+                enumerators = json.load(f)
+            
+            if not isinstance(enumerators, list):
+                return {
+                    "operation": "process_enumerators",
+                    "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                    "message": "Enumerators file must contain a list of enumerator versions",
+                    "details_type": "error",
+                    "details": {
+                        "error": "Invalid format",
+                        "expected": "list",
+                        "actual": type(enumerators).__name__
+                    },
+                    "status": "error"
+                }
+            
+            # Process each enumerator version
+            processed_count = 0
+            errors = []
+            
+            for enumerator_version in enumerators:
+                try:
+                    # Validate required fields
+                    if "version" not in enumerator_version:
+                        errors.append(f"Missing 'version' field in enumerator version")
+                        continue
+                    
+                    version = enumerator_version["version"]
+                    if not isinstance(version, int):
+                        errors.append(f"Version must be an integer, got {type(version).__name__}")
+                        continue
+                    
+                    # Prepare document for upsert
+                    document = {
+                        "version": version,
+                        "enumerators": enumerator_version.get("enumerators", {}),
+                        "name": enumerator_version.get("name", "Enumerations"),
+                        "status": enumerator_version.get("status", "Active")
+                    }
+                    
+                    # Upsert the document using version as the key
+                    result = self.mongo_io.upsert_document(
+                        self.config.ENUMERATORS_COLLECTION_NAME,
+                        {"version": version},
+                        document
+                    )
+                    
+                    # upsert_document returns the document itself, so if we get a result, it succeeded
+                    if result and isinstance(result, dict):
+                        processed_count += 1
+                    else:
+                        errors.append(f"Failed to upsert version {version}")
+                        
+                except Exception as e:
+                    errors.append(f"Error processing version {enumerator_version.get('version', 'unknown')}: {str(e)}")
+            
+            # Return result
+            if errors:
+                return {
+                    "operation": "process_enumerators",
+                    "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                    "message": f"Processed {processed_count} enumerator versions with {len(errors)} errors",
+                    "details_type": "error",
+                    "details": {
+                        "processed_count": processed_count,
+                        "total_versions": len(enumerators),
+                        "errors": errors,
+                        "enumerator_file": str(enumerator_file)
+                    },
+                    "status": "error"
+                }
+            else:
+                return {
+                    "operation": "process_enumerators",
+                    "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                    "message": f"Successfully processed {processed_count} enumerator versions",
+                    "details_type": "enumerators",
+                    "details": {
+                        "processed_count": processed_count,
+                        "total_versions": len(enumerators),
+                        "enumerator_file": str(enumerator_file)
+                    },
+                    "status": "success"
+                }
+                
+        except json.JSONDecodeError as e:
+            return {
+                "operation": "process_enumerators",
+                "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                "message": f"Failed to parse enumerators file: {str(e)}",
+                "details_type": "error",
+                "details": {
+                    "error": str(e),
+                    "enumerator_file": str(enumerator_file)
+                },
+                "status": "error"
+            }
+        except Exception as e:
+            error_message = str(e)
+            logger.error(f"Failed to process enumerators: {error_message}")
+            return {
+                "operation": "process_enumerators",
+                "collection": self.config.ENUMERATORS_COLLECTION_NAME,
+                "message": error_message,
+                "details_type": "error",
+                "details": {
+                    "error": error_message,
+                    "enumerator_file": str(enumerator_file)
                 },
                 "status": "error"
             }
