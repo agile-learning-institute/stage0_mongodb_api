@@ -213,7 +213,7 @@ class ConfigManager:
         overall_status = "error" if any_collection_failed else "success"
         overall_message = "Some collections failed to process" if any_collection_failed else "All collections processed successfully"
         
-        # Add the overall status only to collections that actually failed
+        # Add the overall status to each collection's results
         for collection_name in results.keys():
             # Check if this collection had any errors (excluding overall_status operations)
             collection_has_errors = any(
@@ -222,21 +222,23 @@ class ConfigManager:
                 for op in results[collection_name]
             )
             
-            # Only add overall_status to collections that failed
-            if collection_has_errors:
-                results[collection_name].append({
-                    "operation": "overall_status",
-                    "message": overall_message,
-                    "details_type": "overall",
-                    "details": {
-                        "collections_processed": len(self.collection_configs),
-                        "collections_failed": sum(1 for result in results.values() 
-                                                if any(isinstance(op, dict) and op.get("status") == "error" 
-                                                      and op.get("operation") != "overall_status"
-                                                      for op in result))
-                    },
-                    "status": overall_status
-                })
+            # Determine this collection's status
+            collection_status = "error" if collection_has_errors else "success"
+            collection_message = "Collection processing failed" if collection_has_errors else "Collection processed successfully"
+            
+            results[collection_name].append({
+                "operation": "overall_status",
+                "message": collection_message,
+                "details_type": "overall",
+                "details": {
+                    "collections_processed": len(self.collection_configs),
+                    "collections_failed": sum(1 for result in results.values() 
+                                            if any(isinstance(op, dict) and op.get("status") == "error" 
+                                                  and op.get("operation") != "overall_status"
+                                                  for op in result))
+                },
+                "status": collection_status
+            })
                 
         return results
 
