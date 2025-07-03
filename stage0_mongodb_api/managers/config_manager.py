@@ -223,6 +223,7 @@ class ConfigManager:
                     "collections_processed": len(self.collection_configs),
                     "collections_failed": sum(1 for result in results.values() 
                                             if any(isinstance(op, dict) and op.get("status") == "error" 
+                                                  and op.get("operation") != "overall_status"
                                                   for op in result))
                 },
                 "status": overall_status

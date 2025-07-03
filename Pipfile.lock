@@ -933,12 +933,12 @@
         },
         "stage0-py-utils": {
             "hashes": [
-                "sha256:03ae6b101e0f5dcbce47d605509fb47d0ee86ef86e2630fa6685caf0cd7174eb",
-                "sha256:bfa1a42bf0fe4e942abced9c489e6f2564ceb504b88d77fdfb0c5b66aa3f27ea"
+                "sha256:23fb80f78dc3e009c8ac22c207f19be06ca3d37f97f536e851bdb84a7edc8a87",
+                "sha256:fa34fb9e777914c11d77cd1df462cbc0e7365e02faca9bd201995e28158f8651"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==0.2.14"
+            "version": "==0.2.15"
         },
         "typing-extensions": {
             "hashes": [
