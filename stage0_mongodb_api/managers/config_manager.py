@@ -215,17 +215,29 @@ class ConfigManager:
         
         # Add the overall status to each collection's results
         for collection_name in results.keys():
+            # Check if this collection had any errors (excluding overall_status operations)
+            collection_has_errors = any(
+                isinstance(op, dict) and op.get("status") == "error" 
+                and op.get("operation") != "overall_status"
+                for op in results[collection_name]
+            )
+            
+            # Determine this collection's status
+            collection_status = "error" if collection_has_errors else "success"
+            collection_message = "Collection processing failed" if collection_has_errors else "Collection processed successfully"
+            
             results[collection_name].append({
                 "operation": "overall_status",
-                "message": overall_message,
+                "message": collection_message,
                 "details_type": "overall",
                 "details": {
                     "collections_processed": len(self.collection_configs),
                     "collections_failed": sum(1 for result in results.values() 
                                             if any(isinstance(op, dict) and op.get("status") == "error" 
+                                                  and op.get("operation") != "overall_status"
                                                   for op in result))
                 },
-                "status": overall_status
+                "status": collection_status
             })
                 
         return results
