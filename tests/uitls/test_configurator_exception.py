@@ -97,11 +97,13 @@ class TestConfiguratorEvent(unittest.TestCase):
     def test_record_failure(self):
         """Test record_failure method"""
         event = ConfiguratorEvent(self.test_event_id, self.test_event_type)
-        failure_data = {"error": "Something went wrong", "code": 500}
-        event.record_failure(failure_data)
+        failure_message = "Something went wrong"
+        failure_data = {"code": 500}
+        event.record_failure(failure_message, failure_data)
         self.assertEqual(event.status, "FAILURE")
         self.assertIsInstance(event.ends, datetime)
-        self.assertEqual(event.data, failure_data)
+        expected_data = {"error": failure_message, "code": 500}
+        self.assertEqual(event.data, expected_data)
         self.assertLessEqual(event.starts, event.ends)
 
     def test_record_failure_overwrites_existing_data(self):
@@ -109,10 +111,11 @@ class TestConfiguratorEvent(unittest.TestCase):
         initial_data = {"initial": "data"}
         event = ConfiguratorEvent(self.test_event_id, self.test_event_type, initial_data)
         
-        failure_data = {"error": "Something went wrong"}
-        event.record_failure(failure_data)
+        failure_message = "Something went wrong"
+        event.record_failure(failure_message)
         
-        self.assertEqual(event.data, failure_data)
+        expected_data = {"error": failure_message}
+        self.assertEqual(event.data, expected_data)
         self.assertNotEqual(event.data, initial_data)
 
     def test_to_dict_with_minimal_data(self):
@@ -142,18 +145,21 @@ class TestConfiguratorEvent(unittest.TestCase):
         self.assertIsInstance(result["starts"], datetime)
         self.assertIsInstance(result["ends"], datetime)
         self.assertEqual(result["status"], "SUCCESS")
-        self.assertEqual(result["sub_events"], [sub_event])
+        self.assertEqual(len(result["sub_events"]), 1)
+        self.assertEqual(result["sub_events"][0]["id"], "sub_event")
+        self.assertEqual(result["sub_events"][0]["type"], "sub_type")
 
     def test_to_dict_after_failure(self):
         """Test to_dict method after recording failure"""
         event = ConfiguratorEvent(self.test_event_id, self.test_event_type)
-        failure_data = {"error": "Test failure"}
-        event.record_failure(failure_data)
+        failure_message = "Test failure"
+        event.record_failure(failure_message)
         result = event.to_dict()
         
         self.assertEqual(result["id"], self.test_event_id)
         self.assertEqual(result["type"], self.test_event_type)
-        self.assertEqual(result["data"], failure_data)
+        expected_data = {"error": failure_message}
+        self.assertEqual(result["data"], expected_data)
         self.assertIsInstance(result["starts"], datetime)
         self.assertIsInstance(result["ends"], datetime)
         self.assertEqual(result["status"], "FAILURE")
