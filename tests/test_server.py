@@ -1,20 +1,15 @@
 import unittest
 from unittest.mock import patch, MagicMock
-import signal
-import sys
 
-# Mock Config to prevent auto-processing during tests
-mock_config = MagicMock()
-mock_config.AUTO_PROCESS = False
-mock_config.EXIT_AFTER_PROCESSING = False
-mock_config.MONGODB_API_PORT = 8081
-mock_config.BUILT_AT = "test"
-
-# Patch both Config and MongoIO before importing server
-with patch('stage0_py_utils.Config.get_instance', return_value=mock_config), \
-     patch('stage0_py_utils.MongoIO.get_instance') as mock_get_instance:
-    mock_get_instance.return_value = MagicMock()
-    from stage0_mongodb_api.server import app, handle_exit
+# Patch Config before importing the app
+with patch('configurator.utils.config.Config.get_instance') as mock_config_get:
+    mock_config = MagicMock()
+    mock_config.AUTO_PROCESS = False
+    mock_config.EXIT_AFTER_PROCESSING = False
+    mock_config.API_PORT = 8081
+    mock_config.BUILT_AT = "test"
+    mock_config_get.return_value = mock_config
+    from configurator.server import app
 
 class TestServer(unittest.TestCase):
     """Test suite for server initialization and configuration."""
@@ -22,16 +17,12 @@ class TestServer(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.app = app.test_client()
-        # Patch MongoIO for every test to ensure no real DB connection
-        patcher = patch('stage0_py_utils.MongoIO.get_instance', return_value=MagicMock())
-        self.addCleanup(patcher.stop)
-        self.mock_mongo = patcher.start()
 
     def test_app_initialization(self):
         """Test Flask app initialization."""
         # Assert
         self.assertIsNotNone(app)
-        self.assertEqual(app.name, 'stage0_mongodb_api.server')
+        self.assertEqual(app.name, 'configurator.server')
 
     def test_health_endpoint(self):
         """Test health check endpoint."""
@@ -49,18 +40,42 @@ class TestServer(unittest.TestCase):
         # Assert
         self.assertNotEqual(response.status_code, 404)
 
-    def test_collection_routes_registered(self):
-        """Test collection routes are registered."""
-        with patch('stage0_mongodb_api.routes.collection_routes.CollectionService.list_collections', return_value=[{"collection_name": "dummy", "version": "1.0.0"}]):
-            # Act
-            response = self.app.get('/api/collections/')
-            # Assert
-            self.assertEqual(response.status_code, 200)
-
-    def test_render_routes_registered(self):
-        """Test render routes are registered."""
+    def test_configuration_routes_registered(self):
+        """Test configuration routes are registered."""
         # Act
-        response = self.app.get('/api/render/json_schema/users')
+        response = self.app.get('/api/configurations')
+
+        # Assert
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_dictionary_routes_registered(self):
+        """Test dictionary routes are registered."""
+        # Act
+        response = self.app.get('/api/dictionaries')
+
+        # Assert
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_type_routes_registered(self):
+        """Test type routes are registered."""
+        # Act
+        response = self.app.get('/api/types')
+
+        # Assert
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_database_routes_registered(self):
+        """Test database routes are registered."""
+        # Act
+        response = self.app.get('/api/database')
+
+        # Assert
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_enumerator_routes_registered(self):
+        """Test enumerator routes are registered."""
+        # Act
+        response = self.app.get('/api/enumerators')
 
         # Assert
         self.assertNotEqual(response.status_code, 404)

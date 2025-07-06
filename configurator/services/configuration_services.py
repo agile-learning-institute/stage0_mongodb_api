@@ -39,7 +39,7 @@ class Configuration:
     def process(self) -> ConfiguratorEvent:
         try:
             event = ConfiguratorEvent(event_id="CFG-00", event_type="PROCESS")
-            mongo_io = MongoIO.get_instance(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
+            mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
             for version in self.versions:
                 current_version = VersionManager.get_current_version(mongo_io, self.name)
                 if version.collection_version <= current_version:
@@ -123,7 +123,6 @@ class Version:
     def process(self, mongo_io: MongoIO):
         try:
             event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version}", event_type="PROCESS")
-            mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
 
             sub_event = ConfiguratorEvent(event_id="PRO-01", event_type="REMOVE_SCHEMA_VALIDATION")
             event.append_events([sub_event])

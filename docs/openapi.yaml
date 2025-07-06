@@ -568,21 +568,20 @@ components:
     file:
       type: object
       properties:
-        properties:
-          name:
-            type: string
-          read_only:
-            type: boolean
-            default: false
-          created_at:
-            type: string
-            format: date-time
-          updated_at:
-            type: string
-            format: date-time
-          size:
-            type: number
-            description: Size in bytes
+        name:
+          type: string
+        read_only:
+          type: boolean
+          default: false
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        size:
+          type: number
+          description: Size in bytes
     configuration:
       description: SchemaManager Collection Configuration
       type: object

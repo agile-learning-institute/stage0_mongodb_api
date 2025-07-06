@@ -27,7 +27,7 @@ signal.signal(signal.SIGINT, handle_exit)
 
 # Initialize Flask App
 from flask import Flask
-from configurator.utils.encode_properties import MongoJSONEncoder
+from configurator.utils.ejson_encoder import MongoJSONEncoder
 app = Flask(__name__)
 app.json = MongoJSONEncoder(app)
 app.url_map.strict_slashes = False

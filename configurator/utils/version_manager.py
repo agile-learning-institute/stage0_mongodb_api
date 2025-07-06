@@ -35,17 +35,17 @@ class VersionManager:
             event = ConfiguratorEvent(event_id="VER-01", event_type="GET_CURRENT_VERSION", event_data=version_docs)
             raise ConfiguratorException(f"Multiple versions found for collection: {collection_name}", event)
         
-        version = VersionNumber(f"{collection_name}.{version_docs[0].get("current_version")}")
-        return version
+        version = VersionNumber(f"{collection_name}.{version_docs[0].get('current_version')}")
+        return str(version)
 
     @staticmethod
-    def update_version(mongo_io: MongoIO, collection_name: str, version: str) -> Dict:
+    def update_version(mongo_io: MongoIO, collection_name: str, version: str) -> str:
         """Update the version of a collection."""
         config = Config.get_instance()
-        version = VersionNumber(f"{collection_name}.{version}")
+        version_obj = VersionNumber(f"{collection_name}.{version}")
             
         # Upsert version document
-        version_doc = mongo_io.upsert_document(
+        version_doc = mongo_io.upsert(
             config.VERSION_COLLECTION_NAME,
             match={"collection_name": collection_name},
             data={"collection_name": collection_name, "current_version": version}

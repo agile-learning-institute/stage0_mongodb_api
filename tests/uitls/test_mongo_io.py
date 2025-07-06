@@ -2,35 +2,53 @@
 MongoIO Integration Tests
 
 These tests require a running MongoDB instance accessible via the configured connection string.
-
-To start the required MongoDB service for testing, run:
-    stage0 up mongodb
-
-All tests operate on a single test collection ('test_collection') and will create, modify, and delete documents and indexes within it. No production data or official config collections are used.
+Tests will create, modify, and delete documents and indexes within a test collection.
 """
-from copy import deepcopy
-from datetime import datetime, timezone
 import unittest
-from unittest import TestLoader
-from stage0_py_utils import Config, MongoIO
+import tempfile
+import json
+from datetime import datetime
 from pymongo import ASCENDING, DESCENDING
-from unittest.mock import patch
+from configurator.utils.config import Config
+from configurator.utils.mongo_io import MongoIO
+from configurator.utils.configurator_exception import ConfiguratorException
+
 
 class TestMongoIO(unittest.TestCase):
     
     def setUp(self):
+        """Set up test fixtures."""
         self.config = Config.get_instance()
-        self.test_id = "eeee00000000000000009999"
         self.test_collection_name = "test_collection"
-        self.test_document = {"name": "TestDoc", "sort_value": 1, "status": "active", "channels": [], "last_saved": {"fromIp": "", "byUser": "", "atTime": datetime(2025, 1, 1, 12, 34, 56), "correlationId": ""}}
-        MongoIO._instance = None
-        self.mongo_io = MongoIO.get_instance()
+        
+        # Create MongoIO instance using config values
+        self.mongo_io = MongoIO(
+            self.config.MONGO_CONNECTION_STRING, 
+            self.config.MONGO_DB_NAME
+        )
+        
+        # Clear any existing test data
+        try:
+            self.mongo_io.drop_database()
+        except:
+            pass  # Database might not exist
+        
+        # Recreate the database
+        self.mongo_io = MongoIO(
+            self.config.MONGO_CONNECTION_STRING, 
+            self.config.MONGO_DB_NAME
+        )
+        
         self._setup_test_documents()
 
+    def tearDown(self):
+        """Clean up test fixtures."""
+        if hasattr(self, 'mongo_io'):
+            self.mongo_io.disconnect()
+
     def _setup_test_documents(self):
-        # Clear any existing test data
-        self.mongo_io.drop_collection(self.test_collection_name)
-        # Insert test documents with different sort_value and name
+        """Set up test documents."""
+        # Insert test documents
         docs = [
             {"name": "Alpha", "sort_value": 1, "status": "active"},
             {"name": "Bravo", "sort_value": 2, "status": "active"},
@@ -38,213 +56,152 @@ class TestMongoIO(unittest.TestCase):
             {"name": "Delta", "sort_value": 4, "status": "archived"},
             {"name": "Echo", "sort_value": 5, "status": "active"}
         ]
-        for doc in docs:
-            self.mongo_io.create_document(self.test_collection_name, doc)
+        
+        collection = self.mongo_io.get_collection(self.test_collection_name)
+        collection.insert_many(docs)
 
-    def tearDown(self):
-        try:
-            self.mongo_io.drop_collection(self.test_collection_name)
-        except Exception:
-            pass
-        finally:
-            self.mongo_io.disconnect()
-
-    def test_singleton_behavior(self):
-        mongo_io1 = MongoIO.get_instance()
-        mongo_io2 = MongoIO.get_instance()
-        self.assertIs(mongo_io1, mongo_io2, "MongoIO should be a singleton")
+    def test_connection_and_disconnect(self):
+        """Test MongoDB connection and disconnection."""
+        # Connection is tested in setUp
+        self.assertIsNotNone(self.mongo_io.client)
+        self.assertIsNotNone(self.mongo_io.db)
+        
+        # Test disconnect
         self.mongo_io.disconnect()
+        self.assertIsNone(self.mongo_io.client)
 
-    def test_CR_document(self):
-        test_id = self.mongo_io.create_document(self.test_collection_name, self.test_document)
-        id_str = str(test_id)
-        document = self.mongo_io.get_document(self.test_collection_name, id_str)
-        self.assertIsInstance(document, dict)
-        self.assertEqual(document["name"], "TestDoc")
+    def test_get_collection(self):
+        """Test getting a collection."""
+        collection = self.mongo_io.get_collection(self.test_collection_name)
+        self.assertIsNotNone(collection)
+        self.assertEqual(collection.name, self.test_collection_name)
 
-    def test_CRU_document(self):
-        test_id = self.mongo_io.create_document(self.test_collection_name, self.test_document)
-        id_str = str(test_id)
-        test_update = {"status": "archived"}
-        document = self.mongo_io.update_document(self.test_collection_name, id_str, set_data=test_update)
-        self.assertIsInstance(document, dict)
-        self.assertEqual(document["status"], "archived")
+    def test_get_documents(self):
+        """Test retrieving documents."""
+        # Get all documents
+        docs = self.mongo_io.get_documents(self.test_collection_name)
+        self.assertEqual(len(docs), 5)
+        
+        # Get documents with match
+        active_docs = self.mongo_io.get_documents(
+            self.test_collection_name, 
+            match={"status": "active"}
+        )
+        self.assertEqual(len(active_docs), 3)
+        
+        # Get documents with projection
+        projected_docs = self.mongo_io.get_documents(
+            self.test_collection_name,
+            project={"name": 1, "_id": 0}
+        )
+        self.assertEqual(len(projected_docs), 5)
+        self.assertIn("name", projected_docs[0])
+        self.assertNotIn("_id", projected_docs[0])
+        
+        # Get documents with sorting
+        sorted_docs = self.mongo_io.get_documents(
+            self.test_collection_name,
+            sort_by=[("sort_value", DESCENDING)]
+        )
+        self.assertEqual(sorted_docs[0]["sort_value"], 5)
 
-    def test_add_to_set_document(self):
-        test_id = self.mongo_io.create_document(self.test_collection_name, self.test_document)
-        id_str = str(test_id)
-        test_add_to_set = {"channels": "channel1"}
-        document = self.mongo_io.update_document(self.test_collection_name, id_str, add_to_set_data=test_add_to_set)
-        self.assertIsInstance(document, dict)
-        self.assertIn("channel1", document["channels"])
+    def test_upsert(self):
+        """Test upserting documents."""
+        # Insert new document
+        result = self.mongo_io.upsert(
+            self.test_collection_name,
+            {"name": "Foxtrot"},
+            {"name": "Foxtrot", "sort_value": 6, "status": "active"}
+        )
+        self.assertEqual(result["name"], "Foxtrot")
+        
+        # Update existing document
+        result = self.mongo_io.upsert(
+            self.test_collection_name,
+            {"name": "Alpha"},
+            {"name": "Alpha", "sort_value": 1, "status": "updated"}
+        )
+        self.assertEqual(result["status"], "updated")
 
-    def test_push_document(self):
-        test_id = self.mongo_io.create_document(self.test_collection_name, self.test_document)
-        id_str = str(test_id)
-        push_data = {"channels": "channel1"}
-        document = self.mongo_io.update_document(self.test_collection_name, id_str, push_data=push_data)
-        self.assertIsInstance(document, dict)
-        self.assertIn("channel1", document["channels"])
+    def test_remove_schema_validation(self):
+        """Test removing schema validation."""
+        event = self.mongo_io.remove_schema_validation(self.test_collection_name)
+        self.assertEqual(event.status, "SUCCESS")
 
-    def test_pull_from_document(self):
-        test_id = self.mongo_io.create_document(self.test_collection_name, self.test_document)
-        id_str = str(test_id)
-        test_add_to_set = {"channels": "channel1"}
-        self.mongo_io.update_document(self.test_collection_name, id_str, add_to_set_data=test_add_to_set)
-        test_pull = {"channels": "channel1"}
-        document = self.mongo_io.update_document(self.test_collection_name, id_str, pull_data=test_pull)
-        self.assertIsInstance(document, dict)
-        self.assertNotIn("channel1", document["channels"])
+    def test_remove_index(self):
+        """Test removing an index."""
+        # First create an index
+        collection = self.mongo_io.get_collection(self.test_collection_name)
+        collection.create_index("name", name="test_index")
+        
+        # Then remove it
+        event = self.mongo_io.remove_index(self.test_collection_name, "test_index")
+        self.assertEqual(event.status, "SUCCESS")
 
-    def test_order_by_ASCENDING(self):
-        order = [("sort_value", ASCENDING)]
-        result = self.mongo_io.get_documents(self.test_collection_name, {}, {"name": 1, "sort_value": 1, "_id": 0}, order)
-        self.assertEqual([doc["name"] for doc in result], ["Alpha", "Bravo", "Charlie", "Delta", "Echo"])
-
-    def test_order_by_DESCENDING(self):
-        order = [("sort_value", DESCENDING)]
-        result = self.mongo_io.get_documents(self.test_collection_name, {}, {"name": 1, "sort_value": 1, "_id": 0}, order)
-        self.assertEqual([doc["name"] for doc in result], ["Echo", "Delta", "Charlie", "Bravo", "Alpha"])
-
-    def test_get_all_full_documents(self):
-        result = self.mongo_io.get_documents(self.test_collection_name)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 5)
-        self.assertEqual(result[0]["name"], "Alpha")
-
-    def test_get_some_full_documents(self):
-        match = {"status": "archived"}
-        result = self.mongo_io.get_documents(self.test_collection_name, match)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["name"], "Delta")
-
-    def test_get_all_partial_documents(self):
-        project = {"_id": 0, "name": 1, "sort_value": 1}
-        result = self.mongo_io.get_documents(self.test_collection_name, project=project)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 5)
-        self.assertIn("name", result[0])
-        self.assertIn("sort_value", result[0])
-        self.assertNotIn("_id", result[0])
-
-    def test_get_some_partial_documents(self):
-        match = {"status": "inactive"}
-        project = {"_id": 0, "name": 1, "sort_value": 1}
-        result = self.mongo_io.get_documents(self.test_collection_name, match, project)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["name"], "Charlie")
-
-    def test_upsert_document(self):
-        match = {"name": "Foxtrot"}
-        data = {"sort_value": 6, "status": "active"}
-        document = self.mongo_io.upsert_document(self.test_collection_name, match, data)
-        self.assertIsInstance(document, dict)
-        self.assertEqual(document["name"], "Foxtrot")
-        self.assertEqual(document["sort_value"], 6)
-        # Test upsert with existing document
-        data = {"sort_value": 7, "status": "inactive"}
-        document = self.mongo_io.upsert_document(self.test_collection_name, match, data)
-        self.assertIsInstance(document, dict)
-        self.assertEqual(document["name"], "Foxtrot")
-        self.assertEqual(document["sort_value"], 7)
-
-    def test_schema_operations(self):
-        schema = {
-            "bsonType": "object",
-            "required": ["name", "status"],
-            "properties": {
-                "name": {"bsonType": "string"},
-                "status": {"bsonType": "string"}
-            }
-        }
-        self.mongo_io.apply_schema(self.test_collection_name, schema)
-        validation_rules = self.mongo_io.get_schema(self.test_collection_name)
-        self.assertIn("$jsonSchema", validation_rules)
-        self.assertEqual(validation_rules["$jsonSchema"], schema)
-        self.mongo_io.remove_schema(self.test_collection_name)
-        validation_rules = self.mongo_io.get_schema(self.test_collection_name)
-        self.assertEqual(validation_rules, {})
-
-    def test_index_operations(self):
-        new_indexes = [
-            {
-                "name": "test_index",
-                "key": [("name", ASCENDING)]
-            }
-        ]
-        self.mongo_io.create_index(self.test_collection_name, new_indexes)
-        indexes = self.mongo_io.get_indexes(self.test_collection_name)
-        index_names = [idx["name"] for idx in indexes]
-        self.assertIn("test_index", index_names)
-        self.mongo_io.drop_index(self.test_collection_name, "test_index")
-        indexes = self.mongo_io.get_indexes(self.test_collection_name)
-        index_names = [idx["name"] for idx in indexes]
-        self.assertNotIn("test_index", index_names)
-
-    def test_pipeline_execution(self):
-        # Create test documents
-        test_docs = [
-            {"name": "Golf", "status": "active"},
-            {"name": "Hotel", "status": "active"},
-            {"name": "India", "status": "inactive"}
-        ]
-        for doc in test_docs:
-            self.mongo_io.create_document(self.test_collection_name, doc)
+    def test_execute_migration(self):
+        """Test executing a migration pipeline."""
         pipeline = [
-            {"$set": {"status": "archived"}},
-            {"$out": self.test_collection_name}  
+            {"$match": {"status": "active"}},
+            {"$count": "active_count"}
         ]
-        self.mongo_io.execute_pipeline(self.test_collection_name, pipeline)
-        documents = self.mongo_io.get_documents(self.test_collection_name, {"name": {"$in": ["Golf", "Hotel", "India"]}})
-        self.assertEqual(len(documents), 3)
-        self.assertTrue(all(doc["status"] == "archived" for doc in documents))
+        
+        event = self.mongo_io.execute_migration(self.test_collection_name, pipeline)
+        self.assertEqual(event.status, "SUCCESS")
 
-    def test_delete_document(self):
-        test_id = self.mongo_io.create_document(self.test_collection_name, self.test_document)
-        deleted_count = self.mongo_io.delete_document(self.test_collection_name, test_id)
-        self.assertEqual(deleted_count, 1)
+    def test_add_index(self):
+        """Test adding an index."""
+        index_spec = {
+            "name": "test_index",
+            "key": [("name", ASCENDING)]
+        }
+        
+        event = self.mongo_io.add_index(self.test_collection_name, index_spec)
+        self.assertEqual(event.status, "SUCCESS")
 
-    def test_delete_documents(self):
-        doc1 = {"name": "Juliet", "value": 1}
-        doc2 = {"name": "Kilo", "value": 2}
-        doc3 = {"name": "Lima", "value": 3}
-        self.mongo_io.create_document(self.test_collection_name, doc1)
-        self.mongo_io.create_document(self.test_collection_name, doc2)
-        self.mongo_io.create_document(self.test_collection_name, doc3)
-        deleted_count = self.mongo_io.delete_documents(self.test_collection_name, {"value": {"$lt": 3}})
-        self.assertEqual(deleted_count, 2)
-        remaining = self.mongo_io.get_documents(self.test_collection_name, {"name": {"$in": ["Lima"]}})
-        self.assertEqual(len(remaining), 1)
-        self.assertEqual(remaining[0]["name"], "Lima")
+    def test_apply_schema_validation(self):
+        """Test applying schema validation."""
+        event = self.mongo_io.apply_schema_validation(self.test_collection_name)
+        self.assertEqual(event.status, "SUCCESS")
 
-    def test_load_test_data_success_return_value(self):
-        import tempfile
-        import os
+    def test_load_json_data(self):
+        """Test loading JSON data from file."""
+        # Create a temporary JSON file
         test_data = [
-            {
-                "_id": {"$oid": "A00000000000000000000001"},
-                "name": "test_document",
-                "status": "active"
-            }
+            {"name": "Test1", "value": 1},
+            {"name": "Test2", "value": 2}
         ]
+        
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            import json
             json.dump(test_data, f)
             temp_file = f.name
+        
         try:
-            result = self.mongo_io.load_test_data(self.test_collection_name, temp_file)
-            self.assertEqual(result["status"], "success")
-            self.assertEqual(result["operation"], "load_test_data")
-            self.assertEqual(result["collection"], self.test_collection_name)
-            self.assertEqual(result["documents_loaded"], 1)
-            self.assertIsInstance(result["inserted_ids"], list)
-            self.assertEqual(len(result["inserted_ids"]), 1)
-            self.assertTrue(result["acknowledged"])
+            event = self.mongo_io.load_json_data("test_load_collection", temp_file)
+            self.assertEqual(event.status, "SUCCESS")
+            self.assertEqual(event.data["documents_loaded"], 2)
         finally:
+            import os
             os.unlink(temp_file)
-            self.mongo_io.drop_collection(self.test_collection_name)
+
+    def test_drop_database(self):
+        """Test dropping the database."""
+        self.mongo_io.drop_database()
+        
+        # Verify database is dropped by checking if it exists in the client
+        # The database should no longer exist in the list of databases
+        database_names = [db['name'] for db in self.mongo_io.client.list_databases()]
+        self.assertNotIn(self.config.MONGO_DB_NAME, database_names)
+
+    def test_error_handling(self):
+        """Test error handling for invalid operations."""
+        # Test invalid collection name
+        with self.assertRaises(ConfiguratorException):
+            self.mongo_io.get_documents("")
+        
+        # Test invalid index name
+        event = self.mongo_io.remove_index(self.test_collection_name, "nonexistent_index")
+        self.assertEqual(event.status, "FAILURE")
+
 
 if __name__ == '__main__':
     unittest.main()

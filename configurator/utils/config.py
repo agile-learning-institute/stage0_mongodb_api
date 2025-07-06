@@ -40,6 +40,7 @@ class Config:
                 "INPUT_FOLDER": "/input",
                 "LOGGING_LEVEL": "INFO", 
                 "MONGO_DB_NAME": "configurator",
+                "VERSION_COLLECTION_NAME": "CollectionVersions",
                 "TYPE_FOLDER": "types",
                 "DICTIONARY_FOLDER": "dictionaries",
                 "CONFIGURATION_FOLDER": "configurations",

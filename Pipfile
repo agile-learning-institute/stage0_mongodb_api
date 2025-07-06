@@ -4,19 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [scripts]
-local = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api python3 -m server'"
-debug = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api LOGGING_LEVEL=DEBUG python3 -m server'"
-batch = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api AUTO_PROCESS=True EXIT_AFTER_PROCESSING=True LOAD_TEST_DATA=True python3 -m server'"
-test = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api LOGGING_LEVEL=CRITICAL coverage run -m unittest discover -s ./tests -p \"test_*.py\" -v && echo \"\\n=== COVERAGE REPORT ===\" && coverage report && coverage html'"
+local = "sh -c 'PYTHONPATH=$(pwd)/mongodb_configurator_api python3 -m server'"
+debug = "sh -c 'PYTHONPATH=$(pwd)/mongodb_configurator_api LOGGING_LEVEL=DEBUG python3 -m server'"
+batch = "sh -c 'PYTHONPATH=$(pwd)/mongodb_configurator_api AUTO_PROCESS=True EXIT_AFTER_PROCESSING=True LOAD_TEST_DATA=True python3 -m server'"
+test = "sh -c 'PYTHONPATH=$(pwd)/mongodb_configurator_api LOGGING_LEVEL=CRITICAL coverage run -m unittest discover -s ./tests -p \"test_*.py\" -v && echo \"\\n=== COVERAGE REPORT ===\" && coverage report && coverage html'"
 stepci-observability = "stepci run ./tests/stepci/observability.yaml"
 stepci-small = "stepci run ./tests/stepci/small_sample.yaml"
 stepci-large = "stepci run ./tests/stepci/large_sample.yaml"
 db-compare = "python tests/db_util.py compare"
 db-harvest = "python tests/db_util.py harvest"
-build = "docker build --tag ghcr.io/agile-learning-institute/stage0_mongodb_api:latest ."
-service = "sh -c 'pipenv run down && docker compose --profile mongodb up --detach && echo `Visit http://localhost:8082/`'"
-database = "sh -c 'pipenv run down && docker compose --profile mongodb-only up --detach'"
-down = "docker compose down mongodb_spa mongodb_api mongodb"
+build = "docker build --tag ghcr.io/agile-learning-institute/mongodb_configurator_api:latest ."
+service = "sh -c 'pipenv run down && docker compose --profile configurator up --detach && echo `Visit http://localhost:8082/`'"
+database = "sh -c 'pipenv run down && docker compose --profile mongodb up --detach'"
+down = "docker compose down mongodb configurator_api configurator_spa"
 
 [packages]
 python-dotenv = "*"
