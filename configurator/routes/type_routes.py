@@ -28,22 +28,25 @@ def create_type_routes():
     # PATCH /api/types - Clean Types
     @type_routes.route('', methods=['PATCH'])
     def clean_types():
+        event = ConfiguratorEvent(event_id="TYP-04", event_type="CLEAN_TYPES")
         try:
             files = FileIO.get_documents(config.TYPE_FOLDER)
-            event = ConfiguratorEvent(event_id="TYP-04", event_type="CLEAN_TYPES")
             for file in files:
-                type = Type(file)
-                event.append_events(type.clean())
+                type = Type(file.name)
+                event.append_events(type.save())
             event.record_success()
             return jsonify(event.to_dict()), 200
         except ConfiguratorException as e:
-            logger.error(f"Configurator error listing configurations: {e.event.to_dict()}")
-            return jsonify(e.event.to_dict()), 500
+            logger.error(f"Configurator error cleaning types: {e.event.to_dict()}")
+            event.append_events([e.event])
+            event.record_failure(message="Configurator error cleaning types")
+            return jsonify(event.to_dict()), 500
         except Exception as e:
-            logger.error(f"Unexpected error listing configurations: {str(e)}")
-            return jsonify(str(e)), 500
-        
-        
+            logger.error(f"Unexpected error cleaning types: {str(e)}")
+            event.event_data = e
+            event.record_failure(message="Unexpected error cleaning types")
+            return jsonify(event.to_dict()), 500
+
     # GET /api/types/<file_name> - Return a type file
     @type_routes.route('/<file_name>', methods=['GET'])
     def get_type(file_name):

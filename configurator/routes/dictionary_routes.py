@@ -28,20 +28,24 @@ def create_dictionary_routes():
     # PATCH /api/dictionaries - Clean Dictionaries
     @dictionary_routes.route('', methods=['PATCH'])
     def clean_dictionaries():
+        event = ConfiguratorEvent(event_id="DIC-04", event_type="CLEAN_DICTIONARIES")
         try:
             files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-            event = ConfiguratorEvent(event_id="DIC-04", event_type="CLEAN_DICTIONARIES")
             for file in files:
                 dictionary = Dictionary(file.name)
-                event.append_events(dictionary.clean())
+                event.append_events(dictionary.save())
             event.record_success()
             return jsonify(event.to_dict()), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error cleaning dictionaries: {e.event.to_dict()}")
-            return jsonify(e.event.to_dict()), 500
+            event.append_events([e.event])
+            event.record_failure(message="Configurator error cleaning dictionaries")
+            return jsonify(event.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error cleaning dictionaries: {str(e)}")
-            return jsonify(str(e)), 500
+            event.event_data = e
+            event.record_failure(message="Unexpected error cleaning dictionaries")
+            return jsonify(event.to_dict()), 500
         
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>', methods=['GET'])

@@ -43,20 +43,24 @@ def create_configuration_routes():
 
     @blueprint.route('/', methods=['PATCH'])
     def clean_configurations():
+        event = ConfiguratorEvent(event_id="CFG-04", event_type="CLEAN_CONFIGURATIONS")
         try:
             files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-            event = ConfiguratorEvent(event_id="CFG-04", event_type="CLEAN_CONFIGURATIONS")
             for file in files:
                 configuration = Configuration(file.name)
-                event.append_events(configuration.clean())
+                event.append_events(configuration.save())
             event.record_success()
             return jsonify(event.to_dict()), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error cleaning configurations: {e.event.to_dict()}")
-            return jsonify(e.event.to_dict()), 500
+            event.append_events([e.event])
+            event.record_failure(message="Configurator error cleaning configurations")
+            return jsonify(event.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error cleaning configurations: {str(e)}")
-            return jsonify(str(e)), 500
+            event.event_data = e
+            event.record_failure(message="Unexpected error cleaning configurations")
+            return jsonify(event.to_dict()), 500
 
     @blueprint.route('/<file_name>/', methods=['GET'])
     def get_configuration(file_name):

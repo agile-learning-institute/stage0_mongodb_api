@@ -18,11 +18,30 @@ class Enumerators:
     def save(self) -> list[ConfiguratorEvent]:
         event = ConfiguratorEvent(event_id="ENU-03", event_type="SAVE_ENUMERATORS")
         try:
+            # Get original content before saving
+            original_doc = FileIO.get_document(self.config.TEST_DATA_FOLDER, "enumerators.json")
+            
+            # Save the cleaned content
             FileIO.put_document(self.config.TEST_DATA_FOLDER, "enumerators.json", self.dict)
-            event.data = self.dict
+            
+            # Re-read the saved content
+            saved_doc = FileIO.get_document(self.config.TEST_DATA_FOLDER, "enumerators.json")
+            
+            # Compare and set event data
+            original_keys = set(original_doc.keys())
+            saved_keys = set(saved_doc.keys())
+            
+            added = saved_keys - original_keys
+            removed = original_keys - saved_keys
+            
+            event.data = {
+                "added": {k: saved_doc[k] for k in added},
+                "removed": {k: original_doc[k] for k in removed}
+            }
+            
             event.record_success()
         except ConfiguratorException as e:
-            event.append_events(e.event.to_dict())
+            event.append_events([e.event])
             event.record_failure(message="error saving document")
         except Exception as e:
             event.append_events(ConfiguratorEvent(event_id="ENU-04", event_type="SAVE_ENUMERATORS", data=e))
@@ -34,10 +53,6 @@ class Enumerators:
     
     def to_dict(self):
         return self.dict
-    
-    def clean(self) -> list[ConfiguratorEvent]:
-        """Clean this enumerators by saving it (which normalizes the content)"""
-        return self.save()
 
 class Enumerations:
     def __init__(self, data: dict):

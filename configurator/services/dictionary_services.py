@@ -25,20 +25,35 @@ class Dictionary:
     def save(self) -> list[ConfiguratorEvent]:
         event = ConfiguratorEvent(event_id="DIC-03", event_type="SAVE_DICTIONARY")
         try:
+            # Get original content before saving
+            original_doc = FileIO.get_document(self.config.DICTIONARIES_FOLDER, self.file_name)
+            
+            # Save the cleaned content
             FileIO.save_document(self.config.DICTIONARIES_FOLDER, self.file_name, self.property.to_dict())
-            event.data = self.property.to_dict()
+            
+            # Re-read the saved content
+            saved_doc = FileIO.get_document(self.config.DICTIONARIES_FOLDER, self.file_name)
+            
+            # Compare and set event data
+            original_keys = set(original_doc.keys())
+            saved_keys = set(saved_doc.keys())
+            
+            added = saved_keys - original_keys
+            removed = original_keys - saved_keys
+            
+            event.data = {
+                "added": {k: saved_doc[k] for k in added},
+                "removed": {k: original_doc[k] for k in removed}
+            }
+            
             event.record_success()
         except ConfiguratorException as e:
-            event.append_events(e.event.to_dict())
+            event.append_events([e.event])
             event.record_failure(message="error saving document")
         except Exception as e:
             event.append_events(ConfiguratorEvent(event_id="DIC-04", event_type="SAVE_DICTIONARY", data=e))
             event.record_failure(message="unexpected error saving document")
         return [event]
-    
-    def clean(self) -> list[ConfiguratorEvent]:
-        """Clean this dictionary by saving it (which normalizes the content)"""
-        return self.save()
 
 class Property:
     def __init__(self, name: str, property: dict):

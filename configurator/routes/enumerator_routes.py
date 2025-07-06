@@ -14,38 +14,42 @@ def create_enumerator_routes():
     @enumerator_routes.route('', methods=['GET'])
     def get_enumerators():
         try:
-            content = FileIO.get_document(config.TEST_DATA_FOLDER, "enumerators.json")
-            return jsonify(content), 200
+            enumerators = Enumerators(None)
+            return jsonify(enumerators.to_dict()), 200
         except ConfiguratorException as e:
-            logger.error(f"Configurator error getting enumerators: {str(e)}")
-            return jsonify(e.to_dict()), 500
+            logger.error(f"Configurator error getting enumerators: {e.event.to_dict()}")
+            return jsonify(e.event.to_dict()), 500
         except Exception as e:
-            logger.error(f"Unexpected error getting enumerators: {str(e)}")
+            logger.error(f"Unexpected error getting enumerators: {e}")
             return jsonify(str(e)), 500
     
     # PATCH /api/enumerators - Clean Enumerators
     @enumerator_routes.route('', methods=['PATCH'])
     def clean_enumerators():
+        event = ConfiguratorEvent(event_id="ENU-04", event_type="CLEAN_ENUMERATORS")
         try:
             enumerators = Enumerators(None)
-            event = ConfiguratorEvent(event_id="ENU-04", event_type="CLEAN_ENUMERATORS")
-            event.append_events(enumerators.clean())
+            event.append_events(enumerators.save())
             event.record_success()
             return jsonify(event.to_dict()), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error cleaning enumerators: {e.event.to_dict()}")
-            return jsonify(e.event.to_dict()), 500
+            event.append_events([e.event])
+            event.record_failure(message="Configurator error cleaning enumerators")
+            return jsonify(event.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error cleaning enumerators: {str(e)}")
-            return jsonify(str(e)), 500
+            event.event_data = e
+            event.record_failure(message="Unexpected error cleaning enumerators")
+            return jsonify(event.to_dict()), 500
     
     # PUT /api/enumerators - Overwrite enumerators.json
     @enumerator_routes.route('', methods=['PUT'])
     def put_enumerators():
         try:
-            data = request.get_json(force=True)
-            FileIO.put_document(config.TEST_DATA_FOLDER, "enumerators.json", data)
-            return jsonify(data), 200
+            enumerators = Enumerators(data=request.get_json(force=True))
+            events = enumerators.save()
+            return jsonify(events[0].data), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error saving enumerators: {str(e)}")
             return jsonify(e.to_dict()), 500
