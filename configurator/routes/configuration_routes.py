@@ -15,7 +15,7 @@ def create_configuration_routes():
     @blueprint.route('/', methods=['GET'])
     def list_configurations():
         try:
-            configurations = FileIO.get_files(config.CONFIGURATIONS_FOLDER)
+            configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
             return jsonify(configurations)
         except ConfiguratorException as e:
             logger.error(f"Configurator error listing configurations: {str(e)}")
@@ -29,7 +29,7 @@ def create_configuration_routes():
         """Process all configured configurations"""
         try:
             results = []
-            configurations = FileIO.get_documents(config.CONFIGURATIONS_FOLDER)
+            configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
             for configuration_name in configurations:
                 configuration = Configuration(configuration_name)
                 results.append(configuration.process())

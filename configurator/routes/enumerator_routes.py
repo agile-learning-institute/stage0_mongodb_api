@@ -8,13 +8,12 @@ logger = logging.getLogger(__name__)
 def create_enumerator_routes():
     enumerator_routes = Blueprint('enumerator_routes', __name__)
     config = Config.get_instance()
-    file_io = FileIO()
     
     # GET /api/enumerators - Return the content of enumerators.json
     @enumerator_routes.route('', methods=['GET'])
     def get_enumerators():
         try:
-            content = file_io.get_document(config.TEST_DATA_FOLDER, "enumerators.json")
+            content = FileIO.get_document(config.TEST_DATA_FOLDER, "enumerators.json")
             return jsonify(content), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting enumerators: {str(e)}")
@@ -31,7 +30,7 @@ def create_enumerator_routes():
     def put_enumerators():
         try:
             data = request.get_json(force=True)
-            file_io.put_document(config.TEST_DATA_FOLDER, "enumerators.json", data)
+            FileIO.put_document(config.TEST_DATA_FOLDER, "enumerators.json", data)
             return jsonify(data), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error saving enumerators: {str(e)}")

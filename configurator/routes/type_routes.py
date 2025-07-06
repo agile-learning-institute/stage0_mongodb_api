@@ -16,7 +16,7 @@ def create_type_routes():
     @type_routes.route('', methods=['GET'])
     def get_types():
         try:
-            files = FileIO.get_files(config.CONFIGURATIONS_FOLDER)
+            files = FileIO.get_documents(config.TYPE_FOLDER)
             return jsonify(files), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error listing configurations: {str(e)}")

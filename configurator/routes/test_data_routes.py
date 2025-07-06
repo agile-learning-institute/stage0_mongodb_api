@@ -15,7 +15,7 @@ def create_test_data_routes():
     @test_data_routes.route('', methods=['GET'])
     def get_data_files():
         try:
-            files = FileIO.get_files(config.TEST_DATA_FOLDER)
+            files = FileIO.get_documents(config.TEST_DATA_FOLDER)
             return jsonify(files), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting test data files: {str(e)}")
@@ -28,7 +28,7 @@ def create_test_data_routes():
     @test_data_routes.route('/<file_name>', methods=['GET'])
     def get_test_data(file_name):
         try:
-            file = FileIO.get_file(config.TEST_DATA_FOLDER, file_name)
+            file = FileIO.get_document(config.TEST_DATA_FOLDER, file_name)
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting test data {file_name}: {str(e)}")
@@ -41,7 +41,7 @@ def create_test_data_routes():
     @test_data_routes.route('/<file_name>', methods=['PUT'])
     def update_test_data(file_name):
         try:
-            file = FileIO.put_file(config.TEST_DATA_FOLDER, request.json)
+            file = FileIO.put_document(config.TEST_DATA_FOLDER, file_name, request.json)
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error updating test data {file_name}: {str(e)}")
@@ -53,7 +53,7 @@ def create_test_data_routes():
     @test_data_routes.route('/<file_name>', methods=['DELETE'])
     def delete_test_data(file_name):
         try:
-            file = FileIO.delete_file(config.TEST_DATA_FOLDER, file_name)
+            file = FileIO.delete_document(config.TEST_DATA_FOLDER, file_name)
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error deleting test data {file_name}: {str(e)}")
@@ -65,7 +65,7 @@ def create_test_data_routes():
     @test_data_routes.route('/<file_name>', methods=['PATCH'])
     def lock_unlock_test_data(file_name):
         try:
-            file = FileIO.lock_unlock_file(config.TEST_DATA_FOLDER, file_name)
+            file = FileIO.lock_unlock(config.TEST_DATA_FOLDER, file_name)
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error locking/unlocking test data {file_name}: {str(e)}")

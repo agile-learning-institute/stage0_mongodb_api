@@ -16,7 +16,7 @@ def create_dictionary_routes():
     @dictionary_routes.route('', methods=['GET'])
     def get_dictionaries():
         try:
-            files = FileIO.get_files(config.DICTIONARIES_FOLDER)
+            files = FileIO.get_documents(config.DICTIONARY_FOLDER)
             return jsonify(files), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error listing configurations: {str(e)}")

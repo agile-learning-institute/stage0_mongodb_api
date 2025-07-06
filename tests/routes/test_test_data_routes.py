@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.test_data_routes import create_test_data_routes
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
 
 class TestTestDataRoutes(unittest.TestCase):
@@ -14,11 +14,11 @@ class TestTestDataRoutes(unittest.TestCase):
         self.app.register_blueprint(create_test_data_routes(), url_prefix='/api/test_data')
         self.client = self.app.test_client()
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_get_data_files_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_data_files_success(self, mock_get_documents):
         """Test successful GET /api/test_data."""
         # Arrange
-        mock_file_io.get_files.return_value = [
+        mock_get_documents.return_value = [
             {
                 "name": "test1.json",
                 "read_only": False,
@@ -41,26 +41,29 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 2)
-        mock_file_io.get_files.assert_called_once_with("test_data")
+        mock_get_documents.assert_called_once_with("test_data")
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_get_data_files_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_data_files_configurator_exception(self, mock_get_documents):
         """Test GET /api/test_data when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.get_files.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.get('/api/test_data')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_get_data_files_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_data_files_general_exception(self, mock_get_documents):
         """Test GET /api/test_data when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.get_files.side_effect = Exception("Unexpected error")
+        mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.get('/api/test_data')
@@ -69,11 +72,11 @@ class TestTestDataRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json, "Undefined Exception")
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_get_test_data_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_document')
+    def test_get_test_data_success(self, mock_get_document):
         """Test successful GET /api/test_data/<file_name>."""
         # Arrange
-        mock_file_io.get_file.return_value = {
+        mock_get_document.return_value = {
             "name": "test.json",
             "read_only": False,
             "created_at": "2023-01-01T00:00:00",
@@ -87,26 +90,29 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["name"], "test.json")
-        mock_file_io.get_file.assert_called_once_with("test_data", "test.json")
+        mock_get_document.assert_called_once_with("test_data", "test.json")
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_get_test_data_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_document')
+    def test_get_test_data_configurator_exception(self, mock_get_document):
         """Test GET /api/test_data/<file_name> when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.get_file.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_document.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.get('/api/test_data/test.json')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_get_test_data_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_document')
+    def test_get_test_data_general_exception(self, mock_get_document):
         """Test GET /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.get_file.side_effect = Exception("Unexpected error")
+        mock_get_document.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.get('/api/test_data/test.json')
@@ -115,11 +121,11 @@ class TestTestDataRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json, "Undefined Exception")
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_update_test_data_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'put_document')
+    def test_update_test_data_success(self, mock_put_document):
         """Test successful PUT /api/test_data/<file_name>."""
         # Arrange
-        mock_file_io.put_file.return_value = {
+        mock_put_document.return_value = {
             "name": "test.json",
             "read_only": False,
             "created_at": "2023-01-01T00:00:00",
@@ -135,13 +141,14 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["name"], "test.json")
-        mock_file_io.put_file.assert_called_once_with("test_data", test_data)
+        mock_put_document.assert_called_once_with("test_data", "test.json", test_data)
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_update_test_data_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'put_document')
+    def test_update_test_data_configurator_exception(self, mock_put_document):
         """Test PUT /api/test_data/<file_name> when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.put_file.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_put_document.side_effect = ConfiguratorException("File error", event)
 
         test_data = {"test": "data"}
 
@@ -150,13 +157,15 @@ class TestTestDataRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_update_test_data_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'put_document')
+    def test_update_test_data_general_exception(self, mock_put_document):
         """Test PUT /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.put_file.side_effect = Exception("Unexpected error")
+        mock_put_document.side_effect = Exception("Unexpected error")
 
         test_data = {"test": "data"}
 
@@ -167,11 +176,11 @@ class TestTestDataRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json, {"error": "A processing error occurred"})
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_delete_test_data_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'delete_document')
+    def test_delete_test_data_success(self, mock_delete_document):
         """Test successful DELETE /api/test_data/<file_name>."""
         # Arrange
-        mock_file_io.delete_file.return_value = {
+        mock_delete_document.return_value = {
             "name": "test.json",
             "deleted": True
         }
@@ -182,26 +191,29 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["deleted"], True)
-        mock_file_io.delete_file.assert_called_once_with("test_data", "test.json")
+        mock_delete_document.assert_called_once_with("test_data", "test.json")
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_delete_test_data_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'delete_document')
+    def test_delete_test_data_configurator_exception(self, mock_delete_document):
         """Test DELETE /api/test_data/<file_name> when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.delete_file.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_delete_document.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.delete('/api/test_data/test.json')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_delete_test_data_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'delete_document')
+    def test_delete_test_data_general_exception(self, mock_delete_document):
         """Test DELETE /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.delete_file.side_effect = Exception("Unexpected error")
+        mock_delete_document.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.delete('/api/test_data/test.json')
@@ -210,11 +222,11 @@ class TestTestDataRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json, "Undefined Exception")
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_lock_unlock_test_data_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'lock_unlock')
+    def test_lock_unlock_test_data_success(self, mock_lock_unlock):
         """Test successful PATCH /api/test_data/<file_name>."""
         # Arrange
-        mock_file_io.lock_unlock_file.return_value = {
+        mock_lock_unlock.return_value = {
             "name": "test.json",
             "read_only": True,
             "created_at": "2023-01-01T00:00:00",
@@ -228,26 +240,29 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["read_only"], True)
-        mock_file_io.lock_unlock_file.assert_called_once_with("test_data", "test.json")
+        mock_lock_unlock.assert_called_once_with("test_data", "test.json")
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_lock_unlock_test_data_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'lock_unlock')
+    def test_lock_unlock_test_data_configurator_exception(self, mock_lock_unlock):
         """Test PATCH /api/test_data/<file_name> when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.lock_unlock_file.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_lock_unlock.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.patch('/api/test_data/test.json')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.test_data_routes.FileIO')
-    def test_lock_unlock_test_data_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'lock_unlock')
+    def test_lock_unlock_test_data_general_exception(self, mock_lock_unlock):
         """Test PATCH /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.lock_unlock_file.side_effect = Exception("Unexpected error")
+        mock_lock_unlock.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.patch('/api/test_data/test.json')

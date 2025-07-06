@@ -49,10 +49,8 @@ class File:
 class FileIO:
     """Class for file I/O operations."""
     
-    def __init__(self):
-        pass
-    
-    def get_documents(self, folder_name: str) -> list[File]:
+    @staticmethod
+    def get_documents(folder_name: str) -> list[File]:
         """Get all files from a folder.
         
         Args:
@@ -81,7 +79,8 @@ class FileIO:
             event = ConfiguratorEvent(event_id="FIL-01", event_type="GET_DOCUMENTS", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to get documents from {folder}", event)
     
-    def get_document(self, folder_name: str, file_name: str) -> dict:
+    @staticmethod
+    def get_document(folder_name: str, file_name: str) -> dict:
         """Read document content from a file.
         
         Args:
@@ -123,7 +122,8 @@ class FileIO:
             event = ConfiguratorEvent(event_id="FIL-04", event_type="GET_DOCUMENT", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to get document from {file_path}", event)
     
-    def put_document(self, folder_name: str, file_name: str, document: dict) -> File:
+    @staticmethod
+    def put_document(folder_name: str, file_name: str, document: dict) -> File:
         """Write document content to a file.
         
         Args:
@@ -162,7 +162,8 @@ class FileIO:
             event = ConfiguratorEvent(event_id="FIL-06", event_type="PUT_DOCUMENT", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to put document to {file_path}", event)
     
-    def delete_document(self, folder_name: str, file_name: str) -> ConfiguratorEvent:
+    @staticmethod
+    def delete_document(folder_name: str, file_name: str) -> ConfiguratorEvent:
         """Delete a file.
         
         Args:
@@ -189,7 +190,8 @@ class FileIO:
             event.record_failure({"error": str(e), "file_path": file_path})
             return event
     
-    def lock_unlock(self, folder_name: str, file_name: str) -> File:
+    @staticmethod
+    def lock_unlock(folder_name: str, file_name: str) -> File:
         """Toggle file read-only status.
         
         Args:

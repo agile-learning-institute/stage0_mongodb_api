@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.type_routes import create_type_routes
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
 
 class TestTypeRoutes(unittest.TestCase):
@@ -14,11 +14,11 @@ class TestTypeRoutes(unittest.TestCase):
         self.app.register_blueprint(create_type_routes(), url_prefix='/api/types')
         self.client = self.app.test_client()
 
-    @patch('configurator.routes.type_routes.FileIO')
-    def test_get_types_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_types_success(self, mock_get_documents):
         """Test successful GET /api/types."""
         # Arrange
-        mock_file_io.get_files.return_value = [
+        mock_get_documents.return_value = [
             {
                 "name": "type1.yaml",
                 "read_only": False,
@@ -41,26 +41,29 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 2)
-        mock_file_io.get_files.assert_called_once_with("configurations")
+        mock_get_documents.assert_called_once_with("types")
 
-    @patch('configurator.routes.type_routes.FileIO')
-    def test_get_types_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_types_configurator_exception(self, mock_get_documents):
         """Test GET /api/types when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.get_files.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.get('/api/types')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.type_routes.FileIO')
-    def test_get_types_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_types_general_exception(self, mock_get_documents):
         """Test GET /api/types when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.get_files.side_effect = Exception("Unexpected error")
+        mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.get('/api/types')
@@ -73,8 +76,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_get_type_success(self, mock_type_class):
         """Test successful GET /api/types/<file_name>."""
         # Arrange
-        mock_type = Mock()
-        mock_type.to_dict.return_value = {
+        mock_type = {
             "name": "test_type",
             "description": "A test type",
             "fields": {"field1": "string"}
@@ -93,14 +95,17 @@ class TestTypeRoutes(unittest.TestCase):
     def test_get_type_configurator_exception(self, mock_type_class):
         """Test GET /api/types/<file_name> when Type raises ConfiguratorException."""
         # Arrange
-        mock_type_class.side_effect = ConfiguratorException("Type error", Mock())
+        event = ConfiguratorEvent("test", "type_error")
+        mock_type_class.side_effect = ConfiguratorException("Type error", event)
 
         # Act
         response = self.client.get('/api/types/test_type.yaml')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_get_type_general_exception(self, mock_type_class):
@@ -146,7 +151,8 @@ class TestTypeRoutes(unittest.TestCase):
         """Test PUT /api/types/<file_name> when Type raises ConfiguratorException."""
         # Arrange
         mock_type = Mock()
-        mock_type.save.side_effect = ConfiguratorException("Save error", Mock())
+        event = ConfiguratorEvent("test", "save_error")
+        mock_type.save.side_effect = ConfiguratorException("Save error", event)
         mock_type_class.return_value = mock_type
 
         test_data = {"name": "test_type"}
@@ -156,7 +162,9 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_update_type_general_exception(self, mock_type_class):
@@ -200,7 +208,8 @@ class TestTypeRoutes(unittest.TestCase):
         """Test DELETE /api/types/<file_name> when Type raises ConfiguratorException."""
         # Arrange
         mock_type = Mock()
-        mock_type.delete.side_effect = ConfiguratorException("Delete error", Mock())
+        event = ConfiguratorEvent("test", "delete_error")
+        mock_type.delete.side_effect = ConfiguratorException("Delete error", event)
         mock_type_class.return_value = mock_type
 
         # Act
@@ -208,7 +217,9 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_delete_type_general_exception(self, mock_type_class):
@@ -250,7 +261,8 @@ class TestTypeRoutes(unittest.TestCase):
         """Test PATCH /api/types/<file_name> when Type raises ConfiguratorException."""
         # Arrange
         mock_type = Mock()
-        mock_type.flip_lock.side_effect = ConfiguratorException("Lock error", Mock())
+        event = ConfiguratorEvent("test", "lock_error")
+        mock_type.flip_lock.side_effect = ConfiguratorException("Lock error", event)
         mock_type_class.return_value = mock_type
 
         # Act
@@ -258,7 +270,9 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_lock_unlock_type_general_exception(self, mock_type_class):

@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.dictionary_routes import create_dictionary_routes
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
 
 class TestDictionaryRoutes(unittest.TestCase):
@@ -14,11 +14,11 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.app.register_blueprint(create_dictionary_routes(), url_prefix='/api/dictionaries')
         self.client = self.app.test_client()
 
-    @patch('configurator.routes.dictionary_routes.FileIO')
-    def test_get_dictionaries_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_dictionaries_success(self, mock_get_documents):
         """Test successful GET /api/dictionaries."""
         # Arrange
-        mock_file_io.get_files.return_value = [
+        mock_get_documents.return_value = [
             {
                 "name": "dict1.yaml",
                 "read_only": False,
@@ -41,26 +41,29 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 2)
-        mock_file_io.get_files.assert_called_once_with("dictionaries")
+        mock_get_documents.assert_called_once_with("dictionaries")
 
-    @patch('configurator.routes.dictionary_routes.FileIO')
-    def test_get_dictionaries_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_dictionaries_configurator_exception(self, mock_get_documents):
         """Test GET /api/dictionaries when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.get_files.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.get('/api/dictionaries')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.dictionary_routes.FileIO')
-    def test_get_dictionaries_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_get_dictionaries_general_exception(self, mock_get_documents):
         """Test GET /api/dictionaries when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.get_files.side_effect = Exception("Unexpected error")
+        mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.get('/api/dictionaries')
@@ -73,8 +76,7 @@ class TestDictionaryRoutes(unittest.TestCase):
     def test_get_dictionary_success(self, mock_dictionary_class):
         """Test successful GET /api/dictionaries/<file_name>."""
         # Arrange
-        mock_dictionary = Mock()
-        mock_dictionary.to_dict.return_value = {
+        mock_dictionary = {
             "name": "test_dict",
             "description": "A test dictionary",
             "fields": {"field1": "string"}
@@ -93,14 +95,17 @@ class TestDictionaryRoutes(unittest.TestCase):
     def test_get_dictionary_configurator_exception(self, mock_dictionary_class):
         """Test GET /api/dictionaries/<file_name> when Dictionary raises ConfiguratorException."""
         # Arrange
-        mock_dictionary_class.side_effect = ConfiguratorException("Dictionary error", Mock())
+        event = ConfiguratorEvent("test", "dictionary_error")
+        mock_dictionary_class.side_effect = ConfiguratorException("Dictionary error", event)
 
         # Act
         response = self.client.get('/api/dictionaries/test_dict.yaml')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_get_dictionary_general_exception(self, mock_dictionary_class):
@@ -146,7 +151,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         """Test PUT /api/dictionaries/<file_name> when Dictionary raises ConfiguratorException."""
         # Arrange
         mock_dictionary = Mock()
-        mock_dictionary.save.side_effect = ConfiguratorException("Save error", Mock())
+        event = ConfiguratorEvent("test", "save_error")
+        mock_dictionary.save.side_effect = ConfiguratorException("Save error", event)
         mock_dictionary_class.return_value = mock_dictionary
 
         test_data = {"name": "test_dict"}
@@ -156,7 +162,9 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_update_dictionary_general_exception(self, mock_dictionary_class):
@@ -200,7 +208,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         """Test DELETE /api/dictionaries/<file_name> when Dictionary raises ConfiguratorException."""
         # Arrange
         mock_dictionary = Mock()
-        mock_dictionary.delete.side_effect = ConfiguratorException("Delete error", Mock())
+        event = ConfiguratorEvent("test", "delete_error")
+        mock_dictionary.delete.side_effect = ConfiguratorException("Delete error", event)
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
@@ -208,7 +217,9 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_delete_dictionary_general_exception(self, mock_dictionary_class):
@@ -250,7 +261,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         """Test PATCH /api/dictionaries/<file_name> when Dictionary raises ConfiguratorException."""
         # Arrange
         mock_dictionary = Mock()
-        mock_dictionary.flip_lock.side_effect = ConfiguratorException("Lock error", Mock())
+        event = ConfiguratorEvent("test", "lock_error")
+        mock_dictionary.flip_lock.side_effect = ConfiguratorException("Lock error", event)
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
@@ -258,7 +270,9 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_lock_unlock_dictionary_general_exception(self, mock_dictionary_class):

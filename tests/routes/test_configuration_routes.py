@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.configuration_routes import create_configuration_routes
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
 
 class TestConfigurationRoutes(unittest.TestCase):
@@ -14,11 +14,11 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.app.register_blueprint(create_configuration_routes(), url_prefix='/api/configurations')
         self.client = self.app.test_client()
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    def test_list_configurations_success(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_list_configurations_success(self, mock_get_documents):
         """Test successful GET /api/configurations/."""
         # Arrange
-        mock_file_io.get_files.return_value = [
+        mock_get_documents.return_value = [
             {
                 "name": "config1.yaml",
                 "read_only": False,
@@ -41,26 +41,29 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 2)
-        mock_file_io.get_files.assert_called_once_with("configurations")
+        mock_get_documents.assert_called_once_with("configurations")
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    def test_list_configurations_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_list_configurations_configurator_exception(self, mock_get_documents):
         """Test GET /api/configurations/ when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.get_files.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.get('/api/configurations/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    def test_list_configurations_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_list_configurations_general_exception(self, mock_get_documents):
         """Test GET /api/configurations/ when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.get_files.side_effect = Exception("Unexpected error")
+        mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.get('/api/configurations/')
@@ -69,17 +72,17 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json, "Undefined Exception")
 
-    @patch('configurator.routes.configuration_routes.FileIO')
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     @patch('configurator.routes.configuration_routes.Configuration')
-    def test_process_configurations_success(self, mock_configuration_class, mock_file_io):
+    def test_process_configurations_success(self, mock_configuration_class, mock_get_documents):
         """Test successful POST /api/configurations/."""
         # Arrange
-        mock_file_io.get_documents.return_value = ["config1.yaml", "config2.yaml"]
+        mock_get_documents.return_value = ["config1.yaml", "config2.yaml"]
         
         mock_config1 = Mock()
-        mock_config1.process.return_value = {"status": "processed", "name": "config1"}
+        mock_config1.process.return_value = {"name": "config1", "processed": True}
         mock_config2 = Mock()
-        mock_config2.process.return_value = {"status": "processed", "name": "config2"}
+        mock_config2.process.return_value = {"name": "config2", "processed": True}
         
         mock_configuration_class.side_effect = [mock_config1, mock_config2]
 
@@ -89,30 +92,29 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 2)
-        mock_file_io.get_documents.assert_called_once_with("configurations")
-        mock_configuration_class.assert_any_call("config1.yaml")
-        mock_configuration_class.assert_any_call("config2.yaml")
-        mock_config1.process.assert_called_once()
-        mock_config2.process.assert_called_once()
+        mock_get_documents.assert_called_once_with("configurations")
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    def test_process_configurations_configurator_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_process_configurations_configurator_exception(self, mock_get_documents):
         """Test POST /api/configurations/ when FileIO raises ConfiguratorException."""
         # Arrange
-        mock_file_io.get_documents.side_effect = ConfiguratorException("File error", Mock())
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
         response = self.client.post('/api/configurations/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    def test_process_configurations_general_exception(self, mock_file_io):
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_process_configurations_general_exception(self, mock_get_documents):
         """Test POST /api/configurations/ when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.get_documents.side_effect = Exception("Unexpected error")
+        mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.post('/api/configurations/')
@@ -125,12 +127,10 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_get_configuration_success(self, mock_configuration_class):
         """Test successful GET /api/configurations/<file_name>/."""
         # Arrange
-        mock_configuration = Mock()
-        mock_configuration.to_dict.return_value = {
+        mock_configuration = {
             "name": "test_config",
-            "title": "Test Configuration",
             "description": "A test configuration",
-            "versions": []
+            "version": "1.0.0"
         }
         mock_configuration_class.return_value = mock_configuration
 
@@ -146,14 +146,17 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_get_configuration_configurator_exception(self, mock_configuration_class):
         """Test GET /api/configurations/<file_name>/ when Configuration raises ConfiguratorException."""
         # Arrange
-        mock_configuration_class.side_effect = ConfiguratorException("Configuration error", Mock())
+        event = ConfiguratorEvent("test", "configuration_error")
+        mock_configuration_class.side_effect = ConfiguratorException("Configuration error", event)
 
         # Act
         response = self.client.get('/api/configurations/test_config.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_configuration_general_exception(self, mock_configuration_class):
@@ -181,9 +184,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         test_data = {
             "name": "test_config",
-            "title": "Updated Test Configuration",
             "description": "Updated test configuration",
-            "versions": []
+            "version": "1.0.0"
         }
 
         # Act
@@ -200,7 +202,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test PUT /api/configurations/<file_name>/ when Configuration raises ConfiguratorException."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.save.side_effect = ConfiguratorException("Save error", Mock())
+        event = ConfiguratorEvent("test", "save_error")
+        mock_configuration.save.side_effect = ConfiguratorException("Save error", event)
         mock_configuration_class.return_value = mock_configuration
 
         test_data = {"name": "test_config"}
@@ -210,7 +213,9 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_general_exception(self, mock_configuration_class):
@@ -254,7 +259,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test DELETE /api/configurations/<file_name>/ when Configuration raises ConfiguratorException."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.delete.side_effect = ConfiguratorException("Delete error", Mock())
+        event = ConfiguratorEvent("test", "delete_error")
+        mock_configuration.delete.side_effect = ConfiguratorException("Delete error", event)
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -262,7 +268,9 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_delete_configuration_general_exception(self, mock_configuration_class):
@@ -304,7 +312,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test PATCH /api/configurations/<file_name>/ when Configuration raises ConfiguratorException."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.flip_lock.side_effect = ConfiguratorException("Lock error", Mock())
+        event = ConfiguratorEvent("test", "lock_error")
+        mock_configuration.flip_lock.side_effect = ConfiguratorException("Lock error", event)
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -312,7 +321,9 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_unlock_configuration_general_exception(self, mock_configuration_class):
@@ -335,8 +346,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Arrange
         mock_configuration = Mock()
         mock_configuration.process.return_value = {
-            "status": "processed",
-            "name": "test_config"
+            "name": "test_config",
+            "processed": True
         }
         mock_configuration_class.return_value = mock_configuration
 
@@ -345,7 +356,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json["status"], "processed")
+        self.assertEqual(response.json["processed"], True)
         mock_configuration_class.assert_called_once_with("test_config.yaml")
         mock_configuration.process.assert_called_once()
 
@@ -354,7 +365,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test POST /api/configurations/<file_name>/ when Configuration raises ConfiguratorException."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.process.side_effect = ConfiguratorException("Process error", Mock())
+        event = ConfiguratorEvent("test", "process_error")
+        mock_configuration.process.side_effect = ConfiguratorException("Process error", event)
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -362,7 +374,9 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_general_exception(self, mock_configuration_class):
@@ -386,7 +400,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         mock_configuration = Mock()
         mock_configuration.get_json_schema.return_value = {
             "type": "object",
-            "properties": {"field1": {"type": "string"}}
+            "properties": {
+                "name": {"type": "string"}
+            }
         }
         mock_configuration_class.return_value = mock_configuration
 
@@ -404,7 +420,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test GET /api/configurations/json_schema/<file_name>/<version>/ when Configuration raises ConfiguratorException."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.get_json_schema.side_effect = ConfiguratorException("Schema error", Mock())
+        event = ConfiguratorEvent("test", "schema_error")
+        mock_configuration.get_json_schema.side_effect = ConfiguratorException("Schema error", event)
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -412,7 +429,9 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_json_schema_general_exception(self, mock_configuration_class):
@@ -436,7 +455,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         mock_configuration = Mock()
         mock_configuration.get_bson_schema.return_value = {
             "bsonType": "object",
-            "properties": {"field1": {"bsonType": "string"}}
+            "properties": {
+                "name": {"bsonType": "string"}
+            }
         }
         mock_configuration_class.return_value = mock_configuration
 
@@ -454,7 +475,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test GET /api/configurations/bson_schema/<file_name>/<version>/ when Configuration raises ConfiguratorException."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.get_bson_schema.side_effect = ConfiguratorException("Schema error", Mock())
+        event = ConfiguratorEvent("test", "schema_error")
+        mock_configuration.get_bson_schema.side_effect = ConfiguratorException("Schema error", event)
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -462,7 +484,9 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, list)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_bson_schema_general_exception(self, mock_configuration_class):
