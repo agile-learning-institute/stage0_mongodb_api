@@ -1,3 +1,24 @@
+"""
+Type Definitions
+===============
+
+A valid Type in this system must be one of the following three forms:
+
+1. Universal Primitive:
+   - Has only a top-level 'schema' property (e.g., {'schema': {'type': 'string', 'format': 'email'}})
+   - Must NOT have 'json_type' or 'bson_type' at any level.
+
+2. Typed Primitive:
+   - Has top-level 'json_type' and/or 'bson_type' properties (e.g., {'json_type': {...}, 'bson_type': {...}})
+   - Must NOT have a 'schema' property.
+
+3. Complex Type (object or array):
+   - Has 'type': 'object' or 'type': 'array' at the top level.
+   - For 'object', must have a 'properties' dict; for 'array', must have an 'items' property.
+   - May have additional fields like 'description', 'required', 'additionalProperties', etc.
+
+Any other combination (e.g., 'schema' containing 'json_type'/'bson_type', or both 'schema' and 'json_type'/'bson_type' at the top level) is invalid and will raise an error.
+"""
 from configurator.utils.file_io import FileIO
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
@@ -94,6 +115,12 @@ class TypeProperty:
         self.additional_properties = property.get("additionalProperties", False)
         self.is_primitive = False
         self.is_universal = False
+
+        # Enforce mutual exclusivity
+        if self.schema is not None and (self.json_type is not None or self.bson_type is not None):
+            raise ConfiguratorException("Type definition cannot have both 'schema' and 'json_type'/'bson_type' at the top level.")
+        if self.schema is not None and ("json_type" in self.schema or "bson_type" in self.schema):
+            raise ConfiguratorException("'json_type' and 'bson_type' must not be nested under 'schema'. They must be top-level properties.")
 
         # Universal primitive: schema only
         if self.schema is not None:
@@ -195,8 +222,8 @@ class TypeProperty:
             custom_schema = custom_type.property.get_json_schema()
             custom_schema["description"] = self.description
             return custom_schema
-    
-        raise ConfiguratorException(f"Type {self.type} is not a valid type")
+
+        raise ConfiguratorException(f"Type {self.type} is not a valid type", ConfiguratorEvent(event_id="TYP-99", event_type="INVALID_TYPE"))
     
     def get_bson_schema(self):
         if self.is_universal:
@@ -240,8 +267,8 @@ class TypeProperty:
             return result
         if self.type:
             custom_type = Type(f"{self.type}.yaml")
-            custom_schema = custom_type.property.get_bson_schema()
+            custom_schema = custom_type.property.get_bson_schema() if hasattr(self, 'get_bson_schema') else custom_type.property.get_json_schema()
             custom_schema["description"] = self.description
             return custom_schema
         
-        raise ConfiguratorException(f"Type {self.type} is not a valid type")
+        raise ConfiguratorException(f"Type {self.type} is not a valid type", ConfiguratorEvent(event_id="TYP-99", event_type="INVALID_TYPE"))

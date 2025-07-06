@@ -46,37 +46,22 @@ class TestTypeProperty(unittest.TestCase):
         self.assertFalse(type_prop.additional_properties)
 
     def test_init_with_schema(self):
-        """Test TypeProperty initialization with schema"""
-        property_data = {
-            "description": "Test description",
-            "schema": {
-                "json_type": {"type": "string"},
-                "bson_type": {"bsonType": "string"}
-            }
-        }
-        type_prop = TypeProperty("test_prop", property_data)
-        
-        self.assertEqual(type_prop.schema, property_data["schema"])
-        self.assertEqual(type_prop.json_type, {"type": "string"})
-        self.assertEqual(type_prop.bson_type, {"bsonType": "string"})
-        self.assertTrue(type_prop.is_primitive)
-        self.assertFalse(type_prop.is_universal)
-        result = type_prop.to_dict()
-        self.assertEqual(result["description"], "Test description")
-        self.assertEqual(result["json_type"], {"type": "string"})
-        self.assertEqual(result["bson_type"], {"bsonType": "string"})
-        self.assertNotIn("schema", result)
-
-    def test_init_with_universal_schema(self):
-        """Test TypeProperty initialization with universal schema"""
+        """Test TypeProperty initialization with universal primitive schema"""
         property_data = {
             "description": "Test description",
             "schema": {"type": "string", "format": "email"}
         }
         type_prop = TypeProperty("test_prop", property_data)
-        
+        self.assertEqual(type_prop.schema, property_data["schema"])
+        self.assertIsNone(type_prop.json_type)
+        self.assertIsNone(type_prop.bson_type)
         self.assertTrue(type_prop.is_primitive)
         self.assertTrue(type_prop.is_universal)
+        result = type_prop.to_dict()
+        self.assertEqual(result["description"], "Test description")
+        self.assertEqual(result["schema"], {"type": "string", "format": "email"})
+        self.assertNotIn("json_type", result)
+        self.assertNotIn("bson_type", result)
 
     def test_init_with_array_type(self):
         """Test TypeProperty initialization with array type"""
@@ -331,31 +316,6 @@ class TestTypePropertyCanonical(unittest.TestCase):
         self.assertIn("items", result)
 
     def test_primitive_with_schema(self):
-        """Test primitive property with schema initialization and to_dict"""
-        property_data = {
-            "description": "Test description",
-            "schema": {
-                "json_type": {"type": "string"},
-                "bson_type": {"bsonType": "string"}
-            }
-        }
-        type_prop = TypeProperty("test_prop", property_data)
-        
-        # Test initialization
-        self.assertEqual(type_prop.schema, property_data["schema"])
-        self.assertEqual(type_prop.json_type, {"type": "string"})
-        self.assertEqual(type_prop.bson_type, {"bsonType": "string"})
-        self.assertTrue(type_prop.is_primitive)
-        self.assertFalse(type_prop.is_universal)
-        
-        # Test to_dict
-        result = type_prop.to_dict()
-        self.assertEqual(result["description"], "Test description")
-        self.assertEqual(result["json_type"], {"type": "string"})
-        self.assertEqual(result["bson_type"], {"bsonType": "string"})
-        self.assertNotIn("schema", result)
-
-    def test_primitive_with_json_bson_type(self):
         """Test primitive property with json_type/bson_type initialization and to_dict"""
         property_data = {
             "description": "Test description",
@@ -363,12 +323,11 @@ class TestTypePropertyCanonical(unittest.TestCase):
             "bson_type": {"bsonType": "string"}
         }
         type_prop = TypeProperty("test_prop", property_data)
-        # Test initialization
+        self.assertIsNone(type_prop.schema)
         self.assertEqual(type_prop.json_type, {"type": "string"})
         self.assertEqual(type_prop.bson_type, {"bsonType": "string"})
         self.assertTrue(type_prop.is_primitive)
         self.assertFalse(type_prop.is_universal)
-        # Test to_dict
         result = type_prop.to_dict()
         self.assertEqual(result["description"], "Test description")
         self.assertEqual(result["json_type"], {"type": "string"})
@@ -443,27 +402,6 @@ class TestTypeCanonical(unittest.TestCase):
         self.assertIn("items", result)
 
     def test_type_primitive_schema(self):
-        """Test primitive type with schema initialization and to_dict"""
-        type_data = {
-            "description": "Test primitive type description",
-            "schema": {
-                "json_type": {"type": "string"},
-                "bson_type": {"bsonType": "string"}
-            }
-        }
-        type_instance = Type("test_primitive", type_data)
-        
-        # Test initialization
-        self.assertEqual(type_instance.name, "test_primitive")
-        self.assertEqual(type_instance.property.description, "Test primitive type description")
-        self.assertIsNotNone(type_instance.property.schema)
-        
-        # Test to_dict
-        result = type_instance.property.to_dict()
-        self.assertEqual(result["description"], "Test primitive type description")
-        self.assertIn("schema", result)
-
-    def test_type_primitive_json_bson(self):
         """Test primitive type with json_type/bson_type initialization and to_dict"""
         type_data = {
             "description": "Test primitive type description",
@@ -471,16 +409,9 @@ class TestTypeCanonical(unittest.TestCase):
             "bson_type": {"bsonType": "string"}
         }
         type_instance = Type("test_primitive", type_data)
-        
-        # Test initialization
         self.assertEqual(type_instance.name, "test_primitive")
         self.assertEqual(type_instance.property.description, "Test primitive type description")
-        self.assertEqual(type_instance.property.json_type, {"type": "string"})
-        self.assertEqual(type_instance.property.bson_type, {"bsonType": "string"})
-        self.assertTrue(type_instance.property.is_primitive)
-        self.assertFalse(type_instance.property.is_universal)
-        
-        # Test to_dict
+        self.assertIsNone(type_instance.property.schema)
         result = type_instance.property.to_dict()
         self.assertEqual(result["description"], "Test primitive type description")
         self.assertEqual(result["json_type"], {"type": "string"})
