@@ -27,25 +27,26 @@ class Enumerators:
             # Re-read the saved content
             saved_doc = FileIO.get_document(self.config.TEST_DATA_FOLDER, "enumerators.json")
             
-            # Compare and set event data
-            original_keys = set(original_doc.keys())
-            saved_keys = set(saved_doc.keys())
-            
-            added = saved_keys - original_keys
-            removed = original_keys - saved_keys
-            
-            event.data = {
-                "added": {k: saved_doc[k] for k in added},
-                "removed": {k: original_doc[k] for k in removed}
-            }
+            # For enumerators, we're dealing with a list of versioned enumerations
+            # Compare the content directly since it's a list structure
+            if original_doc != saved_doc:
+                event.data = {
+                    "original": original_doc,
+                    "saved": saved_doc,
+                    "changed": True
+                }
+            else:
+                event.data = {
+                    "changed": False
+                }
             
             event.record_success()
         except ConfiguratorException as e:
             event.append_events([e.event])
-            event.record_failure(message="error saving document")
+            event.record_failure("error saving document")
         except Exception as e:
-            event.append_events(ConfiguratorEvent(event_id="ENU-04", event_type="SAVE_ENUMERATORS", data=e))
-            event.record_failure(message="unexpected error saving document")
+            event.append_events([ConfiguratorEvent(event_id="ENU-04", event_type="SAVE_ENUMERATORS", event_data={"error": str(e)})])
+            event.record_failure("unexpected error saving document")
         return [event]
     
     def version(self, version: int):

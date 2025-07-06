@@ -56,10 +56,10 @@ class Configuration:
             event.record_success()
         except ConfiguratorException as e:
             event.append_events([e.event])
-            event.record_failure(message="error saving document")
+            event.record_failure("error saving document")
         except Exception as e:
-            event.append_events(ConfiguratorEvent(event_id="CFG-04", event_type="SAVE_CONFIGURATION", data=e))
-            event.record_failure(message="unexpected error saving document")
+            event.append_events([ConfiguratorEvent(event_id="CFG-04", event_type="SAVE_CONFIGURATION", event_data={"error": str(e)})])
+            event.record_failure("unexpected error saving document")
         return [event]
     
     def delete(self):
@@ -85,14 +85,12 @@ class Configuration:
             mongo_io.disconnect()
             return event
         except ConfiguratorException as e:
-            event.record_failure(e.data)
-            event.append_events(e.event)
-            event.data = e.data
+            event.append_events([e.event])
+            event.record_failure("error processing configuration")
             mongo_io.disconnect()
             return event
         except Exception as e:
-            event.record_failure(e.message)
-            event.data = e
+            event.record_failure("unexpected error processing configuration", {"error": str(e)})
             mongo_io.disconnect()
             return event
     
@@ -197,11 +195,10 @@ class Version:
             return event
         
         except ConfiguratorException as e:
-            event.record_failure(e.data)
-            event.append_events(e.event)
-            event.data = e.data
+            event.append_events([e.event])
+            event.record_failure("error processing version")
             return event
         except Exception as e:
-            event.record_failure(e.message)
-            event.data = e
+            event.append_events([ConfiguratorEvent(event_id="CFG-04", event_type="SAVE_CONFIGURATION", event_data={"error": str(e)})])
+            event.record_failure("unexpected error processing version")
             return event

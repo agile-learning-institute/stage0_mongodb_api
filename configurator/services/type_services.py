@@ -45,10 +45,10 @@ class Type:
             event.record_success()
         except ConfiguratorException as e:
             event.append_events([e.event])
-            event.record_failure(message="error saving document")
+            event.record_failure("error saving document")
         except Exception as e:
-            event.append_events(ConfiguratorEvent(event_id="TYP-04", event_type="SAVE_TYPE", data=e))
-            event.record_failure(message="unexpected error saving document")
+            event.append_events([ConfiguratorEvent(event_id="TYP-04", event_type="SAVE_TYPE", event_data={"error": str(e)})])
+            event.record_failure("unexpected error saving document")
         return [event]
     
     def get_json_schema(self):
@@ -57,6 +57,30 @@ class Type:
     def get_bson_schema(self):
         return self.property.get_bson_schema()
                 
+    def delete(self):
+        event = ConfiguratorEvent(event_id="TYP-05", event_type="DELETE_TYPE")
+        try:
+            FileIO.delete_document(self.config.TYPE_FOLDER, self.file_name)
+            event.record_success()
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error deleting type")
+        except Exception as e:
+            event.record_failure("unexpected error deleting type", {"error": str(e)})
+        return event
+
+    def flip_lock(self):
+        event = ConfiguratorEvent(event_id="TYP-06", event_type="LOCK_UNLOCK_TYPE")
+        try:
+            FileIO.lock_unlock(self.config.TYPE_FOLDER, self.file_name)
+            event.record_success()
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error locking/unlocking type")
+        except Exception as e:
+            event.record_failure("unexpected error locking/unlocking type", {"error": str(e)})
+        return event
+
 class TypeProperty:
     def __init__(self, name: str, property: dict):
         self.name = name

@@ -49,11 +49,35 @@ class Dictionary:
             event.record_success()
         except ConfiguratorException as e:
             event.append_events([e.event])
-            event.record_failure(message="error saving document")
+            event.record_failure("error saving document")
         except Exception as e:
-            event.append_events(ConfiguratorEvent(event_id="DIC-04", event_type="SAVE_DICTIONARY", data=e))
-            event.record_failure(message="unexpected error saving document")
+            event.append_events([ConfiguratorEvent(event_id="DIC-04", event_type="SAVE_DICTIONARY", event_data={"error": str(e)})])
+            event.record_failure("unexpected error saving document")
         return [event]
+
+    def delete(self):
+        event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
+        try:
+            FileIO.delete_document(self.config.DICTIONARIES_FOLDER, self.file_name)
+            event.record_success()
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error deleting dictionary")
+        except Exception as e:
+            event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
+        return event
+
+    def lock_unlock(self):
+        event = ConfiguratorEvent(event_id="DIC-06", event_type="LOCK_UNLOCK_DICTIONARY")
+        try:
+            FileIO.lock_unlock(self.config.DICTIONARIES_FOLDER, self.file_name)
+            event.record_success()
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error locking/unlocking dictionary")
+        except Exception as e:
+            event.record_failure("unexpected error locking/unlocking dictionary", {"error": str(e)})
+        return event
 
 class Property:
     def __init__(self, name: str, property: dict):
