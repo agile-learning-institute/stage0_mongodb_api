@@ -19,7 +19,7 @@ def create_test_data_routes():
             return jsonify(files), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting test data files: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting test data files: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -32,7 +32,7 @@ def create_test_data_routes():
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting test data {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting test data {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -45,7 +45,7 @@ def create_test_data_routes():
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error updating test data {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error updating test data {file_name}: {str(e)}")
             return jsonify({"error": "A processing error occurred"}), 500
@@ -57,7 +57,7 @@ def create_test_data_routes():
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error deleting test data {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error deleting test data {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -69,7 +69,7 @@ def create_test_data_routes():
             return jsonify(file), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error locking/unlocking test data {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error locking/unlocking test data {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500

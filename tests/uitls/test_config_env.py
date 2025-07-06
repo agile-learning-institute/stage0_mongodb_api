@@ -3,6 +3,9 @@ import os
 from configurator.utils.config import Config
 
 class TestConfigEnvironment(unittest.TestCase):
+    """Test Config environment variable loading.
+    NOTE: Config is never mocked in these tests. The real Config singleton is used, and config values are set/reset in setUp/tearDown.
+    """
 
     def setUp(self):
         """Re-initialize the config for each test."""

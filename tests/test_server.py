@@ -1,22 +1,24 @@
 import unittest
-from unittest.mock import patch, MagicMock
-
-# Patch Config before importing the app
-with patch('configurator.utils.config.Config.get_instance') as mock_config_get:
-    mock_config = MagicMock()
-    mock_config.AUTO_PROCESS = False
-    mock_config.EXIT_AFTER_PROCESSING = False
-    mock_config.API_PORT = 8081
-    mock_config.BUILT_AT = "test"
-    mock_config_get.return_value = mock_config
-    from configurator.server import app
+from configurator.server import app
+from configurator.utils.config import Config
 
 class TestServer(unittest.TestCase):
-    """Test suite for server initialization and configuration."""
+    """Test suite for server initialization and configuration.
+    NOTE: Config is never mocked in these tests. The real Config singleton is used, and config values are set/reset in setUp/tearDown.
+    """
 
     def setUp(self):
         """Set up test fixtures."""
         self.app = app.test_client()
+        self.config = Config.get_instance()
+        self._original_api_port = self.config.API_PORT
+        self._original_built_at = self.config.BUILT_AT
+        self.config.API_PORT = 8081
+        self.config.BUILT_AT = "test"
+
+    def tearDown(self):
+        self.config.API_PORT = self._original_api_port
+        self.config.BUILT_AT = self._original_built_at
 
     def test_app_initialization(self):
         """Test Flask app initialization."""

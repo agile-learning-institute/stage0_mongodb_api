@@ -41,3 +41,9 @@ class ConfiguratorException(Exception):
 
     def __str__(self):
         return self.message
+        
+    def to_dict(self):
+        return {
+            "message": self.message,
+            "event": self.event.to_dict() if self.event else None
+        }

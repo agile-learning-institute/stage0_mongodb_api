@@ -19,7 +19,7 @@ def create_configuration_routes():
             return jsonify(configurations)
         except ConfiguratorException as e:
             logger.error(f"Configurator error listing configurations: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error listing configurations: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -36,7 +36,7 @@ def create_configuration_routes():
             return jsonify(results)
         except ConfiguratorException as e:
             logger.error(f"Configurator error processing configurations: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error processing configurations: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -49,7 +49,7 @@ def create_configuration_routes():
             return jsonify(configuration)
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting configuration {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting configuration {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -63,7 +63,7 @@ def create_configuration_routes():
             return jsonify(saved)
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting configuration {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting configuration {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -77,7 +77,7 @@ def create_configuration_routes():
             return jsonify(deleted) 
         except ConfiguratorException as e:
             logger.error(f"Configurator error deleting configuration {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error deleting configuration {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -91,7 +91,7 @@ def create_configuration_routes():
             return jsonify(result)
         except ConfiguratorException as e:
             logger.error(f"Configurator error locking/unlocking configuration {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error locking/unlocking configuration {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -105,7 +105,7 @@ def create_configuration_routes():
             return jsonify(result)
         except ConfiguratorException as e:
             logger.error(f"Configurator error processing configuration {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error processing configuration {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -119,7 +119,7 @@ def create_configuration_routes():
             return jsonify(schema)
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting JSON schema {file_name}, {version}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting JSON schema {file_name}, {version}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -133,7 +133,7 @@ def create_configuration_routes():
             return jsonify(schema)
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting BSON schema {file_name}, {version}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting BSON schema {file_name}, {version}: {str(e)}")
             return jsonify("Undefined Exception"), 500

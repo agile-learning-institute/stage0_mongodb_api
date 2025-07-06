@@ -20,7 +20,7 @@ def create_type_routes():
             return jsonify(files), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error listing configurations: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error listing configurations: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -33,7 +33,7 @@ def create_type_routes():
             return jsonify(type), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting type {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting type {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -47,7 +47,7 @@ def create_type_routes():
             return jsonify(saved), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error updating type {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error updating type {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -60,7 +60,7 @@ def create_type_routes():
             return jsonify(deleted), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error deleting type {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error deleting type {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500
@@ -73,7 +73,7 @@ def create_type_routes():
             return jsonify(result), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error locking/unlocking type {file_name}: {str(e)}")
-            return jsonify(e.events), 500
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error locking/unlocking type {file_name}: {str(e)}")
             return jsonify("Undefined Exception"), 500

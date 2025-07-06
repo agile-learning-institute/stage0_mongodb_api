@@ -7,7 +7,9 @@ from configurator.utils.config import Config
 
 
 class TestVersionManager(unittest.TestCase):
-    """Test cases for VersionManager class"""
+    """Test cases for VersionManager class
+    NOTE: Config is never mocked in these tests. The real Config singleton is used, and config values are set/reset in setUp/tearDown.
+    """
 
     def setUp(self):
         """Set up test fixtures"""
@@ -85,9 +87,9 @@ class TestVersionManager(unittest.TestCase):
 
     def test_update_version_new_version(self):
         """Test update_version for a new version"""
-        # Mock upsert_document to return a document
+        # Mock upsert to return a document
         mock_version_doc = {"collection_name": self.collection_name, "current_version": "1.2.3.4"}
-        self.mock_mongo_io.upsert_document.return_value = mock_version_doc
+        self.mock_mongo_io.upsert.return_value = mock_version_doc
         
         # Mock get_current_version to return the updated version
         expected_result = f"{self.collection_name}.1.2.3.yaml"
@@ -98,8 +100,8 @@ class TestVersionManager(unittest.TestCase):
         # Verify the result
         self.assertEqual(result, expected_result)
         
-        # Verify upsert_document was called correctly
-        self.mock_mongo_io.upsert_document.assert_called_once_with(
+        # Verify upsert was called correctly
+        self.mock_mongo_io.upsert.assert_called_once_with(
             self.version_collection_name,
             match={"collection_name": self.collection_name},
             data={"collection_name": self.collection_name, "current_version": "1.2.3.4"}
@@ -107,9 +109,9 @@ class TestVersionManager(unittest.TestCase):
 
     def test_update_version_existing_version(self):
         """Test update_version for an existing version"""
-        # Mock upsert_document to return a document
+        # Mock upsert to return a document
         mock_version_doc = {"collection_name": self.collection_name, "current_version": "2.0.0.1"}
-        self.mock_mongo_io.upsert_document.return_value = mock_version_doc
+        self.mock_mongo_io.upsert.return_value = mock_version_doc
         
         # Mock get_current_version to return the updated version
         expected_result = f"{self.collection_name}.2.0.0.yaml"
@@ -120,8 +122,8 @@ class TestVersionManager(unittest.TestCase):
         # Verify the result
         self.assertEqual(result, expected_result)
         
-        # Verify upsert_document was called correctly
-        self.mock_mongo_io.upsert_document.assert_called_once_with(
+        # Verify upsert was called correctly
+        self.mock_mongo_io.upsert.assert_called_once_with(
             self.version_collection_name,
             match={"collection_name": self.collection_name},
             data={"collection_name": self.collection_name, "current_version": "2.0.0.1"}
@@ -129,8 +131,8 @@ class TestVersionManager(unittest.TestCase):
 
     def test_update_version_invalid_version_format(self):
         """Test update_version with invalid version format"""
-        # Mock upsert_document to raise an exception due to invalid version
-        self.mock_mongo_io.upsert_document.side_effect = Exception("Invalid version format")
+        # Mock upsert to raise an exception due to invalid version
+        self.mock_mongo_io.upsert.side_effect = Exception("Invalid version format")
         
         # Verify exception is raised when trying to create VersionNumber with invalid format
         with self.assertRaises(ConfiguratorException):
@@ -165,7 +167,7 @@ class TestVersionManager(unittest.TestCase):
         self.assertEqual(current_version, f"{self.collection_name}.0.0.0.0")
         
         # Step 2: Update to a new version
-        self.mock_mongo_io.upsert_document.return_value = {"collection_name": self.collection_name, "current_version": "1.0.0.1"}
+        self.mock_mongo_io.upsert.return_value = {"collection_name": self.collection_name, "current_version": "1.0.0.1"}
         self.mock_mongo_io.get_documents.return_value = [{"current_version": "1.0.0.1"}]
         
         updated_version = VersionManager.update_version(self.mock_mongo_io, self.collection_name, "1.0.0.1")
@@ -191,14 +193,14 @@ class TestVersionManager(unittest.TestCase):
         # Reset mock for next test
         self.mock_mongo_io.reset_mock()
         
-        # Test upsert_document call
-        self.mock_mongo_io.upsert_document.return_value = {"collection_name": self.collection_name, "current_version": "1.0.0.1"}
+        # Test upsert call
+        self.mock_mongo_io.upsert.return_value = {"collection_name": self.collection_name, "current_version": "1.0.0.1"}
         self.mock_mongo_io.get_documents.return_value = [{"current_version": "1.0.0.1"}]
         
         VersionManager.update_version(self.mock_mongo_io, self.collection_name, "1.0.0.1")
         
-        # Verify upsert_document was called with correct parameters
-        self.mock_mongo_io.upsert_document.assert_called_once_with(
+        # Verify upsert was called with correct parameters
+        self.mock_mongo_io.upsert.assert_called_once_with(
             self.version_collection_name,
             match={"collection_name": self.collection_name},
             data={"collection_name": self.collection_name, "current_version": "1.0.0.1"}
