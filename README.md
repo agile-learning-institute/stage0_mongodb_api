@@ -166,53 +166,35 @@ If you need a new set of test data to validate features you are adding, feel fre
 ### Rendering Tests
  Rendering tests for both the small_sample and large_sample test cases is done using the expected output found in the `tests/test_cases/{case}/expected/json_schema` and `expected/bson_schema` folders. If your new test case needs to include rendering tests, you can add the expected output there and extend the rendering unit tests.
 
-## CURL Examples
+## API Documentation
+
+The complete API documentation with interactive testing is available at:
+- **Swagger UI**: http://localhost:8081/docs/ (when server is running)
+- **OpenAPI Spec**: http://localhost:8081/docs/openapi.yaml
+
+The Swagger UI provides:
+- Interactive endpoint testing
+- Auto-generated curl commands for each endpoint
+- Request/response schemas
+- Parameter documentation
+
+### Quick API Examples
 
 ```bash
-# Configuration Management
-curl -X GET http://localhost:8081/api/configurations/                    # List all configurations
-curl -X GET http://localhost:8081/api/configurations/{file_name}/        # Get specific configuration
-curl -X PUT http://localhost:8081/api/configurations/{file_name}/        # Save configuration
-curl -X POST http://localhost:8081/api/configurations/                   # Process all configurations
-curl -X POST http://localhost:8081/api/configurations/{file_name}/       # Process specific configuration
-curl -X PATCH http://localhost:8081/api/configurations/                  # Clean all configurations
-curl -X DELETE http://localhost:8081/api/configurations/{file_name}/     # Delete configuration
-curl -X PATCH http://localhost:8081/api/configurations/{file_name}/      # Lock/Unlock configuration
+# Health check
+curl -X GET http://localhost:8081/api/health
 
-# Dictionary Management
-curl -X GET http://localhost:8081/api/dictionaries/                      # List all dictionaries
-curl -X GET http://localhost:8081/api/dictionaries/{file_name}/          # Get specific dictionary
-curl -X PUT http://localhost:8081/api/dictionaries/{file_name}/          # Save dictionary
-curl -X PATCH http://localhost:8081/api/dictionaries/                    # Clean all dictionaries
-curl -X DELETE http://localhost:8081/api/dictionaries/{file_name}/       # Delete dictionary
-curl -X PATCH http://localhost:8081/api/dictionaries/{file_name}/        # Lock/Unlock dictionary
+# Get current configuration
+curl -X GET http://localhost:8081/api/config/
 
-# Type Management
-curl -X GET http://localhost:8081/api/types/                             # List all types
-curl -X GET http://localhost:8081/api/types/{file_name}/                 # Get specific type
-curl -X PUT http://localhost:8081/api/types/{file_name}/                 # Save type
-curl -X PATCH http://localhost:8081/api/types/                           # Clean all types
-curl -X DELETE http://localhost:8081/api/types/{file_name}/              # Delete type
-curl -X PATCH http://localhost:8081/api/types/{file_name}/               # Lock/Unlock type
+# List all configurations
+curl -X GET http://localhost:8081/api/configurations/
 
-# Enumerator Management
-curl -X GET http://localhost:8081/api/enumerators/                       # Get all enumerators
-curl -X PUT http://localhost:8081/api/enumerators/                       # Save enumerators
-curl -X PATCH http://localhost:8081/api/enumerators/                     # Clean enumerators
+# Process all configurations
+curl -X POST http://localhost:8081/api/configurations/
 
-# Test Data Management
-curl -X GET http://localhost:8081/api/test_data/                         # List all test data files
-curl -X GET http://localhost:8081/api/test_data/{file_name}/             # Get specific test data file
-curl -X PUT http://localhost:8081/api/test_data/{file_name}/             # Save test data file
-curl -X DELETE http://localhost:8081/api/test_data/{file_name}/          # Delete test data file
-curl -X PATCH http://localhost:8081/api/test_data/{file_name}/           # Lock/Unlock test data file
-
-# Schema Rendering
-curl -X GET http://localhost:8081/api/configurations/json_schema/{file_name}/{version_number}/  # Get JSON schema
-curl -X GET http://localhost:8081/api/configurations/bson_schema/{file_name}/{version_number}/  # Get BSON schema
-
-# System Management
-curl -X GET http://localhost:8081/api/config/                            # Get current configuration
-curl -X GET http://localhost:8081/api/health                             # Health check
-curl -X DELETE http://localhost:8081/api/database/                       # Drop database
+# Clean all types
+curl -X PATCH http://localhost:8081/api/types/
 ```
+
+For complete API documentation and interactive testing, serve the Swagger UI at from /docs/index.html
