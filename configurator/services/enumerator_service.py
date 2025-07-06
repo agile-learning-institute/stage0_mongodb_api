@@ -68,7 +68,7 @@ class Enumerations:
         
     def get_enum_values(self, enum_name: str):
         try:
-            return self.enumerators[enum_name].keys()
+            return list(self.enumerators[enum_name].keys())
         except Exception as e:
             event = ConfiguratorEvent(event_id="ENU-02", event_type="INVALID_ENUMERATOR_NAME", event_data=e)
             raise ConfiguratorException("Invalid enumerator name", event)

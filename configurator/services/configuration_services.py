@@ -13,13 +13,13 @@ class Configuration:
         self.config = Config.get_instance()
         self.file_name = file_name
         if not document:
-            document = FileIO.get_document(self.config.CONFIGURATIONS_FOLDER, file_name)
+            document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
         self.name = document["name"]
-        self.title = document["title"]
+        self.title = document.get("title", "")
         self.description = document["description"]
         self.versions = []
         for version in document["versions"]:
-            self.versions.append(Version(self.name, version))
+            self.versions.append(Version(self.name, version, self.config))
 
     def to_dict(self):
         return {
@@ -33,13 +33,13 @@ class Configuration:
         event = ConfiguratorEvent(event_id="CFG-03", event_type="SAVE_CONFIGURATION")
         try:
             # Get original content before saving
-            original_doc = FileIO.get_document(self.config.CONFIGURATIONS_FOLDER, self.file_name)
+            original_doc = FileIO.get_document(self.config.CONFIGURATION_FOLDER, self.file_name)
             
             # Save the cleaned content
-            FileIO.save_document(self.config.CONFIGURATIONS_FOLDER, self.file_name, self.to_dict())
+            FileIO.save_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
             
             # Re-read the saved content
-            saved_doc = FileIO.get_document(self.config.CONFIGURATIONS_FOLDER, self.file_name)
+            saved_doc = FileIO.get_document(self.config.CONFIGURATION_FOLDER, self.file_name)
             
             # Compare and set event data
             original_keys = set(original_doc.keys())
@@ -63,10 +63,10 @@ class Configuration:
         return [event]
     
     def delete(self):
-        FileIO.delete_document(self.config.CONFIGURATIONS_FOLDER, self.file_name)
+        FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)
         
     def lock_unlock(self):
-        FileIO.lock_unlock(self.config.CONFIGURATIONS_FOLDER, self.file_name)
+        FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, self.file_name)
         
     def process(self) -> ConfiguratorEvent:
         try:
@@ -111,14 +111,15 @@ class Configuration:
         return version_obj.get_bson_schema()
 
 class Version:
-    def __init__(self, collection_name: str, version: dict):
+    def __init__(self, collection_name: str, version: dict, config):
+        self.config = config
         self.collection_name = collection_name
         self.collection_version = VersionNumber(f"{collection_name}.{version["version"]}")
         self.version_str = self.collection_version.get_version_str()
-        self.drop_indexes = version["drop_indexes"]
-        self.add_indexes = version["add_indexes"]
-        self.migrations = version["migrations"]
-        self.test_data = version["test_data"]
+        self.drop_indexes = version.get("drop_indexes", [])
+        self.add_indexes = version.get("add_indexes", [])
+        self.migrations = version.get("migrations", [])
+        self.test_data = version.get("test_data", None)
         
     def __eq__(self, other):
         if not isinstance(other, Version):
@@ -141,13 +142,19 @@ class Version:
         }
     
     def get_json_schema(self):
-        enumerators = Enumerators().enumerations.version(self.enumerator())
-        dictionary = Dictionary(self.config.DICTIONARIES_FOLDER, self.collection_version.get_schema_filename())
+        enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
+        # Load dictionary data first
+        dictionary_filename = self.collection_version.get_schema_filename()
+        dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
+        dictionary = Dictionary(dictionary_filename, dictionary_data)
         return dictionary.get_json_schema(enumerators)
     
     def get_bson_schema(self): 
-        enumerators = Enumerators().enumerations.version(self.enumerator())
-        dictionary = Dictionary(self.config.DICTIONARIES_FOLDER, self.collection_version.get_schema_filename())
+        enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
+        # Load dictionary data first
+        dictionary_filename = self.collection_version.get_schema_filename()
+        dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
+        dictionary = Dictionary(dictionary_filename, dictionary_data)
         return dictionary.get_bson_schema(enumerators)
     
     def process(self, mongo_io: MongoIO):

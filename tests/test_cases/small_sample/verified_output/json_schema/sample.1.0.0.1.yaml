@@ -8,12 +8,14 @@ properties:
   name:
     description: The name of the document
     type: string
-    pattern: "^[a-zA-Z0-9_-]{4,40}$"
+    pattern: "^\\S{1,40}$"
   status:
     description: The current status of the document
     type: string
-    enum: ["active", "archived"]
-additionalProperties: false
+    enum:
+      - active
+      - archived
 required:
   - _id
-  - status  
+  - status
+additionalProperties: false 

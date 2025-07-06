@@ -37,7 +37,7 @@ if config.AUTO_PROCESS:
     try:
         logger.info(f"============= Auto Processing is Starting ===============")
         processing_events = []
-        configurations = FileIO.get_documents(config.CONFIGURATIONS_FOLDER)
+        configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
         for configuration_name in configurations:
             configuration = Configuration(configuration_name)
             processing_events.append(configuration.process())
