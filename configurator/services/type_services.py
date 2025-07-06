@@ -4,6 +4,7 @@ from configurator.utils.config import Config
 
 class Type:
     def __init__(self, file_name: str, document: dict = {}):
+        self.config = Config()
         self.file_name = file_name
         self.name = file_name.split(".")[0]
         self.type_property = {}
@@ -11,12 +12,7 @@ class Type:
         if document:
             self.property = TypeProperty(self.name, document)
         else:
-            try:
-                self.config = Config()
-                self.property = TypeProperty(self.name, FileIO.get_document(self.config.TYPES_FOLDER, file_name))
-            except Exception:
-                # Handle singleton case for testing
-                self.property = TypeProperty(self.name, {"description": "Missing Required Description"})
+            self.property = TypeProperty(self.name, FileIO.get_document(self.config.TYPES_FOLDER, file_name))
 
     def to_dict(self):
         return self.property.to_dict()

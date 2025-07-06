@@ -592,7 +592,9 @@ class TestTypePropertyCanonical(unittest.TestCase):
 
 
 class TestTypeCanonical(unittest.TestCase):
-    def test_type_object(self):
+    @patch('configurator.services.type_services.Config')
+    def test_type_object(self, mock_config):
+        mock_config.return_value = MagicMock(TYPES_FOLDER="/test/types")
         document = {
             "description": "Object type",
             "type": "object",
@@ -611,7 +613,9 @@ class TestTypeCanonical(unittest.TestCase):
         bs = t.get_bson_schema()
         self.assertEqual(bs["bsonType"], "object")
 
-    def test_type_array(self):
+    @patch('configurator.services.type_services.Config')
+    def test_type_array(self, mock_config):
+        mock_config.return_value = MagicMock(TYPES_FOLDER="/test/types")
         document = {
             "description": "Array type",
             "type": "array",
@@ -626,7 +630,9 @@ class TestTypeCanonical(unittest.TestCase):
         bs = t.get_bson_schema()
         self.assertEqual(bs["bsonType"], "array")
 
-    def test_type_primitive_schema(self):
+    @patch('configurator.services.type_services.Config')
+    def test_type_primitive_schema(self, mock_config):
+        mock_config.return_value = MagicMock(TYPES_FOLDER="/test/types")
         document = {
             "description": "Primitive with schema",
             "schema": {"type": "string", "format": "email"}
@@ -641,7 +647,9 @@ class TestTypeCanonical(unittest.TestCase):
         self.assertEqual(bs["bsonType"], "string")
         self.assertEqual(bs["format"], "email")
 
-    def test_type_primitive_json_bson(self):
+    @patch('configurator.services.type_services.Config')
+    def test_type_primitive_json_bson(self, mock_config):
+        mock_config.return_value = MagicMock(TYPES_FOLDER="/test/types")
         document = {
             "description": "Primitive with json_type and bson_type",
             "schema": {

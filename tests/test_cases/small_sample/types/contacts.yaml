@@ -1,0 +1,6 @@
+title: Contacts
+description: An array of contact objects
+type: array
+items:
+  description: A contact object
+  type: contact 
