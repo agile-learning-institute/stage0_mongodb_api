@@ -167,33 +167,52 @@ If you need a new set of test data to validate features you are adding, feel fre
  Rendering tests for both the small_sample and large_sample test cases is done using the expected output found in the `tests/test_cases/{case}/expected/json_schema` and `expected/bson_schema` folders. If your new test case needs to include rendering tests, you can add the expected output there and extend the rendering unit tests.
 
 ## CURL Examples
-TODO: Update as built.
+
 ```bash
-# Get Configuration
-curl -X GET http://localhost:8081/api/config/
+# Configuration Management
+curl -X GET http://localhost:8081/api/configurations/                    # List all configurations
+curl -X GET http://localhost:8081/api/configurations/{file_name}/        # Get specific configuration
+curl -X PUT http://localhost:8081/api/configurations/{file_name}/        # Save configuration
+curl -X POST http://localhost:8081/api/configurations/                   # Process all configurations
+curl -X POST http://localhost:8081/api/configurations/{file_name}/       # Process specific configuration
+curl -X PATCH http://localhost:8081/api/configurations/                  # Clean all configurations
+curl -X DELETE http://localhost:8081/api/configurations/{file_name}/     # Delete configuration
+curl -X PATCH http://localhost:8081/api/configurations/{file_name}/      # Lock/Unlock configuration
 
-# Health Check
-curl -X GET http://localhost:8081/api/health
+# Dictionary Management
+curl -X GET http://localhost:8081/api/dictionaries/                      # List all dictionaries
+curl -X GET http://localhost:8081/api/dictionaries/{file_name}/          # Get specific dictionary
+curl -X PUT http://localhost:8081/api/dictionaries/{file_name}/          # Save dictionary
+curl -X PATCH http://localhost:8081/api/dictionaries/                    # Clean all dictionaries
+curl -X DELETE http://localhost:8081/api/dictionaries/{file_name}/       # Delete dictionary
+curl -X PATCH http://localhost:8081/api/dictionaries/{file_name}/        # Lock/Unlock dictionary
 
-# List Collection Configs
-curl -X GET http://localhost:8081/api/collections/
+# Type Management
+curl -X GET http://localhost:8081/api/types/                             # List all types
+curl -X GET http://localhost:8081/api/types/{file_name}/                 # Get specific type
+curl -X PUT http://localhost:8081/api/types/{file_name}/                 # Save type
+curl -X PATCH http://localhost:8081/api/types/                           # Clean all types
+curl -X DELETE http://localhost:8081/api/types/{file_name}/              # Delete type
+curl -X PATCH http://localhost:8081/api/types/{file_name}/               # Lock/Unlock type
 
-# Get a Collection Config
-curl -X GET http://localhost:8081/api/collections/{collection_name}
+# Enumerator Management
+curl -X GET http://localhost:8081/api/enumerators/                       # Get all enumerators
+curl -X PUT http://localhost:8081/api/enumerators/                       # Save enumerators
+curl -X PATCH http://localhost:8081/api/enumerators/                     # Clean enumerators
 
-# Process All Collections
-curl -X POST http://localhost:8081/api/collections/
+# Test Data Management
+curl -X GET http://localhost:8081/api/test_data/                         # List all test data files
+curl -X GET http://localhost:8081/api/test_data/{file_name}/             # Get specific test data file
+curl -X PUT http://localhost:8081/api/test_data/{file_name}/             # Save test data file
+curl -X DELETE http://localhost:8081/api/test_data/{file_name}/          # Delete test data file
+curl -X PATCH http://localhost:8081/api/test_data/{file_name}/           # Lock/Unlock test data file
 
-# Process Specific Collection
-curl -X POST http://localhost:8081/api/collections/{collection_name}
+# Schema Rendering
+curl -X GET http://localhost:8081/api/configurations/json_schema/{file_name}/{version_number}/  # Get JSON schema
+curl -X GET http://localhost:8081/api/configurations/bson_schema/{file_name}/{version_number}/  # Get BSON schema
 
-# Render BSON Schema
-curl -X GET http://localhost:8081/api/render/bson_schema/{version_name}
-
-# Render JSON Schema
-curl -X GET http://localhost:8081/api/render/json_schema/{version_name}
-
-# Render OpenAPI Specification
-curl -X GET http://localhost:8081/api/render/openapi/{version_name}
-
+# System Management
+curl -X GET http://localhost:8081/api/config/                            # Get current configuration
+curl -X GET http://localhost:8081/api/health                             # Health check
+curl -X DELETE http://localhost:8081/api/database/                       # Drop database
 ```

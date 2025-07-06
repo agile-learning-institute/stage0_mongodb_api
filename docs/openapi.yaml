@@ -42,6 +42,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+    patch:
+      summary: Clean all Collection Configurations
+      operationId: clean_configurations
+      responses:
+        '200':
+          description: All configurations cleaned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
   /api/configurations/{file_name}/:
     get:
       summary: Get a collection configuration
@@ -235,6 +251,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+    patch:
+      summary: Clean all Dictionaries
+      operationId: clean_dictionaries
+      responses:
+        '200':
+          description: All dictionaries cleaned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
   /api/dictionaries/{file_name}/:
     get:
       summary: Get a dictionary 
@@ -328,6 +360,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/files'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    patch:
+      summary: Clean all Types
+      operationId: clean_types
+      responses:
+        '200':
+          description: All types cleaned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
         '500':
           description: Processing error
           content:
@@ -559,6 +607,62 @@ paths:
         '500':
           description: Processing error
 
+  /api/enumerators/:
+    get:
+      summary: Get all Enumerators
+      operationId: get_enumerators
+      responses:
+        '200':
+          description: Enumerators data
+          content:
+            application/json:
+              schema:
+                type: array
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    put:
+      summary: Save Enumerators
+      operationId: save_enumerators
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+      responses:
+        '200':
+          description: Enumerators saved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    patch:
+      summary: Clean Enumerators
+      operationId: clean_enumerators
+      responses:
+        '200':
+          description: Enumerators cleaned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+
 components:
   schemas:
     files:
@@ -671,12 +775,49 @@ components:
         - name
         - type
     type:
-      description: A Simple Schema Type
+      description: A Type definition - must be one of three valid forms
       type: object
       properties:
-        oneOf:
-        $ref: '#/components/schemas/dictionary'
-        $ref: '#/components/schemas/primitive_type'
+        description:
+          description: A description of the type
+          type: string
+        # Universal Primitive - schema only
+        schema:
+          description: Universal primitive schema (mutually exclusive with json_type/bson_type)
+          type: object
+          additionalProperties: true
+        # Typed Primitive - json_type/bson_type only  
+        json_type:
+          description: JSON schema definition (mutually exclusive with schema)
+          type: object
+          additionalProperties: true
+        bson_type:
+          description: BSON schema definition (mutually exclusive with schema)
+          type: object
+          additionalProperties: true
+        # Complex Type - object or array
+        type:
+          description: Type of complex type (object or array)
+          type: string
+          enum: [object, array]
+        properties:
+          description: Properties for object types
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/type'
+        items:
+          description: Items definition for array types
+          $ref: '#/components/schemas/type'
+        required:
+          description: Whether the type is required
+          type: boolean
+          default: false
+        additionalProperties:
+          description: Whether additional properties are allowed (for object types)
+          type: boolean
+          default: false
+      required:
+        - description
     primitive_type:
       description: A Simple Schema Primitive Type
       type: object

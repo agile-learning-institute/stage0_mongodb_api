@@ -36,7 +36,8 @@ class TestMongoIO(unittest.TestCase):
         try:
             self.mongo_io.drop_database()
         except Exception as e:
-            print("Database might not exist")
+            # Database might not exist, which is fine for testing
+            pass
 
         # Insert test documents
         docs = [
