@@ -2,16 +2,18 @@ from configurator.services.type_services import Type
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.enumerator_service import Enumerators
 from configurator.utils.file_io import FileIO
+from configurator.utils.config import Config
 import os
 
 
 class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
+        self.config = Config.get_instance()
         self.file_name = file_name
         if document:
-            self.property = Property(document)
+            self.property = Property("root", document)
         else:
-            self.property = Property(FileIO.get_document(self.config.DICTIONARIES_FOLDER, file_name))
+            self.property = Property("root", FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name))
 
     def to_dict(self):
         return self.property.to_dict()
@@ -26,13 +28,13 @@ class Dictionary:
         event = ConfiguratorEvent(event_id="DIC-03", event_type="SAVE_DICTIONARY")
         try:
             # Get original content before saving
-            original_doc = FileIO.get_document(self.config.DICTIONARIES_FOLDER, self.file_name)
+            original_doc = FileIO.get_document(self.config.DICTIONARY_FOLDER, self.file_name)
             
             # Save the cleaned content
-            FileIO.save_document(self.config.DICTIONARIES_FOLDER, self.file_name, self.property.to_dict())
+            FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.property.to_dict())
             
             # Re-read the saved content
-            saved_doc = FileIO.get_document(self.config.DICTIONARIES_FOLDER, self.file_name)
+            saved_doc = FileIO.get_document(self.config.DICTIONARY_FOLDER, self.file_name)
             
             # Compare and set event data
             original_keys = set(original_doc.keys())
@@ -58,7 +60,7 @@ class Dictionary:
     def delete(self):
         event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
         try:
-            FileIO.delete_document(self.config.DICTIONARIES_FOLDER, self.file_name)
+            FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name)
             event.record_success()
         except ConfiguratorException as e:
             event.append_events([e.event])
@@ -70,7 +72,7 @@ class Dictionary:
     def lock_unlock(self):
         event = ConfiguratorEvent(event_id="DIC-06", event_type="LOCK_UNLOCK_DICTIONARY")
         try:
-            FileIO.lock_unlock(self.config.DICTIONARIES_FOLDER, self.file_name)
+            FileIO.lock_unlock(self.config.DICTIONARY_FOLDER, self.file_name)
             event.record_success()
         except ConfiguratorException as e:
             event.append_events([e.event])
@@ -82,105 +84,141 @@ class Dictionary:
 class Property:
     def __init__(self, name: str, property: dict):
         self.name = name
-        self.ref = property["$ref", None]
-        self.description = property["description", "Missing Required Description"]
-        self.type = property["type", "Missing Required Type"]
-        self.enums = property["enums", ""]
-        self.required = property["required", False]
-        self.additional_properties = property["additionalProperties", False]
+        self.ref = property.get("$ref", None)
+        self.description = property.get("description", "Missing Required Description")
+        self.type = property.get("type", None)
+        self.enums = property.get("enums", None)
+        self.required = property.get("required", False)
+        self.additional_properties = property.get("additionalProperties", False)
         self.properties = {}
-        for name, property in property["properties", {}].items():
-            self.properties[name] = Property(name, property)
-        self.items = Property(property["items"])
+        self.items = None
+        
+        # Initialize properties if this is an object type
+        if self.type == "object":
+            for prop_name, prop_data in property.get("properties", {}).items():
+                self.properties[prop_name] = Property(prop_name, prop_data)
+        
+        # Initialize items if this is an array type
+        if self.type == "array":
+            items_data = property.get("items", {})
+            if items_data:
+                self.items = Property("items", items_data)
                     
     def to_dict(self):
         if self.ref:
             return {"$ref": self.ref}
         
-        dict = {
+        result = {
             "description": self.description,
-            "type": self.type,
         }
         
+        if self.type:
+            result["type"] = self.type
+        
         if self.type == "object":
-            dict["properties"] = {}
-            for property in self.properties:
-                dict["properties"][property] = self.properties[property].to_dict()
+            result["properties"] = {}
+            for prop_name, prop in self.properties.items():
+                result["properties"][prop_name] = prop.to_dict()
+            if self.additional_properties:
+                result["additionalProperties"] = self.additional_properties
         
-        if self.type == "array":
-            dict["items"] = self.items.to_dict()
+        if self.type == "array" and self.items:
+            result["items"] = self.items.to_dict()
         
-        if self.type == "enum" or self.type == "enum_array":
-            dict["enums"] = self.enums
+        if self.type in ["enum", "enum_array"] and self.enums:
+            result["enums"] = self.enums
 
         if self.required: 
-            dict["required"] = self.required
+            result["required"] = self.required
             
-        if self.additional_properties: 
-            dict["additionalProperties"] = self.additional_properties
-            
-        return dict    
+        return result    
     
     def get_json_schema(self, enumerators: Enumerators):
-        schema = {}
         if self.ref:
             dictionary = Dictionary(self.ref)
             return dictionary.get_json_schema(enumerators)
 
-        schema["description"] = self.description            
+        schema = {"description": self.description}
+        
         if self.type == "object":
             schema["type"] = "object"
-            for property in self.properties:
-                schema["properties"][property] = self.properties[property].get_json_schema(enumerators)
-            schema["required"] = self._get_required()
-            schema["additionalProperties"] = self.additional_properties
+            schema["properties"] = {}
+            for prop_name, prop in self.properties.items():
+                schema["properties"][prop_name] = prop.get_json_schema(enumerators)
+            required_props = self._get_required()
+            if required_props:
+                schema["required"] = required_props
+            if self.additional_properties:
+                schema["additionalProperties"] = self.additional_properties
         elif self.type == "array":
             schema["type"] = "array"
-            schema["items"] = self.items.get_json_schema(enumerators)
+            if self.items:
+                schema["items"] = self.items.get_json_schema(enumerators)
         elif self.type == "enum":
             schema["type"] = "string"
-            schema["enums"] = enumerators.get_enum_values(self.enums)
+            if self.enums:
+                schema["enum"] = enumerators.get_enum_values(self.enums)
         elif self.type == "enum_array":
             schema["type"] = "array"
-            schema["items"] = {"type": "string", "enums": enumerators.get_enum_values(self.enums)}
+            if self.enums:
+                schema["items"] = {"type": "string", "enum": enumerators.get_enum_values(self.enums)}
+        elif self.type:
+            # Reference a custom type
+            custom_type = Type(f"{self.type}.yaml")
+            custom_schema = custom_type.get_json_schema()
+            custom_schema["description"] = self.description
+            return custom_schema
         else:
-            type = Type(f"{self.type}.yaml")
-            schema = type.get_json_schema()
+            raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 
+                                      ConfiguratorEvent(event_id="DIC-99", event_type="INVALID_PROPERTY_TYPE"))
             
         return schema
     
     def get_bson_schema(self, enumerators: Enumerators):
-        schema = {}
         if self.ref:
             dictionary = Dictionary(self.ref)
             return dictionary.get_bson_schema(enumerators)
 
-        schema["description"] = self.description
+        schema = {"description": self.description}
+        
         if self.type == "object":
             schema["bsonType"] = "object"
-            for property in self.properties:
-                schema["properties"][property] = self.properties[property].get_json_schema(enumerators)
-            schema["required"] = self._get_required()
-            schema["additionalProperties"] = self.additional_properties
+            schema["properties"] = {}
+            for prop_name, prop in self.properties.items():
+                schema["properties"][prop_name] = prop.get_bson_schema(enumerators)
+            required_props = self._get_required()
+            if required_props:
+                schema["required"] = required_props
+            if self.additional_properties:
+                schema["additionalProperties"] = self.additional_properties
         elif self.type == "array":
             schema["bsonType"] = "array"
-            schema["items"] = self.items.get_json_schema(enumerators)
+            if self.items:
+                schema["items"] = self.items.get_bson_schema(enumerators)
         elif self.type == "enum":
             schema["bsonType"] = "string"
-            schema["enums"] = enumerators.get_enum_values(self.enums)
+            if self.enums:
+                schema["enum"] = enumerators.get_enum_values(self.enums)
         elif self.type == "enum_array":
             schema["bsonType"] = "array"
-            schema["items"] = {"type": "string", "enums": enumerators.get_enum_values(self.enums)}
+            if self.enums:
+                schema["items"] = {"bsonType": "string", "enum": enumerators.get_enum_values(self.enums)}
+        elif self.type:
+            # Reference a custom type
+            custom_type = Type(f"{self.type}.yaml")
+            custom_schema = custom_type.get_bson_schema()
+            custom_schema["description"] = self.description
+            return custom_schema
         else:
-            type = Type(f"{self.type}.yaml")
-            schema = type.get_bson_schema()
+            raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 
+                                      ConfiguratorEvent(event_id="DIC-99", event_type="INVALID_PROPERTY_TYPE"))
             
         return schema
     
     
     def _get_required(self):
         required = []
-        for property in self.properties:
-            if self.properties[property].required:
-                required.append(property)
+        for prop_name, prop in self.properties.items():
+            if prop.required:
+                required.append(prop_name)
         return required
