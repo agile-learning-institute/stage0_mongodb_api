@@ -216,7 +216,6 @@ class TestType(unittest.TestCase):
         mock_config.TYPE_FOLDER = "/test/types"
         
         mock_file_io.get_document.return_value = {
-            "title": "Test Type",
             "description": "Test type description",
             "type": "object",
             "properties": {
@@ -237,7 +236,6 @@ class TestType(unittest.TestCase):
         mock_config_class.get_instance.return_value = mock_config
         
         document = {
-            "title": "Test Type",
             "description": "Test type description",
             "type": "object",
             "properties": {
@@ -258,7 +256,6 @@ class TestType(unittest.TestCase):
         mock_config_class.get_instance.return_value = mock_config
         
         document = {
-            "title": "Test Type",
             "description": "Test type description",
             "type": "object",
             "properties": {
@@ -391,7 +388,6 @@ class TestTypeCanonical(unittest.TestCase):
     def test_type_object(self):
         """Test object type initialization and to_dict"""
         type_data = {
-            "title": "Test Object Type",
             "description": "Test object type description",
             "type": "object",
             "properties": {
@@ -425,7 +421,6 @@ class TestTypeCanonical(unittest.TestCase):
     def test_type_array(self):
         """Test array type initialization and to_dict"""
         type_data = {
-            "title": "Test Array Type",
             "description": "Test array type description",
             "type": "array",
             "items": {
@@ -450,7 +445,6 @@ class TestTypeCanonical(unittest.TestCase):
     def test_type_primitive_schema(self):
         """Test primitive type with schema initialization and to_dict"""
         type_data = {
-            "title": "Test Primitive Type",
             "description": "Test primitive type description",
             "schema": {
                 "json_type": {"type": "string"},
@@ -467,25 +461,25 @@ class TestTypeCanonical(unittest.TestCase):
         # Test to_dict
         result = type_instance.property.to_dict()
         self.assertEqual(result["description"], "Test primitive type description")
-        self.assertEqual(result["json_type"], {"type": "string"})
-        self.assertEqual(result["bson_type"], {"bsonType": "string"})
-        self.assertNotIn("schema", result)
+        self.assertIn("schema", result)
 
     def test_type_primitive_json_bson(self):
         """Test primitive type with json_type/bson_type initialization and to_dict"""
         type_data = {
-            "title": "Test Primitive Type",
             "description": "Test primitive type description",
             "json_type": {"type": "string"},
             "bson_type": {"bsonType": "string"}
         }
         type_instance = Type("test_primitive", type_data)
+        
         # Test initialization
         self.assertEqual(type_instance.name, "test_primitive")
         self.assertEqual(type_instance.property.description, "Test primitive type description")
         self.assertEqual(type_instance.property.json_type, {"type": "string"})
         self.assertEqual(type_instance.property.bson_type, {"bsonType": "string"})
         self.assertTrue(type_instance.property.is_primitive)
+        self.assertFalse(type_instance.property.is_universal)
+        
         # Test to_dict
         result = type_instance.property.to_dict()
         self.assertEqual(result["description"], "Test primitive type description")

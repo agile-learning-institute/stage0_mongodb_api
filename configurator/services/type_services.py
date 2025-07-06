@@ -3,6 +3,7 @@ from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 import os
 import yaml
+from collections import OrderedDict
 
 
 class Type:
@@ -86,105 +87,161 @@ class TypeProperty:
         self.name = name
         self.description = property.get("description", "Missing Required Description")
         self.schema = property.get("schema", None)
-        # Support top-level json_type/bson_type as well as inside schema
-        self.json_type = None
-        self.bson_type = None
+        self.json_type = property.get("json_type", None)
+        self.bson_type = property.get("bson_type", None)
         self.type = property.get("type", None)
         self.required = property.get("required", False)
         self.additional_properties = property.get("additionalProperties", False)
-        if self.schema:
-            self.json_type = self.schema.get("json_type", None)
-            self.bson_type = self.schema.get("bson_type", None)
-        # Top-level json_type/bson_type
-        if property.get("json_type"):
-            self.json_type = property["json_type"]
-        if property.get("bson_type"):
-            self.bson_type = property["bson_type"]
+        self.is_primitive = False
+        self.is_universal = False
+
+        # Universal primitive: schema only
+        if self.schema is not None:
+            self.is_primitive = True
+            self.is_universal = True
+            return
+        # Non-universal primitive: json_type/bson_type only
+        if self.json_type is not None or self.bson_type is not None:
+            self.is_primitive = True
+            self.is_universal = False
+            return
+        # Array
         if self.type == "array":
             self.items = TypeProperty("items", property.get("items", {}))
+            return
+        # Object
         if self.type == "object":
             self.properties = {}
             for name, prop in property.get("properties", {}).items():
                 self.properties[name] = TypeProperty(name, prop)
-        # Initialize primitive flags
-        self.is_primitive = False
-        self.is_universal = False
-        if self.schema:
-            # If schema is a universal schema (not split into json_type/bson_type)
-            if not ("json_type" in self.schema and "bson_type" in self.schema):
-                self.is_primitive = True
-                self.is_universal = True
-        # If json_type and bson_type are present (either top-level or in schema), treat as non-universal primitive
-        if self.json_type is not None and self.bson_type is not None:
-            self.is_primitive = True
-            self.is_universal = False
+            return
 
     def to_dict(self):
-        dict = {
-            "description": self.description,
-            "type": self.type,
-        }
-        if self.type == "array":
-            dict["items"] = self.items.to_dict()
-            dict["required"] = self.required
-        if self.type == "object":
-            dict["additionalProperties"] = self.additional_properties
-            dict["required"] = self.required
-            dict["properties"] = {}
-            for name, property in self.properties.items():
-                dict["properties"][name] = property.to_dict()
+        # Universal primitive
+        if self.is_universal:
+            return {
+                "description": self.description,
+                "schema": self.schema,
+            }
+        # Non-universal primitive
         if self.is_primitive:
-            if self.is_universal:
-                dict["schema"] = self.schema
-            else:
-                if self.json_type is not None:
-                    dict["json_type"] = self.json_type
-                if self.bson_type is not None:
-                    dict["bson_type"] = self.bson_type
-        return dict
+            return {
+                "description": self.description,
+                "json_type": self.json_type or {},
+                "bson_type": self.bson_type or {},
+            }
+        # Array
+        if self.type == "array":
+            return {
+                "description": self.description,
+                "required": self.required,
+                "type": self.type,
+                "items": self.items.to_dict(),
+            }
+        # Object
+        if self.type == "object":
+            return {
+                "description": self.description,
+                "required": self.required,
+                "type": self.type,
+                "properties": {name: property.to_dict() for name, property in self.properties.items()},
+                "additionalProperties": self.additional_properties
+            }
+        # Basic type (string, number, etc.)
+        return {
+            "description": self.description,
+            "type": self.type
+        }
     
     def get_json_schema(self):
-        schema = {}
-        schema["description"] = self.description
+        if self.is_universal:
+            return {
+                "description": self.description,
+                **self.schema
+            }
+        if self.is_primitive:
+            return {
+                "description": self.description,
+                **self.json_type
+            }
         if self.type == "array":
-            schema["type"] = "array"
-            schema["items"] = self.items.get_json_schema()
-        elif self.type == "object":
-            schema["type"] = "object"
-            schema["properties"] = {}
+            return {
+                "description": self.description,
+                "type": "array",
+                "items": self.items.get_json_schema()
+            }
+        if self.type == "object":
+            properties = {}
+            required_properties = []
+            
             for name, property in self.properties.items():
-                schema["properties"][name] = property.get_json_schema()
-        elif self.type:
-            type = Type(f"{self.type}.yaml")
-            schema.update(type.get_json_schema())
-        elif self.is_primitive:
-            if self.is_universal:
-                schema.update(self.schema)
-            else:
-                if self.json_type is not None:
-                    schema.update(self.json_type)
-        return schema
+                properties[name] = property.get_json_schema()
+                if property.required:
+                    required_properties.append(name)
+            
+            result = {
+                "description": self.description,
+                "type": "object",
+                "properties": properties,
+                "additionalProperties": self.additional_properties
+            }
+            
+            if required_properties:
+                result["required"] = required_properties
+                
+            return result
+        if self.type:
+            custom_type = Type(f"{self.type}.yaml")
+            custom_schema = custom_type.property.get_json_schema()
+            custom_schema["description"] = self.description
+            return custom_schema
+    
+        raise ConfiguratorException(f"Type {self.type} is not a valid type")
     
     def get_bson_schema(self):
-        schema = {}
-        schema["description"] = self.description
+        if self.is_universal:
+            schema = self.schema.copy()
+            schema["bsonType"] = schema["type"]
+            del schema["type"]
+            return {
+                "description": self.description,
+                **schema
+            }
+        if self.is_primitive:
+            return {
+                "description": self.description,
+                **self.bson_type
+            }
         if self.type == "array":
-            schema["bsonType"] = "array"
-            schema["items"] = self.items.get_bson_schema()
-        elif self.type == "object":
-            schema["bsonType"] = "object"
-            schema["properties"] = {}
+            return {
+                "description": self.description,
+                "bsonType": "array",
+                "items": self.items.get_bson_schema()
+            }
+        if self.type == "object":
+            properties = {}
+            required_properties = []
+            
             for name, property in self.properties.items():
-                schema["properties"][name] = property.get_bson_schema()
-        elif self.type:
-            type = Type(f"{self.type}.yaml")
-            schema.update(type.get_bson_schema())
-        elif self.is_primitive:
-            if self.is_universal:
-                schema.update(self.schema)
-                schema["bsonType"] = schema["type"]
-                del schema["type"]
-            else:
-                if self.bson_type is not None:
-                    schema.update(self.bson_type)
-        return schema
+                properties[name] = property.get_bson_schema()
+                if property.required:
+                    required_properties.append(name)
+            
+            result = {
+                "description": self.description,
+                "bsonType": "object",
+                "properties": properties,
+                "additionalProperties": self.additional_properties
+            }
+            
+            if required_properties:
+                result["required"] = required_properties
+                
+            return result
+        if self.type:
+            custom_type = Type(f"{self.type}.yaml")
+            custom_schema = custom_type.property.get_bson_schema()
+            custom_schema["description"] = self.description
+            return custom_schema
+        
+        raise ConfiguratorException(f"Type {self.type} is not a valid type")
