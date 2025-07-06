@@ -1,0 +1,4 @@
+description: A valid email address
+type: null
+json_type: string
+bson_type: string

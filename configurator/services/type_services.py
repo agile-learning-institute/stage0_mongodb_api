@@ -4,7 +4,7 @@ from configurator.utils.config import Config
 
 class Type:
     def __init__(self, file_name: str, document: dict = {}):
-        self.config = Config()
+        self.config = Config.get_instance()
         self.file_name = file_name
         self.name = file_name.split(".")[0]
         self.type_property = {}
@@ -12,7 +12,7 @@ class Type:
         if document:
             self.property = TypeProperty(self.name, document)
         else:
-            self.property = TypeProperty(self.name, FileIO.get_document(self.config.TYPES_FOLDER, file_name))
+            self.property = TypeProperty(self.name, FileIO.get_document(self.config.TYPE_FOLDER, file_name))
 
     def to_dict(self):
         return self.property.to_dict()
