@@ -2,4 +2,4 @@ title: URL
 description: A valid URL
 schema:
   type: string
-  pattern: "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
+  pattern: "^https?://[^\\s]+$"
