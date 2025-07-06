@@ -322,6 +322,8 @@ class TestTypeRoutes(unittest.TestCase):
             Mock(name="type1.yaml"),
             Mock(name="type2.yaml")
         ]
+        for f, n in zip(mock_files, ["type1.yaml", "type2.yaml"]):
+            f.name = n
         mock_get_documents.return_value = mock_files
         
         mock_type1 = Mock()
@@ -370,7 +372,7 @@ class TestTypeRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "TYP-04")
         self.assertEqual(response_data["type"], "CLEAN_TYPES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Configurator error cleaning types")
+        self.assertEqual(response_data["data"], {"error": "Configurator error cleaning types"})
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_clean_types_general_exception(self, mock_get_documents):
@@ -387,7 +389,7 @@ class TestTypeRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "TYP-04")
         self.assertEqual(response_data["type"], "CLEAN_TYPES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Unexpected error cleaning types")
+        self.assertEqual(response_data["data"], {"error": "Unexpected error"})
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     @patch('configurator.routes.type_routes.Type')
@@ -395,6 +397,7 @@ class TestTypeRoutes(unittest.TestCase):
         """Test PATCH /api/types when Type.save() raises an exception."""
         # Arrange
         mock_files = [Mock(name="type1.yaml")]
+        mock_files[0].name = "type1.yaml"
         mock_get_documents.return_value = mock_files
         
         mock_type = Mock()
@@ -413,7 +416,7 @@ class TestTypeRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "TYP-04")
         self.assertEqual(response_data["type"], "CLEAN_TYPES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Configurator error cleaning types")
+        self.assertEqual(response_data["data"], {"error": "Configurator error cleaning types"})
         self.assertEqual(len(response_data["sub_events"]), 1)
         self.assertEqual(response_data["sub_events"][0]["id"], "test")
 
@@ -423,6 +426,7 @@ class TestTypeRoutes(unittest.TestCase):
         """Test PATCH /api/types when Type.save() raises a general exception."""
         # Arrange
         mock_files = [Mock(name="type1.yaml")]
+        mock_files[0].name = "type1.yaml"
         mock_get_documents.return_value = mock_files
         
         mock_type = Mock()
@@ -440,7 +444,7 @@ class TestTypeRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "TYP-04")
         self.assertEqual(response_data["type"], "CLEAN_TYPES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Unexpected error cleaning types")
+        self.assertEqual(response_data["data"], {"error": "Save failed"})
 
 
 if __name__ == '__main__':

@@ -322,6 +322,8 @@ class TestDictionaryRoutes(unittest.TestCase):
             Mock(name="dict1.yaml"),
             Mock(name="dict2.yaml")
         ]
+        for f, n in zip(mock_files, ["dict1.yaml", "dict2.yaml"]):
+            f.name = n
         mock_get_documents.return_value = mock_files
         
         mock_dict1 = Mock()
@@ -370,7 +372,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "DIC-04")
         self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Configurator error cleaning dictionaries")
+        self.assertEqual(response_data["data"], {"error": "Configurator error cleaning dictionaries"})
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_clean_dictionaries_general_exception(self, mock_get_documents):
@@ -387,7 +389,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "DIC-04")
         self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Unexpected error cleaning dictionaries")
+        self.assertEqual(response_data["data"], {"error": "Unexpected error"})
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     @patch('configurator.routes.dictionary_routes.Dictionary')
@@ -395,6 +397,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         """Test PATCH /api/dictionaries when Dictionary.save() raises an exception."""
         # Arrange
         mock_files = [Mock(name="dict1.yaml")]
+        mock_files[0].name = "dict1.yaml"
         mock_get_documents.return_value = mock_files
         
         mock_dictionary = Mock()
@@ -413,7 +416,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "DIC-04")
         self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Configurator error cleaning dictionaries")
+        self.assertEqual(response_data["data"], {"error": "Configurator error cleaning dictionaries"})
         self.assertEqual(len(response_data["sub_events"]), 1)
         self.assertEqual(response_data["sub_events"][0]["id"], "test")
 
@@ -423,6 +426,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         """Test PATCH /api/dictionaries when Dictionary.save() raises a general exception."""
         # Arrange
         mock_files = [Mock(name="dict1.yaml")]
+        mock_files[0].name = "dict1.yaml"
         mock_get_documents.return_value = mock_files
         
         mock_dictionary = Mock()
@@ -440,7 +444,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "DIC-04")
         self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Unexpected error cleaning dictionaries")
+        self.assertEqual(response_data["data"], {"error": "Save failed"})
 
 
 if __name__ == '__main__':

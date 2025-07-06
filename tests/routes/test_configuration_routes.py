@@ -518,6 +518,8 @@ class TestConfigurationRoutes(unittest.TestCase):
             Mock(name="config1.yaml"),
             Mock(name="config2.yaml")
         ]
+        for f, n in zip(mock_files, ["config1.yaml", "config2.yaml"]):
+            f.name = n
         mock_get_documents.return_value = mock_files
         
         mock_config1 = Mock()
@@ -566,7 +568,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "CFG-04")
         self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Configurator error cleaning configurations")
+        self.assertEqual(response_data["data"], {"error": "Configurator error cleaning configurations"})
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_clean_configurations_general_exception(self, mock_get_documents):
@@ -583,7 +585,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "CFG-04")
         self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Unexpected error cleaning configurations")
+        self.assertEqual(response_data["data"], {"error": "Unexpected error"})
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     @patch('configurator.routes.configuration_routes.Configuration')
@@ -591,6 +593,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test PATCH /api/configurations when Configuration.save() raises an exception."""
         # Arrange
         mock_files = [Mock(name="config1.yaml")]
+        mock_files[0].name = "config1.yaml"
         mock_get_documents.return_value = mock_files
         
         mock_configuration = Mock()
@@ -609,7 +612,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "CFG-04")
         self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Configurator error cleaning configurations")
+        self.assertEqual(response_data["data"], {"error": "Configurator error cleaning configurations"})
         self.assertEqual(len(response_data["sub_events"]), 1)
         self.assertEqual(response_data["sub_events"][0]["id"], "test")
 
@@ -619,6 +622,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test PATCH /api/configurations when Configuration.save() raises a general exception."""
         # Arrange
         mock_files = [Mock(name="config1.yaml")]
+        mock_files[0].name = "config1.yaml"
         mock_get_documents.return_value = mock_files
         
         mock_configuration = Mock()
@@ -636,7 +640,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "CFG-04")
         self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], "Unexpected error cleaning configurations")
+        self.assertEqual(response_data["data"], {"error": "Save failed"})
 
 
 if __name__ == '__main__':
