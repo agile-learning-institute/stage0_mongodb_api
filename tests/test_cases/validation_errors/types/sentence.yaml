@@ -1,4 +1,3 @@
-title: Sentence
 description: A String of text, at least 4 and no more than 255 characters with no special characters
 schema:
   type: string

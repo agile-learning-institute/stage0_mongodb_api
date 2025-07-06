@@ -1,4 +1,3 @@
-title: IP Address
 description: A valid IP Address
 schema:
   type: string

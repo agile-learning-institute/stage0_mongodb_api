@@ -1,4 +1,3 @@
-title: Appointment
 description: A date/time range
 type: object
 properties:
@@ -9,4 +8,5 @@ properties:
   to: 
     description: Ending Date/Time
     type: date-time
-    required: true 
+    required: true
+additionalProperties: false 

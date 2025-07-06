@@ -1,5 +1,4 @@
 type: object
-title: User Collection
 description: A user collection for testing the schema system
 properties:
   _id:

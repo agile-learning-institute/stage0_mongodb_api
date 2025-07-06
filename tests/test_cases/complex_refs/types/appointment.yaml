@@ -1,4 +1,3 @@
-title: Appointment
 description: A date/time range
 type: object
 properties:

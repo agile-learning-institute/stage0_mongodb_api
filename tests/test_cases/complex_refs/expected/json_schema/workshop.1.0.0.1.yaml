@@ -368,7 +368,6 @@ properties:
       - by_user
       - at_time
       - correlation_id
-title: Workshop
 required:
   - _id
   - status

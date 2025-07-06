@@ -1,4 +1,3 @@
-title: search
 description: A search index that is used to support a elastic search polymorphic query service
 type: object
 properties:

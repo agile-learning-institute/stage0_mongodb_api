@@ -1,4 +1,3 @@
-title: User Collection
 description: A user collection for testing the schema system
 type: object
 properties:

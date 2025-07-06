@@ -1,4 +1,3 @@
-title: MissingRef
 description: This schema references a missing $ref
 type: object
 properties:

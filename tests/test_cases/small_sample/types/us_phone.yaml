@@ -1,4 +1,3 @@
-title: US Phone
 description: A US phone number in E.164 format
 schema:
   type: string

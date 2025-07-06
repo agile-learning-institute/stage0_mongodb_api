@@ -1,4 +1,3 @@
-title: Circular Reference Test
 description: A schema with a circular reference
 type: object
 properties:

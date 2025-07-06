@@ -1,4 +1,3 @@
-title: DateTime
 description: An ISO 8601 formatted date-time string
 json_type:
   type: string
