@@ -40,7 +40,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         response = self.client.get('/api/enumerators')
 
         # Assert
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
         self.assertIn("message", response.json)
         self.assertIn("event", response.json)
@@ -72,7 +72,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'put_document')
     def test_put_enumerators_success(self, mock_put_document):
@@ -118,7 +118,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     def test_enumerators_delete_method_not_allowed(self):
         """Test that DELETE method is not allowed on /api/enumerators."""

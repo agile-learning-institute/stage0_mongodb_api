@@ -70,7 +70,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     @patch('configurator.routes.configuration_routes.Configuration')
@@ -121,7 +121,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_configuration_success(self, mock_configuration_class):
@@ -169,7 +169,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_success(self, mock_configuration_class):
@@ -232,7 +232,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_delete_configuration_success(self, mock_configuration_class):
@@ -285,7 +285,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_unlock_configuration_success(self, mock_configuration_class):
@@ -338,7 +338,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_success(self, mock_configuration_class):
@@ -391,7 +391,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_json_schema_success(self, mock_configuration_class):
@@ -446,7 +446,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_bson_schema_success(self, mock_configuration_class):
@@ -501,7 +501,7 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     def test_configurations_method_not_allowed(self):
         """Test that methods not defined are not allowed."""

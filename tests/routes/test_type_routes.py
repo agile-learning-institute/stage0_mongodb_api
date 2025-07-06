@@ -70,7 +70,7 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.type_routes.Type')
     def test_get_type_success(self, mock_type_class):
@@ -118,7 +118,7 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.type_routes.Type')
     def test_update_type_success(self, mock_type_class):
@@ -181,7 +181,7 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.type_routes.Type')
     def test_delete_type_success(self, mock_type_class):
@@ -234,7 +234,7 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.type_routes.Type')
     def test_lock_unlock_type_success(self, mock_type_class):
@@ -287,7 +287,7 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     def test_types_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/types."""

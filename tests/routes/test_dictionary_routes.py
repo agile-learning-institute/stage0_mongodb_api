@@ -70,7 +70,7 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_get_dictionary_success(self, mock_dictionary_class):
@@ -118,7 +118,7 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_update_dictionary_success(self, mock_dictionary_class):
@@ -181,7 +181,7 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_delete_dictionary_success(self, mock_dictionary_class):
@@ -234,7 +234,7 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_lock_unlock_dictionary_success(self, mock_dictionary_class):
@@ -287,7 +287,7 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     def test_dictionaries_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/dictionaries."""

@@ -23,7 +23,7 @@ def create_dictionary_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error listing configurations: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>', methods=['GET'])
@@ -36,7 +36,7 @@ def create_dictionary_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting dictionary {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     # PUT /api/dictionaries/<file_name> - Update a dictionary file
     @dictionary_routes.route('/<file_name>', methods=['PUT'])
@@ -50,7 +50,7 @@ def create_dictionary_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error updating dictionary {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     @dictionary_routes.route('/<file_name>', methods=['DELETE'])
     def delete_dictionary(file_name):
@@ -63,7 +63,7 @@ def create_dictionary_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error deleting dictionary {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     @dictionary_routes.route('/<file_name>', methods=['PATCH'])
     def lock_unlock_dictionary(file_name):
@@ -76,7 +76,7 @@ def create_dictionary_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error locking/unlocking dictionary {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     logger.info("dictionary Flask Routes Registered")
     return dictionary_routes

@@ -91,7 +91,7 @@ class TestDatabaseRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Undefined Exception")
+        self.assertEqual(response.json, "Unexpected error")
 
     def test_drop_database_get_method_not_allowed(self):
         """Test that GET method is not allowed on /api/database."""
