@@ -1,19 +1,21 @@
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
+from configurator.utils.config import Config
 
 class Enumerators:
     """ A list of versioned Enumerations"""
     def __init__(self, data: dict):
+        self.config = Config.get_instance()
         if data is None:
-            self.dict = FileIO.get_file(self.config.TEST_DATA_FOLDER, "enumerators.json")
+            self.dict = FileIO.get_document(self.config.TEST_DATA_FOLDER, "enumerators.json")
         else:
             self.dict = data
         self.versions = []
         for enumerators in self.dict:
-            self.versions.append = Enumerators(enumerators)
+            self.versions.append(Enumerations(enumerators))
                 
     def save(self):
-        FileIO.put_file(self.config.TEST_DATA_FOLDER, "enumerators.json", self.dict)
+        FileIO.put_document(self.config.TEST_DATA_FOLDER, "enumerators.json", self.dict)
         return self.dict
     
     def version(self, version: int):
