@@ -2,6 +2,7 @@ from configurator.services.type_services import Type
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.enumerator_service import Enumerators
 from configurator.utils.file_io import FileIO
+import os
 
 
 class Dictionary:
@@ -21,9 +22,24 @@ class Dictionary:
     def get_bson_schema(self, enumerators: Enumerators):
         return self.property.get_bson_schema(enumerators)
             
-    def save(self):
-        FileIO.save_document(self.config.DICTIONARIES_FOLDER, self.file_name, self.property.to_dict())
-        
+    def save(self) -> list[ConfiguratorEvent]:
+        event = ConfiguratorEvent(event_id="DIC-03", event_type="SAVE_DICTIONARY")
+        try:
+            FileIO.save_document(self.config.DICTIONARIES_FOLDER, self.file_name, self.property.to_dict())
+            event.data = self.property.to_dict()
+            event.record_success()
+        except ConfiguratorException as e:
+            event.append_events(e.event.to_dict())
+            event.record_failure(message="error saving document")
+        except Exception as e:
+            event.append_events(ConfiguratorEvent(event_id="DIC-04", event_type="SAVE_DICTIONARY", data=e))
+            event.record_failure(message="unexpected error saving document")
+        return [event]
+    
+    def clean(self) -> list[ConfiguratorEvent]:
+        """Clean this dictionary by saving it (which normalizes the content)"""
+        return self.save()
+
 class Property:
     def __init__(self, name: str, property: dict):
         self.name = name

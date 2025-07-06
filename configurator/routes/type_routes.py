@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from configurator.utils.config import Config
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
 from configurator.services.type_services import Type
 
@@ -12,7 +12,7 @@ def create_type_routes():
     type_routes = Blueprint('type_routes', __name__)
     config = Config.get_instance()
     
-    # GET /api/types - Return the current type files
+    # GET /api/types/ - Return the current type files
     @type_routes.route('', methods=['GET'])
     def get_types():
         try:
@@ -24,6 +24,25 @@ def create_type_routes():
         except Exception as e:
             logger.error(f"Unexpected error listing configurations: {str(e)}")
             return jsonify(str(e)), 500
+
+    # PATCH /api/types - Clean Types
+    @type_routes.route('', methods=['PATCH'])
+    def clean_types():
+        try:
+            files = FileIO.get_documents(config.TYPE_FOLDER)
+            event = ConfiguratorEvent(event_id="TYP-04", event_type="CLEAN_TYPES")
+            for file in files:
+                type = Type(file)
+                event.append_events(type.clean())
+            event.record_success()
+            return jsonify(event.to_dict()), 200
+        except ConfiguratorException as e:
+            logger.error(f"Configurator error listing configurations: {e.event.to_dict()}")
+            return jsonify(e.event.to_dict()), 500
+        except Exception as e:
+            logger.error(f"Unexpected error listing configurations: {str(e)}")
+            return jsonify(str(e)), 500
+        
         
     # GET /api/types/<file_name> - Return a type file
     @type_routes.route('/<file_name>', methods=['GET'])

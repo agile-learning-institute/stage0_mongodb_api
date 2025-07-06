@@ -1,5 +1,8 @@
 from configurator.utils.file_io import FileIO
 from configurator.utils.config import Config
+from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
+import os
+import yaml
 
 
 class Type:
@@ -14,14 +17,30 @@ class Type:
         else:
             self.property = TypeProperty(self.name, FileIO.get_document(self.config.TYPE_FOLDER, file_name))
 
-    def to_dict(self):
-        return self.property.to_dict()
+
+    def save(self) -> list[ConfiguratorEvent]:
+        event = ConfiguratorEvent(event_id="TYP-03", event_type="SAVE_TYPE")
+        try:
+            FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.property.to_dict())
+            event.data = self.property.to_dict()
+            event.record_success()
+        except ConfiguratorException as e:
+            event.append_events(e.event.to_dict())
+            event.record_failure(message="error saving document")
+        except Exception as e:
+            event.append_events(ConfiguratorEvent(event_id="TYP-04", event_type="SAVE_TYPE", data=e))
+            event.record_failure(message="unexpected error saving document")
+        return [event]
     
     def get_json_schema(self):
         return self.property.get_json_schema()
     
     def get_bson_schema(self):
         return self.property.get_bson_schema()
+    
+    def clean(self) -> list[ConfiguratorEvent]:
+        """Clean this type by saving it (which normalizes the content)"""
+        return self.save()
                 
 class TypeProperty:
     def __init__(self, name: str, property: dict):

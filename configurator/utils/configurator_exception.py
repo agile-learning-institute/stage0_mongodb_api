@@ -30,7 +30,7 @@ class ConfiguratorEvent:
             "starts": self.starts,
             "ends": self.ends,
             "status": self.status,
-            "sub_events": self.sub_events
+            "sub_events": [event.to_dict() for event in self.sub_events]
         }
 
 

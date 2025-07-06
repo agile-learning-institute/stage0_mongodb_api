@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from configurator.services.configuration_services import Configuration
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO
 
@@ -39,6 +39,23 @@ def create_configuration_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error processing configurations: {str(e)}")
+            return jsonify(str(e)), 500
+
+    @blueprint.route('/', methods=['PATCH'])
+    def clean_configurations():
+        try:
+            files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+            event = ConfiguratorEvent(event_id="CFG-04", event_type="CLEAN_CONFIGURATIONS")
+            for file in files:
+                configuration = Configuration(file.name)
+                event.append_events(configuration.clean())
+            event.record_success()
+            return jsonify(event.to_dict()), 200
+        except ConfiguratorException as e:
+            logger.error(f"Configurator error cleaning configurations: {e.event.to_dict()}")
+            return jsonify(e.event.to_dict()), 500
+        except Exception as e:
+            logger.error(f"Unexpected error cleaning configurations: {str(e)}")
             return jsonify(str(e)), 500
 
     @blueprint.route('/<file_name>/', methods=['GET'])

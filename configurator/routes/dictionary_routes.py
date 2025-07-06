@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from configurator.utils.config import Config
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 from configurator.utils.file_io import FileIO
 from configurator.services.dictionary_services import Dictionary
 
@@ -23,6 +23,24 @@ def create_dictionary_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error listing configurations: {str(e)}")
+            return jsonify(str(e)), 500
+        
+    # PATCH /api/dictionaries - Clean Dictionaries
+    @dictionary_routes.route('', methods=['PATCH'])
+    def clean_dictionaries():
+        try:
+            files = FileIO.get_documents(config.DICTIONARY_FOLDER)
+            event = ConfiguratorEvent(event_id="DIC-04", event_type="CLEAN_DICTIONARIES")
+            for file in files:
+                dictionary = Dictionary(file.name)
+                event.append_events(dictionary.clean())
+            event.record_success()
+            return jsonify(event.to_dict()), 200
+        except ConfiguratorException as e:
+            logger.error(f"Configurator error cleaning dictionaries: {e.event.to_dict()}")
+            return jsonify(e.event.to_dict()), 500
+        except Exception as e:
+            logger.error(f"Unexpected error cleaning dictionaries: {str(e)}")
             return jsonify(str(e)), 500
         
     # GET /api/dictionaries/<file_name> - Return a dictionary file

@@ -6,10 +6,12 @@ from configurator.utils.file_io import FileIO
 from configurator.utils.mongo_io import MongoIO
 from configurator.utils.version_manager import VersionManager
 from configurator.utils.version_number import VersionNumber
+import os
 
 class Configuration:
     def __init__(self, file_name: str, document: dict  = None):
         self.config = Config.get_instance()
+        self.file_name = file_name
         if not document:
             document = FileIO.get_document(self.config.CONFIGURATIONS_FOLDER, file_name)
         self.name = document["name"]
@@ -27,8 +29,19 @@ class Configuration:
             "versions": [v.to_dict() for v in self.versions],
         }
 
-    def save(self):
-        FileIO.save_document(self.config.CONFIGURATIONS_FOLDER, self.file_name, self.to_dict())
+    def save(self) -> list[ConfiguratorEvent]:
+        event = ConfiguratorEvent(event_id="CFG-03", event_type="SAVE_CONFIGURATION")
+        try:
+            FileIO.save_document(self.config.CONFIGURATIONS_FOLDER, self.file_name, self.to_dict())
+            event.data = self.to_dict()
+            event.record_success()
+        except ConfiguratorException as e:
+            event.append_events(e.event.to_dict())
+            event.record_failure(message="error saving document")
+        except Exception as e:
+            event.append_events(ConfiguratorEvent(event_id="CFG-04", event_type="SAVE_CONFIGURATION", data=e))
+            event.record_failure(message="unexpected error saving document")
+        return [event]
     
     def delete(self):
         FileIO.delete_document(self.config.CONFIGURATIONS_FOLDER, self.file_name)
@@ -80,6 +93,10 @@ class Configuration:
             raise ConfiguratorException("Version not found", event, data)
         return version_obj.get_bson_schema()
     
+    def clean(self) -> list[ConfiguratorEvent]:
+        """Clean this configuration by saving it (which normalizes the content)"""
+        return self.save()
+
 class Version:
     def __init__(self, collection_name: str, version: dict):
         self.collection_name = collection_name
