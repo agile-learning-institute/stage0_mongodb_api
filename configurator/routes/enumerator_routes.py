@@ -35,12 +35,11 @@ def create_enumerator_routes():
         except ConfiguratorException as e:
             logger.error(f"Configurator error cleaning enumerators: {e.event.to_dict()}")
             event.append_events([e.event])
-            event.record_failure(message="Configurator error cleaning enumerators")
+            event.record_failure("Configurator error cleaning enumerators")
             return jsonify(event.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error cleaning enumerators: {str(e)}")
-            event.event_data = e
-            event.record_failure(message="Unexpected error cleaning enumerators")
+            event.record_failure("Unexpected error cleaning enumerators", {"error": str(e)})
             return jsonify(event.to_dict()), 500
     
     # PUT /api/enumerators - Overwrite enumerators.json

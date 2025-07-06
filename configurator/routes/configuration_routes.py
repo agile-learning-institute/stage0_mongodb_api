@@ -54,12 +54,11 @@ def create_configuration_routes():
         except ConfiguratorException as e:
             logger.error(f"Configurator error cleaning configurations: {e.event.to_dict()}")
             event.append_events([e.event])
-            event.record_failure(message="Configurator error cleaning configurations")
+            event.record_failure("Configurator error cleaning configurations")
             return jsonify(event.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error cleaning configurations: {str(e)}")
-            event.event_data = e
-            event.record_failure(message="Unexpected error cleaning configurations")
+            event.record_failure("Unexpected error cleaning configurations", {"error": str(e)})
             return jsonify(event.to_dict()), 500
 
     @blueprint.route('/<file_name>/', methods=['GET'])

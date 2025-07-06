@@ -39,12 +39,11 @@ def create_dictionary_routes():
         except ConfiguratorException as e:
             logger.error(f"Configurator error cleaning dictionaries: {e.event.to_dict()}")
             event.append_events([e.event])
-            event.record_failure(message="Configurator error cleaning dictionaries")
+            event.record_failure("Configurator error cleaning dictionaries")
             return jsonify(event.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error cleaning dictionaries: {str(e)}")
-            event.event_data = e
-            event.record_failure(message="Unexpected error cleaning dictionaries")
+            event.record_failure("Unexpected error cleaning dictionaries", {"error": str(e)})
             return jsonify(event.to_dict()), 500
         
     # GET /api/dictionaries/<file_name> - Return a dictionary file

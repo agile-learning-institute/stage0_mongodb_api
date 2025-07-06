@@ -39,12 +39,11 @@ def create_type_routes():
         except ConfiguratorException as e:
             logger.error(f"Configurator error cleaning types: {e.event.to_dict()}")
             event.append_events([e.event])
-            event.record_failure(message="Configurator error cleaning types")
+            event.record_failure("Configurator error cleaning types")
             return jsonify(event.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error cleaning types: {str(e)}")
-            event.event_data = e
-            event.record_failure(message="Unexpected error cleaning types")
+            event.record_failure("Unexpected error cleaning types", {"error": str(e)})
             return jsonify(event.to_dict()), 500
 
     # GET /api/types/<file_name> - Return a type file
