@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from configurator.utils.config import Config
+from configurator.utils.configurator_exception import ConfiguratorException
 
 import logging
 logger = logging.getLogger(__name__)
@@ -15,6 +16,9 @@ def create_config_routes():
         try:
             # Return the JSON representation of the config object
             return jsonify(config.to_dict()), 200
+        except ConfiguratorException as e:
+            logger.warning(f"get_config ConfiguratorException: {e}")
+            return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.warning(f"get_config Error has occurred: {e}")
             return jsonify(str(e)), 500

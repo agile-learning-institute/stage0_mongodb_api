@@ -128,13 +128,69 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 405)
 
-    def test_enumerators_patch_method_not_allowed(self):
-        """Test that PATCH method is not allowed on /api/enumerators."""
+    @patch('configurator.routes.enumerator_routes.Enumerators')
+    def test_clean_enumerators_success(self, mock_enumerators_class):
+        """Test successful PATCH /api/enumerators - Clean Enumerators."""
+        # Arrange
+        mock_enumerators = Mock()
+        mock_event = Mock()
+        mock_event.to_dict.return_value = {"id": "ENU-03", "status": "SUCCESS"}
+        mock_enumerators.save.return_value = [mock_event]
+        mock_enumerators_class.return_value = mock_enumerators
+
         # Act
         response = self.client.patch('/api/enumerators')
 
         # Assert
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "ENU-04")
+        self.assertEqual(response_data["type"], "CLEAN_ENUMERATORS")
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(len(response_data["sub_events"]), 1)
+        mock_enumerators_class.assert_called_once()
+        mock_enumerators.save.assert_called_once()
+
+    @patch('configurator.routes.enumerator_routes.Enumerators')
+    def test_clean_enumerators_configurator_exception(self, mock_enumerators_class):
+        """Test PATCH /api/enumerators when Enumerators.save() raises ConfiguratorException."""
+        # Arrange
+        mock_enumerators = Mock()
+        event = ConfiguratorEvent("test", "save_error")
+        mock_enumerators.save.side_effect = ConfiguratorException("Save error", event)
+        mock_enumerators_class.return_value = mock_enumerators
+
+        # Act
+        response = self.client.patch('/api/enumerators')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "ENU-04")
+        self.assertEqual(response_data["type"], "CLEAN_ENUMERATORS")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Configurator error cleaning enumerators")
+        self.assertEqual(len(response_data["sub_events"]), 1)
+        self.assertEqual(response_data["sub_events"][0]["id"], "test")
+
+    @patch('configurator.routes.enumerator_routes.Enumerators')
+    def test_clean_enumerators_general_exception(self, mock_enumerators_class):
+        """Test PATCH /api/enumerators when Enumerators.save() raises a general exception."""
+        # Arrange
+        mock_enumerators = Mock()
+        mock_enumerators.save.side_effect = Exception("Save failed")
+        mock_enumerators_class.return_value = mock_enumerators
+
+        # Act
+        response = self.client.patch('/api/enumerators')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "ENU-04")
+        self.assertEqual(response_data["type"], "CLEAN_ENUMERATORS")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Unexpected error cleaning enumerators")
 
     def test_enumerators_with_filename_not_allowed(self):
         """Test that /api/enumerators/<filename> is not allowed."""

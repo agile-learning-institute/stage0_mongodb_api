@@ -504,18 +504,139 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response.json, "Unexpected error")
 
     def test_configurations_method_not_allowed(self):
-        """Test that methods not defined are not allowed."""
-        # Test PUT on root
-        response = self.client.put('/api/configurations/')
-        self.assertEqual(response.status_code, 405)
-
-        # Test DELETE on root
+        """Test that DELETE method is not allowed on /api/configurations."""
+        # Act
         response = self.client.delete('/api/configurations/')
         self.assertEqual(response.status_code, 405)
 
-        # Test PATCH on root
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.configuration_routes.Configuration')
+    def test_clean_configurations_success(self, mock_configuration_class, mock_get_documents):
+        """Test successful PATCH /api/configurations - Clean Configurations."""
+        # Arrange
+        mock_files = [
+            Mock(name="config1.yaml"),
+            Mock(name="config2.yaml")
+        ]
+        mock_get_documents.return_value = mock_files
+        
+        mock_config1 = Mock()
+        mock_config2 = Mock()
+        mock_configuration_class.side_effect = [mock_config1, mock_config2]
+        
+        # Mock save methods returning events
+        mock_event1 = Mock()
+        mock_event1.to_dict.return_value = {"id": "CFG-03", "status": "SUCCESS"}
+        mock_event2 = Mock()
+        mock_event2.to_dict.return_value = {"id": "CFG-03", "status": "SUCCESS"}
+        
+        mock_config1.save.return_value = [mock_event1]
+        mock_config2.save.return_value = [mock_event2]
+
+        # Act
         response = self.client.patch('/api/configurations/')
-        self.assertEqual(response.status_code, 405)
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "CFG-04")
+        self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(len(response_data["sub_events"]), 2)
+        
+        mock_get_documents.assert_called_once_with("configurations")
+        mock_configuration_class.assert_any_call("config1.yaml")
+        mock_configuration_class.assert_any_call("config2.yaml")
+        mock_config1.save.assert_called_once()
+        mock_config2.save.assert_called_once()
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_clean_configurations_configurator_exception(self, mock_get_documents):
+        """Test PATCH /api/configurations when FileIO raises ConfiguratorException."""
+        # Arrange
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
+
+        # Act
+        response = self.client.patch('/api/configurations/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "CFG-04")
+        self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Configurator error cleaning configurations")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_clean_configurations_general_exception(self, mock_get_documents):
+        """Test PATCH /api/configurations when FileIO raises a general exception."""
+        # Arrange
+        mock_get_documents.side_effect = Exception("Unexpected error")
+
+        # Act
+        response = self.client.patch('/api/configurations/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "CFG-04")
+        self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Unexpected error cleaning configurations")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.configuration_routes.Configuration')
+    def test_clean_configurations_with_configuration_save_exception(self, mock_configuration_class, mock_get_documents):
+        """Test PATCH /api/configurations when Configuration.save() raises an exception."""
+        # Arrange
+        mock_files = [Mock(name="config1.yaml")]
+        mock_get_documents.return_value = mock_files
+        
+        mock_configuration = Mock()
+        mock_configuration_class.return_value = mock_configuration
+        
+        # Mock Configuration.save() raising ConfiguratorException
+        event = ConfiguratorEvent("test", "save_error")
+        mock_configuration.save.side_effect = ConfiguratorException("Save error", event)
+
+        # Act
+        response = self.client.patch('/api/configurations/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "CFG-04")
+        self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Configurator error cleaning configurations")
+        self.assertEqual(len(response_data["sub_events"]), 1)
+        self.assertEqual(response_data["sub_events"][0]["id"], "test")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.configuration_routes.Configuration')
+    def test_clean_configurations_with_configuration_save_general_exception(self, mock_configuration_class, mock_get_documents):
+        """Test PATCH /api/configurations when Configuration.save() raises a general exception."""
+        # Arrange
+        mock_files = [Mock(name="config1.yaml")]
+        mock_get_documents.return_value = mock_files
+        
+        mock_configuration = Mock()
+        mock_configuration_class.return_value = mock_configuration
+        
+        # Mock Configuration.save() raising general Exception
+        mock_configuration.save.side_effect = Exception("Save failed")
+
+        # Act
+        response = self.client.patch('/api/configurations/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "CFG-04")
+        self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Unexpected error cleaning configurations")
 
 
 if __name__ == '__main__':

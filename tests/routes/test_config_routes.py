@@ -50,6 +50,46 @@ class TestConfigRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 405)
 
+    def test_get_config_configurator_exception(self):
+        """Test GET /api/config when ConfiguratorException is raised."""
+        # Patch Config.get_instance().to_dict to raise ConfiguratorException
+        from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+        import configurator.routes.config_routes as config_routes_mod
+        orig_get_instance = config_routes_mod.Config.get_instance
+        class DummyConfig:
+            def to_dict(self):
+                raise ConfiguratorException("Config error", ConfiguratorEvent("CFG-01", "CONFIG_ERROR"))
+        config_routes_mod.Config.get_instance = staticmethod(lambda: DummyConfig())
+        try:
+            app = Flask(__name__)
+            app.register_blueprint(config_routes_mod.create_config_routes(), url_prefix='/api/config')
+            client = app.test_client()
+            response = client.get('/api/config')
+            self.assertEqual(response.status_code, 500)
+            self.assertIsInstance(response.json, dict)
+            self.assertIn("id", response.json)
+            self.assertIn("type", response.json)
+        finally:
+            config_routes_mod.Config.get_instance = orig_get_instance
+
+    def test_get_config_general_exception(self):
+        """Test GET /api/config when a general Exception is raised."""
+        import configurator.routes.config_routes as config_routes_mod
+        orig_get_instance = config_routes_mod.Config.get_instance
+        class DummyConfig:
+            def to_dict(self):
+                raise Exception("General error")
+        config_routes_mod.Config.get_instance = staticmethod(lambda: DummyConfig())
+        try:
+            app = Flask(__name__)
+            app.register_blueprint(config_routes_mod.create_config_routes(), url_prefix='/api/config')
+            client = app.test_client()
+            response = client.get('/api/config')
+            self.assertEqual(response.status_code, 500)
+            self.assertEqual(response.json, "General error")
+        finally:
+            config_routes_mod.Config.get_instance = orig_get_instance
+
 
 if __name__ == '__main__':
     unittest.main()

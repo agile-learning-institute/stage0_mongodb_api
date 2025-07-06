@@ -313,13 +313,134 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 405)
 
-    def test_dictionaries_patch_method_not_allowed_on_root(self):
-        """Test that PATCH method is not allowed on /api/dictionaries (root)."""
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.dictionary_routes.Dictionary')
+    def test_clean_dictionaries_success(self, mock_dictionary_class, mock_get_documents):
+        """Test successful PATCH /api/dictionaries - Clean Dictionaries."""
+        # Arrange
+        mock_files = [
+            Mock(name="dict1.yaml"),
+            Mock(name="dict2.yaml")
+        ]
+        mock_get_documents.return_value = mock_files
+        
+        mock_dict1 = Mock()
+        mock_dict2 = Mock()
+        mock_dictionary_class.side_effect = [mock_dict1, mock_dict2]
+        
+        # Mock save methods returning events
+        mock_event1 = Mock()
+        mock_event1.to_dict.return_value = {"id": "DIC-03", "status": "SUCCESS"}
+        mock_event2 = Mock()
+        mock_event2.to_dict.return_value = {"id": "DIC-03", "status": "SUCCESS"}
+        
+        mock_dict1.save.return_value = [mock_event1]
+        mock_dict2.save.return_value = [mock_event2]
+
         # Act
         response = self.client.patch('/api/dictionaries')
 
         # Assert
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "DIC-04")
+        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(len(response_data["sub_events"]), 2)
+        
+        mock_get_documents.assert_called_once_with("dictionaries")
+        mock_dictionary_class.assert_any_call("dict1.yaml")
+        mock_dictionary_class.assert_any_call("dict2.yaml")
+        mock_dict1.save.assert_called_once()
+        mock_dict2.save.assert_called_once()
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_clean_dictionaries_configurator_exception(self, mock_get_documents):
+        """Test PATCH /api/dictionaries when FileIO raises ConfiguratorException."""
+        # Arrange
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
+
+        # Act
+        response = self.client.patch('/api/dictionaries')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "DIC-04")
+        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Configurator error cleaning dictionaries")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_clean_dictionaries_general_exception(self, mock_get_documents):
+        """Test PATCH /api/dictionaries when FileIO raises a general exception."""
+        # Arrange
+        mock_get_documents.side_effect = Exception("Unexpected error")
+
+        # Act
+        response = self.client.patch('/api/dictionaries')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "DIC-04")
+        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Unexpected error cleaning dictionaries")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.dictionary_routes.Dictionary')
+    def test_clean_dictionaries_with_dictionary_save_exception(self, mock_dictionary_class, mock_get_documents):
+        """Test PATCH /api/dictionaries when Dictionary.save() raises an exception."""
+        # Arrange
+        mock_files = [Mock(name="dict1.yaml")]
+        mock_get_documents.return_value = mock_files
+        
+        mock_dictionary = Mock()
+        mock_dictionary_class.return_value = mock_dictionary
+        
+        # Mock Dictionary.save() raising ConfiguratorException
+        event = ConfiguratorEvent("test", "save_error")
+        mock_dictionary.save.side_effect = ConfiguratorException("Save error", event)
+
+        # Act
+        response = self.client.patch('/api/dictionaries')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "DIC-04")
+        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Configurator error cleaning dictionaries")
+        self.assertEqual(len(response_data["sub_events"]), 1)
+        self.assertEqual(response_data["sub_events"][0]["id"], "test")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.dictionary_routes.Dictionary')
+    def test_clean_dictionaries_with_dictionary_save_general_exception(self, mock_dictionary_class, mock_get_documents):
+        """Test PATCH /api/dictionaries when Dictionary.save() raises a general exception."""
+        # Arrange
+        mock_files = [Mock(name="dict1.yaml")]
+        mock_get_documents.return_value = mock_files
+        
+        mock_dictionary = Mock()
+        mock_dictionary_class.return_value = mock_dictionary
+        
+        # Mock Dictionary.save() raising general Exception
+        mock_dictionary.save.side_effect = Exception("Save failed")
+
+        # Act
+        response = self.client.patch('/api/dictionaries')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "DIC-04")
+        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Unexpected error cleaning dictionaries")
 
 
 if __name__ == '__main__':

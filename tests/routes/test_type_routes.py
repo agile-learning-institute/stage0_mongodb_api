@@ -313,13 +313,134 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 405)
 
-    def test_types_patch_method_not_allowed_on_root(self):
-        """Test that PATCH method is not allowed on /api/types (root)."""
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.type_routes.Type')
+    def test_clean_types_success(self, mock_type_class, mock_get_documents):
+        """Test successful PATCH /api/types - Clean Types."""
+        # Arrange
+        mock_files = [
+            Mock(name="type1.yaml"),
+            Mock(name="type2.yaml")
+        ]
+        mock_get_documents.return_value = mock_files
+        
+        mock_type1 = Mock()
+        mock_type2 = Mock()
+        mock_type_class.side_effect = [mock_type1, mock_type2]
+        
+        # Mock save methods returning events
+        mock_event1 = Mock()
+        mock_event1.to_dict.return_value = {"id": "TYP-03", "status": "SUCCESS"}
+        mock_event2 = Mock()
+        mock_event2.to_dict.return_value = {"id": "TYP-03", "status": "SUCCESS"}
+        
+        mock_type1.save.return_value = [mock_event1]
+        mock_type2.save.return_value = [mock_event2]
+
         # Act
         response = self.client.patch('/api/types')
 
         # Assert
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "TYP-04")
+        self.assertEqual(response_data["type"], "CLEAN_TYPES")
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(len(response_data["sub_events"]), 2)
+        
+        mock_get_documents.assert_called_once_with("types")
+        mock_type_class.assert_any_call("type1.yaml")
+        mock_type_class.assert_any_call("type2.yaml")
+        mock_type1.save.assert_called_once()
+        mock_type2.save.assert_called_once()
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_clean_types_configurator_exception(self, mock_get_documents):
+        """Test PATCH /api/types when FileIO raises ConfiguratorException."""
+        # Arrange
+        event = ConfiguratorEvent("test", "file_error")
+        mock_get_documents.side_effect = ConfiguratorException("File error", event)
+
+        # Act
+        response = self.client.patch('/api/types')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "TYP-04")
+        self.assertEqual(response_data["type"], "CLEAN_TYPES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Configurator error cleaning types")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    def test_clean_types_general_exception(self, mock_get_documents):
+        """Test PATCH /api/types when FileIO raises a general exception."""
+        # Arrange
+        mock_get_documents.side_effect = Exception("Unexpected error")
+
+        # Act
+        response = self.client.patch('/api/types')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "TYP-04")
+        self.assertEqual(response_data["type"], "CLEAN_TYPES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Unexpected error cleaning types")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.type_routes.Type')
+    def test_clean_types_with_type_save_exception(self, mock_type_class, mock_get_documents):
+        """Test PATCH /api/types when Type.save() raises an exception."""
+        # Arrange
+        mock_files = [Mock(name="type1.yaml")]
+        mock_get_documents.return_value = mock_files
+        
+        mock_type = Mock()
+        mock_type_class.return_value = mock_type
+        
+        # Mock Type.save() raising ConfiguratorException
+        event = ConfiguratorEvent("test", "save_error")
+        mock_type.save.side_effect = ConfiguratorException("Save error", event)
+
+        # Act
+        response = self.client.patch('/api/types')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "TYP-04")
+        self.assertEqual(response_data["type"], "CLEAN_TYPES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Configurator error cleaning types")
+        self.assertEqual(len(response_data["sub_events"]), 1)
+        self.assertEqual(response_data["sub_events"][0]["id"], "test")
+
+    @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
+    @patch('configurator.routes.type_routes.Type')
+    def test_clean_types_with_type_save_general_exception(self, mock_type_class, mock_get_documents):
+        """Test PATCH /api/types when Type.save() raises a general exception."""
+        # Arrange
+        mock_files = [Mock(name="type1.yaml")]
+        mock_get_documents.return_value = mock_files
+        
+        mock_type = Mock()
+        mock_type_class.return_value = mock_type
+        
+        # Mock Type.save() raising general Exception
+        mock_type.save.side_effect = Exception("Save failed")
+
+        # Act
+        response = self.client.patch('/api/types')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertEqual(response_data["id"], "TYP-04")
+        self.assertEqual(response_data["type"], "CLEAN_TYPES")
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertEqual(response_data["data"], "Unexpected error cleaning types")
 
 
 if __name__ == '__main__':
