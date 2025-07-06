@@ -50,6 +50,35 @@ class TestDatabaseRoutes(unittest.TestCase):
         self.assertIn("event", response.json)
 
     @patch('configurator.routes.database_routes.MongoIO')
+    def test_drop_database_safety_limit_exceeded(self, mock_mongo_io_class):
+        """Test DELETE /api/database when collections have more than 100 documents."""
+        # Arrange
+        mock_mongo_io = Mock()
+        mock_event = ConfiguratorEvent(
+            "MON-14", 
+            "DROP_DATABASE", 
+            {"collections_exceeding_limit": [
+                {"collection": "users", "document_count": 150},
+                {"collection": "orders", "document_count": 200}
+            ]}
+        )
+        mock_mongo_io.drop_database.side_effect = ConfiguratorException(
+            "Drop database Safety Limit Exceeded - Collections with >100 documents found", 
+            mock_event
+        )
+        mock_mongo_io_class.return_value = mock_mongo_io
+
+        # Act
+        response = self.client.delete('/api/database')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("message", response.json)
+        self.assertIn("event", response.json)
+        self.assertIn("Safety Limit Exceeded", response.json["message"])
+
+    @patch('configurator.routes.database_routes.MongoIO')
     def test_drop_database_general_exception(self, mock_mongo_io_class):
         """Test DELETE /api/database when MongoIO raises a general exception."""
         # Arrange

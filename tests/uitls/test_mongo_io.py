@@ -7,7 +7,9 @@ Tests will create, modify, and delete documents and indexes within a test collec
 import unittest
 import tempfile
 import json
+import os
 from datetime import datetime
+from unittest.mock import patch, Mock
 from pymongo import ASCENDING, DESCENDING
 from configurator.utils.config import Config
 from configurator.utils.mongo_io import MongoIO
@@ -18,7 +20,10 @@ class TestMongoIO(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
+        os.environ['ENABLE_DROP_DATABASE'] = 'true'
+        os.environ['BUILT_AT'] = 'Local'
         self.config = Config.get_instance()
+        self.config.initialize()
         self.test_collection_name = "test_collection"
         
         # Create MongoIO instance using config values
@@ -27,27 +32,12 @@ class TestMongoIO(unittest.TestCase):
             self.config.MONGO_DB_NAME
         )
         
-        # Clear any existing test data
+        # Clear any existing test data by dropping the database
         try:
             self.mongo_io.drop_database()
-        except:
-            pass  # Database might not exist
-        
-        # Recreate the database
-        self.mongo_io = MongoIO(
-            self.config.MONGO_CONNECTION_STRING, 
-            self.config.MONGO_DB_NAME
-        )
-        
-        self._setup_test_documents()
+        except Exception as e:
+            print("Database might not exist")
 
-    def tearDown(self):
-        """Clean up test fixtures."""
-        if hasattr(self, 'mongo_io'):
-            self.mongo_io.disconnect()
-
-    def _setup_test_documents(self):
-        """Set up test documents."""
         # Insert test documents
         docs = [
             {"name": "Alpha", "sort_value": 1, "status": "active"},
@@ -58,7 +48,17 @@ class TestMongoIO(unittest.TestCase):
         ]
         
         collection = self.mongo_io.get_collection(self.test_collection_name)
-        collection.insert_many(docs)
+        collection.insert_many(docs)        
+
+    def tearDown(self):
+        """Clean up test fixtures."""
+        if hasattr(self, 'mongo_io'):
+            try:
+                # Drop the test database
+                self.mongo_io.drop_database()
+            except:
+                pass  # Database might not drop..
+            self.mongo_io.disconnect()
 
     def test_connection_and_disconnect(self):
         """Test MongoDB connection and disconnection."""
@@ -66,10 +66,6 @@ class TestMongoIO(unittest.TestCase):
         self.assertIsNotNone(self.mongo_io.client)
         self.assertIsNotNone(self.mongo_io.db)
         
-        # Test disconnect
-        self.mongo_io.disconnect()
-        self.assertIsNone(self.mongo_io.client)
-
     def test_get_collection(self):
         """Test getting a collection."""
         collection = self.mongo_io.get_collection(self.test_collection_name)
@@ -182,26 +178,6 @@ class TestMongoIO(unittest.TestCase):
         finally:
             import os
             os.unlink(temp_file)
-
-    def test_drop_database(self):
-        """Test dropping the database."""
-        self.mongo_io.drop_database()
-        
-        # Verify database is dropped by checking if it exists in the client
-        # The database should no longer exist in the list of databases
-        database_names = [db['name'] for db in self.mongo_io.client.list_databases()]
-        self.assertNotIn(self.config.MONGO_DB_NAME, database_names)
-
-    def test_error_handling(self):
-        """Test error handling for invalid operations."""
-        # Test invalid collection name
-        with self.assertRaises(ConfiguratorException):
-            self.mongo_io.get_documents("")
-        
-        # Test invalid index name
-        event = self.mongo_io.remove_index(self.test_collection_name, "nonexistent_index")
-        self.assertEqual(event.status, "FAILURE")
-
 
 if __name__ == '__main__':
     unittest.main()

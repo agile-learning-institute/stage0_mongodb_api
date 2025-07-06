@@ -4,6 +4,7 @@ from bson import ObjectId
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.operations import IndexModel
 from bson import json_util
+from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 
 import logging
@@ -257,11 +258,44 @@ class MongoIO:
             event.record_failure({"error": str(e), "collection": collection_name, "data_file": data_file})
             return event
 
-    def drop_database(self):
+    def drop_database(self) -> ConfiguratorEvent:
         """Drop the database."""
+        event = ConfiguratorEvent(event_id="MON-12", event_type="DROP_DATABASE")
+        config = Config.get_instance()
+        if not config.ENABLE_DROP_DATABASE:
+            event.record_failure({"error": "Drop database feature is not enabled"})
+            return event
+        if not config.BUILT_AT == "Local":
+            event.record_failure({"error": "Drop database not allowed on Non-Local Build"})
+            return event
+        
+        # Check if any collections have more than 100 documents
+        try:
+            collections_with_many_docs = []
+            for collection_name in self.db.list_collection_names():
+                doc_count = self.db.get_collection(collection_name).count_documents({})
+                if doc_count > 100:
+                    collections_with_many_docs.append({
+                        "collection": collection_name,
+                        "document_count": doc_count
+                    })
+            
+            if collections_with_many_docs:
+                event.event_data = collections_with_many_docs
+                event.record_failure("Drop database Safety Limit Exceeded - Collections with >100 documents found")
+                return event
+            
+        except Exception as e:
+            event.event_data = e
+            event.record_failure("Check collection counts raised an exception")
+            return event
+
         try:
             self.client.drop_database(self.db.name)
+            event.record_success()
             logger.info(f"Dropped database: {self.db.name}")
+            return event
         except Exception as e:
-            event = ConfiguratorEvent(event_id="MON-12", event_type="DROP_DATABASE", event_data={"error": str(e)})
-            raise ConfiguratorException(f"Failed to drop database {self.db.name}", event)
+            event.event_data=e
+            event.record_failure(f"Failed to drop database {self.db.name}")
+            return event
