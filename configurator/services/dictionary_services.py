@@ -107,28 +107,33 @@ class Property:
     def to_dict(self):
         if self.ref:
             return {"$ref": self.ref}
-        
-        result = {
-            "description": self.description,
-        }
-        
-        if self.type:
-            result["type"] = self.type
+        result = {}
         
         if self.type == "object":
+            result["description"] = self.description
+            result["type"] = self.type
+            result["required"] = self.required
             result["properties"] = {}
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()
-            if self.additional_properties:
-                result["additionalProperties"] = self.additional_properties
+            result["additionalProperties"] = self.additional_properties
         
-        if self.type == "array" and self.items:
+        elif self.type == "array":
+            result["description"] = self.description
+            result["type"] = self.type
+            result["required"] = self.required
             result["items"] = self.items.to_dict()
         
-        if self.type in ["enum", "enum_array"] and self.enums:
+        elif self.type in ["enum", "enum_array"]:
+            result["description"] = self.description
+            result["type"] = self.type
+            result["required"] = self.required
             result["enums"] = self.enums
-
-        if self.required: 
+            
+        elif self.type:
+            # Custom type (like identifier, word, etc.)
+            result["description"] = self.description
+            result["type"] = self.type
             result["required"] = self.required
             
         return result    
@@ -138,9 +143,9 @@ class Property:
             dictionary = Dictionary(self.ref)
             return dictionary.get_json_schema(enumerators)
 
-        schema = {"description": self.description}
-        
         if self.type == "object":
+            schema = {}
+            schema["description"] = self.description
             schema["type"] = "object"
             schema["properties"] = {}
             for prop_name, prop in self.properties.items():
@@ -148,20 +153,33 @@ class Property:
             required_props = self._get_required()
             if required_props:
                 schema["required"] = required_props
-            if self.additional_properties:
-                schema["additionalProperties"] = self.additional_properties
+            schema["additionalProperties"] = self.additional_properties
+            return schema
+            
         elif self.type == "array":
+            schema = {}
+            schema["description"] = self.description
             schema["type"] = "array"
             if self.items:
                 schema["items"] = self.items.get_json_schema(enumerators)
+            return schema
+            
         elif self.type == "enum":
+            schema = {}
+            schema["description"] = self.description
             schema["type"] = "string"
             if self.enums:
                 schema["enum"] = enumerators.get_enum_values(self.enums)
+            return schema
+            
         elif self.type == "enum_array":
+            schema = {}
+            schema["description"] = self.description
             schema["type"] = "array"
             if self.enums:
                 schema["items"] = {"type": "string", "enum": enumerators.get_enum_values(self.enums)}
+            return schema
+            
         elif self.type:
             # Reference a custom type
             custom_type = Type(f"{self.type}.yaml")
@@ -172,16 +190,14 @@ class Property:
             raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 
                                       ConfiguratorEvent(event_id="DIC-99", event_type="INVALID_PROPERTY_TYPE"))
             
-        return schema
-    
     def get_bson_schema(self, enumerators: Enumerators):
         if self.ref:
             dictionary = Dictionary(self.ref)
             return dictionary.get_bson_schema(enumerators)
 
-        schema = {"description": self.description}
-        
         if self.type == "object":
+            schema = {}
+            schema["description"] = self.description
             schema["bsonType"] = "object"
             schema["properties"] = {}
             for prop_name, prop in self.properties.items():
@@ -189,20 +205,33 @@ class Property:
             required_props = self._get_required()
             if required_props:
                 schema["required"] = required_props
-            if self.additional_properties:
-                schema["additionalProperties"] = self.additional_properties
+            schema["additionalProperties"] = self.additional_properties
+            return schema
+            
         elif self.type == "array":
+            schema = {}
+            schema["description"] = self.description
             schema["bsonType"] = "array"
             if self.items:
                 schema["items"] = self.items.get_bson_schema(enumerators)
+            return schema
+            
         elif self.type == "enum":
+            schema = {}
+            schema["description"] = self.description
             schema["bsonType"] = "string"
             if self.enums:
                 schema["enum"] = enumerators.get_enum_values(self.enums)
+            return schema
+            
         elif self.type == "enum_array":
+            schema = {}
+            schema["description"] = self.description
             schema["bsonType"] = "array"
             if self.enums:
                 schema["items"] = {"bsonType": "string", "enum": enumerators.get_enum_values(self.enums)}
+            return schema
+            
         elif self.type:
             # Reference a custom type
             custom_type = Type(f"{self.type}.yaml")

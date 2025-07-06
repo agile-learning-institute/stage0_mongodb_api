@@ -152,7 +152,7 @@ class FileIO:
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
                 if extension == ".yaml":
-                    yaml.dump(document, f, default_flow_style=False, allow_unicode=True)
+                    yaml.dump(document, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
                 elif extension == ".json":
                     json.dump(document, f, indent=2, ensure_ascii=False)
             

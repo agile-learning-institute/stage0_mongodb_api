@@ -1,5 +1,6 @@
 description: A simple collection for testing
 type: object
+required: false
 properties:
   _id:
     description: The unique identifier for the media
@@ -8,8 +9,10 @@ properties:
   name:
     description: The name of the document
     type: word
+    required: false
   status:
     description: The current status of the document
     type: enum
-    enums: default_status
     required: true
+    enums: default_status
+additionalProperties: false
