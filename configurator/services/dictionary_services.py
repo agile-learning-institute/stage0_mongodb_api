@@ -18,11 +18,15 @@ class Dictionary:
     def to_dict(self):
         return self.property.to_dict()
     
-    def get_json_schema(self, enumerators: Enumerators):
-        return self.property.get_json_schema(enumerators)
+    def get_json_schema(self, enumerators: Enumerators, ref_stack: list = None):
+        if ref_stack is None:
+            ref_stack = []
+        return self.property.get_json_schema(enumerators, ref_stack)
     
-    def get_bson_schema(self, enumerators: Enumerators):
-        return self.property.get_bson_schema(enumerators)
+    def get_bson_schema(self, enumerators: Enumerators, ref_stack: list = None):
+        if ref_stack is None:
+            ref_stack = []
+        return self.property.get_bson_schema(enumerators, ref_stack)
             
     def save(self) -> list[ConfiguratorEvent]:
         event = ConfiguratorEvent(event_id="DIC-03", event_type="SAVE_DICTIONARY")
@@ -83,6 +87,7 @@ class Dictionary:
 
 class Property:
     def __init__(self, name: str, property: dict):
+        self.config = Config.get_instance()
         self.name = name
         self.ref = property.get("$ref", None)
         self.description = property.get("description", "Missing Required Description")
@@ -138,10 +143,37 @@ class Property:
             
         return result    
     
-    def get_json_schema(self, enumerators: Enumerators):
+    def get_json_schema(self, enumerators: Enumerators, ref_stack: list = None):
+        if ref_stack is None:
+            ref_stack = []
+        
         if self.ref:
-            dictionary = Dictionary(self.ref)
-            return dictionary.get_json_schema(enumerators)
+            # Check for circular reference
+            if self.ref in ref_stack:
+                ref_chain = " -> ".join(ref_stack + [self.ref])
+                event = ConfiguratorEvent(
+                    event_id="DIC-07", 
+                    event_type="CIRCULAR_REFERENCE",
+                    event_data={"ref_chain": ref_chain, "ref_stack": ref_stack}
+                )
+                raise ConfiguratorException(f"Circular reference detected: {ref_chain}", event)
+            
+            # Check stack depth limit
+            if len(ref_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
+                event = ConfiguratorEvent(
+                    event_id="DIC-08", 
+                    event_type="STACK_DEPTH_EXCEEDED",
+                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(ref_stack)}
+                )
+                raise ConfiguratorException(f"Reference stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
+            
+            # Add current ref to stack and process
+            ref_stack.append(self.ref)
+            try:
+                dictionary = Dictionary(self.ref)
+                return dictionary.get_json_schema(enumerators, ref_stack)
+            finally:
+                ref_stack.pop()
 
         if self.type == "object":
             schema = {}
@@ -149,7 +181,7 @@ class Property:
             schema["type"] = "object"
             schema["properties"] = {}
             for prop_name, prop in self.properties.items():
-                schema["properties"][prop_name] = prop.get_json_schema(enumerators)
+                schema["properties"][prop_name] = prop.get_json_schema(enumerators, ref_stack)
             required_props = self._get_required()
             if required_props:
                 schema["required"] = required_props
@@ -161,7 +193,7 @@ class Property:
             schema["description"] = self.description
             schema["type"] = "array"
             if self.items:
-                schema["items"] = self.items.get_json_schema(enumerators)
+                schema["items"] = self.items.get_json_schema(enumerators, ref_stack)
             return schema
             
         elif self.type == "enum":
@@ -190,10 +222,37 @@ class Property:
             raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 
                                       ConfiguratorEvent(event_id="DIC-99", event_type="INVALID_PROPERTY_TYPE"))
             
-    def get_bson_schema(self, enumerators: Enumerators):
+    def get_bson_schema(self, enumerators: Enumerators, ref_stack: list = None):
+        if ref_stack is None:
+            ref_stack = []
+        
         if self.ref:
-            dictionary = Dictionary(self.ref)
-            return dictionary.get_bson_schema(enumerators)
+            # Check for circular reference
+            if self.ref in ref_stack:
+                ref_chain = " -> ".join(ref_stack + [self.ref])
+                event = ConfiguratorEvent(
+                    event_id="DIC-07", 
+                    event_type="CIRCULAR_REFERENCE",
+                    event_data={"ref_chain": ref_chain, "ref_stack": ref_stack}
+                )
+                raise ConfiguratorException(f"Circular reference detected: {ref_chain}", event)
+            
+            # Check stack depth limit
+            if len(ref_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
+                event = ConfiguratorEvent(
+                    event_id="DIC-08", 
+                    event_type="STACK_DEPTH_EXCEEDED",
+                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(ref_stack)}
+                )
+                raise ConfiguratorException(f"Reference stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
+            
+            # Add current ref to stack and process
+            ref_stack.append(self.ref)
+            try:
+                dictionary = Dictionary(self.ref)
+                return dictionary.get_bson_schema(enumerators, ref_stack)
+            finally:
+                ref_stack.pop()
 
         if self.type == "object":
             schema = {}
@@ -201,7 +260,7 @@ class Property:
             schema["bsonType"] = "object"
             schema["properties"] = {}
             for prop_name, prop in self.properties.items():
-                schema["properties"][prop_name] = prop.get_bson_schema(enumerators)
+                schema["properties"][prop_name] = prop.get_bson_schema(enumerators, ref_stack)
             required_props = self._get_required()
             if required_props:
                 schema["required"] = required_props
@@ -213,7 +272,7 @@ class Property:
             schema["description"] = self.description
             schema["bsonType"] = "array"
             if self.items:
-                schema["items"] = self.items.get_bson_schema(enumerators)
+                schema["items"] = self.items.get_bson_schema(enumerators, ref_stack)
             return schema
             
         elif self.type == "enum":

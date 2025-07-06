@@ -73,11 +73,15 @@ class Type:
             event.record_failure("unexpected error saving document")
         return [event]
     
-    def get_json_schema(self):
-        return self.property.get_json_schema()
+    def get_json_schema(self, type_stack: list = None):
+        if type_stack is None:
+            type_stack = []
+        return self.property.get_json_schema(type_stack)
     
-    def get_bson_schema(self):
-        return self.property.get_bson_schema()
+    def get_bson_schema(self, type_stack: list = None):
+        if type_stack is None:
+            type_stack = []
+        return self.property.get_bson_schema(type_stack)
                 
     def delete(self):
         event = ConfiguratorEvent(event_id="TYP-05", event_type="DELETE_TYPE")
@@ -105,6 +109,7 @@ class Type:
 
 class TypeProperty:
     def __init__(self, name: str, property: dict):
+        self.config = Config.get_instance()
         self.name = name
         self.description = property.get("description", "Missing Required Description")
         self.schema = property.get("schema", None)
@@ -180,7 +185,9 @@ class TypeProperty:
             "type": self.type
         }
     
-    def get_json_schema(self):
+    def get_json_schema(self, type_stack: list = None):
+        if type_stack is None:
+            type_stack = []
         if self.is_universal:
             return {
                 "description": self.description,
@@ -195,14 +202,14 @@ class TypeProperty:
             return {
                 "description": self.description,
                 "type": "array",
-                "items": self.items.get_json_schema()
+                "items": self.items.get_json_schema(type_stack)
             }
         if self.type == "object":
             properties = {}
             required_properties = []
             
             for name, property in self.properties.items():
-                properties[name] = property.get_json_schema()
+                properties[name] = property.get_json_schema(type_stack)
                 if property.required:
                     required_properties.append(name)
             
@@ -218,14 +225,41 @@ class TypeProperty:
                 
             return result
         if self.type:
-            custom_type = Type(f"{self.type}.yaml")
-            custom_schema = custom_type.property.get_json_schema()
-            custom_schema["description"] = self.description
-            return custom_schema
+            # Check for circular reference
+            type_name = f"{self.type}.yaml"
+            if type_name in type_stack:
+                type_chain = " -> ".join(type_stack + [type_name])
+                event = ConfiguratorEvent(
+                    event_id="TYP-07", 
+                    event_type="CIRCULAR_TYPE_REFERENCE",
+                    event_data={"type_chain": type_chain, "type_stack": type_stack}
+                )
+                raise ConfiguratorException(f"Circular type reference detected: {type_chain}", event)
+            
+            # Check stack depth limit
+            if len(type_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
+                event = ConfiguratorEvent(
+                    event_id="TYP-08", 
+                    event_type="TYPE_STACK_DEPTH_EXCEEDED",
+                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(type_stack)}
+                )
+                raise ConfiguratorException(f"Type stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
+            
+            # Add current type to stack and process
+            type_stack.append(type_name)
+            try:
+                custom_type = Type(type_name)
+                custom_schema = custom_type.property.get_json_schema(type_stack)
+                custom_schema["description"] = self.description
+                return custom_schema
+            finally:
+                type_stack.pop()
 
         raise ConfiguratorException(f"Type {self.type} is not a valid type", ConfiguratorEvent(event_id="TYP-99", event_type="INVALID_TYPE"))
     
-    def get_bson_schema(self):
+    def get_bson_schema(self, type_stack: list = None):
+        if type_stack is None:
+            type_stack = []
         if self.is_universal:
             schema = self.schema.copy()
             schema["bsonType"] = schema["type"]
@@ -243,14 +277,14 @@ class TypeProperty:
             return {
                 "description": self.description,
                 "bsonType": "array",
-                "items": self.items.get_bson_schema()
+                "items": self.items.get_bson_schema(type_stack)
             }
         if self.type == "object":
             properties = {}
             required_properties = []
             
             for name, property in self.properties.items():
-                properties[name] = property.get_bson_schema()
+                properties[name] = property.get_bson_schema(type_stack)
                 if property.required:
                     required_properties.append(name)
             
@@ -266,9 +300,34 @@ class TypeProperty:
                 
             return result
         if self.type:
-            custom_type = Type(f"{self.type}.yaml")
-            custom_schema = custom_type.property.get_bson_schema()
-            custom_schema["description"] = self.description
-            return custom_schema
-        
+            # Check for circular reference
+            type_name = f"{self.type}.yaml"
+            if type_name in type_stack:
+                type_chain = " -> ".join(type_stack + [type_name])
+                event = ConfiguratorEvent(
+                    event_id="TYP-07", 
+                    event_type="CIRCULAR_TYPE_REFERENCE",
+                    event_data={"type_chain": type_chain, "type_stack": type_stack}
+                )
+                raise ConfiguratorException(f"Circular type reference detected: {type_chain}", event)
+            
+            # Check stack depth limit
+            if len(type_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
+                event = ConfiguratorEvent(
+                    event_id="TYP-08", 
+                    event_type="TYPE_STACK_DEPTH_EXCEEDED",
+                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(type_stack)}
+                )
+                raise ConfiguratorException(f"Type stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
+            
+            # Add current type to stack and process
+            type_stack.append(type_name)
+            try:
+                custom_type = Type(type_name)
+                custom_schema = custom_type.property.get_bson_schema(type_stack)
+                custom_schema["description"] = self.description
+                return custom_schema
+            finally:
+                type_stack.pop()
+
         raise ConfiguratorException(f"Type {self.type} is not a valid type", ConfiguratorEvent(event_id="TYP-99", event_type="INVALID_TYPE"))

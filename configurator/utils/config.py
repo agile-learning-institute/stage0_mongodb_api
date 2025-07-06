@@ -33,6 +33,7 @@ class Config:
             self.EXIT_AFTER_PROCESSING = False
             self.LOAD_TEST_DATA = False
             self.ENABLE_DROP_DATABASE = False
+            self.RENDER_STACK_MAX_DEPTH = 0
     
             # Default Values grouped by value type            
             self.config_strings = {
@@ -49,6 +50,7 @@ class Config:
             self.config_ints = {
                 "API_PORT": "8081",
                 "SPA_PORT": "8082",
+                "RENDER_STACK_MAX_DEPTH": "100",
             }
             self.config_booleans = {
                 "AUTO_PROCESS": "false",
