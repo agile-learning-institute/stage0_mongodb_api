@@ -1,0 +1,6 @@
+title: Schedule
+description: A list of appointments
+type: array
+items:
+  description: An appointment
+  type: appointment

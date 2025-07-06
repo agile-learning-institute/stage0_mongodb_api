@@ -1,5 +1,0 @@
-title: URL
-description: A valid URL
-schema:
-  type: string
-  pattern: "^https?://[^\\s]+$"
