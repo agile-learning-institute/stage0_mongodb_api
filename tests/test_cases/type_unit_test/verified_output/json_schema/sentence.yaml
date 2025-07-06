@@ -1,0 +1,2 @@
+type: string
+pattern: "^[^\\t\\n\\r]{0,255}$" 

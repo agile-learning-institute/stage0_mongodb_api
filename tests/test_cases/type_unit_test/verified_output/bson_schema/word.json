@@ -1,5 +1,5 @@
 {
   "description": "A String of text, at least 4 and no more than 40 characters with no spaces, or special characters like /t or /n",
   "bsonType": "string",
-  "pattern": "^[^\\s]{4,40}$"
+  "pattern": "^\\S{1,40}$"
 } 

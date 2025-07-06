@@ -1,4 +1,5 @@
 {
   "description": "A valid email address",
-  "bsonType": "string"
+  "bsonType": "string",
+  "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
 } 
