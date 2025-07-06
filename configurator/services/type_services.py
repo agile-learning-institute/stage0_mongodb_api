@@ -86,11 +86,20 @@ class TypeProperty:
         self.name = name
         self.description = property.get("description", "Missing Required Description")
         self.schema = property.get("schema", None)
-        self.json_type = self.schema.get("json_type", None) if self.schema else None
-        self.bson_type = self.schema.get("bson_type", None) if self.schema else None
+        # Support top-level json_type/bson_type as well as inside schema
+        self.json_type = None
+        self.bson_type = None
         self.type = property.get("type", None)
         self.required = property.get("required", False)
         self.additional_properties = property.get("additionalProperties", False)
+        if self.schema:
+            self.json_type = self.schema.get("json_type", None)
+            self.bson_type = self.schema.get("bson_type", None)
+        # Top-level json_type/bson_type
+        if property.get("json_type"):
+            self.json_type = property["json_type"]
+        if property.get("bson_type"):
+            self.bson_type = property["bson_type"]
         if self.type == "array":
             self.items = TypeProperty("items", property.get("items", {}))
         if self.type == "object":
@@ -100,11 +109,13 @@ class TypeProperty:
         # Initialize primitive flags
         self.is_primitive = False
         self.is_universal = False
-        
         if self.schema:
-            self.is_primitive = True
-            self.is_universal = True
-        if self.json_type and self.bson_type:
+            # If schema is a universal schema (not split into json_type/bson_type)
+            if not ("json_type" in self.schema and "bson_type" in self.schema):
+                self.is_primitive = True
+                self.is_universal = True
+        # If json_type and bson_type are present (either top-level or in schema), treat as non-universal primitive
+        if self.json_type is not None and self.bson_type is not None:
             self.is_primitive = True
             self.is_universal = False
 
@@ -126,8 +137,10 @@ class TypeProperty:
             if self.is_universal:
                 dict["schema"] = self.schema
             else:
-                dict["json_type"] = self.json_type
-                dict["bson_type"] = self.bson_type
+                if self.json_type is not None:
+                    dict["json_type"] = self.json_type
+                if self.bson_type is not None:
+                    dict["bson_type"] = self.bson_type
         return dict
     
     def get_json_schema(self):
@@ -148,7 +161,8 @@ class TypeProperty:
             if self.is_universal:
                 schema.update(self.schema)
             else:
-                schema.update(self.json_type)
+                if self.json_type is not None:
+                    schema.update(self.json_type)
         return schema
     
     def get_bson_schema(self):
@@ -171,5 +185,6 @@ class TypeProperty:
                 schema["bsonType"] = schema["type"]
                 del schema["type"]
             else:
-                schema.update(self.bson_type)
+                if self.bson_type is not None:
+                    schema.update(self.bson_type)
         return schema
