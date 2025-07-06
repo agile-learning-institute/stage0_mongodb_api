@@ -17,13 +17,10 @@ def create_enumerator_routes():
             return jsonify(content), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting enumerators: {str(e)}")
-            # If file not found, return 404
-            if e.event and e.event.type == "FILE_NOT_FOUND":
-                return jsonify(e.to_dict()), 404
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting enumerators: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
     
     # PUT /api/enumerators - Overwrite enumerators.json
     @enumerator_routes.route('', methods=['PUT'])
@@ -37,7 +34,7 @@ def create_enumerator_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error saving enumerators: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
     
     logger.info("Enumerator Flask Routes Registered")
     return enumerator_routes

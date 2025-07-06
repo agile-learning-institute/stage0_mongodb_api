@@ -23,7 +23,7 @@ def create_type_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error listing configurations: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     # GET /api/types/<file_name> - Return a type file
     @type_routes.route('/<file_name>', methods=['GET'])
@@ -36,7 +36,7 @@ def create_type_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting type {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     # PUT /api/types/<file_name> - Update a type file
     @type_routes.route('/<file_name>', methods=['PUT'])
@@ -50,7 +50,7 @@ def create_type_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error updating type {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     @type_routes.route('/<file_name>', methods=['DELETE'])
     def delete_type(file_name):
@@ -63,7 +63,7 @@ def create_type_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error deleting type {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     @type_routes.route('/<file_name>', methods=['PATCH'])
     def lock_unlock_type(file_name):
@@ -76,7 +76,7 @@ def create_type_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error locking/unlocking type {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     logger.info("Type Flask Routes Registered")
     return type_routes

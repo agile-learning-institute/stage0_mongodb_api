@@ -24,7 +24,7 @@ def create_database_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error dropping the database: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     logger.info("database Flask Routes Registered")
     return database_routes

@@ -17,7 +17,7 @@ def create_config_routes():
             return jsonify(config.to_dict()), 200
         except Exception as e:
             logger.warning(f"get_config Error has occurred: {e}")
-            return jsonify({"error": "A processing error occurred"}), 500
+            return jsonify(str(e)), 500
         
     logger.info("Config Flask Routes Registered")
     return config_routes

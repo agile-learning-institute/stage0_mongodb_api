@@ -22,7 +22,7 @@ def create_test_data_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting test data files: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     # GET /api/dictionaries/<file_name> - Return a test_data file
     @test_data_routes.route('/<file_name>', methods=['GET'])
@@ -35,7 +35,7 @@ def create_test_data_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting test data {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     # PUT /api/dictionaries/<file_name> - Update a test_data file
     @test_data_routes.route('/<file_name>', methods=['PUT'])
@@ -48,7 +48,7 @@ def create_test_data_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error updating test data {file_name}: {str(e)}")
-            return jsonify({"error": "A processing error occurred"}), 500
+            return jsonify(str(e)), 500
         
     @test_data_routes.route('/<file_name>', methods=['DELETE'])
     def delete_test_data(file_name):
@@ -60,7 +60,7 @@ def create_test_data_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error deleting test data {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     @test_data_routes.route('/<file_name>', methods=['PATCH'])
     def lock_unlock_test_data(file_name):
@@ -72,7 +72,7 @@ def create_test_data_routes():
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error locking/unlocking test data {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     logger.info("test_data Flask Routes Registered")
     return test_data_routes

@@ -16,13 +16,13 @@ def create_configuration_routes():
     def list_configurations():
         try:
             configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-            return jsonify(configurations)
+            return jsonify(configurations), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error listing configurations: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error listing configurations: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     @blueprint.route('/', methods=['POST'])
     def process_configurations():
@@ -33,26 +33,26 @@ def create_configuration_routes():
             for configuration_name in configurations:
                 configuration = Configuration(configuration_name)
                 results.append(configuration.process())
-            return jsonify(results)
+            return jsonify(results), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error processing configurations: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error processing configurations: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     @blueprint.route('/<file_name>/', methods=['GET'])
     def get_configuration(file_name):
         """Get a specific configuration configuration"""
         try:
             configuration = Configuration(file_name)
-            return jsonify(configuration)
+            return jsonify(configuration), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting configuration {file_name}: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting configuration {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     @blueprint.route('/<file_name>/', methods=['PUT'])
     def put_configuration(file_name):
@@ -60,13 +60,13 @@ def create_configuration_routes():
         try:
             configuration = Configuration(file_name, request.json)
             saved = configuration.save()
-            return jsonify(saved)
+            return jsonify(saved), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting configuration {file_name}: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting configuration {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
         
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     def delete_configuration(file_name):
@@ -74,13 +74,13 @@ def create_configuration_routes():
         try:
             configuration = Configuration(file_name)
             deleted = configuration.delete()
-            return jsonify(deleted) 
+            return jsonify(deleted), 200 
         except ConfiguratorException as e:
             logger.error(f"Configurator error deleting configuration {file_name}: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error deleting configuration {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     @blueprint.route('/<file_name>/', methods=['PATCH'])
     def lock_unlock_configuration(file_name):
@@ -88,13 +88,13 @@ def create_configuration_routes():
         try:
             configuration = Configuration(file_name)
             result = configuration.flip_lock()
-            return jsonify(result)
+            return jsonify(result), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error locking/unlocking configuration {file_name}: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error locking/unlocking configuration {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     @blueprint.route('/<file_name>/', methods=['POST'])
     def process_configuration(file_name):
@@ -102,13 +102,13 @@ def create_configuration_routes():
         try:
             configuration = Configuration(file_name)
             result = configuration.process()
-            return jsonify(result)
+            return jsonify(result), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error processing configuration {file_name}: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error processing configuration {file_name}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     @blueprint.route('json_schema/<file_name>/<version>/', methods=['GET'])
     def get_json_schema(file_name, version):
@@ -116,13 +116,13 @@ def create_configuration_routes():
         try:
             configuration = Configuration(file_name)
             schema = configuration.get_json_schema(version)
-            return jsonify(schema)
+            return jsonify(schema), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting JSON schema {file_name}, {version}: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting JSON schema {file_name}, {version}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     @blueprint.route('bson_schema/<file_name>/<version>/', methods=['GET'])
     def get_bson_schema(file_name, version):
@@ -130,13 +130,13 @@ def create_configuration_routes():
         try:
             configuration = Configuration(file_name)
             schema = configuration.get_bson_schema(version)
-            return jsonify(schema)
+            return jsonify(schema), 200
         except ConfiguratorException as e:
             logger.error(f"Configurator error getting BSON schema {file_name}, {version}: {str(e)}")
             return jsonify(e.to_dict()), 500
         except Exception as e:
             logger.error(f"Unexpected error getting BSON schema {file_name}, {version}: {str(e)}")
-            return jsonify("Undefined Exception"), 500
+            return jsonify(str(e)), 500
 
     logger.info("configuration Flask Routes Registered")
     return blueprint 
