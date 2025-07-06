@@ -23,9 +23,8 @@ python-dotenv = "*"
 flask = "*"
 prometheus-flask-exporter = "*"
 pymongo = "*"
-stage0-py-utils = "*"
 pyyaml = ">=6.0.1"
-stage0-mongodb-api = {file = ".", editable = true}
+configurator = {file = ".", editable = true}
 
 [dev-packages]
 coverage = "*"

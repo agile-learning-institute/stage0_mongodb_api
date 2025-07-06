@@ -32,6 +32,7 @@ class Config:
             self.AUTO_PROCESS = False
             self.EXIT_AFTER_PROCESSING = False
             self.LOAD_TEST_DATA = False
+            self.ENABLE_DROP_DATABASE = False
     
             # Default Values grouped by value type            
             self.config_strings = {
@@ -52,6 +53,7 @@ class Config:
                 "AUTO_PROCESS": "false",
                 "EXIT_AFTER_PROCESSING": "false",
                 "LOAD_TEST_DATA": "false",
+                "ENABLE_DROP_DATABASE": "false",
             }            
             self.config_string_secrets = {  
                 "MONGO_CONNECTION_STRING": "mongodb://mongodb:27017/"
@@ -114,7 +116,7 @@ class Config:
         from_source = "default"
 
         # Check for config file first
-        file_path = Path(self.INPUT_FOLDER) 
+        file_path = Path(self.INPUT_FOLDER, name) 
         if file_path.exists():
             value = file_path.read_text().strip()
             from_source = "file"

@@ -1,6 +1,6 @@
 import unittest
 import os
-from stage0_py_utils import Config
+from configurator.utils.config import Config
 
 class TestConfigEnvironment(unittest.TestCase):
 
@@ -11,7 +11,7 @@ class TestConfigEnvironment(unittest.TestCase):
         
         # Set all environment variables to "ENV_VALUE"
         for key, default in {**self.config.config_strings, **self.config.config_string_secrets}.items():
-            if key != "BUILT_AT" and key != "CONFIG_FOLDER":
+            if key != "BUILT_AT" and key != "INPUT_FOLDER":
                 os.environ[key] = "ENV_VALUE"
             
         for key, default in self.config.config_ints.items():
@@ -20,21 +20,18 @@ class TestConfigEnvironment(unittest.TestCase):
         for key, default in self.config.config_booleans.items():
             os.environ[key] = "true"
 
-        for key, default in self.config.config_json_secrets.items():
-            os.environ[key] = '{"foo":"bar"}'
-
         # Initialize the Config object
         self.config._instance = None
         self.config.initialize()
         
         # Reset environment variables 
-        for key, default in {**self.config.config_strings, **self.config.config_ints, **self.config.config_string_secrets, **self.config.config_json_secrets}.items():
-            if key != "BUILT_AT" and key != "CONFIG_FOLDER":
+        for key, default in {**self.config.config_strings, **self.config.config_ints, **self.config.config_string_secrets}.items():
+            if key != "BUILT_AT" and key != "INPUT_FOLDER":
                 del os.environ[key]
             
     def test_env_string_properties(self):
         for key, default in {**self.config.config_strings, **self.config.config_string_secrets}.items():
-            if key != "BUILT_AT" and key != "CONFIG_FOLDER":
+            if key != "BUILT_AT" and key != "INPUT_FOLDER":
                 self.assertEqual(getattr(self.config, key), "ENV_VALUE")
 
     def test_env_int_properties(self):
@@ -45,13 +42,9 @@ class TestConfigEnvironment(unittest.TestCase):
         for key, default in self.config.config_booleans.items():
             self.assertEqual(getattr(self.config, key), True)
             
-    def test_env_json_secret_properties(self):
-        for key, default in self.config.config_json_secrets.items():
-            self.assertEqual(getattr(self.config, key), {"foo":"bar"})
-
     def test_env_string_ci(self):
         for key, default in self.config.config_strings.items():
-            if key != "BUILT_AT" and key != "CONFIG_FOLDER":
+            if key != "BUILT_AT" and key != "INPUT_FOLDER":
                 self._test_config_environment_value(key, "ENV_VALUE")
 
     def test_env_int_ci(self):
@@ -59,7 +52,7 @@ class TestConfigEnvironment(unittest.TestCase):
             self._test_config_environment_value(key, "1234")
 
     def test_env_secret_ci(self):
-        for key, default in {**self.config.config_string_secrets, **self.config.config_json_secrets}.items():
+        for key, default in self.config.config_string_secrets.items():
             self._test_config_environment_value(key, "secret")
 
     def _test_config_environment_value(self, ci_name, value):

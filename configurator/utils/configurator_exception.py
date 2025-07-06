@@ -30,7 +30,6 @@ class ConfiguratorEvent:
         self.data = data
         self.status = "FAILURE"
         self.ends = datetime.now()
-
         
     def to_dict(self):
         return {

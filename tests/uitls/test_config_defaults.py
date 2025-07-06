@@ -28,7 +28,7 @@ class TestConfigDefaults(unittest.TestCase):
     def test_to_dict(self):
         """Test the to_dict method of the Config class."""
         # Convert the config object to a dictionary
-        result_dict = self.config.to_dict({})
+        result_dict = self.config.to_dict()
         self.assertIsInstance(result_dict["config_items"], list)
         
     def test_default_string_ci(self):
@@ -36,7 +36,7 @@ class TestConfigDefaults(unittest.TestCase):
             self._test_config_default_value(key, default)
 
     def test_default_secret_ci(self):
-        for key, default in {**self.config.config_string_secrets, **self.config.config_json_secrets}.items():
+        for key, default in self.config.config_string_secrets.items():
             self._test_config_default_value(key, "secret")
 
     def _test_config_default_value(self, config_name, expected_value):

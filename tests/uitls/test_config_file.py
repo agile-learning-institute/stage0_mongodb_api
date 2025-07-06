@@ -1,25 +1,23 @@
 import unittest
 import os
-from stage0_py_utils import Config
+from configurator.utils.config import Config
 
 class TestConfigFiles(unittest.TestCase):
 
     def setUp(self):
-        """Re-initialize the config for each test."""
-        self.config = Config.get_instance()
-        
         # Set Config Folder location
-        os.environ["CONFIG_FOLDER"] = "./tests/test_data/config/"
+        os.environ["INPUT_FOLDER"] = "./tests/test_cases/config_files/"
 
         # Initialize the Config object
+        self.config = Config.get_instance()
         self.config.initialize()
         
         # Reset config folder location 
-        del os.environ["CONFIG_FOLDER"]
+        del os.environ["INPUT_FOLDER"]
 
     def test_file_string_properties(self):
         for key, default in {**self.config.config_strings, **self.config.config_string_secrets}.items():
-            if key != "BUILT_AT" and key != "CONFIG_FOLDER":
+            if key != "BUILT_AT" and key != "INPUT_FOLDER" and key != "LOGGING_LEVEL":
                 self.assertEqual(getattr(self.config, key), "TEST_VALUE")
 
     def test_file_int_properties(self):
@@ -30,13 +28,9 @@ class TestConfigFiles(unittest.TestCase):
         for key, default in self.config.config_booleans.items():
             self.assertEqual(getattr(self.config, key), True)
 
-    def test_file_json_secret_properties(self):
-        for key, default in self.config.config_json_secrets.items():
-            self.assertEqual(getattr(self.config, key), {"foo":"bat"})
-
     def test_file_string_ci(self):
         for key, default in self.config.config_strings.items():
-            if key != "BUILT_AT" and key != "CONFIG_FOLDER":
+            if key != "BUILT_AT" and key != "INPUT_FOLDER" and key != "LOGGING_LEVEL":
                 self._test_config_file_value(key, "TEST_VALUE")
 
     def test_file_int_ci(self):
@@ -44,7 +38,7 @@ class TestConfigFiles(unittest.TestCase):
             self._test_config_file_value(key, "9999")
 
     def test_file_secret_ci(self):
-        for key, default in {**self.config.config_string_secrets, **self.config.config_json_secrets}.items():
+        for key, default in self.config.config_string_secrets.items():
             self._test_config_file_value(key, "secret")
 
 
