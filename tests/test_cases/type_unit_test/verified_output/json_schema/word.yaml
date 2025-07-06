@@ -1,3 +1,4 @@
-description: A String of text, at least 4 and no more than 40 characters with no spaces, or special characters like /t or /n
+description: A String of text, 1 to 40 characters with no spaces, or special characters
+  like /t or /n
 type: string
-pattern: "^\\S{1,40}$" 
+pattern: ^\S{1,40}$

@@ -267,7 +267,7 @@ class TypeProperty:
             return result
         if self.type:
             custom_type = Type(f"{self.type}.yaml")
-            custom_schema = custom_type.property.get_bson_schema() if hasattr(self, 'get_bson_schema') else custom_type.property.get_json_schema()
+            custom_schema = custom_type.property.get_bson_schema()
             custom_schema["description"] = self.description
             return custom_schema
         

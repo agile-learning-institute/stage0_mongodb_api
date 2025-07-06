@@ -26,111 +26,59 @@ def clear_config():
     Config._instance = None
 
 
-class TestTypeRenderingVerified(unittest.TestCase):
-    """Test rendering against verified output files"""
+class TestTypeRendering(unittest.TestCase):
+    """Test type rendering against verified output files"""
 
     def setUp(self):
-        self.config = set_config_input_folder("tests/test_cases/type_unit_test")
+        self.config = set_config_input_folder("./tests/test_cases/type_unit_test")
 
     def tearDown(self):
         clear_config()
 
-    def test_object_type_json_schema(self):
-        """Test object type JSON schema rendering against verified output"""
-        type_data = {
-            "description": "Test object type",
-            "properties": {
-                "name": {
-                    "description": "Name property",
-                    "type": "string"
-                },
-                "age": {
-                    "description": "Age property",
-                    "type": "number"
-                }
-            }
-        }
-        type_instance = Type("test_object", type_data)
+    def test_all_verified_renders(self):
+        """Test all verified renders match actual renders"""
+        # Test JSON schema renders
+        json_dir = f"{self.config.INPUT_FOLDER}/verified_output/json_schema"
+        for file in os.listdir(json_dir):
+            if file.endswith('.yaml'):
+                type_name = file.replace('.yaml', '')
+                self._test_json_render(type_name, file)
         
-        expected = load_yaml("tests/test_cases/type_unit_test/verified_output/json_schema/appointment.yaml")
-        actual = type_instance.get_json_schema()
-        
-        self.assertEqual(actual, expected)
+        # Test BSON schema renders
+        bson_dir = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema"
+        for file in os.listdir(bson_dir):
+            if file.endswith('.json'):
+                type_name = file.replace('.json', '')
+                self._test_bson_render(type_name, file)
 
-    def test_object_type_bson_schema(self):
-        """Test object type BSON schema rendering against verified output"""
-        type_data = {
-            "description": "Test object type",
-            "properties": {
-                "name": {
-                    "description": "Name property",
-                    "type": "string"
-                },
-                "age": {
-                    "description": "Age property",
-                    "type": "number"
-                }
-            }
-        }
-        type_instance = Type("test_object", type_data)
-        
-        expected = load_json("tests/test_cases/type_unit_test/verified_output/bson_schema/appointment.json")
-        actual = type_instance.get_bson_schema()
-        
-        self.assertEqual(actual, expected)
-
-
-class TestTypeUnitTestVerified(unittest.TestCase):
-    """Test all types in type_unit_test against verified output files"""
-
-    def setUp(self):
-        self.config = set_config_input_folder("tests/test_cases/type_unit_test")
-
-    def tearDown(self):
-        clear_config()
-
-    def test_all_types_json_schema(self):
-        """Test all types JSON schema rendering against verified output"""
-        self._test_all_types_rendering("json_schema", "yaml", self._compare_json_schema)
-
-    def test_all_types_bson_schema(self):
-        """Test all types BSON schema rendering against verified output"""
-        self._test_all_types_rendering("bson_schema", "json", self._compare_bson_schema)
-
-    def _test_all_types_rendering(self, output_type, file_ext, compare_func):
-        """Generic test method for all types rendering"""
-        verified_dir = f"tests/test_cases/type_unit_test/verified_output/{output_type}"
-        types_dir = "tests/test_cases/type_unit_test/types"
-        
-        # Get all verified output files
-        verified_files = [f for f in os.listdir(verified_dir) if f.endswith(f".{file_ext}")]
-        
-        for verified_file in verified_files:
-            type_name = verified_file.replace(f".{file_ext}", "")
-            compare_func(type_name, verified_file)
-
-    def _compare_json_schema(self, type_name, expected_filename):
-        """Compare JSON schema rendering with verified output"""
-        type_path = f"tests/test_cases/type_unit_test/types/{type_name}.yaml"
+    def _test_json_render(self, type_name, expected_file):
+        """Test JSON schema render for a type"""
+        # Load type and render
+        type_path = f"{self.config.INPUT_FOLDER}/types/{type_name}.yaml"
         type_data = load_yaml(type_path)
         type_instance = Type(type_name, type_data)
-        
-        expected_path = f"tests/test_cases/type_unit_test/verified_output/json_schema/{expected_filename}"
-        expected = load_yaml(expected_path)
         actual = type_instance.get_json_schema()
         
+        # Load expected
+        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/json_schema/{expected_file}"
+        expected = load_yaml(expected_path)
+        
+        # Compare
         self._assert_dict_equality(actual, expected, f"JSON schema for {type_name}")
 
-    def _compare_bson_schema(self, type_name, expected_filename):
-        """Compare BSON schema rendering with verified output"""
-        type_path = f"tests/test_cases/type_unit_test/types/{type_name}.yaml"
+    def _test_bson_render(self, type_name, expected_file):
+        """Test BSON schema render for a type"""
+        # Load type and render
+        type_path = f"{self.config.INPUT_FOLDER}/types/{type_name}.yaml"
         type_data = load_yaml(type_path)
         type_instance = Type(type_name, type_data)
-        
-        expected_path = f"tests/test_cases/type_unit_test/verified_output/bson_schema/{expected_filename}"
-        expected = load_json(expected_path)
         actual = type_instance.get_bson_schema()
         
+        # Load expected
+        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema/{expected_file}"
+        expected = load_json(expected_path)
+        
+        # Compare
         self._assert_dict_equality(actual, expected, f"BSON schema for {type_name}")
 
     def _assert_dict_equality(self, actual, expected, context):
