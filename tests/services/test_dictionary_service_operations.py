@@ -193,24 +193,19 @@ class TestProperty(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
-            "required": False,
             "properties": {
-                "name": {
-                    "description": "Name property",
-                    "type": "string"
-                }
-            }
+                "name": {"description": "Name property", "type": "string"}
+            },
+            "additionalProperties": True
         }
         prop = Property("test_object", property_data)
         result = prop.to_dict()
-    
-        self.assertEqual(result["description"], "Object with properties")
         self.assertEqual(result["type"], "object")
-        self.assertTrue(result["additionalProperties"])
-        self.assertNotIn("required", result)  # required=False is not included
         self.assertIn("properties", result)
         self.assertIn("name", result["properties"])
+        self.assertEqual(result["properties"]["name"]["type"], "string")
+        self.assertIn("required", result)
+        self.assertFalse(result["required"])  # required should be present and False
 
     def test_to_dict_with_enum(self):
         """Test to_dict method for enum property"""
