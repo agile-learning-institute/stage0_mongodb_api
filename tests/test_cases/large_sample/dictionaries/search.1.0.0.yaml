@@ -8,7 +8,7 @@ properties:
     required: true
   collection_id:
     description: The unique identifier for this source document
-    type: identity
+    type: identifier
     required: true
 one_of:
   type_property: collection_name

@@ -4,7 +4,7 @@ type: object
 properties:
   _id:
     description: The unique identifier for the organization
-    type: identity
+    type: identifier
     required: true
   name:
     description: The organization name
@@ -24,7 +24,7 @@ properties:
     type: array
     items:
       description: A user identifier
-      type: identity
+      type: identifier
   website:
     description: Organization website
     type: url

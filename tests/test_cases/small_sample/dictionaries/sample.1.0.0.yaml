@@ -4,7 +4,7 @@ type: object
 properties:
   _id:
     description: The unique identifier for the media
-    type: identity
+    type: identifier
     required: true
   name:
     description: The name of the document

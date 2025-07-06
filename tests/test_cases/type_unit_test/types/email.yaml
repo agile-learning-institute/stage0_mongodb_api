@@ -1,2 +1,5 @@
+title: Email
 description: A valid email address
-type: null
+schema:
+  type: string
+  pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$" 
