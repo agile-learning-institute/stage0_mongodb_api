@@ -9,25 +9,23 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 paths:
-  /api/collections/:
+  /api/configurations/:
     get:
-      summary: List all Configured Collections 
-      operationId: list_collections
+      summary: List all Collection Configurations
+      operationId: list_configurations
       responses:
         '200':
-          description: List of collections
+          description: List of collections configuration files
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/collections'
+                $ref: '#/components/schemas/files'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
+                $ref: '#/components/schemas/events'
     post:
       summary: Process all Configured Collections 
       operationId: process_collections
@@ -37,21 +35,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/processing_results'
+                $ref: '#/components/schemas/events'
         '500':
-          description: Processing error
+          description: Processing error occurred
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-  /api/collections/{name}/:
+                $ref: '#/components/schemas/events'
+  /api/configurations/{file_name}/:
     get:
       summary: Get a collection configuration
-      operationId: get_collection
+      operationId: get_configuration
       parameters:
-        - name: name
+        - name: file_name
           in: path
           required: true
           schema:
@@ -62,21 +58,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/collection'
-        '404':
-          description: Collection not found
-          content:
-            application/json:
-              schema:
-                type: string
+                $ref: '#/components/schemas/configuration'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
+                $ref: '#/components/schemas/events'
+    put:
+      summary: Save a collection configuration
+      operationId: save_configuration
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Collection configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/configuration'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
     post:
       summary: Process a collection configuration
       operationId: process_collection
@@ -92,34 +102,76 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/processing_results'
-        '404':
-          description: Collection not found
-          content:
-            application/json:
-              schema:
-                type: string
+                $ref: '#/components/schemas/events'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-
-  /api/render/json_schema/{schema_name}/:
+                $ref: '#/components/schemas/events'
+    delete:
+      summary: Delete a collection configuration
+      operationId: delete_configuration
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Collection configuration deleted
+          content:    
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    patch:
+      summary: Lock/Unlock a collection configuration
+      operationId: lock_unlock_configuration
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Collection configuration locked/unlocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+  
+  /api/configurations/json_schema/{file_name}/{version_number}/:
     get:
       summary: Get a Json Schema rendered for a schema
-      description: Json Schema for a specific schema version (e.g., "collection.1.0.0.1")
+      description: Json Schema for a specific schema version (e.g., "sample.1.0.0.1")
       operationId: render_json_schema
       parameters:
-        - name: schema_name
+        - name: file_name
           in: path
           required: true
           schema:
             type: string
-            description: Complete schema name including version (e.g., "collection.1.0.0.1")
+            description: Configuration version file name (e.g., "sample.yaml")
+        - name: version_number
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Version number (e.g., "1.0.0.1")
       responses:
         '200':
           description: Schema
@@ -127,33 +179,31 @@ paths:
             text/json:
               schema:
                 type: object
-        '404':
-          description: Schema not found
-          content:
-            application/json:
-              schema:
-                type: string
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
+                $ref: '#/components/schemas/events'
 
-  /api/render/bson_schema/{schema_name}/:
+  /api/configurations/bson_schema/{file_name}/{version_number}/:
     get:
       summary: Get a Bson Schema rendered for a schema
-      description: Bson Schema for a specific schema version (e.g., "collection.1.0.0.1")
+      description: Bson Schema for a specific schema version (e.g., "sample.1.0.0.1")
       operationId: render_bson_schema
       parameters:
-        - name: schema_name
+        - name: file_name
           in: path
           required: true
           schema:
             type: string
-            description: Complete schema name including version (e.g., "collection.1.0.0.1")
+            description: Configuration version file name (e.g., "sample.yaml")
+        - name: version_number
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Version number (e.g., "1.0.0.1")
       responses:
         '200':
           description: Schema
@@ -161,54 +211,325 @@ paths:
             text/json:
               schema:
                 type: object
-        '404':
-          description: Schema not found
+       '500':
+          description: Processing error
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/events'
+
+  /api/dictionaries/:
+    get:
+      summary: List all Dictionaries
+      operationId: list_dictionaries
+      responses:
+        '200':
+          description: List of dictionaries configuration files
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/files'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-
-  /api/render/openapi/{schema_name}/:
+                $ref: '#/components/schemas/events'
+  /api/dictionaries/{file_name}/:
     get:
-      summary: Get a OpenAPI rendered for a schema
-      description: OpenAPI Specification for a specific schema version (e.g., "collection.1.0.0.1")
-      operationId: render_openapi
+      summary: Get a dictionary 
+      operationId: get_dictionary
       parameters:
-        - name: schema_name
+        - name: file_name
           in: path
           required: true
           schema:
             type: string
-            description: Complete schema name including version (e.g., "collection.1.0.0.1")
       responses:
         '200':
-          description: OpenAPI Specification
-          content:
-            text/yaml:
-              schema:
-                type: object
-        '404':
-          description: Schema not found
+          description: Dictionary
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/dictionary'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
+                $ref: '#/components/schemas/events'
+    put:
+      summary: Save a dictionary
+      operationId: save_dictionary
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dictionary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dictionary'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    delete:
+      summary: Delete a dictionary
+      operationId: delete_dictionary
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+      responses:
+        '200':
+          description: Dictionary deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events' 
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    patch:
+      summary: Lock/Unlock a dictionary
+      operationId: lock_unlock_dictionary
+      parameters:
+        - name: file_name
+          in: path
+          required: true  
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dictionary locked/unlocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/file'
+
+  /api/types/:
+    get:
+      summary: List all Types
+      operationId: list_types
+      responses:
+        '200':
+          description: List of type files
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/files'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+  /api/types/{file_name}/:
+    get:
+      summary: Get a type 
+      operationId: get_type
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/type'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    put:
+      summary: Save a type
+      operationId: save_type
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/type'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    delete:
+      summary: Delete a type
+      operationId: delete_type
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Type deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    patch:
+      summary: Lock/Unlock a type
+      operationId: lock_unlock_type
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Type locked/unlocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/file'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+
+  /api/test_data/:
+    get:
+      summary: List all Test Data Files
+      operationId: list_data_files
+      responses:
+        '200':
+          description: List of test data files
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/files'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+  /api/test_data/{file_name}/:
+    get:
+      summary: Get a test data file 
+      operationId: get_data_file
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Test Data File
+          content:
+            application/json:
+              schema:
                 type: array
-                items:
-                  type: object
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    put:
+      summary: Save a test data file
+      operationId: save_data_file
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Test Data File
+          content:
+            application/json:
+              schema:
+                type: array
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    delete:
+      summary: Delete a test data file
+      operationId: delete_data_file
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Test Data File deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    patch:
+      summary: Lock/Unlock a test data file
+      operationId: lock_unlock_data_file
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Test Data File locked/unlocked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/file'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/events'
 
   /api/health:
     get:
@@ -237,21 +558,32 @@ paths:
                 $ref: '#/components/schemas/config'
         '500':
           description: Processing error
+
 components:
   schemas:
-    collections:
+    files:
       type: array
       items:
-        type: object
+        $ref: '#/components/schemas/file'
+    file:
+      type: object
+      properties:
         properties:
-          collection_name:
+          name:
             type: string
-          version:
+          read_only:
+            type: boolean
+            default: false
+          created_at:
             type: string
-          targeted_version:
+            format: date-time
+          updated_at:
             type: string
-            description: The target version (last version) for this collection
-    collection:
+            format: date-time
+          size:
+            type: number
+            description: Size in bytes
+    configuration:
       description: SchemaManager Collection Configuration
       type: object
       required:
@@ -260,6 +592,9 @@ components:
       properties:
         name:
           description: The name of the MongoDB collection
+          type: string
+        description:
+          description: A description of the MongoDB collection
           type: string
         versions:
           description: List of version configurations in chronological order
@@ -271,14 +606,6 @@ components:
               version:
                 description: Version string in format major.minor.patch.schema
                 type: string
-              test_data:
-                description: Name of the test data file for this version
-                type: string
-              add_indexes:
-                description: List of indexes to add in this version. 
-                type: array
-                items:
-                  description: Index items are defined at https://www.mongodb.com/docs/manual/indexes/
               drop_indexes:
                 description: List of index names to drop in this version
                 type: array
@@ -289,12 +616,93 @@ components:
                 type: array
                 items:
                   description: Aggregate pipelines are defined at https://www.mongodb.com/docs/manual/aggregation/
-    processing_results:
-      description: Array of processing operation results
+              add_indexes:
+                description: List of indexes to add in this version. 
+                type: array
+                items:
+                  description: Index items are defined at https://www.mongodb.com/docs/manual/indexes/
+              test_data:
+                description: Name of the test data file for this version
+                type: string
+    dictionary:
+      description: A Simple Schema Dictionary
+      type: object
+      properties:
+        '$ref': 
+          description: Reference to another dictionary
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        name:
+          description: The name of the property
+          type: string
+        type:
+          description: The type of the property
+          type: string
+          enum: 
+            - object
+            - array
+            - enum
+            - enum_list
+            - TYPE
+        properties:
+          description: Properties of an Object type
+          type: object
+          properties:
+            $ref: '#/components/schemas/dictionary'
+        items:
+          description: Items of an Array type
+          type: array
+          items:
+            $ref: '#/components/schemas/dictionary'
+        enum:
+          description: Enum name for enum or enum_list types
+          type: string
+        required:
+          description: Whether the property is required
+          type: boolean
+          default: false
+        additionalProperties:
+          description: Whether the property is an additional property
+          type: boolean
+          default: false
+      required:
+        - description
+        - name
+        - type
+    type:
+      description: A Simple Schema Type
+      type: object
+      properties:
+        oneOf:
+        $ref: '#/components/schemas/dictionary'
+        $ref: '#/components/schemas/primitive_type'
+    primitive_type:
+      description: A Simple Schema Primitive Type
+      type: object
+      properties:
+        title:
+          description: The name of the type
+          type: string
+        type:
+          description: A Universal Type 
+          type: object
+          additionalProperties: true
+        json_type:
+          description: Type rendered as JSON Schema
+          type: object
+          additionalProperties: true
+        bson_type:
+          description: Type rendered as BSON Schema
+          type: object
+          additionalProperties: true
+    events:
+      description: Array of processing or validation events
       type: array
       items:
         type: object
-        description: Result of a single processing operation
+        description: Result of a single processing or validation operation
         required:
           - operation
           - status
@@ -302,18 +710,6 @@ components:
           operation:
             description: Type of operation performed
             type: string
-            enum:
-              - evaluate_version
-              - remove_schema
-              - drop_index
-              - run_migration
-              - create_index
-              - apply_schema
-              - load_test_data
-              - update_version
-              - collection_processing
-              - version_processing
-              - overall_status
           status:
             description: Operation status
             type: string
@@ -330,14 +726,6 @@ components:
           details_type:
             description: Type of details for complex operations
             type: string
-            enum:
-              - schema
-              - index
-              - migration
-              - test_data
-              - version
-              - error
-              - overall
           details:
             description: Operation-specific details (object or array)
             oneOf:
@@ -347,7 +735,6 @@ components:
                 items:
                   type: object
                   additionalProperties: true
-        additionalProperties: true
     config:
       type: object
       properties:

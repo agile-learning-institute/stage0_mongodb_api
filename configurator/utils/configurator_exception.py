@@ -1,0 +1,44 @@
+import datetime
+from configurator.utils.configurator_exception import ConfiguratorEvent
+
+class ConfiguratorException(Exception):
+    def __init__(self, message: str, event: ConfiguratorEvent):
+        self.message = message
+        self.event = event
+
+    def __str__(self):
+        return self.message
+    
+class ConfiguratorEvent:
+    def __init__(self, event_id: str, event_type: str, event_data: dict = None):
+        self.id = event_id
+        self.type = event_type
+        self.data = event_data
+        self.starts = datetime.now()
+        self.ends = None
+        self.status = "PENDING"
+        self.sub_events = []
+    
+    def append_events(self, events: list):
+        self.events.extend(events)
+        
+    def record_success(self):
+        self.status = "SUCCESS"
+        self.ends = datetime.now()
+            
+    def record_failure(self, data: dict):
+        self.data = data
+        self.status = "FAILURE"
+        self.ends = datetime.now()
+
+        
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "type": self.type,
+            "data": self.data,
+            "starts": self.starts,
+            "ends": self.ends,
+            "status": self.status,
+            "sub_events": self.sub_events
+        }

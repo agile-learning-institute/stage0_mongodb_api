@@ -11,8 +11,6 @@ test = "sh -c 'PYTHONPATH=$(pwd)/stage0_mongodb_api LOGGING_LEVEL=CRITICAL cover
 stepci-observability = "stepci run ./tests/stepci/observability.yaml"
 stepci-small = "stepci run ./tests/stepci/small_sample.yaml"
 stepci-large = "stepci run ./tests/stepci/large_sample.yaml"
-db-drop = "python tests/db_util.py drop"
-db-drop-silent = "python tests/db_util.py drop --passphrase DROP_DROWSSAP_YEK"
 db-compare = "python tests/db_util.py compare"
 db-harvest = "python tests/db_util.py harvest"
 build = "docker build --tag ghcr.io/agile-learning-institute/stage0_mongodb_api:latest ."
