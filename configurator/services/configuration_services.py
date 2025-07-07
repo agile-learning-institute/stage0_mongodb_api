@@ -9,7 +9,7 @@ from configurator.utils.version_number import VersionNumber
 import os
 
 class Configuration:
-    def __init__(self, file_name: str, document: dict  = None):
+    def __init__(self, file_name: str, document: dict = None):
         self.config = Config.get_instance()
         self.file_name = file_name
         if not document:
@@ -17,9 +17,7 @@ class Configuration:
         self.name = document["name"]
         self.title = document.get("title", "")
         self.description = document["description"]
-        self.versions = []
-        for version in document["versions"]:
-            self.versions.append(Version(self.name, version, self.config))
+        self.versions = [Version(self.name, v, self.config) for v in document["versions"]]
 
     def to_dict(self):
         return {
@@ -69,18 +67,24 @@ class Configuration:
         FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, self.file_name)
         
     def process(self) -> ConfiguratorEvent:
+        event = ConfiguratorEvent(event_id="CFG-00", event_type="PROCESS")
+        mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         try:
-            event = ConfiguratorEvent(event_id="CFG-00", event_type="PROCESS")
-            mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
             for version in self.versions:
                 current_version = VersionManager.get_current_version(mongo_io, self.name)
                 if version.collection_version <= current_version:
-                    sub_event = ConfiguratorEvent(event_id="PRO-00", event_type="SKIP_VERSION", 
-                        event_data={"version": version.to_dict(), "current_version": current_version.to_dict()})
+                    sub_event = ConfiguratorEvent(
+                        event_id="PRO-00",
+                        event_type="SKIP_VERSION",
+                        event_data={
+                            "version": version.to_dict(),
+                            "current_version": current_version.get_version_str(),
+                        },
+                    )
                     sub_event.record_success()
                     event.append_events([sub_event])
                     continue
-                event.append_events(version.process(mongo_io))
+                event.append_events([version.process(mongo_io)])
             event.record_success()
             mongo_io.disconnect()
             return event
@@ -114,24 +118,14 @@ class Version:
     def __init__(self, collection_name: str, version: dict, config):
         self.config = config
         self.collection_name = collection_name
-        self.collection_version = VersionNumber(f"{collection_name}.{version["version"]}")
+        # Always construct VersionNumber with 4-part version string
+        self.collection_version = VersionNumber(f"{collection_name}.{version['version']}")
         self.version_str = self.collection_version.get_version_str()
         self.drop_indexes = version.get("drop_indexes", [])
         self.add_indexes = version.get("add_indexes", [])
         self.migrations = version.get("migrations", [])
         self.test_data = version.get("test_data", None)
-        
-    def __eq__(self, other):
-        if not isinstance(other, Version):
-            return False
-        return self.collection_version == other.collection_version
-            
-    def version_str(self):
-        return self.collection_version.get_version_str()
-    
-    def enumerator(self) -> int:
-        return self.parts[4]
-    
+
     def to_dict(self):
         return {
             "version": self.collection_version.get_version_str(),
@@ -140,7 +134,9 @@ class Version:
             "migrations": self.migrations,
             "test_data": self.test_data,
         }
-    
+
+
+
     def get_json_schema(self):
         enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
         # Load dictionary data first
@@ -148,57 +144,70 @@ class Version:
         dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
         dictionary = Dictionary(dictionary_filename, dictionary_data)
         return dictionary.get_json_schema(enumerators)
-    
-    def get_bson_schema(self): 
+
+    def get_bson_schema(self):
         enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
         # Load dictionary data first
         dictionary_filename = self.collection_version.get_schema_filename()
         dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
         dictionary = Dictionary(dictionary_filename, dictionary_data)
         return dictionary.get_bson_schema(enumerators)
-    
+
     def process(self, mongo_io: MongoIO):
+        event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version_str}", event_type="PROCESS")
         try:
-            event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version}", event_type="PROCESS")
-
+            # Remove schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-01", event_type="REMOVE_SCHEMA_VALIDATION")
-            event.append_events([sub_event])
             sub_event.append_events(mongo_io.remove_schema_validation(self.collection_name))
-            sub_event.record_success()
-
-            sub_event = ConfiguratorEvent(event_id="PRO-02", event_type="REMOVE_INDEXES")
             event.append_events([sub_event])
+
+            # Remove indexes
+            sub_event = ConfiguratorEvent(event_id="PRO-02", event_type="REMOVE_INDEXES")
             for index in self.drop_indexes:
                 sub_event.append_events(mongo_io.remove_index(self.collection_name, index))
-            sub_event.record_success()
-
-            sub_event = ConfiguratorEvent(event_id="PRO-03", event_type="EXECUTE_MIGRATIONS")
             event.append_events([sub_event])
+
+            # Execute migrations
+            sub_event = ConfiguratorEvent(event_id="PRO-03", event_type="EXECUTE_MIGRATIONS")
             for migration in self.migrations:
                 sub_event.append_events(mongo_io.execute_migration(self.collection_name, migration))
-            sub_event.record_success()
-                
-            sub_event = ConfiguratorEvent(event_id="PRO-04", event_type="ADD_INDEXES")
             event.append_events([sub_event])
+
+            # Add indexes
+            sub_event = ConfiguratorEvent(event_id="PRO-04", event_type="ADD_INDEXES")
             for index in self.add_indexes:
                 sub_event.append_events(mongo_io.add_index(self.collection_name, index))
-            sub_event.record_success()
+            event.append_events([sub_event])
 
+            # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-05", event_type="APPLY_SCHEMA_VALIDATION")
+            sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name))
             event.append_events([sub_event])
-            event.append_events(mongo_io.apply_schema_validation(self.collection_name))
-            sub_event.record_success()
 
+            # Load test data
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="LOAD_TEST_DATA")
+            if self.test_data:
+                import os
+                test_data_path = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, self.test_data)
+                sub_event.append_events(mongo_io.load_json_data(self.collection_name, test_data_path))
+            else:
+                sub_event.record_success()
             event.append_events([sub_event])
-            event.append_events(mongo_io.load_json_data(self.collection_name, self.test_data))
-            sub_event.record_success()
 
+            # Update version
             sub_event = ConfiguratorEvent(event_id="PRO-07", event_type="UPDATE_VERSION")
+            try:
+                mongo_io.upsert(
+                    self.config.VERSION_COLLECTION_NAME,
+                    {"collection_name": self.collection_name},
+                    {"collection_name": self.collection_name, "current_version": self.version_str}
+                )
+                sub_event.record_success()
+            except Exception as e:
+                sub_event.record_failure({"error": str(e)})
             event.append_events([sub_event])
-            event.append_events(mongo_io.upsert(self.config.VERSIONS_COLLECTION, {"name": self.collection_name}, {"$set": {"version": self.version}}))
-            sub_event.record_success()
 
+            event.record_success()
             return event
         
         except ConfiguratorException as e:
@@ -206,6 +215,5 @@ class Version:
             event.record_failure("error processing version")
             return event
         except Exception as e:
-            event.append_events([ConfiguratorEvent(event_id="CFG-04", event_type="SAVE_CONFIGURATION", event_data={"error": str(e)})])
-            event.record_failure("unexpected error processing version")
+            event.record_failure("unexpected error processing version", {"error": str(e)})
             return event

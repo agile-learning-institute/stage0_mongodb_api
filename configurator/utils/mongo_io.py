@@ -45,8 +45,10 @@ class MongoIO:
                 self.client = None
                 logger.info("Disconnected from MongoDB")
         except Exception as e:
-            event = ConfiguratorEvent(event_id="MON-02", event_type="CONNECTION", event_data={"error": str(e)})
-            raise ConfiguratorException("Failed to disconnect from MongoDB", event)
+            # Log the error but don't raise it - disconnect should be safe to call
+            logger.warning(f"Error during disconnect: {e}")
+            # Clear the client reference even if close failed
+            self.client = None
 
     def get_collection(self, collection_name):
         """Get a collection, creating it if it doesn't exist."""

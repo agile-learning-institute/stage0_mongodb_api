@@ -76,18 +76,7 @@ class TestConfigurationOperations(unittest.TestCase):
         self.assertEqual(version.migrations, ["migration1"])
         self.assertEqual(version.test_data, "test.json")
 
-    def test_version_equality(self):
-        """Test Version object equality comparison"""
-        version_data1 = {"version": "1.0.0.1", "drop_indexes": [], "add_indexes": [], "migrations": [], "test_data": "test.json"}
-        version_data2 = {"version": "1.0.0.1", "drop_indexes": [], "add_indexes": [], "migrations": [], "test_data": "test.json"}
-        version_data3 = {"version": "1.0.0.2", "drop_indexes": [], "add_indexes": [], "migrations": [], "test_data": "test.json"}
-        
-        version1 = Version("test_collection", version_data1, Config.get_instance())
-        version2 = Version("test_collection", version_data2, Config.get_instance())
-        version3 = Version("test_collection", version_data3, Config.get_instance())
-        
-        self.assertEqual(version1, version2)
-        self.assertNotEqual(version1, version3)
+
 
     def test_version_to_dict(self):
         """Test Version serialization to dictionary"""
