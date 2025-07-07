@@ -22,7 +22,7 @@ class TestDatabaseRoutes(unittest.TestCase):
         mock_mongo_io_class.return_value = mock_mongo_io
 
         # Act
-        response = self.client.delete('/api/database')
+        response = self.client.delete('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -40,7 +40,7 @@ class TestDatabaseRoutes(unittest.TestCase):
         mock_mongo_io_class.return_value = mock_mongo_io
 
         # Act
-        response = self.client.delete('/api/database')
+        response = self.client.delete('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -69,7 +69,7 @@ class TestDatabaseRoutes(unittest.TestCase):
         mock_mongo_io_class.return_value = mock_mongo_io
 
         # Act
-        response = self.client.delete('/api/database')
+        response = self.client.delete('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -86,7 +86,7 @@ class TestDatabaseRoutes(unittest.TestCase):
         mock_mongo_io_class.return_value = mock_mongo_io
 
         # Act
-        response = self.client.delete('/api/database')
+        response = self.client.delete('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -96,7 +96,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_get_method_not_allowed(self):
         """Test that GET method is not allowed on /api/database."""
         # Act
-        response = self.client.get('/api/database')
+        response = self.client.get('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -104,7 +104,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/database."""
         # Act
-        response = self.client.post('/api/database')
+        response = self.client.post('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -112,7 +112,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_put_method_not_allowed(self):
         """Test that PUT method is not allowed on /api/database."""
         # Act
-        response = self.client.put('/api/database')
+        response = self.client.put('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -120,7 +120,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_patch_method_not_allowed(self):
         """Test that PATCH method is not allowed on /api/database."""
         # Act
-        response = self.client.patch('/api/database')
+        response = self.client.patch('/api/database/')
 
         # Assert
         self.assertEqual(response.status_code, 405)

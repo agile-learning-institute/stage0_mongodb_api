@@ -11,6 +11,9 @@ class TestConfigDefaults(unittest.TestCase):
 
     def test_default_string_properties(self):
         for key, default in self.config.config_strings.items():
+            # Skip LOGGING_LEVEL if it's set by environment variable
+            if key == 'LOGGING_LEVEL' and any(item['name'] == key and item['from'] == 'environment' for item in self.config.config_items):
+                continue
             self.assertEqual(getattr(self.config, key), default)
 
     def test_default_int_properties(self):
@@ -33,6 +36,9 @@ class TestConfigDefaults(unittest.TestCase):
         
     def test_default_string_ci(self):
         for key, default in {**self.config.config_strings, **self.config.config_ints}.items():
+            # Skip LOGGING_LEVEL if it's set by environment variable
+            if key == 'LOGGING_LEVEL' and any(item['name'] == key and item['from'] == 'environment' for item in self.config.config_items):
+                continue
             self._test_config_default_value(key, default)
 
     def test_default_secret_ci(self):

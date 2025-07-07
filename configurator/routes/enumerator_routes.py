@@ -12,14 +12,14 @@ def create_enumerator_routes():
     config = Config.get_instance()
     
     # GET /api/enumerators - Return the content of enumerators.json
-    @enumerator_routes.route('', methods=['GET'])
+    @enumerator_routes.route('/', methods=['GET'])
     @handle_errors("getting enumerators")
     def get_enumerators():
         enumerators = Enumerators(None)
         return jsonify(enumerators.to_dict()), 200
     
     # PATCH /api/enumerators - Clean Enumerators
-    @enumerator_routes.route('', methods=['PATCH'])
+    @enumerator_routes.route('/', methods=['PATCH'])
     def clean_enumerators():
         event = ConfiguratorEvent(event_id="ENU-04", event_type="CLEAN_ENUMERATORS")
         try:
@@ -38,7 +38,7 @@ def create_enumerator_routes():
             return jsonify(event.to_dict()), 500
     
     # PUT /api/enumerators - Overwrite enumerators.json
-    @enumerator_routes.route('', methods=['PUT'])
+    @enumerator_routes.route('/', methods=['PUT'])
     @handle_errors("saving enumerators")
     def put_enumerators():
         enumerators = Enumerators(data=request.get_json(force=True))

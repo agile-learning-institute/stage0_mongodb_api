@@ -651,6 +651,65 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response_data["status"], "FAILURE")
         self.assertEqual(response_data["data"], {"error": "Save failed"})
 
+    @patch('configurator.routes.configuration_routes.TemplateService')
+    def test_create_collection_success(self, mock_template_service_class):
+        """Test successful POST /api/configurations/collection/<file_name>"""
+        # Arrange
+        mock_template_service = Mock()
+        mock_template_service_class.return_value = mock_template_service
+        mock_template_service.create_collection.return_value = {
+            "collection_name": "test_collection",
+            "configuration_file": "test_collection.yaml",
+            "dictionary_file": "test_collection.0.0.1.yaml"
+        }
+
+        # Act
+        response = self.client.post(f'/api/configurations/collection/test_collection/')
+
+        # Assert
+        self.assertEqual(response.status_code, 201)
+        response_data = response.json
+        self.assertEqual(response_data["collection_name"], "test_collection")
+        self.assertEqual(response_data["configuration_file"], "test_collection.yaml")
+        self.assertEqual(response_data["dictionary_file"], "test_collection.0.0.1.yaml")
+        mock_template_service.create_collection.assert_called_once_with("test_collection")
+
+    @patch('configurator.routes.configuration_routes.TemplateService')
+    def test_create_collection_configurator_exception(self, mock_template_service_class):
+        """Test POST /api/configurations/collection/<file_name> when TemplateService raises ConfiguratorException"""
+        # Arrange
+        mock_template_service = Mock()
+        mock_template_service_class.return_value = mock_template_service
+        event = ConfiguratorEvent("TPL-02", "INVALID_COLLECTION_NAME", {"name": "invalid@name"})
+        mock_template_service.create_collection.side_effect = ConfiguratorException("Invalid collection name", event)
+
+        # Act
+        response = self.client.post(f'/api/configurations/collection/invalid@name/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        self.assertIsInstance(response.json, dict)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
+        self.assertEqual(response.json["id"], "TPL-02")
+        self.assertEqual(response.json["type"], "INVALID_COLLECTION_NAME")
+
+    @patch('configurator.routes.configuration_routes.TemplateService')
+    def test_create_collection_general_exception(self, mock_template_service_class):
+        """Test POST /api/configurations/collection/<file_name> when TemplateService raises a general exception"""
+        # Arrange
+        mock_template_service = Mock()
+        mock_template_service_class.return_value = mock_template_service
+        mock_template_service.create_collection.side_effect = Exception("Unexpected error")
+
+        # Act
+        response = self.client.post(f'/api/configurations/collection/test_collection/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
+
 
 if __name__ == '__main__':
     unittest.main()

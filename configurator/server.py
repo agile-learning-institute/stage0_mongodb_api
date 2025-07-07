@@ -30,7 +30,7 @@ from flask import Flask
 from configurator.utils.ejson_encoder import MongoJSONEncoder
 app = Flask(__name__)
 app.json = MongoJSONEncoder(app)
-app.url_map.strict_slashes = False
+# app.url_map.strict_slashes = False
 
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
 if config.AUTO_PROCESS:

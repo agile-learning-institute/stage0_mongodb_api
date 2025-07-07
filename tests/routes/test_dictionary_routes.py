@@ -36,7 +36,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         ]
 
         # Act
-        response = self.client.get('/api/dictionaries')
+        response = self.client.get('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -51,7 +51,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.get('/api/dictionaries')
+        response = self.client.get('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -66,7 +66,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/dictionaries')
+        response = self.client.get('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -85,7 +85,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
-        response = self.client.get('/api/dictionaries/test_dict.yaml')
+        response = self.client.get('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -100,7 +100,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.side_effect = ConfiguratorException("Dictionary error", event)
 
         # Act
-        response = self.client.get('/api/dictionaries/test_dict.yaml')
+        response = self.client.get('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -115,7 +115,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/dictionaries/test_dict.yaml')
+        response = self.client.get('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -140,7 +140,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         }
 
         # Act
-        response = self.client.put('/api/dictionaries/test_dict.yaml', json=test_data)
+        response = self.client.put('/api/dictionaries/test_dict.yaml/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -160,7 +160,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         test_data = {"name": "test_dict"}
 
         # Act
-        response = self.client.put('/api/dictionaries/test_dict.yaml', json=test_data)
+        response = self.client.put('/api/dictionaries/test_dict.yaml/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -179,7 +179,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         test_data = {"name": "test_dict"}
 
         # Act
-        response = self.client.put('/api/dictionaries/test_dict.yaml', json=test_data)
+        response = self.client.put('/api/dictionaries/test_dict.yaml/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -197,7 +197,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
-        response = self.client.delete('/api/dictionaries/test_dict.yaml')
+        response = self.client.delete('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -215,7 +215,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
-        response = self.client.delete('/api/dictionaries/test_dict.yaml')
+        response = self.client.delete('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -232,7 +232,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
-        response = self.client.delete('/api/dictionaries/test_dict.yaml')
+        response = self.client.delete('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -250,7 +250,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
-        response = self.client.patch('/api/dictionaries/test_dict.yaml')
+        response = self.client.patch('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -268,7 +268,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
-        response = self.client.patch('/api/dictionaries/test_dict.yaml')
+        response = self.client.patch('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -285,7 +285,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
-        response = self.client.patch('/api/dictionaries/test_dict.yaml')
+        response = self.client.patch('/api/dictionaries/test_dict.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -294,7 +294,7 @@ class TestDictionaryRoutes(unittest.TestCase):
     def test_dictionaries_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/dictionaries."""
         # Act
-        response = self.client.post('/api/dictionaries')
+        response = self.client.post('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -302,7 +302,7 @@ class TestDictionaryRoutes(unittest.TestCase):
     def test_dictionaries_put_method_not_allowed_on_root(self):
         """Test that PUT method is not allowed on /api/dictionaries (root)."""
         # Act
-        response = self.client.put('/api/dictionaries')
+        response = self.client.put('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -310,7 +310,7 @@ class TestDictionaryRoutes(unittest.TestCase):
     def test_dictionaries_delete_method_not_allowed_on_root(self):
         """Test that DELETE method is not allowed on /api/dictionaries (root)."""
         # Act
-        response = self.client.delete('/api/dictionaries')
+        response = self.client.delete('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -342,7 +342,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dict2.save.return_value = [mock_event2]
 
         # Act
-        response = self.client.patch('/api/dictionaries')
+        response = self.client.patch('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -366,7 +366,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.patch('/api/dictionaries')
+        response = self.client.patch('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -383,7 +383,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.patch('/api/dictionaries')
+        response = self.client.patch('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -410,7 +410,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary.save.side_effect = ConfiguratorException("Save error", event)
 
         # Act
-        response = self.client.patch('/api/dictionaries')
+        response = self.client.patch('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -438,7 +438,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_dictionary.save.side_effect = Exception("Save failed")
 
         # Act
-        response = self.client.patch('/api/dictionaries')
+        response = self.client.patch('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 500)

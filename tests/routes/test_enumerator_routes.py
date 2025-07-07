@@ -24,7 +24,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act
-        response = self.client.get('/api/enumerators')
+        response = self.client.get('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -39,7 +39,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.side_effect = ConfiguratorException("File not found", event)
 
         # Act
-        response = self.client.get('/api/enumerators')
+        response = self.client.get('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -55,7 +55,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.side_effect = ConfiguratorException("Other error", event)
 
         # Act
-        response = self.client.get('/api/enumerators')
+        response = self.client.get('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -70,7 +70,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/enumerators')
+        response = self.client.get('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -89,7 +89,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act
-        response = self.client.put('/api/enumerators', json=test_data)
+        response = self.client.put('/api/enumerators/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -105,7 +105,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         test_data = [{"name": "enum1", "status": "active", "version": 1, "enumerators": {}}]
 
         # Act
-        response = self.client.put('/api/enumerators', json=test_data)
+        response = self.client.put('/api/enumerators/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -121,7 +121,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         test_data = [{"name": "enum1", "status": "active", "version": 1, "enumerators": {}}]
 
         # Act
-        response = self.client.put('/api/enumerators', json=test_data)
+        response = self.client.put('/api/enumerators/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -131,7 +131,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
     def test_enumerators_delete_method_not_allowed(self):
         """Test that DELETE method is not allowed on /api/enumerators."""
         # Act
-        response = self.client.delete('/api/enumerators')
+        response = self.client.delete('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -147,7 +147,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act
-        response = self.client.patch('/api/enumerators')
+        response = self.client.patch('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -169,7 +169,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act
-        response = self.client.patch('/api/enumerators')
+        response = self.client.patch('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -190,7 +190,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act
-        response = self.client.patch('/api/enumerators')
+        response = self.client.patch('/api/enumerators/')
 
         # Assert
         self.assertEqual(response.status_code, 500)

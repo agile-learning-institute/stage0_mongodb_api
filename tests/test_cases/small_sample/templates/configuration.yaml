@@ -1,0 +1,5 @@
+description: Collection for managing {{collection_name}}
+name: {{collection_name}}
+versions:
+  - version: "0.0.1"
+    test_data: {{collection_name}}.0.0.1.json 

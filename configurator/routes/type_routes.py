@@ -14,14 +14,14 @@ def create_type_routes():
     config = Config.get_instance()
     
     # GET /api/types/ - Return the current type files
-    @type_routes.route('', methods=['GET'])
+    @type_routes.route('/', methods=['GET'])
     @handle_errors("listing types")
     def get_types():
         files = FileIO.get_documents(config.TYPE_FOLDER)
         return jsonify(files), 200
 
     # PATCH /api/types - Clean Types
-    @type_routes.route('', methods=['PATCH'])
+    @type_routes.route('/', methods=['PATCH'])
     def clean_types():
         event = ConfiguratorEvent(event_id="TYP-04", event_type="CLEAN_TYPES")
         try:
@@ -42,28 +42,28 @@ def create_type_routes():
             return jsonify(event.to_dict()), 500
 
     # GET /api/types/<file_name> - Return a type file
-    @type_routes.route('/<file_name>', methods=['GET'])
+    @type_routes.route('/<file_name>/', methods=['GET'])
     @handle_errors("getting type")
     def get_type(file_name):
         type = Type(file_name)
         return jsonify(type), 200
         
     # PUT /api/types/<file_name> - Update a type file
-    @type_routes.route('/<file_name>', methods=['PUT'])
+    @type_routes.route('/<file_name>/', methods=['PUT'])
     @handle_errors("updating type")
     def update_type(file_name):
         type = Type(file_name, request.json)
         saved = type.save()
         return jsonify(saved), 200
         
-    @type_routes.route('/<file_name>', methods=['DELETE'])
+    @type_routes.route('/<file_name>/', methods=['DELETE'])
     @handle_errors("deleting type")
     def delete_type(file_name):
         type = Type(file_name)
         deleted = type.delete()
         return jsonify(deleted), 200
         
-    @type_routes.route('/<file_name>', methods=['PATCH'])
+    @type_routes.route('/<file_name>/', methods=['PATCH'])
     @handle_errors("locking/unlocking type")
     def lock_unlock_type(file_name):
         type = Type(file_name)

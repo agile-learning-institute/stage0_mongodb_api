@@ -13,7 +13,7 @@ def create_database_routes():
     config = Config.get_instance()
     
     # DELETE /api/database - Drop the Database
-    @database_routes.route('', methods=['DELETE'])
+    @database_routes.route('/', methods=['DELETE'])
     @handle_errors("dropping database")
     def drop_database():
         mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)

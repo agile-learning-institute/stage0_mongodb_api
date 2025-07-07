@@ -36,7 +36,7 @@ class TestTypeRoutes(unittest.TestCase):
         ]
 
         # Act
-        response = self.client.get('/api/types')
+        response = self.client.get('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -51,7 +51,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.get('/api/types')
+        response = self.client.get('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -66,7 +66,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/types')
+        response = self.client.get('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -85,7 +85,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.return_value = mock_type
 
         # Act
-        response = self.client.get('/api/types/test_type.yaml')
+        response = self.client.get('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -100,7 +100,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.side_effect = ConfiguratorException("Type error", event)
 
         # Act
-        response = self.client.get('/api/types/test_type.yaml')
+        response = self.client.get('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -115,7 +115,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/types/test_type.yaml')
+        response = self.client.get('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -140,7 +140,7 @@ class TestTypeRoutes(unittest.TestCase):
         }
 
         # Act
-        response = self.client.put('/api/types/test_type.yaml', json=test_data)
+        response = self.client.put('/api/types/test_type.yaml/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -160,7 +160,7 @@ class TestTypeRoutes(unittest.TestCase):
         test_data = {"name": "test_type"}
 
         # Act
-        response = self.client.put('/api/types/test_type.yaml', json=test_data)
+        response = self.client.put('/api/types/test_type.yaml/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -179,7 +179,7 @@ class TestTypeRoutes(unittest.TestCase):
         test_data = {"name": "test_type"}
 
         # Act
-        response = self.client.put('/api/types/test_type.yaml', json=test_data)
+        response = self.client.put('/api/types/test_type.yaml/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -198,7 +198,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.return_value = mock_type
 
         # Act
-        response = self.client.delete('/api/types/test_type.yaml')
+        response = self.client.delete('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -216,7 +216,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.return_value = mock_type
 
         # Act
-        response = self.client.delete('/api/types/test_type.yaml')
+        response = self.client.delete('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -233,7 +233,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.return_value = mock_type
 
         # Act
-        response = self.client.delete('/api/types/test_type.yaml')
+        response = self.client.delete('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -252,7 +252,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.return_value = mock_type
 
         # Act
-        response = self.client.patch('/api/types/test_type.yaml')
+        response = self.client.patch('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -270,7 +270,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.return_value = mock_type
 
         # Act
-        response = self.client.patch('/api/types/test_type.yaml')
+        response = self.client.patch('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -287,7 +287,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type_class.return_value = mock_type
 
         # Act
-        response = self.client.patch('/api/types/test_type.yaml')
+        response = self.client.patch('/api/types/test_type.yaml/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -297,7 +297,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_types_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/types."""
         # Act
-        response = self.client.post('/api/types')
+        response = self.client.post('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -305,7 +305,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_types_put_method_not_allowed_on_root(self):
         """Test that PUT method is not allowed on /api/types (root)."""
         # Act
-        response = self.client.put('/api/types')
+        response = self.client.put('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -313,7 +313,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_types_delete_method_not_allowed_on_root(self):
         """Test that DELETE method is not allowed on /api/types (root)."""
         # Act
-        response = self.client.delete('/api/types')
+        response = self.client.delete('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -345,7 +345,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type2.save.return_value = [mock_event2]
 
         # Act
-        response = self.client.patch('/api/types')
+        response = self.client.patch('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -369,7 +369,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.patch('/api/types')
+        response = self.client.patch('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -386,7 +386,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.patch('/api/types')
+        response = self.client.patch('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -413,7 +413,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type.save.side_effect = ConfiguratorException("Save error", event)
 
         # Act
-        response = self.client.patch('/api/types')
+        response = self.client.patch('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -441,7 +441,7 @@ class TestTypeRoutes(unittest.TestCase):
         mock_type.save.side_effect = Exception("Save failed")
 
         # Act
-        response = self.client.patch('/api/types')
+        response = self.client.patch('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 500)

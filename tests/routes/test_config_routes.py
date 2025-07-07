@@ -15,7 +15,7 @@ class TestConfigRoutes(unittest.TestCase):
     def test_get_config_success(self):
         """Test successful GET /api/config."""
         # Act
-        response = self.client.get('/api/config')
+        response = self.client.get('/api/config/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -29,7 +29,7 @@ class TestConfigRoutes(unittest.TestCase):
     def test_get_config_method_not_allowed(self):
         """Test that POST method is not allowed on /api/config."""
         # Act
-        response = self.client.post('/api/config')
+        response = self.client.post('/api/config/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -37,7 +37,7 @@ class TestConfigRoutes(unittest.TestCase):
     def test_get_config_put_method_not_allowed(self):
         """Test that PUT method is not allowed on /api/config."""
         # Act
-        response = self.client.put('/api/config')
+        response = self.client.put('/api/config/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -45,7 +45,7 @@ class TestConfigRoutes(unittest.TestCase):
     def test_get_config_delete_method_not_allowed(self):
         """Test that DELETE method is not allowed on /api/config."""
         # Act
-        response = self.client.delete('/api/config')
+        response = self.client.delete('/api/config/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -64,7 +64,7 @@ class TestConfigRoutes(unittest.TestCase):
             app = Flask(__name__)
             app.register_blueprint(config_routes_mod.create_config_routes(), url_prefix='/api/config')
             client = app.test_client()
-            response = client.get('/api/config')
+            response = client.get('/api/config/')
             self.assertEqual(response.status_code, 500)
             self.assertIsInstance(response.json, dict)
             self.assertIn("id", response.json)
@@ -84,7 +84,7 @@ class TestConfigRoutes(unittest.TestCase):
             app = Flask(__name__)
             app.register_blueprint(config_routes_mod.create_config_routes(), url_prefix='/api/config')
             client = app.test_client()
-            response = client.get('/api/config')
+            response = client.get('/api/config/')
             self.assertEqual(response.status_code, 500)
             self.assertIsInstance(response.json, str)
             self.assertIn("General error", response.json)

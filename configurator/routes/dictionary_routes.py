@@ -14,14 +14,14 @@ def create_dictionary_routes():
     config = Config.get_instance()
     
     # GET /api/dictionaries - Return the current dictionary files
-    @dictionary_routes.route('', methods=['GET'])
+    @dictionary_routes.route('/', methods=['GET'])
     @handle_errors("listing dictionaries")
     def get_dictionaries():
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
         return jsonify(files), 200
         
     # PATCH /api/dictionaries - Clean Dictionaries
-    @dictionary_routes.route('', methods=['PATCH'])
+    @dictionary_routes.route('/', methods=['PATCH'])
     def clean_dictionaries():
         event = ConfiguratorEvent(event_id="DIC-04", event_type="CLEAN_DICTIONARIES")
         try:
@@ -42,28 +42,28 @@ def create_dictionary_routes():
             return jsonify(event.to_dict()), 500
         
     # GET /api/dictionaries/<file_name> - Return a dictionary file
-    @dictionary_routes.route('/<file_name>', methods=['GET'])
+    @dictionary_routes.route('/<file_name>/', methods=['GET'])
     @handle_errors("getting dictionary")
     def get_dictionary(file_name):
         dictionary = Dictionary(file_name)
         return jsonify(dictionary), 200
         
     # PUT /api/dictionaries/<file_name> - Update a dictionary file
-    @dictionary_routes.route('/<file_name>', methods=['PUT'])
+    @dictionary_routes.route('/<file_name>/', methods=['PUT'])
     @handle_errors("updating dictionary")
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
         saved = dictionary.save()
         return jsonify(saved), 200
         
-    @dictionary_routes.route('/<file_name>', methods=['DELETE'])
+    @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @handle_errors("deleting dictionary")
     def delete_dictionary(file_name):
         dictionary = Dictionary(file_name)
         deleted = dictionary.delete()
         return jsonify(deleted), 200
         
-    @dictionary_routes.route('/<file_name>', methods=['PATCH'])
+    @dictionary_routes.route('/<file_name>/', methods=['PATCH'])
     @handle_errors("locking/unlocking dictionary")
     def lock_unlock_dictionary(file_name):
         dictionary = Dictionary(file_name)

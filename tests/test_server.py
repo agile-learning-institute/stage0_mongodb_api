@@ -69,7 +69,7 @@ class TestServer(unittest.TestCase):
     def test_database_routes_registered(self):
         """Test database routes are registered."""
         # Act
-        response = self.app.get('/api/database')
+        response = self.app.get('/api/database/')
 
         # Assert
         self.assertNotEqual(response.status_code, 404)
@@ -77,7 +77,7 @@ class TestServer(unittest.TestCase):
     def test_enumerator_routes_registered(self):
         """Test enumerator routes are registered."""
         # Act
-        response = self.app.get('/api/enumerators')
+        response = self.app.get('/api/enumerators/')
 
         # Assert
         # The route is registered, but may return 500 if file doesn't exist

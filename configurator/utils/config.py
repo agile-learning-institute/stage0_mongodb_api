@@ -27,6 +27,7 @@ class Config:
             self.DICTIONARY_FOLDER = ''
             self.CONFIGURATION_FOLDER = ''
             self.TEST_DATA_FOLDER = ''
+            self.TEMPLATE_FOLDER = ''
             self.API_PORT = 0
             self.SPA_PORT = 0
             self.AUTO_PROCESS = False
@@ -45,7 +46,8 @@ class Config:
                 "TYPE_FOLDER": "types",
                 "DICTIONARY_FOLDER": "dictionaries",
                 "CONFIGURATION_FOLDER": "configurations",
-                "TEST_DATA_FOLDER": "test_data"
+                "TEST_DATA_FOLDER": "test_data",
+                "TEMPLATE_FOLDER": "templates"
             }
             self.config_ints = {
                 "API_PORT": "8081",

@@ -234,6 +234,54 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
+  /api/configurations/collection/{name}:
+    post:
+      summary: Create a new collection
+      description: |
+        Creates a new collection by generating configuration and dictionary files from templates.
+        This endpoint creates both a configuration file and a dictionary file for the specified collection name.
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The name of the collection to create
+          schema:
+            type: string
+            pattern: '^[a-zA-Z][a-zA-Z0-9_]*$'
+            example: "my_collection"
+      responses:
+        '201':
+          description: Collection created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Collection 'my_collection' created successfully"
+                  files:
+                    type: object
+                    properties:
+                      configuration:
+                        type: string
+                        example: "configurations/my_collection.yaml"
+                      dictionary:
+                        type: string
+                        example: "dictionaries/my_collection.1.0.0.yaml"
+        '400':
+          description: Invalid collection name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /api/dictionaries/:
     get:
       summary: List all Dictionaries

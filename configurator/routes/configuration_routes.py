@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from configurator.services.configuration_services import Configuration
+from configurator.services.template_service import TemplateService
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO
@@ -49,6 +50,14 @@ def create_configuration_routes():
             logger.error(f"Unexpected error cleaning configurations: {str(e)}")
             event.record_failure("Unexpected error cleaning configurations", {"error": str(e)})
             return jsonify(event.to_dict()), 500
+
+    @blueprint.route('/collection/<file_name>/', methods=['POST'])
+    @handle_errors("creating collection")
+    def create_collection(file_name):
+        """Create a new collection with configuration and dictionary files from templates"""
+        template_service = TemplateService()
+        result = template_service.create_collection(file_name)
+        return jsonify(result), 201
 
     @blueprint.route('/<file_name>/', methods=['GET'])
     @handle_errors("getting configuration")

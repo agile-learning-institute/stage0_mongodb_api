@@ -36,7 +36,7 @@ class TestTestDataRoutes(unittest.TestCase):
         ]
 
         # Act
-        response = self.client.get('/api/test_data')
+        response = self.client.get('/api/test_data/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -51,7 +51,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_get_documents.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.get('/api/test_data')
+        response = self.client.get('/api/test_data/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -66,7 +66,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_get_documents.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/test_data')
+        response = self.client.get('/api/test_data/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -86,7 +86,7 @@ class TestTestDataRoutes(unittest.TestCase):
         }
 
         # Act
-        response = self.client.get('/api/test_data/test.json')
+        response = self.client.get('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -101,7 +101,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_get_document.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.get('/api/test_data/test.json')
+        response = self.client.get('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -116,7 +116,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_get_document.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.get('/api/test_data/test.json')
+        response = self.client.get('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -138,7 +138,7 @@ class TestTestDataRoutes(unittest.TestCase):
         test_data = {"test": "data"}
 
         # Act
-        response = self.client.put('/api/test_data/test.json', json=test_data)
+        response = self.client.put('/api/test_data/test.json/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -155,7 +155,7 @@ class TestTestDataRoutes(unittest.TestCase):
         test_data = {"test": "data"}
 
         # Act
-        response = self.client.put('/api/test_data/test.json', json=test_data)
+        response = self.client.put('/api/test_data/test.json/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -172,7 +172,7 @@ class TestTestDataRoutes(unittest.TestCase):
         test_data = {"test": "data"}
 
         # Act
-        response = self.client.put('/api/test_data/test.json', json=test_data)
+        response = self.client.put('/api/test_data/test.json/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -189,7 +189,7 @@ class TestTestDataRoutes(unittest.TestCase):
         }
 
         # Act
-        response = self.client.delete('/api/test_data/test.json')
+        response = self.client.delete('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -204,7 +204,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_delete_document.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.delete('/api/test_data/test.json')
+        response = self.client.delete('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -219,7 +219,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_delete_document.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.delete('/api/test_data/test.json')
+        response = self.client.delete('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -239,7 +239,7 @@ class TestTestDataRoutes(unittest.TestCase):
         }
 
         # Act
-        response = self.client.patch('/api/test_data/test.json')
+        response = self.client.patch('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -254,7 +254,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_lock_unlock.side_effect = ConfiguratorException("File error", event)
 
         # Act
-        response = self.client.patch('/api/test_data/test.json')
+        response = self.client.patch('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -269,7 +269,7 @@ class TestTestDataRoutes(unittest.TestCase):
         mock_lock_unlock.side_effect = Exception("Unexpected error")
 
         # Act
-        response = self.client.patch('/api/test_data/test.json')
+        response = self.client.patch('/api/test_data/test.json/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -279,7 +279,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_test_data_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/test_data."""
         # Act
-        response = self.client.post('/api/test_data')
+        response = self.client.post('/api/test_data/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -287,7 +287,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_test_data_put_method_not_allowed_on_root(self):
         """Test that PUT method is not allowed on /api/test_data (root)."""
         # Act
-        response = self.client.put('/api/test_data')
+        response = self.client.put('/api/test_data/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -295,7 +295,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_test_data_delete_method_not_allowed_on_root(self):
         """Test that DELETE method is not allowed on /api/test_data (root)."""
         # Act
-        response = self.client.delete('/api/test_data')
+        response = self.client.delete('/api/test_data/')
 
         # Assert
         self.assertEqual(response.status_code, 405)
@@ -303,7 +303,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_test_data_patch_method_not_allowed_on_root(self):
         """Test that PATCH method is not allowed on /api/test_data (root)."""
         # Act
-        response = self.client.patch('/api/test_data')
+        response = self.client.patch('/api/test_data/')
 
         # Assert
         self.assertEqual(response.status_code, 405)

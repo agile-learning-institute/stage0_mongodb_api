@@ -12,7 +12,7 @@ def create_config_routes():
     config = Config.get_instance()
     
     # GET /api/config - Return the current configuration as JSON
-    @config_routes.route('', methods=['GET'])
+    @config_routes.route('/', methods=['GET'])
     @handle_errors("getting config")
     def get_config():
         # Return the JSON representation of the config object
