@@ -6,7 +6,6 @@ properties:
     type: word
     required: true
 one_of:
-  type_property: exercise
   schemas:
     stakeholders: 
       description: Stakeholders Exercise
@@ -16,7 +15,7 @@ one_of:
           description: Stakeholder Observations
           type: array
           items:
-            $ref: observation_stakeholder.1.0.0
+            ref: observation_stakeholder.1.0.0
     empathy: 
       description: Empathy Mapping exercise
       type: object
@@ -35,7 +34,7 @@ one_of:
               description: Empathy Observations
               type: array
               items:
-                $ref: observation_empathy.1.0.0
+                ref: observation_empathy.1.0.0
     hills: 
       description: Hills of the exercise
       type: object
@@ -44,7 +43,7 @@ one_of:
           description: Hills Observations
           type: array
           items:
-            $ref: observation_hills.1.0.0
+                            ref: observation_hills.1.0.0
     priority: 
       description: Priority of the exercise
       type: object
@@ -53,9 +52,9 @@ one_of:
           description: Priority Observations
           type: array
           items:
-            $ref: observation_priority.1.0.0
-        outcome:
-          $ref: observation_ranking.1.0.0
+                            ref: observation_priority.1.0.0
+                  outcome:
+            ref: observation_ranking.1.0.0
     retrospective: 
       description: Retrospective of the exercise
       type: object
@@ -64,4 +63,4 @@ one_of:
           description: Retrospective Observations
           type: array
           items:
-            $ref: observation_retrospective.1.0.0
+                            ref: observation_retrospective.1.0.0

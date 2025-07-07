@@ -1,37 +1,27 @@
 {
-  "description": "A media item in the system",
+  "description": "An organization in the system",
   "bsonType": "object",
   "properties": {
     "_id": {
-      "description": "The unique identifier for the media",
+      "description": "The unique identifier for the organization",
       "bsonType": "objectId"
     },
-    "title": {
-      "description": "The title of the media",
+    "name": {
+      "description": "The organization name",
       "pattern": "^[^\\t\\n\\r]{0,255}$",
       "bsonType": "string"
     },
-    "type": {
-      "description": "The type of media",
-      "bsonType": "string",
-      "enum": [
-        "movie",
-        "tv_show",
-        "documentary",
-        "short"
-      ]
-    },
     "status": {
-      "description": "The current status of the media",
+      "description": "The current status of the organization",
       "bsonType": "string",
       "enum": [
         "draft",
-        "published",
+        "active",
         "archived"
       ]
     },
     "last_saved": {
-      "description": "When the media was last updated",
+      "description": "When the organization document was last updated",
       "bsonType": "object",
       "properties": {
         "from_ip": {
@@ -62,55 +52,54 @@
         "correlation_id"
       ]
     },
-    "tags": {
-      "description": "Tags associated with the media",
+    "users": {
+      "description": "Users associated with this organization",
       "bsonType": "array",
       "items": {
-        "bsonType": "string",
-        "enum": [
-          "action",
-          "comedy",
-          "drama",
-          "sci_fi",
-          "documentary"
-        ]
+        "description": "A user identifier",
+        "bsonType": "objectId"
       }
     },
-    "metadata": {
-      "description": "Additional metadata about the media",
+    "website": {
+      "description": "Organization website",
+      "pattern": "^https?://[^\\s]+$",
+      "bsonType": "string"
+    },
+    "home_address": {
+      "description": "Organization home address",
       "bsonType": "object",
       "properties": {
-        "duration": {
-          "description": "Duration in minutes",
-          "bsonType": "int",
-          "minimum": 1
+        "street": {
+          "description": "Street address",
+          "pattern": "^[^\\t\\n\\r]{0,255}$",
+          "bsonType": "string"
         },
-        "format": {
-          "description": "Media format",
-          "bsonType": "string",
-          "enum": [
-            "dvd",
-            "bluray",
-            "digital",
-            "streaming"
-          ]
+        "city": {
+          "description": "City",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
         },
-        "quality": {
-          "description": "Quality rating",
-          "bsonType": "string",
-          "enum": [
-            "sd",
-            "hd",
-            "uhd"
-          ]
+        "state": {
+          "description": "State or province",
+          "pattern": "^[A-Z]{2}$",
+          "bsonType": "string"
+        },
+        "postal_code": {
+          "description": "Postal code",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "street",
+        "postal_code"
+      ]
     }
   },
   "required": [
     "_id",
-    "title",
+    "name",
     "status",
     "last_saved"
   ],

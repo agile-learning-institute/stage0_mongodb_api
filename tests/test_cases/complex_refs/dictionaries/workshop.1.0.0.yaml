@@ -58,7 +58,7 @@ properties:
             type: array
             required: true
             items:
-              $ref: observation.1.0.0
+              ref: observation.1.0.0
   last_saved:
     description: Last Saved breadcrumb
     type: breadcrumb

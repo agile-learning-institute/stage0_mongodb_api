@@ -10,7 +10,7 @@ properties:
     required: true
   type:
     description: The type of media
-    $ref: bad_file_ref
+    ref: bad_file_ref
   status:
     description: The current status of the media
     type: word

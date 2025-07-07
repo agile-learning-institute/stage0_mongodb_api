@@ -1,5 +1,4 @@
 {
-  "title": "Organization",
   "description": "An organization in the system",
   "bsonType": "object",
   "properties": {
@@ -9,28 +8,30 @@
     },
     "name": {
       "description": "The organization name",
-      "bsonType": "string",
-      "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
     },
     "status": {
       "description": "The current status of the organization",
       "bsonType": "string",
-      "enum": ["active", "archived"]
+      "enum": [
+        "active",
+        "archived"
+      ]
     },
     "last_saved": {
-      "title": "Breadcrumb",
       "description": "When the organization document was last updated",
       "bsonType": "object",
       "properties": {
         "from_ip": {
           "description": "Http Request remote IP address",
-          "bsonType": "string",
-          "pattern": "^[^\\s]{4,40}$"
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
         },
         "by_user": {
           "description": "ID Of User",
-          "bsonType": "string",
-          "pattern": "^[^\\s]{4,40}$"
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
         },
         "at_time": {
           "description": "The date-time when last updated",
@@ -38,12 +39,17 @@
         },
         "correlation_id": {
           "description": "The logging correlation ID of the update transaction",
-          "bsonType": "string",
-          "pattern": "^[^\\s]{4,40}$"
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
         }
       },
       "additionalProperties": false,
-      "required": ["from_ip", "by_user", "at_time", "correlation_id"]
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
     },
     "users": {
       "description": "Users associated with this organization",
@@ -55,39 +61,46 @@
     },
     "website": {
       "description": "Organization website",
-      "bsonType": "string",
-      "pattern": "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
+      "pattern": "^https?://[^\\s]+$",
+      "bsonType": "string"
     },
     "home_address": {
-      "title": "Street Address",
       "description": "Organization home address",
       "bsonType": "object",
       "properties": {
         "street": {
           "description": "Street address",
-          "bsonType": "string",
-          "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+          "pattern": "^[^\\t\\n\\r]{0,255}$",
+          "bsonType": "string"
         },
         "city": {
           "description": "City",
-          "bsonType": "string",
-          "pattern": "^[^\\s]{4,40}$"
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
         },
         "state": {
           "description": "State or province",
-          "bsonType": "string",
-          "pattern": "^[A-Z]{2}$"
+          "pattern": "^[A-Z]{2}$",
+          "bsonType": "string"
         },
         "postal_code": {
           "description": "Postal code",
-          "bsonType": "string",
-          "pattern": "^[^\\s]{4,40}$"
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
         }
       },
       "additionalProperties": false,
-      "required": ["postal_code"]
+      "required": [
+        "street",
+        "postal_code"
+      ]
     }
   },
-  "additionalProperties": false,
-  "required": ["_id", "name", "status", "last_saved"]
+  "required": [
+    "_id",
+    "name",
+    "status",
+    "last_saved"
+  ],
+  "additionalProperties": false
 }

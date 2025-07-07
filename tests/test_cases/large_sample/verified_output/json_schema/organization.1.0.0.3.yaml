@@ -1,31 +1,23 @@
-description: A media item in the system
+description: An organization in the system
 type: object
 properties:
   _id:
-    description: The unique identifier for the media
+    description: The unique identifier for the organization
     type: string
     pattern: ^[0-9a-fA-F]{24}$
-  title:
-    description: The title of the media
+  name:
+    description: The organization name
     type: string
     pattern: ^[^\t\n\r]{0,255}$
-  type:
-    description: The type of media
-    type: string
-    enum:
-    - movie
-    - tv_show
-    - documentary
-    - short
   status:
-    description: The current status of the media
+    description: The current status of the organization
     type: string
     enum:
     - draft
-    - published
+    - active
     - archived
   last_saved:
-    description: When the media was last updated
+    description: When the organization document was last updated
     type: object
     properties:
       from_ip:
@@ -50,45 +42,44 @@ properties:
     - by_user
     - at_time
     - correlation_id
-  tags:
-    description: Tags associated with the media
+  users:
+    description: Users associated with this organization
     type: array
     items:
+      description: A user identifier
       type: string
-      enum:
-      - action
-      - comedy
-      - drama
-      - sci_fi
-      - documentary
-  metadata:
-    description: Additional metadata about the media
+      pattern: ^[0-9a-fA-F]{24}$
+  website:
+    description: Organization website
+    type: string
+    pattern: ^https?://[^\s]+$
+  home_address:
+    description: Organization home address
     type: object
     properties:
-      duration:
-        description: Duration in minutes
-        type: number
-        minimum: 1
-        multipleOf: 1
-      format:
-        description: Media format
+      street:
+        description: Street address
         type: string
-        enum:
-        - dvd
-        - bluray
-        - digital
-        - streaming
-      quality:
-        description: Quality rating
+        pattern: ^[^\t\n\r]{0,255}$
+      city:
+        description: City
         type: string
-        enum:
-        - sd
-        - hd
-        - uhd
+        pattern: ^\S{1,40}$
+      state:
+        description: State or province
+        type: string
+        pattern: ^[A-Z]{2}$
+      postal_code:
+        description: Postal code
+        type: string
+        pattern: ^\S{1,40}$
     additionalProperties: false
+    required:
+    - street
+    - postal_code
 required:
 - _id
-- title
+- name
 - status
 - last_saved
 additionalProperties: false
