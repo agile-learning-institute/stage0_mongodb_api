@@ -10,12 +10,13 @@ class VersionNumber:
         """Initialize a VersionNumber instance.
         
         Args:
-            version: Version string collection.major.minor.patch.enumerator
+            version: Version string collection.major.minor.patch[.enumerator]
+                   If enumerator is omitted, defaults to 0.
             
         """
         self.version = version
         parts = version.split('.')
-        if len(parts) != 5:
+        if len(parts) < 4 or len(parts) > 5:
             event = ConfiguratorEvent(event_id="VER-01", event_type="VALIDATION")
             raise ConfiguratorException(f"Invalid version format {version}", event)
         
@@ -23,12 +24,21 @@ class VersionNumber:
         self.parts = [None] * 5
         self.parts[0] = parts[0]  # Collection name
         
-        # Validate that parts 1-4 are digits
-        for i, part in enumerate(parts[1:], 1):
+        # Validate that parts 1-3 are digits
+        for i, part in enumerate(parts[1:4], 1):
             if not part.isdigit():
                 event = ConfiguratorEvent(event_id="VER-01", event_type="VALIDATION")
                 raise ConfiguratorException(f"Invalid version format {version}", event)
             self.parts[i] = int(part)
+        
+        # Handle enumerator (part 4) - default to 0 if not provided
+        if len(parts) == 5:
+            if not parts[4].isdigit():
+                event = ConfiguratorEvent(event_id="VER-01", event_type="VALIDATION")
+                raise ConfiguratorException(f"Invalid version format {version}", event)
+            self.parts[4] = int(parts[4])
+        else:
+            self.parts[4] = 0  # Default enumerator to 0
 
     def get_schema_filename(self) -> str:
         """Get the schema file name - without enumerator version."""
