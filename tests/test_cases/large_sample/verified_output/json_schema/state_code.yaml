@@ -1,0 +1,3 @@
+description: A two character state code
+type: string
+pattern: ^[A-Z]{2}$

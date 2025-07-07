@@ -1,4 +1,0 @@
-description: A two character state code
-schema:
-  type: string
-  pattern: "^[A-Z]{2}$"

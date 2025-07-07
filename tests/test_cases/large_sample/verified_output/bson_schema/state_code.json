@@ -1,0 +1,5 @@
+{
+  "description": "A two character state code",
+  "pattern": "^[A-Z]{2}$",
+  "bsonType": "string"
+}

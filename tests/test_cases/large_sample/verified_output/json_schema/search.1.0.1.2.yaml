@@ -1,0 +1,16 @@
+description: A search index that is used to support a elastic search polymorphic query
+  service
+type: object
+properties:
+  collection_name:
+    description: The name of the collection
+    type: string
+    pattern: ^\S{1,40}$
+  collection_id:
+    description: The unique identifier for this source document
+    type: string
+    pattern: ^[0-9a-fA-F]{24}$
+required:
+- collection_name
+- collection_id
+additionalProperties: false

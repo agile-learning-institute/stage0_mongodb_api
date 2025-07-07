@@ -1,0 +1,85 @@
+description: An organization in the system
+type: object
+properties:
+  _id:
+    description: The unique identifier for the organization
+    type: string
+    pattern: ^[0-9a-fA-F]{24}$
+  name:
+    description: The organization name
+    type: string
+    pattern: ^[^\t\n\r]{0,255}$
+  status:
+    description: The current status of the organization
+    type: string
+    enum:
+    - draft
+    - active
+    - archived
+  last_saved:
+    description: When the organization document was last updated
+    type: object
+    properties:
+      from_ip:
+        description: Http Request remote IP address
+        type: string
+        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+      by_user:
+        description: ID Of User
+        type: string
+        pattern: ^\S{1,40}$
+      at_time:
+        description: The date-time when last updated
+        type: string
+        format: date-time
+      correlation_id:
+        description: The logging correlation ID of the update transaction
+        type: string
+        pattern: ^\S{1,40}$
+    additionalProperties: false
+    required:
+    - from_ip
+    - by_user
+    - at_time
+    - correlation_id
+  users:
+    description: Users associated with this organization
+    type: array
+    items:
+      description: A user identifier
+      type: string
+      pattern: ^[0-9a-fA-F]{24}$
+  website:
+    description: Organization website
+    type: string
+    pattern: ^https?://[^\s]+$
+  home_address:
+    description: Organization home address
+    type: object
+    properties:
+      street:
+        description: Street address
+        type: string
+        pattern: ^[^\t\n\r]{0,255}$
+      city:
+        description: City
+        type: string
+        pattern: ^\S{1,40}$
+      state:
+        description: State or province
+        type: string
+        pattern: ^[A-Z]{2}$
+      postal_code:
+        description: Postal code
+        type: string
+        pattern: ^\S{1,40}$
+    additionalProperties: false
+    required:
+    - street
+    - postal_code
+required:
+- _id
+- name
+- status
+- last_saved
+additionalProperties: false

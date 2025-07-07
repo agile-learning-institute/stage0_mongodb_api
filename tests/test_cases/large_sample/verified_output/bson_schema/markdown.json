@@ -1,0 +1,5 @@
+{
+  "description": "A String of text, at least 1 and no more than 4k characters. May contain markdown, newlines, and tabs.",
+  "maxLength": 4096,
+  "bsonType": "string"
+}

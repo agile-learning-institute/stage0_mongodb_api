@@ -1,5 +1,6 @@
 import unittest
 from configurator.services.type_services import Type
+from configurator.utils.version_number import VersionNumber
 import os
 import yaml
 import json
@@ -35,24 +36,42 @@ class TestTypeRendering(unittest.TestCase):
     def tearDown(self):
         clear_config()
 
-    def test_all_verified_renders(self):
-        """Test all verified renders match actual renders"""
-        # Test JSON schema renders
-        json_dir = f"{self.config.INPUT_FOLDER}/verified_output/json_schema"
+    def test_all_type_renders(self):
+        """Test all individual type renders match actual renders"""
+        # Test JSON schema type renders
+        json_dir = f"{self.config.INPUT_FOLDER}/verified_output/type_renders/json_schema"
         for file in os.listdir(json_dir):
             if file.endswith('.yaml'):
                 type_name = file.replace('.yaml', '')
-                self._test_json_render(type_name, file)
+                self._test_type_json_render(type_name, file)
         
-        # Test BSON schema renders
-        bson_dir = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema"
+        # Test BSON schema type renders
+        bson_dir = f"{self.config.INPUT_FOLDER}/verified_output/type_renders/bson_schema"
         for file in os.listdir(bson_dir):
             if file.endswith('.json'):
                 type_name = file.replace('.json', '')
-                self._test_bson_render(type_name, file)
+                self._test_type_bson_render(type_name, file)
 
-    def _test_json_render(self, type_name, expected_file):
-        """Test JSON schema render for a type"""
+    def test_all_full_schemas(self):
+        """Test all full schema renders match actual renders"""
+        # Test JSON schema full renders
+        json_dir = f"{self.config.INPUT_FOLDER}/verified_output/full_schemas/json_schema"
+        if os.path.exists(json_dir):
+            for file in os.listdir(json_dir):
+                if file.endswith('.yaml'):
+                    type_name = file.replace('.yaml', '')
+                    self._test_full_json_render(type_name, file)
+        
+        # Test BSON schema full renders
+        bson_dir = f"{self.config.INPUT_FOLDER}/verified_output/full_schemas/bson_schema"
+        if os.path.exists(bson_dir):
+            for file in os.listdir(bson_dir):
+                if file.endswith('.json'):
+                    type_name = file.replace('.json', '')
+                    self._test_full_bson_render(type_name, file)
+
+    def _test_type_json_render(self, type_name, expected_file):
+        """Test individual type JSON schema render"""
         # Load type and render
         type_path = f"{self.config.INPUT_FOLDER}/types/{type_name}.yaml"
         type_data = load_yaml(type_path)
@@ -60,14 +79,14 @@ class TestTypeRendering(unittest.TestCase):
         actual = type_instance.get_json_schema()
         
         # Load expected
-        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/json_schema/{expected_file}"
+        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/type_renders/json_schema/{expected_file}"
         expected = load_yaml(expected_path)
         
         # Compare
-        self._assert_dict_equality(actual, expected, f"JSON schema for {type_name}")
+        self._assert_dict_equality(actual, expected, f"Type JSON schema for {type_name}")
 
-    def _test_bson_render(self, type_name, expected_file):
-        """Test BSON schema render for a type"""
+    def _test_type_bson_render(self, type_name, expected_file):
+        """Test individual type BSON schema render"""
         # Load type and render
         type_path = f"{self.config.INPUT_FOLDER}/types/{type_name}.yaml"
         type_data = load_yaml(type_path)
@@ -75,11 +94,41 @@ class TestTypeRendering(unittest.TestCase):
         actual = type_instance.get_bson_schema()
         
         # Load expected
-        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema/{expected_file}"
+        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/type_renders/bson_schema/{expected_file}"
         expected = load_json(expected_path)
         
         # Compare
-        self._assert_dict_equality(actual, expected, f"BSON schema for {type_name}")
+        self._assert_dict_equality(actual, expected, f"Type BSON schema for {type_name}")
+
+    def _test_full_json_render(self, type_name, expected_file):
+        """Test full JSON schema render with all references resolved"""
+        # Load type and render with full resolution
+        type_path = f"{self.config.INPUT_FOLDER}/types/{type_name}.yaml"
+        type_data = load_yaml(type_path)
+        type_instance = Type(type_name, type_data)
+        actual = type_instance.get_json_schema()
+        
+        # Load expected
+        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/full_schemas/json_schema/{expected_file}"
+        expected = load_yaml(expected_path)
+        
+        # Compare
+        self._assert_dict_equality(actual, expected, f"Full JSON schema for {type_name}")
+
+    def _test_full_bson_render(self, type_name, expected_file):
+        """Test full BSON schema render with all references resolved"""
+        # Load type and render with full resolution
+        type_path = f"{self.config.INPUT_FOLDER}/types/{type_name}.yaml"
+        type_data = load_yaml(type_path)
+        type_instance = Type(type_name, type_data)
+        actual = type_instance.get_bson_schema()
+        
+        # Load expected
+        expected_path = f"{self.config.INPUT_FOLDER}/verified_output/full_schemas/bson_schema/{expected_file}"
+        expected = load_json(expected_path)
+        
+        # Compare
+        self._assert_dict_equality(actual, expected, f"Full BSON schema for {type_name}")
 
     def _assert_dict_equality(self, actual, expected, context):
         """Assert dictionary equality with detailed diff reporting"""

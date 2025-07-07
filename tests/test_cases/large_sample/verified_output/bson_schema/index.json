@@ -1,0 +1,5 @@
+{
+  "description": "A zero-based array index",
+  "bsonType": "int",
+  "minimum": 0
+}

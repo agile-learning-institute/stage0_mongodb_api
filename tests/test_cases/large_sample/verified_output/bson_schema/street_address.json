@@ -1,0 +1,31 @@
+{
+  "description": "A street address",
+  "bsonType": "object",
+  "properties": {
+    "street": {
+      "description": "Street address",
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
+    },
+    "city": {
+      "description": "City",
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "state": {
+      "description": "State or province",
+      "pattern": "^[A-Z]{2}$",
+      "bsonType": "string"
+    },
+    "postal_code": {
+      "description": "Postal code",
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "street",
+    "postal_code"
+  ]
+}
