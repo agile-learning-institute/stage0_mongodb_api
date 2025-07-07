@@ -89,7 +89,7 @@ class Property:
     def __init__(self, name: str, property: dict):
         self.config = Config.get_instance()
         self.name = name
-        self.ref = property.get("$ref", None)
+        self.ref = property.get("ref", None)
         self.description = property.get("description", "Missing Required Description")
         self.type = property.get("type", None)
         self.enums = property.get("enums", None)
@@ -97,11 +97,16 @@ class Property:
         self.additional_properties = property.get("additionalProperties", False)
         self.properties = {}
         self.items = None
-        
+        self.one_of = None
+                
         # Initialize properties if this is an object type
         if self.type == "object":
             for prop_name, prop_data in property.get("properties", {}).items():
                 self.properties[prop_name] = Property(prop_name, prop_data)
+            # Initialize one_of if present
+            one_of_data = property.get("one_of", None)
+            if one_of_data:
+                self.one_of = OneOf(one_of_data)
         
         # Initialize items if this is an array type
         if self.type == "array":
@@ -111,7 +116,7 @@ class Property:
                     
     def to_dict(self):
         if self.ref:
-            return {"$ref": self.ref}
+            return {"ref": self.ref}
         result = {}
         
         if self.type == "object":
@@ -122,6 +127,10 @@ class Property:
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()
             result["additionalProperties"] = self.additional_properties
+            
+            # Add one_of if present
+            if self.one_of:
+                result["one_of"] = self.one_of.to_dict()
         
         elif self.type == "array":
             result["description"] = self.description
@@ -161,6 +170,11 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
+            
+            # Handle one_of structure
+            if self.one_of:
+                schema["oneOf"] = self.one_of.get_json_schema(enumerators, ref_stack)
+            
             return schema
             
         elif self.type == "array":
@@ -215,6 +229,11 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
+            
+            # Handle one_of structure
+            if self.one_of:
+                schema["oneOf"] = self.one_of.get_bson_schema(enumerators, ref_stack)
+            
             return schema
             
         elif self.type == "array":
@@ -291,3 +310,21 @@ class Property:
             if prop.required:
                 required.append(prop_name)
         return required
+
+
+class OneOf:
+    def __init__(self, one_of_data: dict):
+        self.schemas = {}
+        for schema_name, schema_data in one_of_data.get("schemas", {}).items():
+            self.schemas[schema_name] = Property(schema_name, schema_data)
+    
+    def to_dict(self):
+        return {
+            "schemas": {name: schema.to_dict() for name, schema in self.schemas.items()}
+        }
+    
+    def get_json_schema(self, enumerators: Enumerators, ref_stack: list = None):
+        return [schema.get_json_schema(enumerators, ref_stack) for schema in self.schemas.values()]
+    
+    def get_bson_schema(self, enumerators: Enumerators, ref_stack: list = None):
+        return [schema.get_bson_schema(enumerators, ref_stack) for schema in self.schemas.values()]
