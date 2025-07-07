@@ -32,7 +32,9 @@ class TestDictionaryRendering(unittest.TestCase):
     """Test dictionary rendering against verified output files"""
 
     def setUp(self):
-        self.config = set_config_input_folder("./tests/test_cases/small_sample")
+        # Default to small_sample for backward compatibility
+        self.test_case = getattr(self, 'test_case', 'small_sample')
+        self.config = set_config_input_folder(f"./tests/test_cases/{self.test_case}")
         self.enumerators_service = Enumerators(None)
 
     def tearDown(self):
@@ -149,6 +151,16 @@ class TestDictionaryRendering(unittest.TestCase):
             return diff
         
         return "\n".join(_diff_dict(dict1, dict2))
+
+
+class TestSmallSampleRendering(TestDictionaryRendering):
+    """Test dictionary rendering for small_sample test case"""
+    test_case = 'small_sample'
+
+
+class TestLargeSampleRendering(TestDictionaryRendering):
+    """Test dictionary rendering for large_sample test case with advanced features"""
+    test_case = 'large_sample'
 
 
 if __name__ == '__main__':
