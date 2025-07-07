@@ -67,5 +67,15 @@ class VersionNumber:
             other = VersionNumber(other)
         return self.parts[1:] == other.parts[1:]
 
+    def __le__(self, other: 'VersionNumber') -> bool:
+        if not isinstance(other, VersionNumber):
+            other = VersionNumber(other)
+        return self.parts[1:] <= other.parts[1:]
+
+    def __ge__(self, other: 'VersionNumber') -> bool:
+        if not isinstance(other, VersionNumber):
+            other = VersionNumber(other)
+        return self.parts[1:] >= other.parts[1:]
+
     def __str__(self) -> str:
         return self.get_schema_filename() 
