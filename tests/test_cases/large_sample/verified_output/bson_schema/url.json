@@ -1,5 +1,0 @@
-{
-  "description": "A valid URL",
-  "pattern": "^https?://[^\\s]+$",
-  "bsonType": "string"
-}

@@ -1,48 +1,42 @@
 {
   "description": "A media item in the system",
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
-      "description": "The unique identifier for the media",
-      "bsonType": "objectId"
+      "bsonType": "objectId",
+      "description": "The unique identifier for the media"
     },
     "title": {
-      "description": "The title of the media",
-      "pattern": "^[^\\t\\n\\r]{0,255}$",
-      "bsonType": "string"
+      "pattern": "^[a-zA-Z0-9\\s.,!?-]{4,255}$",
+      "bsonType": "string",
+      "description": "The title of the media"
     },
     "type": {
       "description": "The type of media",
       "bsonType": "string",
-      "enum": [
-        "movie",
-        "tv_show",
-        "documentary",
-        "short"
-      ]
+      "enum": ["movie", "tv_show", "documentary", "short"]
     },
     "status": {
       "description": "The current status of the media",
       "bsonType": "string",
-      "enum": [
-        "draft",
-        "published",
-        "archived"
-      ]
+      "enum": ["draft", "published", "archived"]
     },
     "last_saved": {
+      "title": "Breadcrumb",
       "description": "When the media was last updated",
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "from_ip": {
           "description": "Http Request remote IP address",
-          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{4,40}$"
         },
         "by_user": {
           "description": "ID Of User",
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{4,40}$"
         },
         "at_time": {
           "description": "The date-time when last updated",
@@ -50,30 +44,18 @@
         },
         "correlation_id": {
           "description": "The logging correlation ID of the update transaction",
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{4,40}$"
         }
       },
-      "additionalProperties": false,
-      "required": [
-        "from_ip",
-        "by_user",
-        "at_time",
-        "correlation_id"
-      ]
+      "required": ["from_ip", "by_user", "at_time", "correlation_id"]
     },
     "tags": {
       "description": "Tags associated with the media",
       "bsonType": "array",
       "items": {
         "bsonType": "string",
-        "enum": [
-          "action",
-          "comedy",
-          "drama",
-          "sci_fi",
-          "documentary"
-        ]
+        "enum": ["action", "comedy", "drama", "sci_fi", "documentary"]
       }
     },
     "metadata": {
@@ -88,31 +70,17 @@
         "format": {
           "description": "Media format",
           "bsonType": "string",
-          "enum": [
-            "dvd",
-            "bluray",
-            "digital",
-            "streaming"
-          ]
+          "enum": ["dvd", "bluray", "digital", "streaming"]
         },
         "quality": {
           "description": "Quality rating",
           "bsonType": "string",
-          "enum": [
-            "sd",
-            "hd",
-            "uhd"
-          ]
+          "enum": ["sd", "hd", "uhd"]
         }
       },
       "additionalProperties": false
     }
   },
-  "required": [
-    "_id",
-    "title",
-    "status",
-    "last_saved"
-  ],
-  "additionalProperties": false
+  "required": ["_id", "title", "status", "last_saved"],
+  "title": "Media"
 }

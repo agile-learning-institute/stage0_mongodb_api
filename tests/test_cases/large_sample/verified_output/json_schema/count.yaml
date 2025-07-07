@@ -1,4 +1,0 @@
-description: A positive integer value
-type: number
-minimum: 1
-multipleOf: 1

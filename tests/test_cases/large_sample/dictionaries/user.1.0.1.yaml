@@ -1,0 +1,52 @@
+title: User Collection
+description: A user collection for testing the schema system
+type: object
+properties:
+  _id:
+    description: The unique identifier for a user
+    type: identity
+    required: true
+  user_name:
+    description: Username
+    type: word
+    required: true
+  full_name:
+    description: Users Full Name
+    type: sentence
+  status:
+    description: The status
+    type: enum
+    enums: default_status
+    required: true
+  categories:
+    description: A users list of categorized tags
+    type: array
+    items:
+      description: A user category
+      type: object
+      properties:
+        name: 
+          description: Category Name assigned by the user
+          type: word
+          required: true
+        category:
+          description: The category type assigned by the user
+          type: enum
+          enums: category_type
+          required: true
+        tags:
+          description: A list of enumerated values assigned by the user
+          type: enum_array
+          enums: category_tags
+          required: true
+  email:
+    description: The person's email address
+    type: email
+  phone:
+    description: The person's phone number
+    type: us_phone
+  last_saved:
+    description: The last time this document was saved
+    type: breadcrumb
+    required: true
+    

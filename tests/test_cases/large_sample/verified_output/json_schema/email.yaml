@@ -1,3 +1,0 @@
-description: A valid email address
-type: string
-pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$

@@ -1,5 +1,0 @@
-{
-  "description": "A String of text, 0 to 255 characters with no special characters",
-  "pattern": "^[^\\t\\n\\r]{0,255}$",
-  "bsonType": "string"
-}

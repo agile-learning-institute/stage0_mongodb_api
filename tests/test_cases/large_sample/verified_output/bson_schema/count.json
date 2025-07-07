@@ -1,5 +1,0 @@
-{
-  "description": "A positive integer value",
-  "bsonType": "int",
-  "minimum": 1
-}

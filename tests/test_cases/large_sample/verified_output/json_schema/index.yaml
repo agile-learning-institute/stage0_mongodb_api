@@ -1,4 +1,0 @@
-description: A zero-based array index
-type: number
-minimum: 0
-multipleOf: 1

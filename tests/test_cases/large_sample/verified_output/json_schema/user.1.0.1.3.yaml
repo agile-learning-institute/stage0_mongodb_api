@@ -1,83 +1,85 @@
+title: User Collection
 description: A user collection for testing the schema system
 type: object
 properties:
   _id:
+    type: string
     description: The unique identifier for a user
-    type: string
-    pattern: ^[0-9a-fA-F]{24}$
+    pattern: "^[0-9a-fA-F]{24}$"
   user_name:
+    type: string
     description: Username
-    type: string
-    pattern: ^\S{1,40}$
+    pattern: "^[^\\s]{4,40}$"
   full_name:
+    type: string
     description: Users Full Name
-    type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
   status:
-    description: The status
     type: string
+    description: The status
     enum:
-    - draft
-    - active
-    - archived
+      - draft
+      - active
+      - archived
   categories:
-    description: A users list of categorized tags
     type: array
+    description: A users list of categorized tags
     items:
-      description: A user category
       type: object
+      description: A user category
       properties:
         name:
+          type: string
           description: Category Name assigned by the user
-          type: string
-          pattern: ^\S{1,40}$
+          pattern: "^[^\\s]{4,40}$"
         category:
-          description: The category type assigned by the user
           type: string
+          description: The category type assigned by the user
           enum:
-          - work
-          - personal
-          - project
-          - reference
+            - work
+            - personal
+            - project
+            - reference
         tags:
-          description: A list of enumerated values assigned by the user
           type: array
+          description: A list of enumerated values assigned by the user
           items:
             type: string
             enum:
-            - urgent
-            - important
-            - normal
-            - low
-            - completed
-            - in_progress
-            - blocked
-            - review
+              - urgent
+              - important
+              - normal
+              - low
+              - completed
+              - in_progress
+              - blocked
+              - review
       required:
-      - name
-      - category
-      - tags
+        - name
+        - category
+        - tags
       additionalProperties: false
   email:
+    type: string
     description: The person's email address
-    type: string
-    pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
+    pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
   phone:
-    description: The person's phone number
     type: string
-    pattern: ^\+1[2-9][0-9]{9}$
+    description: The person's phone number
+    pattern: "^\\+1[2-9][0-9]{9}$"
   last_saved:
+    title: Breadcrumb
     description: The last time this document was saved
     type: object
     properties:
       from_ip:
         description: Http Request remote IP address
         type: string
-        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        pattern: "^[^\\s]{4,40}$"
       by_user:
         description: ID Of User
         type: string
-        pattern: ^\S{1,40}$
+        pattern: "^[^\\s]{4,40}$"
       at_time:
         description: The date-time when last updated
         type: string
@@ -85,16 +87,16 @@ properties:
       correlation_id:
         description: The logging correlation ID of the update transaction
         type: string
-        pattern: ^\S{1,40}$
-    additionalProperties: false
+        pattern: "^[^\\s]{4,40}$" 
     required:
-    - from_ip
-    - by_user
-    - at_time
-    - correlation_id
+      - from_ip
+      - by_user
+      - at_time
+      - correlation_id
+    additionalProperties: false
 required:
-- _id
-- user_name
-- status
-- last_saved
+  - _id
+  - user_name
+  - status
+  - last_saved
 additionalProperties: false
