@@ -56,8 +56,8 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_get_types_general_exception(self, mock_get_documents):
@@ -70,7 +70,8 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_get_type_success(self, mock_type_class):
@@ -104,8 +105,8 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_get_type_general_exception(self, mock_type_class):
@@ -118,7 +119,8 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_update_type_success(self, mock_type_class):
@@ -163,8 +165,8 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_update_type_general_exception(self, mock_type_class):
@@ -181,7 +183,8 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_delete_type_success(self, mock_type_class):
@@ -218,8 +221,8 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_delete_type_general_exception(self, mock_type_class):
@@ -234,7 +237,8 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_lock_unlock_type_success(self, mock_type_class):
@@ -271,8 +275,8 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.type_routes.Type')
     def test_lock_unlock_type_general_exception(self, mock_type_class):
@@ -287,7 +291,8 @@ class TestTypeRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     def test_types_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/types."""

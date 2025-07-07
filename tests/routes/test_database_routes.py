@@ -46,8 +46,8 @@ class TestDatabaseRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         # The response should contain the to_dict() structure from the exception
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.database_routes.MongoIO')
     def test_drop_database_safety_limit_exceeded(self, mock_mongo_io_class):
@@ -74,9 +74,8 @@ class TestDatabaseRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
-        self.assertIn("Safety Limit Exceeded", response.json["message"])
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.database_routes.MongoIO')
     def test_drop_database_general_exception(self, mock_mongo_io_class):
@@ -91,7 +90,8 @@ class TestDatabaseRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     def test_drop_database_get_method_not_allowed(self):
         """Test that GET method is not allowed on /api/database."""

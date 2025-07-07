@@ -44,8 +44,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("data", response.json)
-        self.assertIn("file_path", response.json["data"])
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_get_enumerators_configurator_exception(self, mock_enumerators_class):
@@ -60,8 +60,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("data", response.json)
-        self.assertIn("error", response.json["data"])
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_get_enumerators_general_exception(self, mock_enumerators_class):
@@ -74,7 +74,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_put_enumerators_success(self, mock_enumerators_class):
@@ -109,8 +110,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_put_enumerators_general_exception(self, mock_enumerators_class):
@@ -124,7 +125,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     def test_enumerators_delete_method_not_allowed(self):
         """Test that DELETE method is not allowed on /api/enumerators."""

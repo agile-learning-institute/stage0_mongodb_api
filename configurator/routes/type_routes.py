@@ -3,6 +3,7 @@ from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
 from configurator.services.type_services import Type
+from configurator.utils.route_decorators import handle_errors
 
 import logging
 logger = logging.getLogger(__name__)
@@ -14,16 +15,10 @@ def create_type_routes():
     
     # GET /api/types/ - Return the current type files
     @type_routes.route('', methods=['GET'])
+    @handle_errors("listing types")
     def get_types():
-        try:
-            files = FileIO.get_documents(config.TYPE_FOLDER)
-            return jsonify(files), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error listing configurations: {str(e)}")
-            return jsonify(e.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error listing configurations: {str(e)}")
-            return jsonify(str(e)), 500
+        files = FileIO.get_documents(config.TYPE_FOLDER)
+        return jsonify(files), 200
 
     # PATCH /api/types - Clean Types
     @type_routes.route('', methods=['PATCH'])
@@ -48,56 +43,32 @@ def create_type_routes():
 
     # GET /api/types/<file_name> - Return a type file
     @type_routes.route('/<file_name>', methods=['GET'])
+    @handle_errors("getting type")
     def get_type(file_name):
-        try:
-            type = Type(file_name)
-            return jsonify(type), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error getting type {file_name}: {str(e)}")
-            return jsonify(e.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error getting type {file_name}: {str(e)}")
-            return jsonify(str(e)), 500
+        type = Type(file_name)
+        return jsonify(type), 200
         
     # PUT /api/types/<file_name> - Update a type file
     @type_routes.route('/<file_name>', methods=['PUT'])
+    @handle_errors("updating type")
     def update_type(file_name):
-        try:
-            type = Type(file_name, request.json)
-            saved = type.save()
-            return jsonify(saved), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error updating type {file_name}: {str(e)}")
-            return jsonify(e.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error updating type {file_name}: {str(e)}")
-            return jsonify(str(e)), 500
+        type = Type(file_name, request.json)
+        saved = type.save()
+        return jsonify(saved), 200
         
     @type_routes.route('/<file_name>', methods=['DELETE'])
+    @handle_errors("deleting type")
     def delete_type(file_name):
-        try:
-            type = Type(file_name)
-            deleted = type.delete()
-            return jsonify(deleted), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error deleting type {file_name}: {str(e)}")
-            return jsonify(e.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error deleting type {file_name}: {str(e)}")
-            return jsonify(str(e)), 500
+        type = Type(file_name)
+        deleted = type.delete()
+        return jsonify(deleted), 200
         
     @type_routes.route('/<file_name>', methods=['PATCH'])
+    @handle_errors("locking/unlocking type")
     def lock_unlock_type(file_name):
-        try:
-            type = Type(file_name)
-            result = type.flip_lock()
-            return jsonify(result), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error locking/unlocking type {file_name}: {str(e)}")
-            return jsonify(e.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error locking/unlocking type {file_name}: {str(e)}")
-            return jsonify(str(e)), 500
+        type = Type(file_name)
+        result = type.flip_lock()
+        return jsonify(result), 200
         
     logger.info("Type Flask Routes Registered")
     return type_routes

@@ -56,8 +56,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_get_dictionaries_general_exception(self, mock_get_documents):
@@ -70,7 +70,8 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_get_dictionary_success(self, mock_dictionary_class):
@@ -104,8 +105,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_get_dictionary_general_exception(self, mock_dictionary_class):
@@ -118,7 +119,8 @@ class TestDictionaryRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_update_dictionary_success(self, mock_dictionary_class):
@@ -163,8 +165,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_update_dictionary_general_exception(self, mock_dictionary_class):
@@ -218,8 +220,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_delete_dictionary_general_exception(self, mock_dictionary_class):
@@ -271,8 +273,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_lock_unlock_dictionary_general_exception(self, mock_dictionary_class):

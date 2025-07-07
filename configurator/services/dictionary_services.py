@@ -148,32 +148,7 @@ class Property:
             ref_stack = []
         
         if self.ref:
-            # Check for circular reference
-            if self.ref in ref_stack:
-                ref_chain = " -> ".join(ref_stack + [self.ref])
-                event = ConfiguratorEvent(
-                    event_id="DIC-07", 
-                    event_type="CIRCULAR_REFERENCE",
-                    event_data={"ref_chain": ref_chain, "ref_stack": ref_stack}
-                )
-                raise ConfiguratorException(f"Circular reference detected: {ref_chain}", event)
-            
-            # Check stack depth limit
-            if len(ref_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
-                event = ConfiguratorEvent(
-                    event_id="DIC-08", 
-                    event_type="STACK_DEPTH_EXCEEDED",
-                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(ref_stack)}
-                )
-                raise ConfiguratorException(f"Reference stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
-            
-            # Add current ref to stack and process
-            ref_stack.append(self.ref)
-            try:
-                dictionary = Dictionary(self.ref)
-                return dictionary.get_json_schema(enumerators, ref_stack)
-            finally:
-                ref_stack.pop()
+            return self._handle_ref_schema(enumerators, ref_stack, "json")
 
         if self.type == "object":
             schema = {}
@@ -227,32 +202,7 @@ class Property:
             ref_stack = []
         
         if self.ref:
-            # Check for circular reference
-            if self.ref in ref_stack:
-                ref_chain = " -> ".join(ref_stack + [self.ref])
-                event = ConfiguratorEvent(
-                    event_id="DIC-07", 
-                    event_type="CIRCULAR_REFERENCE",
-                    event_data={"ref_chain": ref_chain, "ref_stack": ref_stack}
-                )
-                raise ConfiguratorException(f"Circular reference detected: {ref_chain}", event)
-            
-            # Check stack depth limit
-            if len(ref_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
-                event = ConfiguratorEvent(
-                    event_id="DIC-08", 
-                    event_type="STACK_DEPTH_EXCEEDED",
-                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(ref_stack)}
-                )
-                raise ConfiguratorException(f"Reference stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
-            
-            # Add current ref to stack and process
-            ref_stack.append(self.ref)
-            try:
-                dictionary = Dictionary(self.ref)
-                return dictionary.get_bson_schema(enumerators, ref_stack)
-            finally:
-                ref_stack.pop()
+            return self._handle_ref_schema(enumerators, ref_stack, "bson")
 
         if self.type == "object":
             schema = {}
@@ -303,6 +253,37 @@ class Property:
             
         return schema
     
+    def _handle_ref_schema(self, enumerators: Enumerators, ref_stack: list, schema_type: str):
+        """Handle reference schema processing with circular reference and depth checking."""
+        # Check for circular reference
+        if self.ref in ref_stack:
+            ref_chain = " -> ".join(ref_stack + [self.ref])
+            event = ConfiguratorEvent(
+                event_id="DIC-07", 
+                event_type="CIRCULAR_REFERENCE",
+                event_data={"ref_chain": ref_chain, "ref_stack": ref_stack}
+            )
+            raise ConfiguratorException(f"Circular reference detected: {ref_chain}", event)
+        
+        # Check stack depth limit
+        if len(ref_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
+            event = ConfiguratorEvent(
+                event_id="DIC-08", 
+                event_type="STACK_DEPTH_EXCEEDED",
+                event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(ref_stack)}
+            )
+            raise ConfiguratorException(f"Reference stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
+        
+        # Add current ref to stack and process
+        ref_stack.append(self.ref)
+        try:
+            dictionary = Dictionary(self.ref)
+            if schema_type == "json":
+                return dictionary.get_json_schema(enumerators, ref_stack)
+            else:
+                return dictionary.get_bson_schema(enumerators, ref_stack)
+        finally:
+            ref_stack.pop()
     
     def _get_required(self):
         required = []

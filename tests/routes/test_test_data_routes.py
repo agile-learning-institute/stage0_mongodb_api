@@ -56,8 +56,8 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_get_data_files_general_exception(self, mock_get_documents):
@@ -70,7 +70,8 @@ class TestTestDataRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_document')
     def test_get_test_data_success(self, mock_get_document):
@@ -105,8 +106,8 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_document')
     def test_get_test_data_general_exception(self, mock_get_document):
@@ -119,7 +120,8 @@ class TestTestDataRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'put_document')
     def test_update_test_data_success(self, mock_put_document):
@@ -158,8 +160,8 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'put_document')
     def test_update_test_data_general_exception(self, mock_put_document):
@@ -174,7 +176,8 @@ class TestTestDataRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'delete_document')
     def test_delete_test_data_success(self, mock_delete_document):
@@ -206,8 +209,8 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'delete_document')
     def test_delete_test_data_general_exception(self, mock_delete_document):
@@ -220,7 +223,8 @@ class TestTestDataRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'lock_unlock')
     def test_lock_unlock_test_data_success(self, mock_lock_unlock):
@@ -255,8 +259,8 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'lock_unlock')
     def test_lock_unlock_test_data_general_exception(self, mock_lock_unlock):
@@ -269,7 +273,8 @@ class TestTestDataRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     def test_test_data_post_method_not_allowed(self):
         """Test that POST method is not allowed on /api/test_data."""

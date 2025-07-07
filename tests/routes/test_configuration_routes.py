@@ -56,8 +56,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_list_configurations_general_exception(self, mock_get_documents):
@@ -70,7 +70,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     @patch('configurator.routes.configuration_routes.Configuration')
@@ -107,8 +108,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch.object(__import__('configurator.utils.file_io', fromlist=['FileIO']).FileIO, 'get_documents')
     def test_process_configurations_general_exception(self, mock_get_documents):
@@ -121,7 +122,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_configuration_success(self, mock_configuration_class):
@@ -155,8 +157,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_configuration_general_exception(self, mock_configuration_class):
@@ -169,7 +171,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_success(self, mock_configuration_class):
@@ -214,8 +217,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_general_exception(self, mock_configuration_class):
@@ -232,7 +235,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_delete_configuration_success(self, mock_configuration_class):
@@ -269,8 +273,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_delete_configuration_general_exception(self, mock_configuration_class):
@@ -285,7 +289,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_unlock_configuration_success(self, mock_configuration_class):
@@ -322,8 +327,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_unlock_configuration_general_exception(self, mock_configuration_class):
@@ -338,7 +343,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_success(self, mock_configuration_class):
@@ -375,8 +381,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_general_exception(self, mock_configuration_class):
@@ -391,7 +397,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_json_schema_success(self, mock_configuration_class):
@@ -430,8 +437,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_json_schema_general_exception(self, mock_configuration_class):
@@ -446,7 +453,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_bson_schema_success(self, mock_configuration_class):
@@ -485,8 +493,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIsInstance(response.json, dict)
-        self.assertIn("message", response.json)
-        self.assertIn("event", response.json)
+        self.assertIn("id", response.json)
+        self.assertIn("type", response.json)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_bson_schema_general_exception(self, mock_configuration_class):
@@ -501,7 +509,8 @@ class TestConfigurationRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.json, "Unexpected error")
+        self.assertIsInstance(response.json, str)
+        self.assertIn("Unexpected error", response.json)
 
     def test_configurations_method_not_allowed(self):
         """Test that DELETE method is not allowed on /api/configurations."""

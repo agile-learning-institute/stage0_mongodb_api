@@ -151,6 +151,6 @@ class Config:
         if Config._instance is None:
             Config()
             
-        # logger.log("Config Initializing")
+
         return Config._instance
         

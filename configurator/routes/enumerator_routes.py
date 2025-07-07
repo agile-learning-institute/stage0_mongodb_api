@@ -3,6 +3,7 @@ from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 from configurator.utils.file_io import FileIO
 from configurator.services.enumerator_service import Enumerators
+from configurator.utils.route_decorators import handle_errors
 import logging
 logger = logging.getLogger(__name__)
 
@@ -12,16 +13,10 @@ def create_enumerator_routes():
     
     # GET /api/enumerators - Return the content of enumerators.json
     @enumerator_routes.route('', methods=['GET'])
+    @handle_errors("getting enumerators")
     def get_enumerators():
-        try:
-            enumerators = Enumerators(None)
-            return jsonify(enumerators.to_dict()), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error getting enumerators: {e.event.to_dict()}")
-            return jsonify(e.event.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error getting enumerators: {e}")
-            return jsonify(str(e)), 500
+        enumerators = Enumerators(None)
+        return jsonify(enumerators.to_dict()), 200
     
     # PATCH /api/enumerators - Clean Enumerators
     @enumerator_routes.route('', methods=['PATCH'])
@@ -44,17 +39,11 @@ def create_enumerator_routes():
     
     # PUT /api/enumerators - Overwrite enumerators.json
     @enumerator_routes.route('', methods=['PUT'])
+    @handle_errors("saving enumerators")
     def put_enumerators():
-        try:
-            enumerators = Enumerators(data=request.get_json(force=True))
-            events = enumerators.save()
-            return jsonify(events[0].data), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error saving enumerators: {str(e)}")
-            return jsonify(e.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error saving enumerators: {str(e)}")
-            return jsonify(str(e)), 500
+        enumerators = Enumerators(data=request.get_json(force=True))
+        events = enumerators.save()
+        return jsonify(events[0].data), 200
     
     logger.info("Enumerator Flask Routes Registered")
     return enumerator_routes

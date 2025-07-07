@@ -225,35 +225,7 @@ class TypeProperty:
                 
             return result
         if self.type:
-            # Check for circular reference
-            type_name = f"{self.type}.yaml"
-            if type_name in type_stack:
-                type_chain = " -> ".join(type_stack + [type_name])
-                event = ConfiguratorEvent(
-                    event_id="TYP-07", 
-                    event_type="CIRCULAR_TYPE_REFERENCE",
-                    event_data={"type_chain": type_chain, "type_stack": type_stack}
-                )
-                raise ConfiguratorException(f"Circular type reference detected: {type_chain}", event)
-            
-            # Check stack depth limit
-            if len(type_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
-                event = ConfiguratorEvent(
-                    event_id="TYP-08", 
-                    event_type="TYPE_STACK_DEPTH_EXCEEDED",
-                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(type_stack)}
-                )
-                raise ConfiguratorException(f"Type stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
-            
-            # Add current type to stack and process
-            type_stack.append(type_name)
-            try:
-                custom_type = Type(type_name)
-                custom_schema = custom_type.property.get_json_schema(type_stack)
-                custom_schema["description"] = self.description
-                return custom_schema
-            finally:
-                type_stack.pop()
+            return self._handle_type_reference(type_stack, "json")
 
         raise ConfiguratorException(f"Type {self.type} is not a valid type", ConfiguratorEvent(event_id="TYP-99", event_type="INVALID_TYPE"))
     
@@ -300,34 +272,39 @@ class TypeProperty:
                 
             return result
         if self.type:
-            # Check for circular reference
-            type_name = f"{self.type}.yaml"
-            if type_name in type_stack:
-                type_chain = " -> ".join(type_stack + [type_name])
-                event = ConfiguratorEvent(
-                    event_id="TYP-07", 
-                    event_type="CIRCULAR_TYPE_REFERENCE",
-                    event_data={"type_chain": type_chain, "type_stack": type_stack}
-                )
-                raise ConfiguratorException(f"Circular type reference detected: {type_chain}", event)
-            
-            # Check stack depth limit
-            if len(type_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
-                event = ConfiguratorEvent(
-                    event_id="TYP-08", 
-                    event_type="TYPE_STACK_DEPTH_EXCEEDED",
-                    event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(type_stack)}
-                )
-                raise ConfiguratorException(f"Type stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
-            
-            # Add current type to stack and process
-            type_stack.append(type_name)
-            try:
-                custom_type = Type(type_name)
-                custom_schema = custom_type.property.get_bson_schema(type_stack)
-                custom_schema["description"] = self.description
-                return custom_schema
-            finally:
-                type_stack.pop()
+            return self._handle_type_reference(type_stack, "bson")
 
         raise ConfiguratorException(f"Type {self.type} is not a valid type", ConfiguratorEvent(event_id="TYP-99", event_type="INVALID_TYPE"))
+
+    def _handle_type_reference(self, type_stack: list, schema_type: str):
+        """Handle type reference processing with circular reference and depth checking."""
+        type_name = f"{self.type}.yaml"
+        # Check for circular reference
+        if type_name in type_stack:
+            type_chain = " -> ".join(type_stack + [type_name])
+            event = ConfiguratorEvent(
+                event_id="TYP-07", 
+                event_type="CIRCULAR_TYPE_REFERENCE",
+                event_data={"type_chain": type_chain, "type_stack": type_stack}
+            )
+            raise ConfiguratorException(f"Circular type reference detected: {type_chain}", event)
+        # Check stack depth limit
+        if len(type_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
+            event = ConfiguratorEvent(
+                event_id="TYP-08", 
+                event_type="TYPE_STACK_DEPTH_EXCEEDED",
+                event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(type_stack)}
+            )
+            raise ConfiguratorException(f"Type stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
+        # Add current type to stack and process
+        type_stack.append(type_name)
+        try:
+            custom_type = Type(type_name)
+            if schema_type == "json":
+                custom_schema = custom_type.property.get_json_schema(type_stack)
+            else:
+                custom_schema = custom_type.property.get_bson_schema(type_stack)
+            custom_schema["description"] = self.description
+            return custom_schema
+        finally:
+            type_stack.pop()
