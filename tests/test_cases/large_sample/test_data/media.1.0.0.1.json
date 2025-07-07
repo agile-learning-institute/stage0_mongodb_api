@@ -14,7 +14,12 @@
     "metadata": {
       "duration": 136,
       "format": "bluray",
-      "quality": "uhd"
+      "quality": "uhd",
+      "content_data": {
+        "director": "Lana Wachowski",
+        "cast": ["Keanu Reeves", "Laurence Fishburne", "Carrie-Anne Moss"],
+        "genre": ["action", "sci_fi"]
+      }
     }
   },
   {
@@ -32,7 +37,12 @@
     "metadata": {
       "duration": 240,
       "format": "bluray",
-      "quality": "hd"
+      "quality": "hd",
+      "content_data": {
+        "season": 1,
+        "episode": 1,
+        "network": "HBO"
+      }
     }
   }
 ]

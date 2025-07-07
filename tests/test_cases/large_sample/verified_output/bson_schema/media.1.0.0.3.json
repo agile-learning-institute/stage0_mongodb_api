@@ -103,6 +103,119 @@
             "hd",
             "uhd"
           ]
+        },
+        "content_data": {
+          "description": "Media-specific content data",
+          "bsonType": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "description": "Movie-specific metadata",
+              "bsonType": "object",
+              "properties": {
+                "director": {
+                  "description": "Movie director",
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                },
+                "cast": {
+                  "description": "Movie cast members",
+                  "bsonType": "array",
+                  "items": {
+                    "description": "Cast member",
+                    "pattern": "^\\S{1,40}$",
+                    "bsonType": "string"
+                  }
+                },
+                "genre": {
+                  "description": "Movie genre",
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string",
+                    "enum": [
+                      "action",
+                      "comedy",
+                      "drama",
+                      "sci_fi",
+                      "documentary"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "director"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "description": "TV show-specific metadata",
+              "bsonType": "object",
+              "properties": {
+                "season": {
+                  "description": "Season number",
+                  "bsonType": "int",
+                  "minimum": 1
+                },
+                "episode": {
+                  "description": "Episode number",
+                  "bsonType": "int",
+                  "minimum": 1
+                },
+                "network": {
+                  "description": "Broadcasting network",
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                }
+              },
+              "required": [
+                "season",
+                "episode"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "description": "Documentary-specific metadata",
+              "bsonType": "object",
+              "properties": {
+                "subject": {
+                  "description": "Documentary subject",
+                  "pattern": "^[^\\t\\n\\r]{0,255}$",
+                  "bsonType": "string"
+                },
+                "narrator": {
+                  "description": "Documentary narrator",
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                }
+              },
+              "required": [
+                "subject"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "description": "Short film-specific metadata",
+              "bsonType": "object",
+              "properties": {
+                "festival": {
+                  "description": "Film festival",
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                },
+                "awards": {
+                  "description": "Awards received",
+                  "bsonType": "array",
+                  "items": {
+                    "description": "Award name",
+                    "pattern": "^\\S{1,40}$",
+                    "bsonType": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
         }
       },
       "additionalProperties": false

@@ -39,6 +39,28 @@ properties:
           type: enum_array
           enums: category_tags
           required: true
+  preferences:
+    description: User preferences and settings
+    type: object
+    properties:
+      notification_types:
+        description: Types of notifications the user wants to receive
+        type: enum_array
+        enums: notification_type
+        required: true
+      delivery_channels:
+        description: Preferred delivery channels for notifications
+        type: enum_array
+        enums: delivery_channel
+        required: true
+      content_tags:
+        description: Content tags the user is interested in
+        type: enum_array
+        enums: content_tags
+      priority_levels:
+        description: Priority levels the user wants to receive
+        type: enum_array
+        enums: priority_level
   email:
     description: The person's email address
     type: email

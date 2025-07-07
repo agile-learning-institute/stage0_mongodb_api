@@ -1,0 +1,261 @@
+{
+  "description": "A notification collection for testing enum_array and cross-collection references",
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "description": "The unique identifier for notification",
+      "bsonType": "objectId"
+    },
+    "user_id": {
+      "description": "A user collection for testing the schema system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for a user",
+          "bsonType": "objectId"
+        },
+        "user_name": {
+          "description": "Username",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "first_name": {
+          "description": "Users First Name",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "last_name": {
+          "description": "Users Last Name",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "status": {
+          "description": "document status",
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "active",
+            "archived"
+          ]
+        },
+        "last_saved": {
+          "description": "The last time this document was saved",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "bsonType": "string"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "from_ip",
+            "by_user",
+            "at_time",
+            "correlation_id"
+          ]
+        }
+      },
+      "required": [
+        "_id",
+        "user_name",
+        "status",
+        "last_saved"
+      ],
+      "additionalProperties": false
+    },
+    "title": {
+      "description": "Notification title",
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "message": {
+      "description": "Notification message",
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
+    },
+    "notification_type": {
+      "description": "Type of notification",
+      "bsonType": "string",
+      "enum": [
+        "system",
+        "user",
+        "content",
+        "reminder"
+      ]
+    },
+    "status": {
+      "description": "Notification status",
+      "bsonType": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ]
+    },
+    "priority": {
+      "description": "Notification priority level",
+      "bsonType": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "tags": {
+      "description": "Notification tags for categorization",
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "urgent",
+          "important",
+          "normal",
+          "low"
+        ]
+      }
+    },
+    "categories": {
+      "description": "Notification categories",
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "work",
+          "personal",
+          "project",
+          "reference"
+        ]
+      }
+    },
+    "channels": {
+      "description": "Delivery channels for this notification",
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "email",
+          "sms",
+          "push",
+          "in_app"
+        ]
+      }
+    },
+    "metadata": {
+      "description": "Additional notification metadata",
+      "bsonType": "object",
+      "properties": {
+        "created_at": {
+          "description": "When the notification was created",
+          "bsonType": "date"
+        },
+        "sent_at": {
+          "description": "When the notification was sent",
+          "bsonType": "date"
+        },
+        "read_at": {
+          "description": "When the notification was read",
+          "bsonType": "date"
+        },
+        "expires_at": {
+          "description": "When the notification expires",
+          "bsonType": "date"
+        },
+        "source": {
+          "description": "Source of the notification",
+          "bsonType": "object",
+          "properties": {
+            "collection": {
+              "description": "Source collection name",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "document_id": {
+              "description": "Source document ID",
+              "bsonType": "objectId"
+            },
+            "action": {
+              "description": "Action that triggered the notification",
+              "bsonType": "string",
+              "enum": [
+                "created",
+                "updated",
+                "deleted",
+                "published"
+              ]
+            }
+          },
+          "required": [
+            "collection",
+            "document_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "last_saved": {
+      "description": "Last saved breadcrumb",
+      "bsonType": "object",
+      "properties": {
+        "from_ip": {
+          "description": "Http Request remote IP address",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
+        },
+        "by_user": {
+          "description": "ID Of User",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "at_time": {
+          "description": "The date-time when last updated",
+          "bsonType": "date"
+        },
+        "correlation_id": {
+          "description": "The logging correlation ID of the update transaction",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
+    }
+  },
+  "required": [
+    "_id",
+    "user_id",
+    "title",
+    "message",
+    "notification_type",
+    "status",
+    "priority",
+    "channels",
+    "last_saved"
+  ],
+  "additionalProperties": false
+}

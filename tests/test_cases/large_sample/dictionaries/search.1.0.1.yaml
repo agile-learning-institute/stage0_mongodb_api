@@ -13,9 +13,9 @@ properties:
 one_of:
   schemas:
     media: 
-      ref: media.1.0.0
+      ref: media.1.0.0.yaml
     organization: 
-      ref: organization.1.0.0
+      ref: organization.1.0.0.yaml
     user: 
-      ref: user.1.0.1
+      ref: user.1.0.1.yaml
   

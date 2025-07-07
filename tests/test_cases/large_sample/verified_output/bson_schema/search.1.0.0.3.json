@@ -19,76 +19,415 @@
   "additionalProperties": false,
   "oneOf": [
     {
-      "if": {
-        "properties": {
-          "collection_name": {
-            "const": "media"
+      "description": "A media item in the system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for the media",
+          "bsonType": "objectId"
+        },
+        "title": {
+          "description": "The title of the media",
+          "pattern": "^[^\\t\\n\\r]{0,255}$",
+          "bsonType": "string"
+        },
+        "type": {
+          "description": "The type of media",
+          "bsonType": "string",
+          "enum": [
+            "movie",
+            "tv_show",
+            "documentary",
+            "short"
+          ]
+        },
+        "status": {
+          "description": "The current status of the media",
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "published",
+            "archived"
+          ]
+        },
+        "last_saved": {
+          "description": "When the media was last updated",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "bsonType": "string"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "from_ip",
+            "by_user",
+            "at_time",
+            "correlation_id"
+          ]
+        },
+        "tags": {
+          "description": "Tags associated with the media",
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": [
+              "action",
+              "comedy",
+              "drama",
+              "sci_fi",
+              "documentary"
+            ]
           }
         },
-        "required": [
-          "collection_name"
-        ]
+        "metadata": {
+          "description": "Additional metadata about the media",
+          "bsonType": "object",
+          "properties": {
+            "duration": {
+              "description": "Duration in minutes",
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "format": {
+              "description": "Media format",
+              "bsonType": "string",
+              "enum": [
+                "dvd",
+                "bluray",
+                "digital",
+                "streaming"
+              ]
+            },
+            "quality": {
+              "description": "Quality rating",
+              "bsonType": "string",
+              "enum": [
+                "sd",
+                "hd",
+                "uhd"
+              ]
+            },
+            "content_data": {
+              "description": "Media-specific content data",
+              "bsonType": "object",
+              "properties": {},
+              "additionalProperties": false,
+              "oneOf": [
+                {
+                  "description": "Movie-specific metadata",
+                  "bsonType": "object",
+                  "properties": {
+                    "director": {
+                      "description": "Movie director",
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    },
+                    "cast": {
+                      "description": "Movie cast members",
+                      "bsonType": "array",
+                      "items": {
+                        "description": "Cast member",
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    },
+                    "genre": {
+                      "description": "Movie genre",
+                      "bsonType": "array",
+                      "items": {
+                        "bsonType": "string",
+                        "enum": [
+                          "action",
+                          "comedy",
+                          "drama",
+                          "sci_fi",
+                          "documentary"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "director"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "description": "TV show-specific metadata",
+                  "bsonType": "object",
+                  "properties": {
+                    "season": {
+                      "description": "Season number",
+                      "bsonType": "int",
+                      "minimum": 1
+                    },
+                    "episode": {
+                      "description": "Episode number",
+                      "bsonType": "int",
+                      "minimum": 1
+                    },
+                    "network": {
+                      "description": "Broadcasting network",
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    }
+                  },
+                  "required": [
+                    "season",
+                    "episode"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "description": "Documentary-specific metadata",
+                  "bsonType": "object",
+                  "properties": {
+                    "subject": {
+                      "description": "Documentary subject",
+                      "pattern": "^[^\\t\\n\\r]{0,255}$",
+                      "bsonType": "string"
+                    },
+                    "narrator": {
+                      "description": "Documentary narrator",
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    }
+                  },
+                  "required": [
+                    "subject"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "description": "Short film-specific metadata",
+                  "bsonType": "object",
+                  "properties": {
+                    "festival": {
+                      "description": "Film festival",
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    },
+                    "awards": {
+                      "description": "Awards received",
+                      "bsonType": "array",
+                      "items": {
+                        "description": "Award name",
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
       },
-      "then": {
-        "properties": {
-          "collection_name": {
-            "const": "media"
-          }
-        },
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/media.1.0.0"
-          }
-        ]
-      }
+      "required": [
+        "_id",
+        "title",
+        "status",
+        "last_saved"
+      ],
+      "additionalProperties": false
     },
     {
-      "if": {
-        "properties": {
-          "collection_name": {
-            "const": "organization"
+      "description": "An organization in the system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for the organization",
+          "bsonType": "objectId"
+        },
+        "name": {
+          "description": "The organization name",
+          "pattern": "^[^\\t\\n\\r]{0,255}$",
+          "bsonType": "string"
+        },
+        "status": {
+          "description": "The current status of the organization",
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "active",
+            "archived"
+          ]
+        },
+        "last_saved": {
+          "description": "When the organization document was last updated",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "bsonType": "string"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "from_ip",
+            "by_user",
+            "at_time",
+            "correlation_id"
+          ]
+        },
+        "users": {
+          "description": "Users associated with this organization",
+          "bsonType": "array",
+          "items": {
+            "description": "A user identifier",
+            "bsonType": "objectId"
           }
         },
-        "required": [
-          "collection_name"
-        ]
+        "website": {
+          "description": "Organization website",
+          "pattern": "^https?://[^\\s]+$",
+          "bsonType": "string"
+        },
+        "home_address": {
+          "description": "Organization home address",
+          "bsonType": "object",
+          "properties": {
+            "street": {
+              "description": "Street address",
+              "pattern": "^[^\\t\\n\\r]{0,255}$",
+              "bsonType": "string"
+            },
+            "city": {
+              "description": "City",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "state": {
+              "description": "State or province",
+              "pattern": "^[A-Z]{2}$",
+              "bsonType": "string"
+            },
+            "postal_code": {
+              "description": "Postal code",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "street",
+            "postal_code"
+          ]
+        }
       },
-      "then": {
-        "properties": {
-          "collection_name": {
-            "const": "organization"
-          }
-        },
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/organization.1.0.0"
-          }
-        ]
-      }
+      "required": [
+        "_id",
+        "name",
+        "status",
+        "last_saved"
+      ],
+      "additionalProperties": false
     },
     {
-      "if": {
-        "properties": {
-          "collection_name": {
-            "const": "user"
-          }
+      "description": "A user collection for testing the schema system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for a user",
+          "bsonType": "objectId"
         },
-        "required": [
-          "collection_name"
-        ]
+        "user_name": {
+          "description": "Username",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "first_name": {
+          "description": "Users First Name",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "last_name": {
+          "description": "Users Last Name",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "status": {
+          "description": "document status",
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "active",
+            "archived"
+          ]
+        },
+        "last_saved": {
+          "description": "The last time this document was saved",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "bsonType": "string"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "from_ip",
+            "by_user",
+            "at_time",
+            "correlation_id"
+          ]
+        }
       },
-      "then": {
-        "properties": {
-          "collection_name": {
-            "const": "user"
-          }
-        },
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/user.1.0.0"
-          }
-        ]
-      }
+      "required": [
+        "_id",
+        "user_name",
+        "status",
+        "last_saved"
+      ],
+      "additionalProperties": false
     }
   ]
 }

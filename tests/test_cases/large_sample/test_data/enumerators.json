@@ -150,6 +150,48 @@
                 "in_progress": "Currently being worked on",
                 "blocked": "Cannot proceed",
                 "review": "Needs review"
+            },
+            "content_type": {
+                "article": "Written content",
+                "video": "Video content",
+                "podcast": "Audio content"
+            },
+            "content_tags": {
+                "technology": "Technology related content",
+                "business": "Business related content",
+                "entertainment": "Entertainment content",
+                "education": "Educational content",
+                "news": "News content"
+            },
+            "notification_type": {
+                "system": "System notification",
+                "user": "User notification",
+                "content": "Content notification",
+                "reminder": "Reminder notification"
+            },
+            "notification_tags": {
+                "urgent": "Urgent notification",
+                "important": "Important notification",
+                "normal": "Normal notification",
+                "low": "Low priority notification"
+            },
+            "priority_level": {
+                "critical": "Critical priority",
+                "high": "High priority",
+                "medium": "Medium priority",
+                "low": "Low priority"
+            },
+            "delivery_channel": {
+                "email": "Email delivery",
+                "sms": "SMS delivery",
+                "push": "Push notification",
+                "in_app": "In-app notification"
+            },
+            "notification_action": {
+                "created": "Document created",
+                "updated": "Document updated",
+                "deleted": "Document deleted",
+                "published": "Document published"
             }
         }
     }

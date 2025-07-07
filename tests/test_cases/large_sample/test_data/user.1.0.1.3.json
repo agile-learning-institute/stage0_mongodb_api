@@ -18,6 +18,12 @@
     ],
     "email": "john.doe@example.com",
     "phone": "+15551234567",
+    "preferences": {
+      "notification_types": ["system", "content", "reminder"],
+      "delivery_channels": ["email", "in_app"],
+      "content_tags": ["technology", "education"],
+      "priority_levels": ["high", "medium"]
+    },
     "last_saved": {
       "from_ip": "127.0.0.1",
       "by_user": "system",
@@ -44,6 +50,12 @@
     ],
     "email": "sarah.johnson@techcorp.com",
     "phone": "+15559876543",
+    "preferences": {
+      "notification_types": ["system", "user", "content"],
+      "delivery_channels": ["email", "push", "in_app"],
+      "content_tags": ["technology", "business"],
+      "priority_levels": ["critical", "high", "medium"]
+    },
     "last_saved": {
       "from_ip": "192.168.1.50",
       "by_user": "admin",
@@ -70,6 +82,12 @@
     ],
     "email": "mike.chen@designstudio.com",
     "phone": "+15551234568",
+    "preferences": {
+      "notification_types": ["content", "reminder"],
+      "delivery_channels": ["email", "push"],
+      "content_tags": ["entertainment", "education"],
+      "priority_levels": ["medium", "low"]
+    },
     "last_saved": {
       "from_ip": "10.0.0.25",
       "by_user": "system",

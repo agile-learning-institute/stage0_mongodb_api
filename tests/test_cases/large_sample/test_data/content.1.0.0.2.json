@@ -1,0 +1,60 @@
+[
+  {
+    "_id": "content_004",
+    "title": "MongoDB Performance Optimization",
+    "subtitle": "Techniques for improving database performance",
+    "content_type": "article",
+    "status": "published",
+    "author_id": "user_001",
+    "content_data": {
+      "body": "# MongoDB Performance Optimization\n\nPerformance optimization is crucial...",
+      "tags": ["technology", "business"],
+      "word_count": 3200
+    },
+    "metadata": {
+      "created_at": "2024-01-25T11:00:00Z",
+      "updated_at": "2024-01-26T15:20:00Z",
+      "published_at": "2024-01-26T15:20:00Z",
+      "categories": [
+        {
+          "name": "Performance Guides",
+          "type": "education",
+          "tags": ["important", "urgent"]
+        }
+      ]
+    },
+    "last_saved": {
+      "saved_at": "2024-01-26T15:20:00Z",
+      "saved_by": "admin"
+    }
+  },
+  {
+    "_id": "content_005",
+    "title": "Database Security Best Practices",
+    "subtitle": "Protecting your data in MongoDB",
+    "content_type": "video",
+    "status": "published",
+    "author_id": "user_002",
+    "content_data": {
+      "url": "https://example.com/videos/database-security-best-practices.mp4",
+      "duration": 2400,
+      "quality": "uhd"
+    },
+    "metadata": {
+      "created_at": "2024-01-28T10:00:00Z",
+      "updated_at": "2024-01-29T12:00:00Z",
+      "published_at": "2024-01-29T12:00:00Z",
+      "categories": [
+        {
+          "name": "Security",
+          "type": "education",
+          "tags": ["urgent", "important"]
+        }
+      ]
+    },
+    "last_saved": {
+      "saved_at": "2024-01-29T12:00:00Z",
+      "saved_by": "user_002"
+    }
+  }
+] 

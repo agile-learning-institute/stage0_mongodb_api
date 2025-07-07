@@ -1,0 +1,317 @@
+{
+  "description": "A content collection for testing one_of structures and advanced schema features",
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "description": "The unique identifier for content",
+      "bsonType": "objectId"
+    },
+    "title": {
+      "description": "Content title",
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "subtitle": {
+      "description": "Content subtitle",
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
+    },
+    "content_type": {
+      "description": "Type of content (article, video, podcast, etc.)",
+      "bsonType": "string",
+      "enum": [
+        "article",
+        "video",
+        "podcast"
+      ]
+    },
+    "status": {
+      "description": "Content status",
+      "bsonType": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ]
+    },
+    "author_id": {
+      "description": "A user collection for testing the schema system",
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "description": "The unique identifier for a user",
+          "bsonType": "objectId"
+        },
+        "user_name": {
+          "description": "Username",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "first_name": {
+          "description": "Users First Name",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "last_name": {
+          "description": "Users Last Name",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "status": {
+          "description": "document status",
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "active",
+            "archived"
+          ]
+        },
+        "last_saved": {
+          "description": "The last time this document was saved",
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "description": "Http Request remote IP address",
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "bsonType": "string"
+            },
+            "by_user": {
+              "description": "ID Of User",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "at_time": {
+              "description": "The date-time when last updated",
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "description": "The logging correlation ID of the update transaction",
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "from_ip",
+            "by_user",
+            "at_time",
+            "correlation_id"
+          ]
+        }
+      },
+      "required": [
+        "_id",
+        "user_name",
+        "status",
+        "last_saved"
+      ],
+      "additionalProperties": false
+    },
+    "content_data": {
+      "description": "The actual content data - varies by type",
+      "bsonType": "object",
+      "properties": {},
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "description": "Article content structure",
+          "bsonType": "object",
+          "properties": {
+            "body": {
+              "description": "Article body text",
+              "maxLength": 4096,
+              "bsonType": "string"
+            },
+            "tags": {
+              "description": "Article tags",
+              "bsonType": "array",
+              "items": {
+                "bsonType": "string",
+                "enum": [
+                  "technology",
+                  "business",
+                  "entertainment",
+                  "education",
+                  "news"
+                ]
+              }
+            },
+            "word_count": {
+              "description": "Article word count",
+              "bsonType": "int",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Video content structure",
+          "bsonType": "object",
+          "properties": {
+            "url": {
+              "description": "Video URL",
+              "pattern": "^https?://[^\\s]+$",
+              "bsonType": "string"
+            },
+            "duration": {
+              "description": "Video duration in seconds",
+              "bsonType": "int",
+              "minimum": 1
+            },
+            "quality": {
+              "description": "Video quality",
+              "bsonType": "string",
+              "enum": [
+                "sd",
+                "hd",
+                "uhd"
+              ]
+            }
+          },
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Podcast content structure",
+          "bsonType": "object",
+          "properties": {
+            "audio_url": {
+              "description": "Audio file URL",
+              "pattern": "^https?://[^\\s]+$",
+              "bsonType": "string"
+            },
+            "transcript": {
+              "description": "Podcast transcript",
+              "maxLength": 4096,
+              "bsonType": "string"
+            },
+            "episode_number": {
+              "description": "Episode number",
+              "bsonType": "int",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "audio_url"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "metadata": {
+      "description": "Additional metadata for the content",
+      "bsonType": "object",
+      "properties": {
+        "created_at": {
+          "description": "When the content was created",
+          "bsonType": "date"
+        },
+        "updated_at": {
+          "description": "When the content was last updated",
+          "bsonType": "date"
+        },
+        "published_at": {
+          "description": "When the content was published",
+          "bsonType": "date"
+        },
+        "categories": {
+          "description": "Content categories",
+          "bsonType": "array",
+          "items": {
+            "description": "A content category",
+            "bsonType": "object",
+            "properties": {
+              "name": {
+                "description": "Category name",
+                "pattern": "^\\S{1,40}$",
+                "bsonType": "string"
+              },
+              "type": {
+                "description": "Category type",
+                "bsonType": "string",
+                "enum": [
+                  "work",
+                  "personal",
+                  "project",
+                  "reference"
+                ]
+              },
+              "tags": {
+                "description": "Category tags",
+                "bsonType": "array",
+                "items": {
+                  "bsonType": "string",
+                  "enum": [
+                    "urgent",
+                    "important",
+                    "normal",
+                    "low",
+                    "completed",
+                    "in_progress",
+                    "blocked",
+                    "review"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "last_saved": {
+      "description": "Last saved breadcrumb",
+      "bsonType": "object",
+      "properties": {
+        "from_ip": {
+          "description": "Http Request remote IP address",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
+        },
+        "by_user": {
+          "description": "ID Of User",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "at_time": {
+          "description": "The date-time when last updated",
+          "bsonType": "date"
+        },
+        "correlation_id": {
+          "description": "The logging correlation ID of the update transaction",
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
+    }
+  },
+  "required": [
+    "_id",
+    "title",
+    "content_type",
+    "status",
+    "content_data",
+    "last_saved"
+  ],
+  "additionalProperties": false
+}

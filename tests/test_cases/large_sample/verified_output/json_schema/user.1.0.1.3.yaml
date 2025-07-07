@@ -58,6 +58,55 @@ properties:
       - category
       - tags
       additionalProperties: false
+  preferences:
+    description: User preferences and settings
+    type: object
+    properties:
+      notification_types:
+        description: Types of notifications the user wants to receive
+        type: array
+        items:
+          type: string
+          enum:
+          - system
+          - user
+          - content
+          - reminder
+      delivery_channels:
+        description: Preferred delivery channels for notifications
+        type: array
+        items:
+          type: string
+          enum:
+          - email
+          - sms
+          - push
+          - in_app
+      content_tags:
+        description: Content tags the user is interested in
+        type: array
+        items:
+          type: string
+          enum:
+          - technology
+          - business
+          - entertainment
+          - education
+          - news
+      priority_levels:
+        description: Priority levels the user wants to receive
+        type: array
+        items:
+          type: string
+          enum:
+          - critical
+          - high
+          - medium
+          - low
+    required:
+    - notification_types
+    - delivery_channels
+    additionalProperties: false
   email:
     description: The person's email address
     type: string

@@ -73,6 +73,70 @@
         "additionalProperties": false
       }
     },
+    "preferences": {
+      "description": "User preferences and settings",
+      "bsonType": "object",
+      "properties": {
+        "notification_types": {
+          "description": "Types of notifications the user wants to receive",
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": [
+              "system",
+              "user",
+              "content",
+              "reminder"
+            ]
+          }
+        },
+        "delivery_channels": {
+          "description": "Preferred delivery channels for notifications",
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": [
+              "email",
+              "sms",
+              "push",
+              "in_app"
+            ]
+          }
+        },
+        "content_tags": {
+          "description": "Content tags the user is interested in",
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": [
+              "technology",
+              "business",
+              "entertainment",
+              "education",
+              "news"
+            ]
+          }
+        },
+        "priority_levels": {
+          "description": "Priority levels the user wants to receive",
+          "bsonType": "array",
+          "items": {
+            "bsonType": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        }
+      },
+      "required": [
+        "notification_types",
+        "delivery_channels"
+      ],
+      "additionalProperties": false
+    },
     "email": {
       "description": "The person's email address",
       "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",

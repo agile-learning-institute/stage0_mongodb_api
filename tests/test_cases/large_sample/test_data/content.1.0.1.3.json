@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "content_006",
+    "title": "MongoDB Aggregation Framework",
+    "subtitle": "Advanced data processing techniques",
+    "content_type": "article",
+    "status": "published",
+    "author_id": "user_001",
+    "full_title": "MongoDB Aggregation Framework - Advanced data processing techniques",
+    "content_data": {
+      "body": "# MongoDB Aggregation Framework\n\nThe aggregation framework provides powerful data processing capabilities...",
+      "tags": ["technology", "education"],
+      "word_count": 4100
+    },
+    "metadata": {
+      "created_at": "2024-02-01T09:00:00Z",
+      "updated_at": "2024-02-02T14:30:00Z",
+      "published_at": "2024-02-02T14:30:00Z",
+      "categories": [
+        {
+          "name": "Advanced Topics",
+          "type": "education",
+          "tags": ["important", "normal"]
+        }
+      ]
+    },
+    "last_saved": {
+      "saved_at": "2024-02-02T14:30:00Z",
+      "saved_by": "admin"
+    }
+  },
+  {
+    "_id": "content_007",
+    "title": "Real-time Data Processing",
+    "subtitle": "Building scalable real-time systems",
+    "content_type": "video",
+    "status": "published",
+    "author_id": "user_002",
+    "full_title": "Real-time Data Processing - Building scalable real-time systems",
+    "content_data": {
+      "url": "https://example.com/videos/real-time-data-processing.mp4",
+      "duration": 3600,
+      "quality": "uhd"
+    },
+    "metadata": {
+      "created_at": "2024-02-05T10:00:00Z",
+      "updated_at": "2024-02-06T16:00:00Z",
+      "published_at": "2024-02-06T16:00:00Z",
+      "categories": [
+        {
+          "name": "Real-time Systems",
+          "type": "technology",
+          "tags": ["urgent", "important"]
+        }
+      ]
+    },
+    "last_saved": {
+      "saved_at": "2024-02-06T16:00:00Z",
+      "saved_by": "user_002"
+    }
+  }
+] 
