@@ -39,7 +39,7 @@ class TestCircularReferences(unittest.TestCase):
             "properties": {
                 "ref_prop": {
                     "description": "Property that creates circular reference",
-                    "$ref": "circular_test.1.0.0.yaml"
+                    "ref": "circular_test.1.0.0.yaml"
                 }
             }
         }
@@ -103,7 +103,7 @@ class TestCircularReferences(unittest.TestCase):
             "properties": {
                 "deep_prop": {
                     "description": "Property that creates deep reference chain",
-                    "$ref": "deep_test_1.1.0.0.yaml"
+                    "ref": "deep_test_1.1.0.0.yaml"
                 }
             }
         }
@@ -116,7 +116,7 @@ class TestCircularReferences(unittest.TestCase):
                 "properties": {
                     "next_prop": {
                         "description": f"Next level property {i}",
-                        "$ref": f"deep_test_{i+1}.1.0.0.yaml" if i < 101 else "deep_test_1.1.0.0.yaml"
+                        "ref": f"deep_test_{i+1}.1.0.0.yaml" if i < 101 else "deep_test_1.1.0.0.yaml"
                     }
                 }
             }

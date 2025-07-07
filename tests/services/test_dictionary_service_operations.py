@@ -4,6 +4,7 @@ from configurator.services.dictionary_services import Dictionary, Property
 import os
 import yaml
 import json
+from configurator.services.enumerator_service import Enumerators
 
 
 def load_yaml(path):
@@ -48,9 +49,9 @@ class TestProperty(unittest.TestCase):
         self.assertIsNone(prop.enums)
 
     def test_init_with_ref(self):
-        """Test Property initialization with $ref"""
+        """Test Property initialization with ref"""
         property_data = {
-            "$ref": "sample.1.0.0.yaml",
+            "ref": "sample.1.0.0.yaml",
             "description": "Reference to another dictionary"
         }
         prop = Property("test_ref", property_data)
@@ -142,14 +143,14 @@ class TestProperty(unittest.TestCase):
         self.assertIsNone(prop.items)
 
     def test_to_dict_with_ref(self):
-        """Test to_dict method for $ref property"""
+        """Test to_dict method for ref property"""
         property_data = {
-            "$ref": "sample.1.0.0.yaml"
+            "ref": "sample.1.0.0.yaml"
         }
         prop = Property("test_ref", property_data)
         result = prop.to_dict()
         
-        expected = {"$ref": "sample.1.0.0.yaml"}
+        expected = {"ref": "sample.1.0.0.yaml"}
         self.assertEqual(result, expected)
 
     def test_to_dict_basic(self):
@@ -274,13 +275,9 @@ class TestDictionary(unittest.TestCase):
     """Test cases for Dictionary class - non-rendering operations"""
 
     @patch('configurator.services.dictionary_services.FileIO')
-    @patch('configurator.services.dictionary_services.Config')
-    def test_init_with_file_name(self, mock_config_class, mock_file_io):
+    def test_init_with_file_name(self, mock_file_io):
         """Test Dictionary initialization with file name"""
-        mock_config = MagicMock()
-        mock_config_class.get_instance.return_value = mock_config
-        
-        mock_doc = {
+        mock_file_io.get_document.return_value = {
             "description": "Test dictionary",
             "type": "object",
             "properties": {
@@ -290,7 +287,6 @@ class TestDictionary(unittest.TestCase):
                 }
             }
         }
-        mock_file_io.get_document.return_value = mock_doc
         
         dictionary = Dictionary("test.yaml")
         
@@ -298,12 +294,8 @@ class TestDictionary(unittest.TestCase):
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
-    @patch('configurator.services.dictionary_services.Config')
-    def test_init_with_document(self, mock_config_class):
+    def test_init_with_document(self):
         """Test Dictionary initialization with document"""
-        mock_config = MagicMock()
-        mock_config_class.get_instance.return_value = mock_config
-        
         doc = {
             "description": "Test dictionary",
             "type": "object",
@@ -314,19 +306,14 @@ class TestDictionary(unittest.TestCase):
                 }
             }
         }
-        
         dictionary = Dictionary("test.yaml", doc)
         
         self.assertEqual(dictionary.file_name, "test.yaml")
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
-    @patch('configurator.services.dictionary_services.Config')
-    def test_to_dict(self, mock_config_class):
+    def test_to_dict(self):
         """Test Dictionary to_dict method"""
-        mock_config = MagicMock()
-        mock_config_class.get_instance.return_value = mock_config
-        
         doc = {
             "description": "Test dictionary",
             "type": "object",
@@ -337,7 +324,6 @@ class TestDictionary(unittest.TestCase):
                 }
             }
         }
-        
         dictionary = Dictionary("test.yaml", doc)
         result = dictionary.to_dict()
         
@@ -445,9 +431,9 @@ class TestPropertyCanonical(unittest.TestCase):
         self.assertEqual(prop.enums, "default_status")
 
     def test_ref_type(self):
-        """Test Property with $ref type"""
+        """Test Property with ref type"""
         property_data = {
-            "$ref": "sample.1.0.0.yaml",
+            "ref": "sample.1.0.0.yaml",
             "description": "Reference to sample dictionary"
         }
         
@@ -486,9 +472,9 @@ class TestDictionaryCanonical(unittest.TestCase):
         self.assertIn("status", result["properties"])
 
     def test_dictionary_ref(self):
-        """Test Dictionary with $ref type"""
+        """Test Dictionary with ref type"""
         doc = {
-            "$ref": "sample.1.0.0.yaml",
+            "ref": "sample.1.0.0.yaml",
             "description": "Reference to sample dictionary"
         }
         
@@ -499,8 +485,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         
         # Test to_dict
         result = dictionary.to_dict()
-        self.assertEqual(result, {"$ref": "sample.1.0.0.yaml"})
-
+        self.assertEqual(result, {"ref": "sample.1.0.0.yaml"})
 
 if __name__ == '__main__':
     unittest.main() 
