@@ -95,8 +95,6 @@ class Config:
         for key, default in self.config_string_secrets.items():
             value = self._get_config_value(key, default, True)
             setattr(self, key, value)
-        
-        return
 
     def configure_logging(self):        
         # Reset logging handlers
@@ -116,8 +114,6 @@ class Config:
 
         # Log configuration
         logger.info(f"Configuration Initialized: {self.config_items}")
-        
-        return
             
     def _get_config_value(self, name, default_value, is_secret):
         """Retrieve a configuration value, first from a file, then environment variable, then default."""

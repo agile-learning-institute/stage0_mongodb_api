@@ -1,6 +1,8 @@
 import unittest
+from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.config_routes import create_config_routes
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
 
 class TestConfigRoutes(unittest.TestCase):
@@ -12,19 +14,27 @@ class TestConfigRoutes(unittest.TestCase):
         self.app.register_blueprint(create_config_routes(), url_prefix='/api/config')
         self.client = self.app.test_client()
 
-    def test_get_config_success(self):
+    @patch('configurator.routes.config_routes.Config')
+    def test_get_config_success(self, mock_config_class):
         """Test successful GET /api/config."""
+        # Arrange
+        mock_config = Mock()
+        mock_config.to_dict.return_value = {"config_items": [{"name": "TEST", "value": "test"}]}
+        mock_config_class.get_instance.return_value = mock_config
+
         # Act
         response = self.client.get('/api/config/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
-        self.assertIn("config_items", response.json)
-        self.assertIsInstance(response.json["config_items"], list)
-        # Check that at least one expected config item is present
-        config_names = [item["name"] for item in response.json["config_items"]]
-        self.assertIn("MONGO_DB_NAME", config_names)
-        self.assertIn("API_PORT", config_names)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertIn("config_items", response_data["data"])
+        self.assertIsInstance(response_data["data"]["config_items"], list)
 
     def test_get_config_method_not_allowed(self):
         """Test that POST method is not allowed on /api/config."""
@@ -72,24 +82,30 @@ class TestConfigRoutes(unittest.TestCase):
         finally:
             config_routes_mod.Config.get_instance = orig_get_instance
 
-    def test_get_config_general_exception(self):
+    @patch('configurator.routes.config_routes.Config')
+    def test_get_config_general_exception(self, mock_config_class):
         """Test GET /api/config when a general Exception is raised."""
-        import configurator.routes.config_routes as config_routes_mod
-        orig_get_instance = config_routes_mod.Config.get_instance
-        class DummyConfig:
-            def to_dict(self):
-                raise Exception("General error")
-        config_routes_mod.Config.get_instance = staticmethod(lambda: DummyConfig())
-        try:
-            app = Flask(__name__)
-            app.register_blueprint(config_routes_mod.create_config_routes(), url_prefix='/api/config')
-            client = app.test_client()
-            response = client.get('/api/config/')
-            self.assertEqual(response.status_code, 500)
-            self.assertIsInstance(response.json, str)
-            self.assertIn("General error", response.json)
-        finally:
-            config_routes_mod.Config.get_instance = orig_get_instance
+        # Arrange
+        mock_config = Mock()
+        mock_config.to_dict.side_effect = Exception("Unexpected error")
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Create a new app with the mocked Config
+        app = Flask(__name__)
+        app.register_blueprint(create_config_routes(), url_prefix='/api/config')
+        client = app.test_client()
+
+        # Act
+        response = client.get('/api/config/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
 
 
 if __name__ == '__main__':

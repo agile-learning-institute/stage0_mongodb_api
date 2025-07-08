@@ -1,10 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
 from configurator.services.type_services import Type
-from configurator.utils.route_decorators import handle_errors
-
+from configurator.utils.route_decorators import event_route
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,60 +14,50 @@ def create_type_routes():
     
     # GET /api/types/ - Return the current type files
     @type_routes.route('/', methods=['GET'])
-    @handle_errors("listing types")
+    @event_route("TYP-01", "GET_TYPES", "listing types")
     def get_types():
         files = FileIO.get_documents(config.TYPE_FOLDER)
-        return jsonify(files), 200
+        return files
 
     # PATCH /api/types - Clean Types
     @type_routes.route('/', methods=['PATCH'])
+    @event_route("TYP-04", "CLEAN_TYPES", "cleaning types")
     def clean_types():
-        event = ConfiguratorEvent(event_id="TYP-04", event_type="CLEAN_TYPES")
-        try:
-            files = FileIO.get_documents(config.TYPE_FOLDER)
-            for file in files:
-                type = Type(file.name)
-                event.append_events(type.save())
-            event.record_success()
-            return jsonify(event.to_dict()), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error cleaning types: {e.event.to_dict()}")
-            event.append_events([e.event])
-            event.record_failure("Configurator error cleaning types")
-            return jsonify(event.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error cleaning types: {str(e)}")
-            event.record_failure("Unexpected error cleaning types", {"error": str(e)})
-            return jsonify(event.to_dict()), 500
+        files = FileIO.get_documents(config.TYPE_FOLDER)
+        events = []
+        for file in files:
+            type = Type(file.name)
+            events.extend(type.save())
+        return events
 
     # GET /api/types/<file_name> - Return a type file
     @type_routes.route('/<file_name>/', methods=['GET'])
-    @handle_errors("getting type")
+    @event_route("TYP-02", "GET_TYPE", "getting type")
     def get_type(file_name):
-        type = Type(file_name)
-        return jsonify(type), 200
-        
+        type_obj = Type(file_name)
+        return type_obj
+    
     # PUT /api/types/<file_name> - Update a type file
     @type_routes.route('/<file_name>/', methods=['PUT'])
-    @handle_errors("updating type")
+    @event_route("TYP-03", "PUT_TYPE", "updating type")
     def update_type(file_name):
-        type = Type(file_name, request.json)
-        saved = type.save()
-        return jsonify(saved), 200
-        
+        type_obj = Type(file_name, request.json)
+        saved = type_obj.save()
+        return saved[0].data if saved else {}
+    
     @type_routes.route('/<file_name>/', methods=['DELETE'])
-    @handle_errors("deleting type")
+    @event_route("TYP-05", "DELETE_TYPE", "deleting type")
     def delete_type(file_name):
-        type = Type(file_name)
-        deleted = type.delete()
-        return jsonify(deleted), 200
-        
+        type_obj = Type(file_name)
+        deleted = type_obj.delete()
+        return deleted
+    
     @type_routes.route('/<file_name>/', methods=['PATCH'])
-    @handle_errors("locking/unlocking type")
+    @event_route("TYP-06", "LOCK_UNLOCK_TYPE", "locking/unlocking type")
     def lock_unlock_type(file_name):
-        type = Type(file_name)
-        result = type.flip_lock()
-        return jsonify(result), 200
-        
+        type_obj = Type(file_name)
+        result = type_obj.flip_lock()
+        return result
+    
     logger.info("Type Flask Routes Registered")
     return type_routes

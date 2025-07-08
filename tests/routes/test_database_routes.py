@@ -26,7 +26,13 @@ class TestDatabaseRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, "Database Dropped")
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(response_data["data"], {"message": "Database Dropped"})
         mock_mongo_io.drop_database.assert_called_once()
         mock_mongo_io.disconnect.assert_called_once()
 
@@ -90,8 +96,12 @@ class TestDatabaseRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, str)
-        self.assertIn("Unexpected error", response.json)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
 
     def test_drop_database_get_method_not_allowed(self):
         """Test that GET method is not allowed on /api/database."""

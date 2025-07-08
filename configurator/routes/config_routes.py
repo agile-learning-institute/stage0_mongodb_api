@@ -1,8 +1,7 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
 from configurator.utils.config import Config
-from configurator.utils.configurator_exception import ConfiguratorException
-from configurator.utils.route_decorators import handle_errors
-
+from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
+from configurator.utils.route_decorators import event_route
 import logging
 logger = logging.getLogger(__name__)
 
@@ -13,10 +12,9 @@ def create_config_routes():
     
     # GET /api/config - Return the current configuration as JSON
     @config_routes.route('/', methods=['GET'])
-    @handle_errors("getting config")
+    @event_route("CFG-00", "GET_CONFIG", "getting config")
     def get_config():
-        # Return the JSON representation of the config object
-        return jsonify(config.to_dict()), 200
-        
+        return config.to_dict()
+    
     logger.info("Config Flask Routes Registered")
     return config_routes

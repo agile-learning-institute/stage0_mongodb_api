@@ -1,4 +1,3 @@
-import sys
 import json
 from bson import ObjectId 
 from pymongo import MongoClient, ASCENDING, DESCENDING

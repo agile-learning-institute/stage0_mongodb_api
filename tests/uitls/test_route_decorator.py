@@ -1,6 +1,6 @@
 import unittest
 from flask import Flask, jsonify
-from configurator.utils.route_decorators import handle_errors
+from configurator.utils.route_decorators import event_route
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
 class TestRouteDecorator(unittest.TestCase):
@@ -9,13 +9,13 @@ class TestRouteDecorator(unittest.TestCase):
         self.app = app
         
         @app.route('/config-exception')
-        @handle_errors("test config exception")
+        @event_route("TEST-01", "TEST_EVENT", "test config exception")
         def config_exception():
             event = ConfiguratorEvent(event_id="TEST-01", event_type="TEST_EVENT")
             raise ConfiguratorException("Test error", event)
         
         @app.route('/generic-exception')
-        @handle_errors("test generic exception")
+        @event_route("TEST-02", "TEST_EVENT", "test generic exception")
         def generic_exception():
             raise Exception("Generic error")
         
@@ -33,8 +33,9 @@ class TestRouteDecorator(unittest.TestCase):
         resp = self.client.get('/generic-exception')
         self.assertEqual(resp.status_code, 500)
         data = resp.get_json()
-        self.assertIsInstance(data, str)
-        self.assertIn('Generic error', data)
+        self.assertIn('id', data)
+        self.assertEqual(data['id'], 'TEST-02')
+        self.assertEqual(data['type'], 'TEST_EVENT')
 
 if __name__ == '__main__':
     unittest.main() 

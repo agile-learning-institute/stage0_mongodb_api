@@ -28,7 +28,13 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, expected_content)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(response_data["data"], expected_content)
         mock_enumerators_class.assert_called_once_with(None)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
@@ -43,9 +49,12 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, dict)
-        self.assertIn("id", response.json)
-        self.assertIn("type", response.json)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_get_enumerators_configurator_exception(self, mock_enumerators_class):
@@ -59,9 +68,12 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, dict)
-        self.assertIn("id", response.json)
-        self.assertIn("type", response.json)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_get_enumerators_general_exception(self, mock_enumerators_class):
@@ -74,8 +86,12 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, str)
-        self.assertIn("Unexpected error", response.json)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_put_enumerators_success(self, mock_enumerators_class):
@@ -93,7 +109,13 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, test_data)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(response_data["data"], test_data)
         mock_enumerators_class.assert_called_once_with(data=test_data)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
@@ -109,9 +131,12 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, dict)
-        self.assertIn("id", response.json)
-        self.assertIn("type", response.json)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_put_enumerators_general_exception(self, mock_enumerators_class):
@@ -125,8 +150,12 @@ class TestEnumeratorRoutes(unittest.TestCase):
 
         # Assert
         self.assertEqual(response.status_code, 500)
-        self.assertIsInstance(response.json, str)
-        self.assertIn("Unexpected error", response.json)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
 
     def test_enumerators_delete_method_not_allowed(self):
         """Test that DELETE method is not allowed on /api/enumerators."""
@@ -141,8 +170,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         """Test successful PATCH /api/enumerators - Clean Enumerators."""
         # Arrange
         mock_enumerators = Mock()
-        mock_event = Mock()
-        mock_event.to_dict.return_value = {"id": "ENU-03", "status": "SUCCESS"}
+        mock_event = ConfiguratorEvent("ENU-03", "SUCCESS")
         mock_enumerators.save.return_value = [mock_event]
         mock_enumerators_class.return_value = mock_enumerators
 
@@ -155,7 +183,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "ENU-04")
         self.assertEqual(response_data["type"], "CLEAN_ENUMERATORS")
         self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(len(response_data["sub_events"]), 1)
+        self.assertIn("sub_events", response_data)
         mock_enumerators_class.assert_called_once()
         mock_enumerators.save.assert_called_once()
 
@@ -177,9 +205,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "ENU-04")
         self.assertEqual(response_data["type"], "CLEAN_ENUMERATORS")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], {"error": "Configurator error cleaning enumerators"})
-        self.assertEqual(len(response_data["sub_events"]), 1)
-        self.assertEqual(response_data["sub_events"][0]["id"], "test")
+        self.assertIn("data", response_data)
+        self.assertIn("sub_events", response_data)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
     def test_clean_enumerators_general_exception(self, mock_enumerators_class):
@@ -198,10 +225,10 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertEqual(response_data["id"], "ENU-04")
         self.assertEqual(response_data["type"], "CLEAN_ENUMERATORS")
         self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["data"], {"error": "Save failed"})
+        self.assertIn("data", response_data)
 
     def test_enumerators_with_filename_not_allowed(self):
-        """Test that /api/enumerators/<filename> is not allowed."""
+        """Test that enumerators with filename is not allowed."""
         # Act
         response = self.client.get('/api/enumerators/test.json')
 

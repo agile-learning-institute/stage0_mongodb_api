@@ -28,6 +28,7 @@ configurator = {file = ".", editable = true}
 
 [dev-packages]
 coverage = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.12"

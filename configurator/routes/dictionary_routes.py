@@ -1,10 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from configurator.utils.config import Config
-from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
 from configurator.services.dictionary_services import Dictionary
-from configurator.utils.route_decorators import handle_errors
-
+from configurator.utils.route_decorators import event_route
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,60 +14,50 @@ def create_dictionary_routes():
     
     # GET /api/dictionaries - Return the current dictionary files
     @dictionary_routes.route('/', methods=['GET'])
-    @handle_errors("listing dictionaries")
+    @event_route("DIC-01", "GET_DICTIONARIES", "listing dictionaries")
     def get_dictionaries():
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-        return jsonify(files), 200
-        
+        return files
+    
     # PATCH /api/dictionaries - Clean Dictionaries
     @dictionary_routes.route('/', methods=['PATCH'])
+    @event_route("DIC-04", "CLEAN_DICTIONARIES", "cleaning dictionaries")
     def clean_dictionaries():
-        event = ConfiguratorEvent(event_id="DIC-04", event_type="CLEAN_DICTIONARIES")
-        try:
-            files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-            for file in files:
-                dictionary = Dictionary(file.name)
-                event.append_events(dictionary.save())
-            event.record_success()
-            return jsonify(event.to_dict()), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error cleaning dictionaries: {e.event.to_dict()}")
-            event.append_events([e.event])
-            event.record_failure("Configurator error cleaning dictionaries")
-            return jsonify(event.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error cleaning dictionaries: {str(e)}")
-            event.record_failure("Unexpected error cleaning dictionaries", {"error": str(e)})
-            return jsonify(event.to_dict()), 500
-        
+        files = FileIO.get_documents(config.DICTIONARY_FOLDER)
+        events = []
+        for file in files:
+            dictionary = Dictionary(file.name)
+            events.extend(dictionary.save())
+        return events
+    
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['GET'])
-    @handle_errors("getting dictionary")
+    @event_route("DIC-02", "GET_DICTIONARY", "getting dictionary")
     def get_dictionary(file_name):
         dictionary = Dictionary(file_name)
-        return jsonify(dictionary), 200
-        
+        return dictionary
+    
     # PUT /api/dictionaries/<file_name> - Update a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['PUT'])
-    @handle_errors("updating dictionary")
+    @event_route("DIC-03", "PUT_DICTIONARY", "updating dictionary")
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
         saved = dictionary.save()
-        return jsonify(saved), 200
-        
+        return saved[0].data if saved else {}
+    
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
-    @handle_errors("deleting dictionary")
+    @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")
     def delete_dictionary(file_name):
         dictionary = Dictionary(file_name)
         deleted = dictionary.delete()
-        return jsonify(deleted), 200
-        
+        return deleted
+    
     @dictionary_routes.route('/<file_name>/', methods=['PATCH'])
-    @handle_errors("locking/unlocking dictionary")
+    @event_route("DIC-06", "LOCK_UNLOCK_DICTIONARY", "locking/unlocking dictionary")
     def lock_unlock_dictionary(file_name):
         dictionary = Dictionary(file_name)
         result = dictionary.flip_lock()
-        return jsonify(result), 200
-        
+        return result
+    
     logger.info("dictionary Flask Routes Registered")
     return dictionary_routes

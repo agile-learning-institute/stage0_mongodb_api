@@ -1,11 +1,10 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from configurator.services.configuration_services import Configuration
 from configurator.services.template_service import TemplateService
-from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO
-from configurator.utils.route_decorators import handle_errors
-
+from configurator.utils.route_decorators import event_route
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,104 +14,85 @@ def create_configuration_routes():
     config = Config.get_instance()
 
     @blueprint.route('/', methods=['GET'])
-    @handle_errors("listing configurations")
+    @event_route("CFG-01", "GET_CONFIGURATIONS", "listing configurations")
     def list_configurations():
         configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        return jsonify(configurations), 200
+        return configurations
 
     @blueprint.route('/', methods=['POST'])
-    @handle_errors("processing configurations")
+    @event_route("CFG-02", "PROCESS_CONFIGURATIONS", "processing configurations")
     def process_configurations():
-        """Process all configured configurations"""
         results = []
         configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
         for configuration_name in configurations:
             configuration = Configuration(configuration_name)
             results.append(configuration.process())
-        return jsonify(results), 200
+        return results
 
     @blueprint.route('/', methods=['PATCH'])
+    @event_route("CFG-04", "CLEAN_CONFIGURATIONS", "cleaning configurations")
     def clean_configurations():
-        event = ConfiguratorEvent(event_id="CFG-04", event_type="CLEAN_CONFIGURATIONS")
-        try:
-            files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-            for file in files:
-                configuration = Configuration(file.name)
-                event.append_events(configuration.save())
-            event.record_success()
-            return jsonify(event.to_dict()), 200
-        except ConfiguratorException as e:
-            logger.error(f"Configurator error cleaning configurations: {e.event.to_dict()}")
-            event.append_events([e.event])
-            event.record_failure("Configurator error cleaning configurations")
-            return jsonify(event.to_dict()), 500
-        except Exception as e:
-            logger.error(f"Unexpected error cleaning configurations: {str(e)}")
-            event.record_failure("Unexpected error cleaning configurations", {"error": str(e)})
-            return jsonify(event.to_dict()), 500
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        events = []
+        for file in files:
+            configuration = Configuration(file.name)
+            events.extend(configuration.save())
+        return events
 
     @blueprint.route('/collection/<file_name>/', methods=['POST'])
-    @handle_errors("creating collection")
+    @event_route("CFG-05", "CREATE_COLLECTION", "creating collection")
     def create_collection(file_name):
-        """Create a new collection with configuration and dictionary files from templates"""
         template_service = TemplateService()
         result = template_service.create_collection(file_name)
-        return jsonify(result), 201
+        return result
 
     @blueprint.route('/<file_name>/', methods=['GET'])
-    @handle_errors("getting configuration")
+    @event_route("CFG-06", "GET_CONFIGURATION", "getting configuration")
     def get_configuration(file_name):
-        """Get a specific configuration configuration"""
         configuration = Configuration(file_name)
-        return jsonify(configuration), 200
+        return configuration
 
     @blueprint.route('/<file_name>/', methods=['PUT'])
-    @handle_errors("updating configuration")
+    @event_route("CFG-07", "PUT_CONFIGURATION", "updating configuration")
     def put_configuration(file_name):
-        """Put a specific configuration configuration"""
         configuration = Configuration(file_name, request.json)
         saved = configuration.save()
-        return jsonify(saved), 200
-        
+        return saved[0].data if saved else {}
+    
     @blueprint.route('/<file_name>/', methods=['DELETE'])
-    @handle_errors("deleting configuration")
+    @event_route("CFG-08", "DELETE_CONFIGURATION", "deleting configuration")
     def delete_configuration(file_name):
-        """Delete a specific configuration"""
         configuration = Configuration(file_name)
         deleted = configuration.delete()
-        return jsonify(deleted), 200
+        return deleted
 
     @blueprint.route('/<file_name>/', methods=['PATCH'])
-    @handle_errors("locking/unlocking configuration")
+    @event_route("CFG-09", "LOCK_UNLOCK_CONFIGURATION", "locking/unlocking configuration")
     def lock_unlock_configuration(file_name):
-        """Process a specific configuration"""
         configuration = Configuration(file_name)
         result = configuration.flip_lock()
-        return jsonify(result), 200
+        return result
 
     @blueprint.route('/<file_name>/', methods=['POST'])
-    @handle_errors("processing configuration")
+    @event_route("CFG-10", "PROCESS_CONFIGURATION", "processing configuration")
     def process_configuration(file_name):
-        """Process a specific configuration"""
         configuration = Configuration(file_name)
         result = configuration.process()
-        return jsonify(result), 200
+        return result
 
     @blueprint.route('json_schema/<file_name>/<version>/', methods=['GET'])
-    @handle_errors("getting JSON schema")
+    @event_route("CFG-11", "GET_JSON_SCHEMA", "getting JSON schema")
     def get_json_schema(file_name, version):
-        """Get a specific JSON schema"""
         configuration = Configuration(file_name)
         schema = configuration.get_json_schema(version)
-        return jsonify(schema), 200
+        return schema
 
     @blueprint.route('bson_schema/<file_name>/<version>/', methods=['GET'])
-    @handle_errors("getting BSON schema")
+    @event_route("CFG-12", "GET_BSON_SCHEMA", "getting BSON schema")
     def get_bson_schema(file_name, version):
-        """Get a specific JSON schema"""
         configuration = Configuration(file_name)
         schema = configuration.get_bson_schema(version)
-        return jsonify(schema), 200
+        return schema
 
     logger.info("configuration Flask Routes Registered")
     return blueprint 
