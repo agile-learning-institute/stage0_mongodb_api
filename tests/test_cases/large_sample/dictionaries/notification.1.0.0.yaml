@@ -18,11 +18,67 @@ properties:
     description: Notification message
     type: sentence
     required: true
+  notification_type:
+    description: Type of notification
+    type: enum
+    enums: notification_type
+    required: true
   status:
     description: Notification status
     type: enum
     enums: default_status
     required: true
+  priority:
+    description: Notification priority level
+    type: enum
+    enums: priority_level
+    required: true
+  tags:
+    description: Notification tags for categorization
+    type: enum_array
+    enums: notification_tags
+  categories:
+    description: Notification categories
+    type: enum_array
+    enums: category_type
+  channels:
+    description: Delivery channels for this notification
+    type: enum_array
+    enums: delivery_channel
+    required: true
+  metadata:
+    description: Additional notification metadata
+    type: object
+    properties:
+      created_at:
+        description: When the notification was created
+        type: date-time
+        required: true
+      sent_at:
+        description: When the notification was sent
+        type: date-time
+      read_at:
+        description: When the notification was read
+        type: date-time
+      expires_at:
+        description: When the notification expires
+        type: date-time
+      source:
+        description: Source of the notification
+        type: object
+        properties:
+          collection:
+            description: Source collection name
+            type: word
+            required: true
+          document_id:
+            description: Source document ID
+            type: identifier
+            required: true
+          action:
+            description: Action that triggered the notification
+            type: enum
+            enums: notification_action
   last_saved:
     description: Last saved breadcrumb
     type: breadcrumb
