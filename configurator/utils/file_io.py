@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import yaml
+from bson import json_util
 
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
@@ -117,7 +118,7 @@ class FileIO:
                 if extension == ".yaml":
                     return yaml.safe_load(f)
                 elif extension == ".json":
-                    return json.load(f)
+                    return json_util.loads(f.read())
         except Exception as e:
             event = ConfiguratorEvent(event_id="FIL-04", event_type="GET_DOCUMENT", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to get document from {file_path}", event)
@@ -154,7 +155,7 @@ class FileIO:
                 if extension == ".yaml":
                     yaml.dump(document, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
                 elif extension == ".json":
-                    json.dump(document, f, indent=2, ensure_ascii=False)
+                    f.write(json_util.dumps(document, indent=2))
             
             # Return updated file object with current properties
             return File(file_path)
