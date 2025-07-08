@@ -1,4 +1,4 @@
-description: A collection for testing
+description: A test collection for integration testing
 name: sample
 versions:
   - version: "1.0.0.1"
