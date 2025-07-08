@@ -85,6 +85,20 @@ class Configuration:
                     event.append_events([sub_event])
                     continue
                 event.append_events([version.process(mongo_io)])
+            
+            # Load enumerators into database
+            sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="LOAD_ENUMERATORS")
+            try:
+                import os
+                enumerators_file = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, "enumerators.json")
+                if os.path.exists(enumerators_file):
+                    sub_event.append_events(mongo_io.load_json_data("enumerators", enumerators_file))
+                else:
+                    sub_event.record_success()  # No enumerators file is OK
+            except Exception as e:
+                sub_event.record_failure({"error": str(e)})
+            event.append_events([sub_event])
+            
             event.record_success()
             mongo_io.disconnect()
             return event
@@ -134,8 +148,6 @@ class Version:
             "migrations": self.migrations,
             "test_data": self.test_data,
         }
-
-
 
     def get_json_schema(self):
         enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
@@ -200,7 +212,7 @@ class Version:
                 mongo_io.upsert(
                     self.config.VERSION_COLLECTION_NAME,
                     {"collection_name": self.collection_name},
-                    {"collection_name": self.collection_name, "current_version": self.version_str}
+                    {"collection_name": self.collection_name, "current_version": self.collection_version.version}
                 )
                 sub_event.record_success()
             except Exception as e:

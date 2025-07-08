@@ -121,7 +121,7 @@ class MongoIO:
             collection_name (str): Name of the collection
             
         Returns:
-            ConfiguratorEvent: Event with operation result
+            list[ConfiguratorEvent]: List containing event with operation result
         """
         event = ConfiguratorEvent(event_id="MON-06", event_type="REMOVE_SCHEMA")
         
@@ -136,10 +136,10 @@ class MongoIO:
             result = self.db.command(command)
             logger.info(f"Schema validation cleared successfully: {collection_name}")
             event.record_success()
-            return event
+            return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name})
-            return event
+            return [event]
 
     def remove_index(self, collection_name, index_name):
         """Drop an index from a collection.
@@ -149,7 +149,7 @@ class MongoIO:
             index_name (str): Name of the index to drop
             
         Returns:
-            ConfiguratorEvent: Event with operation result
+            list[ConfiguratorEvent]: List containing event with operation result
         """
         event = ConfiguratorEvent(event_id="MON-07", event_type="REMOVE_INDEX")
         
@@ -158,10 +158,10 @@ class MongoIO:
             collection.drop_index(index_name)
             logger.info(f"Dropped index {index_name} from collection: {collection_name}")
             event.record_success()
-            return event
+            return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name, "index": index_name})
-            return event
+            return [event]
 
     def execute_migration(self, collection_name, pipeline):
         """Execute a MongoDB aggregation pipeline (migration).
@@ -171,7 +171,7 @@ class MongoIO:
             pipeline (list): List of pipeline stages to execute
             
         Returns:
-            ConfiguratorEvent: Event with operation result
+            list[ConfiguratorEvent]: List containing event with operation result
         """
         event = ConfiguratorEvent(event_id="MON-08", event_type="EXECUTE_MIGRATION")
         
@@ -180,10 +180,10 @@ class MongoIO:
             result = list(collection.aggregate(pipeline))
             logger.info(f"Executed migration on collection: {collection_name}")
             event.record_success()
-            return event
+            return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name})
-            return event
+            return [event]
 
     def add_index(self, collection_name, index_spec):
         """Create an index on a collection.
@@ -193,7 +193,7 @@ class MongoIO:
             index_spec (dict): Index specification with 'name' and 'key' fields
             
         Returns:
-            ConfiguratorEvent: Event with operation result
+            list[ConfiguratorEvent]: List containing event with operation result
         """
         event = ConfiguratorEvent(event_id="MON-09", event_type="ADD_INDEX")
         
@@ -203,10 +203,10 @@ class MongoIO:
             collection.create_indexes([index_model])
             logger.info(f"Created index {index_spec['name']} on collection: {collection_name}")
             event.record_success()
-            return event
+            return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name, "index": index_spec})
-            return event
+            return [event]
 
     def apply_schema_validation(self, collection_name):
         """Apply schema validation to a collection.
@@ -215,7 +215,7 @@ class MongoIO:
             collection_name (str): Name of the collection
             
         Returns:
-            ConfiguratorEvent: Event with operation result
+            list[ConfiguratorEvent]: List containing event with operation result
         """
         event = ConfiguratorEvent(event_id="MON-10", event_type="APPLY_SCHEMA")
         
@@ -224,10 +224,10 @@ class MongoIO:
             # For now, just record success as placeholder
             logger.info(f"Schema validation applied to collection: {collection_name}")
             event.record_success()
-            return event
+            return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name})
-            return event
+            return [event]
 
     def load_json_data(self, collection_name, data_file):
         """Load test data from a file into a collection.
@@ -237,15 +237,16 @@ class MongoIO:
             data_file (str): Path to the JSON data file
             
         Returns:
-            ConfiguratorEvent: Event with operation result
+            list[ConfiguratorEvent]: List containing event with operation result
         """
         event = ConfiguratorEvent(event_id="MON-11", event_type="LOAD_DATA")
         
         try:
             collection = self.get_collection(collection_name)
             with open(data_file, 'r') as file:
-                # Use regular json.loads for standard JSON files
-                data = json.loads(file.read())
+                # Use bson.json_util.loads to handle Extended JSON ($oid, $date, etc.)
+                from bson import json_util
+                data = json_util.loads(file.read())
             
             logger.info(f"Loading {len(data)} documents from {data_file} into collection: {collection_name}")
             result = collection.insert_many(data)
@@ -255,21 +256,21 @@ class MongoIO:
                 "inserted_ids": [str(oid) for oid in result.inserted_ids]
             }
             event.record_success()
-            return event
+            return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name, "data_file": data_file})
-            return event
+            return [event]
 
-    def drop_database(self) -> ConfiguratorEvent:
+    def drop_database(self) -> list[ConfiguratorEvent]:
         """Drop the database."""
         event = ConfiguratorEvent(event_id="MON-12", event_type="DROP_DATABASE")
         config = Config.get_instance()
         if not config.ENABLE_DROP_DATABASE:
             event.record_failure({"error": "Drop database feature is not enabled"})
-            return event
+            return [event]
         if not config.BUILT_AT == "Local":
             event.record_failure({"error": "Drop database not allowed on Non-Local Build"})
-            return event
+            return [event]
         
         # Check if any collections have more than 100 documents
         try:
@@ -285,19 +286,19 @@ class MongoIO:
             if collections_with_many_docs:
                 event.event_data = collections_with_many_docs
                 event.record_failure("Drop database Safety Limit Exceeded - Collections with >100 documents found")
-                return event
+                return [event]
             
         except Exception as e:
             event.event_data = e
             event.record_failure("Check collection counts raised an exception")
-            return event
+            return [event]
 
         try:
             self.client.drop_database(self.db.name)
             event.record_success()
             logger.info(f"Dropped database: {self.db.name}")
-            return event
+            return [event]
         except Exception as e:
             event.event_data=e
             event.record_failure(f"Failed to drop database {self.db.name}")
-            return event
+            return [event]
