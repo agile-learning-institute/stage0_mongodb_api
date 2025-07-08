@@ -8,6 +8,10 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:8081
+    description: Local development server
 paths:
   /api/configurations/:
     get:
@@ -227,7 +231,7 @@ paths:
             text/json:
               schema:
                 type: object
-       '500':
+        '500':
           description: Processing error
           content:
             application/json:
@@ -814,7 +818,7 @@ components:
         properties:
           description: Properties of an Object type
           type: object
-          properties:
+          additionalProperties:
             $ref: '#/components/schemas/dictionary'
         items:
           description: Items of an Array type

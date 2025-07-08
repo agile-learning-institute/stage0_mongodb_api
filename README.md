@@ -36,6 +36,7 @@ pipenv run test
 # Select a test_case for the server
 export INPUT_FOLDER=./tests/test_cases/small_sample
 export INPUT_FOLDER=./tests/test_cases/large_sample
+export INPUT_FOLDER=./tests/test_cases/playground
 
 # Set Debug Mode if needed
 export LOGGING_LEVEL=DEBUG
@@ -197,26 +198,7 @@ curl -X POST http://localhost:8081/api/configurations/
 curl -X PATCH http://localhost:8081/api/types/
 ```
 
-For complete API documentation and interactive testing, serve the Swagger UI at from /docs/index.html
-
-## Configuration Format: Migrations
-
-Collection configuration YAML files now specify migrations as a list of JSON filenames. Each filename should correspond to a migration pipeline stored in the `migrations/` folder for the test case or environment. Example:
-
-```yaml
-- version: "1.0.1.3"
-  migrations:
-    - "user_merge_name_fields.json"
-    - "another_migration.json"
-  test_data: user.1.0.1.3.json
-```
-
-- Each migration file must be a valid MongoDB aggregation pipeline in Extended JSON format.
-- The migration will be loaded and executed in order for the given version.
-- No `name:` or `file:` keys are required—just a list of filenames.
-- Legacy inline pipeline support is deprecated and should not be used in new configurations.
-
-Migration files are stored in the `migrations/` folder alongside your configuration YAMLs and test data.
+For complete API documentation and interactive API Explorer, serve the Swagger UI at from /docs/index.html
 
 ---
 
