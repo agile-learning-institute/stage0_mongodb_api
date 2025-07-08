@@ -3,6 +3,8 @@ from typing import List, Optional
 
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
+# NOTE: All ConfiguratorEvent instances in this file use descriptive event_type and unique event_id for traceability.
+
 class VersionNumber:
     """Class for handling version numbers."""
     
@@ -17,7 +19,7 @@ class VersionNumber:
         self.version = version
         parts = version.split('.')
         if len(parts) < 4 or len(parts) > 5:
-            event = ConfiguratorEvent(event_id="VER-01", event_type="VALIDATION")
+            event = ConfiguratorEvent(event_id="VER-01-INIT", event_type="VERSION_NUMBER_VALIDATION")
             raise ConfiguratorException(f"Invalid version format {version}", event)
         
         # Initialize parts list
@@ -27,14 +29,14 @@ class VersionNumber:
         # Validate that parts 1-3 are digits
         for i, part in enumerate(parts[1:4], 1):
             if not part.isdigit():
-                event = ConfiguratorEvent(event_id="VER-01", event_type="VALIDATION")
+                event = ConfiguratorEvent(event_id=f"VER-01-NON_DIGIT-{i}", event_type="VERSION_NUMBER_VALIDATION")
                 raise ConfiguratorException(f"Invalid version format {version}", event)
             self.parts[i] = int(part)
         
         # Handle enumerator (part 4) - default to 0 if not provided
         if len(parts) == 5:
             if not parts[4].isdigit():
-                event = ConfiguratorEvent(event_id="VER-01", event_type="VALIDATION")
+                event = ConfiguratorEvent(event_id="VER-01-NON_DIGIT-ENUM", event_type="VERSION_NUMBER_VALIDATION")
                 raise ConfiguratorException(f"Invalid version format {version}", event)
             self.parts[4] = int(parts[4])
         else:
