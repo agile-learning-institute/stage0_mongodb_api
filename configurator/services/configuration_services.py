@@ -184,19 +184,9 @@ class Version:
 
             # Execute migrations
             sub_event = ConfiguratorEvent(event_id="PRO-03", event_type="EXECUTE_MIGRATIONS")
-            for migration in self.migrations:
-                if "file" in migration:
-                    # New file-based migration format
-                    migration_file = os.path.join(self.config.INPUT_FOLDER, self.config.MIGRATIONS_FOLDER, migration["file"])
-                    sub_event.append_events(mongo_io.execute_migration_from_file(self.collection_name, migration_file))
-                elif "pipeline" in migration:
-                    # Legacy inline pipeline format (for backward compatibility)
-                    sub_event.append_events(mongo_io.execute_migration(self.collection_name, migration["pipeline"]))
-                else:
-                    # Invalid migration format
-                    error_event = ConfiguratorEvent(event_id="PRO-03-ERR", event_type="INVALID_MIGRATION")
-                    error_event.record_failure({"error": "Migration must have either 'file' or 'pipeline' field", "migration": migration})
-                    sub_event.append_events([error_event])
+            for filename in self.migrations:
+                migration_file = os.path.join(self.config.INPUT_FOLDER, self.config.MIGRATIONS_FOLDER, filename)
+                sub_event.append_events(mongo_io.execute_migration_from_file(self.collection_name, migration_file))
             event.append_events([sub_event])
 
             # Add indexes
@@ -213,7 +203,6 @@ class Version:
             # Load test data
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="LOAD_TEST_DATA")
             if self.test_data:
-                import os
                 test_data_path = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, self.test_data)
                 sub_event.append_events(mongo_io.load_json_data(self.collection_name, test_data_path))
             else:

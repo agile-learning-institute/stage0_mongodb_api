@@ -25,11 +25,5 @@ versions:
     test_data: notification.1.0.0.2.json
   - version: "1.0.1.3"
     migrations:
-      - name: "merge_notification_data"
-        pipeline:
-          - $addFields:
-              full_message: { $concat: ["$title", ": ", "$message"] }
-          - $unset:
-              - "message"
-          - $out: "notification"
+      - "notification_merge_notification_data.json"
     test_data: notification.1.0.1.3.json 
