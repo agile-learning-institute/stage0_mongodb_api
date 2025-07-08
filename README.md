@@ -6,7 +6,7 @@ This project builds a the [MongoDB Configurator](https://github.com/agile-learni
 
 ### Prerequisites
 
-- [Python](https://www.python.org/downloads/) 3.8 or later
+- [Python](https://www.python.org/downloads/) 3.12 or later
 - [Pipenv](https://pipenv.pypa.io/en/latest/installation.html)
 - [Docker Desktop](https://github.com/agile-learning-institute/stage0/tree/main/developer_edition)
 - [MongoDB Compass]() *optional*
@@ -47,58 +47,28 @@ pipenv install --dev
 # Run Unit Tests and generate coverage report
 pipenv run test
 
-# Run a backing mongo database
-pipenv run database
+# Drop the Testing Database - Live - Real Drop Database!!!
+pipenv run drop
 
-## All run locally commands assume the database is running
-# Start server locally**
-pipenv run local
+#####################
+# Running test server  - uses INPUT_FOLDER setting# 
+pipenv run database     # Start the backing mongo database
+pipenv run local        # Start the server locally
+pipenv run debug        # Start locally with DEBUG logging
+pipenv run batch        # Run locally in Batch mode (process and exit)
 
-# Start locally with debugging 
-pipenv run debug 
+#####################
+# Building and Testing the container (before a PR)
+pipenv run build        # Build the container
+pipenv run service      # Run the DB, API, and SPA containers
+# visit http://localhost:8082 and "process all"
 
-# Run locally in Batch mode (process and shut down)
-pipenv run batch
-
-# Build container after code changes
-pipenv run build
-
-# Start Containerized Stack (Database, API, and SPA)
-pipenv run service
-
-# Stop the testing containers
-pipenv run down
+pipenv run down         # Stops all testing containers
 
 #####################
 # Black Box Testing #
-
-# MongoDB Utilities
-pipenv run db-drop-silent   # drop the testing database
-pipenv run db-compare       # Compare the database to a know set of data
-pipenv run db-harvest       # Update the set of known data from the database
-
-# Run StepCI black box testing 
-pipenv run stepci-observability
-pipenv run stepci-small
-pipenv run stepci-large
-
-# Combine DB actions with Batch testing 
-pipenv run db-drop-silent 
-pipenv run db-compare                   # Should fail
-pipenv run batch 
-pipenv run db-compare                   # Should pass
-
-# Combine DB actions, containerized runtime, and StepCI testing 
-pipenv run service
-pipenv run db-compare                   # Should fail
-pipenv run stepci-large
-pipenv run db-compare                   # Should pass
-
-# Use the SPA to find errors and test configuration
-pipenv run service      # if it's not already running
-pipenv run db-compare   # Should fail
-# visit http://localhost:8082 and "process all"
-pipenv run db-compare   # Should pass
+pipenv run stepci-observe   # Observability endpoints
+pipenv run stepci-<type>    # [configurations, dictionaries, types, test_data, enumerators]
 
 ```
 
@@ -106,30 +76,30 @@ pipenv run db-compare   # Should pass
 The /configurator directory contains source code.
 ```
 configurator/
-├── models/                     # Core processing models
-│   ├── database_model.py          # Configuration Database
-│   ├── configuration_model.py     # Collection Configuration
-│   ├── property_model.py          # Schema Property
-│   ├── enumerators_model.py       # Schema Enumerators
-│   ├── type_model.py              # Schema Type
-│   ├── event_model.py             # Processing or Validation Event
 ├── routes/                     # Flask HTTP Handlers
 │   ├── config_routes.py            # API Config Routes
 │   ├── configuration_routes.py     # Configuration Routes
-│   ├── data_routes.py              # Test Data Routes
+│   ├── database_routes.py          # Database Routes
 │   ├── dictionary_routes.py        # Dictionary Routes
-│   ├── render_routes.py            # Schema Rendering Routes
+│   ├── enumerator_routes.py        # Enumerator Routes
+│   ├── migration_routes.py         # Migration Routes
+│   ├── test_data_routes.py         # Test Data Routes
 │   ├── type_routes.py              # Type Routes
-├── services/                   # Business Logic and RBAC
-│   ├── configuration_services.py   # Configuration Routes
-│   ├── data_services.py            # Test Data Routes
-│   ├── dictionary_services.py      # Dictionary Routes
-│   ├── type_services.py            # Type Routes
+├── services/                   # Processing, Rendering Models
+│   ├── configuration_services.py   # Configuration Services
+│   ├── dictionary_services.py      # Dictionary Services
+│   ├── enumerator_service.py       # Enumerator Services
+│   ├── template_service.py         # Template Services
+│   ├── type_services.py            # Type Services
 ├── utils/                      # Utilities
 │   ├── config.py                   # API Configuration
-│   ├── fileIO.py                   # File IO Wrappers
-│   ├── mongoIO.py                  # MongoDB Wrappers
-│   ├── version.py                  # Version Number utility
+│   ├── configurator_exception.py   # Exception Classes
+│   ├── ejson_encoder.py            # Extended JSON Encoder
+│   ├── file_io.py                  # File IO Wrappers
+│   ├── mongo_io.py                 # MongoDB Wrappers
+│   ├── route_decorators.py         # Route Decorators
+│   ├── version_manager.py          # Version Manager
+│   ├── version_number.py           # Version Number utility
 ├── server.py                   # Application Entrypoint
 ```
 
@@ -137,41 +107,26 @@ configurator/
 The `tests/` directory contains python unit tests, stepci black box, and testing data.
 ```
 tests/
-├── test_server.py      # Server.py unit tests
-├── models/             # Model class unit tests
-├── routes/             # Route class unit tests
-├── services/           # Service layer unit tests
-├── utils/              # Utility unit tests
-├── stepci/             # API Black Box testing
-├── test_cases/         # Test data 
-│   ├── small_sample/   # Simple test configuration
-│   ├── large_sample/   # Complex test configuration
-│   ├── empty_input/    # Load Error testing
-│   ├── .../            # Additional test cases
+├── test_server.py          # Server.py unit tests
+├── models/                 # Model class unit tests
+├── routes/                 # Route class unit tests
+├── services/               # Service layer unit tests
+├── utils/                  # Utility unit tests
+├── stepci/                 # API Black Box testing
+├── test_cases/             # Test data 
+│   ├── small_sample/       # Simple test configuration
+│   ├── large_sample/       # Complex test configuration
+│   ├── empty_input/        # Load Error testing
+│   ├── sample_template/    # Configuration for Template
+│   ├── playground/         # Served with Stack for UI testing
+│   ├── .../                # Additional test cases
 ```
- 
-### Test Cases
-
-The `tests/test_cases/` directory contains test scenarios:
-
-- **small_sample**: Minimal configuration with one collection for basic functionality testing
-- **large_sample**: Complex multi-collection setup with relationships and advanced features
-- **validation_errors**: Test cases for error handling and validation scenarios
-- **minimum_valid**: Empty configuration for edge case testing
-
-If you need a new set of test data to validate features you are adding, feel free to add a new test case folder. Take note of these unit tests that use the test data. 
-
-### Load and Validation Errors
- Load and validation unit testing leverages test cases with known errors. Assertions validate that the errors were thrown using the unique identifier thrown in the code. If you introduce new testing, make sure you add new unique identifiers here.
-
-### Rendering Tests
- Rendering tests for both the small_sample and large_sample test cases is done using the expected output found in the `tests/test_cases/{case}/expected/json_schema` and `expected/bson_schema` folders. If your new test case needs to include rendering tests, you can add the expected output there and extend the rendering unit tests.
+the unit tests TestConfigurationIntegration and TestTypeRendering are integration tests that use the input folders in test_cases. 
 
 ## API Documentation
 
-The complete API documentation with interactive testing is available at:
-- **Swagger UI**: http://localhost:8081/docs/ (when server is running)
-- **OpenAPI Spec**: http://localhost:8081/docs/openapi.yaml
+The complete API documentation with interactive testing is available:
+- GoLive on [index.html](./docs/index.html)
 
 The Swagger UI provides:
 - Interactive endpoint testing
@@ -197,9 +152,4 @@ curl -X POST http://localhost:8081/api/configurations/
 # Clean all types
 curl -X PATCH http://localhost:8081/api/types/
 ```
-
-For complete API documentation and interactive API Explorer, serve the Swagger UI at from /docs/index.html
-
 ---
-
-
