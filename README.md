@@ -199,75 +199,25 @@ curl -X PATCH http://localhost:8081/api/types/
 
 For complete API documentation and interactive testing, serve the Swagger UI at from /docs/index.html
 
-## Migration Refactor Progress
+## Configuration Format: Migrations
 
-**Status**: In Progress  
-**Goal**: Move MongoDB aggregation pipelines from inline YAML to separate JSON files to solve `$` prefix issues
+Collection configuration YAML files now specify migrations as a list of JSON filenames. Each filename should correspond to a migration pipeline stored in the `migrations/` folder for the test case or environment. Example:
 
-### ✅ Completed Steps
+```yaml
+- version: "1.0.1.3"
+  migrations:
+    - "user_merge_name_fields.json"
+    - "another_migration.json"
+  test_data: user.1.0.1.3.json
+```
 
-1. **New Folder Structure** - Created migrations folder structure
-2. **Migration JSON Files** - Created initial migration files:
-   - `tests/test_cases/large_sample/migrations/user_merge_name_fields.json`
-   - `tests/test_cases/large_sample/migrations/content_merge_content_fields.json`
-3. **Config Updates** - Added MIGRATIONS_FOLDER and API_CONFIG_FOLDER configurations
-4. **MongoIO Updates** - Added migration file loading with `bson.json_util.loads()`:
-   - `load_migration_pipeline()` - Loads JSON files with proper $ prefix handling
-   - `execute_migration_from_file()` - Executes migrations from JSON files
+- Each migration file must be a valid MongoDB aggregation pipeline in Extended JSON format.
+- The migration will be loaded and executed in order for the given version.
+- No `name:` or `file:` keys are required—just a list of filenames.
+- Legacy inline pipeline support is deprecated and should not be used in new configurations.
 
-### ✅ Completed Steps
+Migration files are stored in the `migrations/` folder alongside your configuration YAMLs and test data.
 
-1. **New Folder Structure** - Created migrations folder structure
-2. **Migration JSON Files** - Created initial migration files:
-   - `tests/test_cases/large_sample/migrations/user_merge_name_fields.json`
-   - `tests/test_cases/large_sample/migrations/content_merge_content_fields.json`
-3. **Config Updates** - Added MIGRATIONS_FOLDER and API_CONFIG_FOLDER configurations
-4. **MongoIO Updates** - Added migration file loading with `bson.json_util.loads()`:
-   - `load_migration_pipeline()` - Loads JSON files with proper $ prefix handling
-   - `execute_migration_from_file()` - Executes migrations from JSON files
-5. **Configuration Format Changes** - Updated YAML to use file references:
-   - Updated `user.yaml` and `content.yaml` to use `file:` instead of `pipeline:`
-   - Added backward compatibility for legacy `pipeline:` format
-   - Added validation for migration format
-
-### ✅ Completed Steps
-
-1. **New Folder Structure** - Created migrations folder structure
-2. **Migration JSON Files** - Created initial migration files:
-   - `tests/test_cases/large_sample/migrations/user_merge_name_fields.json`
-   - `tests/test_cases/large_sample/migrations/content_merge_content_fields.json`
-3. **Config Updates** - Added MIGRATIONS_FOLDER and API_CONFIG_FOLDER configurations
-4. **MongoIO Updates** - Added migration file loading with `bson.json_util.loads()`:
-   - `load_migration_pipeline()` - Loads JSON files with proper $ prefix handling
-   - `execute_migration_from_file()` - Executes migrations from JSON files
-5. **Configuration Format Changes** - Updated YAML to use file references:
-   - Updated `user.yaml` and `content.yaml` to use `file:` instead of `pipeline:`
-   - Added backward compatibility for legacy `pipeline:` format
-   - Added validation for migration format
-6. **API Routes** - Added `/api/migrations` endpoints:
-   - `GET /api/migrations/` - List all migration files
-   - `GET /api/migrations/{filename}/` - Get specific migration
-   - `DELETE /api/migrations/{filename}/` - Delete migration
-   - `DELETE /api/migrations/` - Clean all migrations
-
-### 🔄 In Progress
-
-7. **File Structure Changes** - Move config files to `api_config/`
-
-### 📋 Remaining Steps
-
-5. **Configuration Format Changes** - Update YAML to use file references
-6. **API Routes** - Add `/api/migrations` endpoints
-7. **File Structure Changes** - Move config files to `api_config/`
-8. **Testing Updates** - Update all tests to use new format
-9. **Documentation Updates** - Update API and configuration docs
-
-### 🎯 Benefits
-
-- ✅ Solves the `$` prefix issue completely
-- ✅ Better separation of concerns (config vs. migrations)
-- ✅ More maintainable migration pipelines
-- ✅ Proper API for migration management
-- ✅ Consistent with existing Extended JSON handling
+---
 
 
