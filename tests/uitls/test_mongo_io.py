@@ -122,8 +122,9 @@ class TestMongoIO(unittest.TestCase):
 
     def test_remove_schema_validation(self):
         """Test removing schema validation."""
-        event = self.mongo_io.remove_schema_validation(self.test_collection_name)
-        self.assertEqual(event.status, "SUCCESS")
+        events = self.mongo_io.remove_schema_validation(self.test_collection_name)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].status, "SUCCESS")
 
     def test_remove_index(self):
         """Test removing an index."""
@@ -132,8 +133,9 @@ class TestMongoIO(unittest.TestCase):
         collection.create_index("name", name="test_index")
         
         # Then remove it
-        event = self.mongo_io.remove_index(self.test_collection_name, "test_index")
-        self.assertEqual(event.status, "SUCCESS")
+        events = self.mongo_io.remove_index(self.test_collection_name, "test_index")
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].status, "SUCCESS")
 
     def test_execute_migration(self):
         """Test executing a migration pipeline."""
@@ -142,8 +144,9 @@ class TestMongoIO(unittest.TestCase):
             {"$count": "active_count"}
         ]
         
-        event = self.mongo_io.execute_migration(self.test_collection_name, pipeline)
-        self.assertEqual(event.status, "SUCCESS")
+        events = self.mongo_io.execute_migration(self.test_collection_name, pipeline)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].status, "SUCCESS")
 
     def test_add_index(self):
         """Test adding an index."""
@@ -152,13 +155,15 @@ class TestMongoIO(unittest.TestCase):
             "key": [("name", ASCENDING)]
         }
         
-        event = self.mongo_io.add_index(self.test_collection_name, index_spec)
-        self.assertEqual(event.status, "SUCCESS")
+        events = self.mongo_io.add_index(self.test_collection_name, index_spec)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].status, "SUCCESS")
 
     def test_apply_schema_validation(self):
         """Test applying schema validation."""
-        event = self.mongo_io.apply_schema_validation(self.test_collection_name)
-        self.assertEqual(event.status, "SUCCESS")
+        events = self.mongo_io.apply_schema_validation(self.test_collection_name)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].status, "SUCCESS")
 
     def test_load_json_data(self):
         """Test loading JSON data from file."""
@@ -173,9 +178,10 @@ class TestMongoIO(unittest.TestCase):
             temp_file = f.name
         
         try:
-            event = self.mongo_io.load_json_data("test_load_collection", temp_file)
-            self.assertEqual(event.status, "SUCCESS")
-            self.assertEqual(event.data["documents_loaded"], 2)
+            events = self.mongo_io.load_json_data("test_load_collection", temp_file)
+            self.assertEqual(len(events), 1)
+            self.assertEqual(events[0].status, "SUCCESS")
+            self.assertEqual(events[0].data["documents_loaded"], 2)
         finally:
             import os
             os.unlink(temp_file)
