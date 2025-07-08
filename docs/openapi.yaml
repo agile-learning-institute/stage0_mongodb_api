@@ -540,6 +540,9 @@ paths:
   /api/test_data/{file_name}/:
     get:
       summary: Get a test data file 
+      description: |
+        Returns the contents of a test data file as a JSON array.
+        MongoDB Extended JSON (e.g., `$oid`, `$date`) is supported for values.
       operationId: get_data_file
       parameters:
         - name: file_name
@@ -549,19 +552,23 @@ paths:
             type: string
       responses:
         '200':
-          description: Test Data File
+          description: Test Data File (always a JSON array)
           content:
             application/json:
               schema:
                 type: array
+                items: {}
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     put:
       summary: Save a test data file
+      description: |
+        Saves the contents of a test data file as a JSON array.
+        MongoDB Extended JSON (e.g., `$oid`, `$date`) is supported for values.
       operationId: save_data_file
       parameters:
         - name: file_name
@@ -569,19 +576,26 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: {}
       responses:
         '200':
-          description: Test Data File
+          description: Test Data File saved (always a JSON array)
           content:
             application/json:
               schema:
-                type: array
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     delete:
       summary: Delete a test data file
       operationId: delete_data_file
@@ -958,4 +972,22 @@ components:
               type: array
               items:
                 type: string
+    event:
+      type: object
+      required: [id, type, status, data]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum: [SUCCESS, ERROR]
+        data:
+          description: Event data or sub-events
+          oneOf:
+            - type: array
+              items: { type: object }
+            - type: object
+              additionalProperties: true
 
