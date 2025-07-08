@@ -28,6 +28,8 @@ class Config:
             self.CONFIGURATION_FOLDER = ''
             self.TEST_DATA_FOLDER = ''
             self.TEMPLATE_FOLDER = ''
+            self.MIGRATIONS_FOLDER = ''
+            self.API_CONFIG_FOLDER = ''
             self.API_PORT = 0
             self.SPA_PORT = 0
             self.AUTO_PROCESS = False
@@ -47,7 +49,9 @@ class Config:
                 "DICTIONARY_FOLDER": "dictionaries",
                 "CONFIGURATION_FOLDER": "configurations",
                 "TEST_DATA_FOLDER": "test_data",
-                "TEMPLATE_FOLDER": "templates"
+                "TEMPLATE_FOLDER": "templates",
+                "MIGRATIONS_FOLDER": "migrations",
+                "API_CONFIG_FOLDER": "api_config"
             }
             self.config_ints = {
                 "API_PORT": "8081",
@@ -120,16 +124,25 @@ class Config:
         value = default_value
         from_source = "default"
 
-        # Check for config file first
-        file_path = Path(self.INPUT_FOLDER, name) 
-        if file_path.exists():
-            value = file_path.read_text().strip()
-            from_source = "file"
+        # Skip API_CONFIG_FOLDER in testing (like INPUT_FOLDER)
+        if name == "API_CONFIG_FOLDER" and os.getenv("INPUT_FOLDER"):
+            # Use default value when testing
+            from_source = "default"
+        else:
+            # Check for config file first - try api_config folder first, then root
+            api_config_path = Path(self.INPUT_FOLDER, "api_config", name)
+            root_path = Path(self.INPUT_FOLDER, name)
             
-        # If no file, check for environment variable
-        elif os.getenv(name):
-            value = os.getenv(name)
-            from_source = "environment"
+            if api_config_path.exists():
+                value = api_config_path.read_text().strip()
+                from_source = "file"
+            elif root_path.exists():
+                value = root_path.read_text().strip()
+                from_source = "file"
+            # If no file, check for environment variable
+            elif os.getenv(name):
+                value = os.getenv(name)
+                from_source = "environment"
 
         # Record the source of the config value
         self.config_items.append({

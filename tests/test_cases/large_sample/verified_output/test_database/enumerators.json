@@ -48,6 +48,42 @@
         "sd": "Standard definition",
         "hd": "High definition",
         "uhd": "Ultra high definition"
+      },
+      "notification_type": {
+        "system": "System notification",
+        "user": "User notification",
+        "content": "Content notification",
+        "reminder": "Reminder notification"
+      },
+      "priority_level": {
+        "critical": "Critical priority",
+        "high": "High priority",
+        "medium": "Medium priority",
+        "low": "Low priority"
+      },
+      "notification_tags": {
+        "urgent": "Urgent notification",
+        "important": "Important notification",
+        "normal": "Normal notification",
+        "low": "Low priority notification"
+      },
+      "category_type": {
+        "work": "Work related items",
+        "personal": "Personal items",
+        "project": "Project specific items",
+        "reference": "Reference materials"
+      },
+      "delivery_channel": {
+        "email": "Email delivery",
+        "sms": "SMS delivery",
+        "push": "Push notification",
+        "in_app": "In-app notification"
+      },
+      "notification_action": {
+        "created": "Document created",
+        "updated": "Document updated",
+        "deleted": "Document deleted",
+        "published": "Document published"
       }
     }
   },

@@ -68,6 +68,7 @@ from configurator.routes.type_routes import create_type_routes
 from configurator.routes.test_data_routes import create_test_data_routes
 from configurator.routes.database_routes import create_database_routes
 from configurator.routes.enumerator_routes import create_enumerator_routes
+from configurator.routes.migration_routes import create_migration_routes
 
 app.register_blueprint(create_config_routes(), url_prefix='/api/config')
 app.register_blueprint(create_configuration_routes(), url_prefix='/api/configurations')
@@ -76,6 +77,7 @@ app.register_blueprint(create_type_routes(), url_prefix='/api/types')
 app.register_blueprint(create_test_data_routes(), url_prefix='/api/test_data')
 app.register_blueprint(create_database_routes(), url_prefix='/api/database')
 app.register_blueprint(create_enumerator_routes(), url_prefix='/api/enumerators')
+app.register_blueprint(create_migration_routes(), url_prefix='/api/migrations')
 logger.info(f"============= Routes Registered ===============")
 
 # Start the server (only when run directly, not when imported by Gunicorn)

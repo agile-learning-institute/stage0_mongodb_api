@@ -25,13 +25,7 @@ versions:
       - statusIndex
     test_data: user.1.0.0.2.json
   - version: "1.0.1.3"
-    aggregations:
+    migrations:
       - name: "merge_name_fields"
-        pipeline:
-          - $addFields:
-              full_name: { $concat: ["$first_name", " ", "$last_name"] }
-          - $unset:
-              - "first_name"
-              - "last_name"
-          - $out: "user"
+        file: "user_merge_name_fields.json"
     test_data: user.1.0.1.3.json

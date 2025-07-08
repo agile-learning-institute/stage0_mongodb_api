@@ -1,0 +1,17 @@
+[
+  {
+    "$addFields": {
+      "full_title": {
+        "$concat": ["$title", " - ", "$subtitle"]
+      }
+    }
+  },
+  {
+    "$unset": [
+      "subtitle"
+    ]
+  },
+  {
+    "$out": "content"
+  }
+] 

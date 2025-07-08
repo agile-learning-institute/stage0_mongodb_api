@@ -20,7 +20,7 @@ class TestConfigFiles(unittest.TestCase):
 
     def test_file_string_properties(self):
         for key, default in {**self.config.config_strings, **self.config.config_string_secrets}.items():
-            if key != "BUILT_AT" and key != "INPUT_FOLDER" and key != "LOGGING_LEVEL":
+            if key not in ("BUILT_AT", "INPUT_FOLDER", "LOGGING_LEVEL", "API_CONFIG_FOLDER"):
                 self.assertEqual(getattr(self.config, key), "TEST_VALUE")
 
     def test_file_int_properties(self):
@@ -33,7 +33,7 @@ class TestConfigFiles(unittest.TestCase):
 
     def test_file_string_ci(self):
         for key, default in self.config.config_strings.items():
-            if key != "BUILT_AT" and key != "INPUT_FOLDER" and key != "LOGGING_LEVEL":
+            if key not in ("BUILT_AT", "INPUT_FOLDER", "LOGGING_LEVEL", "API_CONFIG_FOLDER"):
                 self._test_config_file_value(key, "TEST_VALUE")
 
     def test_file_int_ci(self):

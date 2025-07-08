@@ -8,6 +8,8 @@ from configurator.utils.mongo_io import MongoIO
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorException
 import logging
+from unittest.mock import patch, Mock
+from bson import json_util
 
 # Suppress logging during tests
 logging.getLogger().setLevel(logging.CRITICAL)
@@ -47,7 +49,8 @@ class DatabaseHarvester:
                 self.config.VERSION_COLLECTION_NAME,
                 sort_by=[("collection_name", 1)]
             )
-            return versions
+            # Serialize to Extended JSON format
+            return json.loads(json_util.dumps(versions))
         except Exception as e:
             return []
     
@@ -58,7 +61,8 @@ class DatabaseHarvester:
                 collection_name,
                 sort_by=[("_id", 1)]
             )
-            return documents
+            # Serialize to Extended JSON format
+            return json.loads(json_util.dumps(documents))
         except Exception as e:
             return []
     
@@ -92,7 +96,7 @@ class DatabaseHarvester:
             filepath = os.path.join(output_dir, filename)
             
             with open(filepath, 'w') as f:
-                json.dump(documents, f, indent=2, default=str)
+                json.dump(documents, f, indent=2)
 
 
 class TestConfigurationIntegration(unittest.TestCase):

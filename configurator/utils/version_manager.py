@@ -35,7 +35,12 @@ class VersionManager:
             event = ConfiguratorEvent(event_id="VER-01", event_type="GET_CURRENT_VERSION", event_data=version_docs)
             raise ConfiguratorException(f"Multiple versions found for collection: {collection_name}", event)
         
-        return VersionNumber(f"{collection_name}.{version_docs[0].get('current_version')}")
+        current_version = version_docs[0].get('current_version')
+        # Check if current_version already contains the collection name
+        if current_version.startswith(f"{collection_name}."):
+            return VersionNumber(current_version)
+        else:
+            return VersionNumber(f"{collection_name}.{current_version}")
 
     @staticmethod
     def update_version(mongo_io: MongoIO, collection_name: str, version: str) -> str:

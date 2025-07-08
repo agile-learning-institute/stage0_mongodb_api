@@ -185,6 +185,53 @@ class MongoIO:
             event.record_failure({"error": str(e), "collection": collection_name})
             return [event]
 
+    def load_migration_pipeline(self, migration_file):
+        """Load a migration pipeline from a JSON file using bson.json_util.loads().
+        
+        Args:
+            migration_file (str): Path to the migration JSON file
+            
+        Returns:
+            list: List of pipeline stages to execute
+            
+        Raises:
+            ConfiguratorException: If file cannot be loaded or parsed
+        """
+        try:
+            with open(migration_file, 'r') as file:
+                # Use bson.json_util.loads to preserve $ prefixes in MongoDB operators
+                pipeline = json_util.loads(file.read())
+            
+            if not isinstance(pipeline, list):
+                raise ValueError("Migration file must contain a list of pipeline stages")
+            
+            logger.info(f"Loaded migration pipeline from: {migration_file}")
+            return pipeline
+        except Exception as e:
+            event = ConfiguratorEvent(event_id="MON-13", event_type="LOAD_MIGRATION", event_data={"error": str(e), "file": migration_file})
+            raise ConfiguratorException(f"Failed to load migration pipeline from {migration_file}", event)
+
+    def execute_migration_from_file(self, collection_name, migration_file):
+        """Execute a migration from a JSON file.
+        
+        Args:
+            collection_name (str): Name of the collection
+            migration_file (str): Path to the migration JSON file
+            
+        Returns:
+            list[ConfiguratorEvent]: List containing event with operation result
+        """
+        event = ConfiguratorEvent(event_id="MON-14", event_type="EXECUTE_MIGRATION_FILE")
+        
+        try:
+            pipeline = self.load_migration_pipeline(migration_file)
+            result = self.execute_migration(collection_name, pipeline)
+            event.record_success()
+            return result
+        except Exception as e:
+            event.record_failure({"error": str(e), "collection": collection_name, "file": migration_file})
+            return [event]
+
     def add_index(self, collection_name, index_spec):
         """Create an index on a collection.
         
