@@ -72,11 +72,13 @@ class DatabaseHarvester:
         
         # Get all collection names
         collection_names = self.mongo_io.db.list_collection_names()
+        print(f"Harvester found collections: {collection_names}")
         
         # Harvest each collection (except CollectionVersions which we already did)
         for collection_name in collection_names:
             if collection_name != self.config.VERSION_COLLECTION_NAME:
                 documents = self.harvest_collection_data(collection_name)
+                print(f"Harvested {len(documents)} documents from {collection_name}")
                 result[collection_name] = documents
         
         return result
@@ -105,6 +107,10 @@ class TestConfigurationIntegration(unittest.TestCase):
         mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         mongo_io.drop_database()
         mongo_io.disconnect()
+        
+        # Add a pause after dropping the database
+        import time
+        time.sleep(1)
         
         # Create temporary directory for test output
         self.temp_dir = tempfile.mkdtemp(prefix="test_config_integration_")
@@ -151,8 +157,31 @@ class TestConfigurationIntegration(unittest.TestCase):
         if not config_files:
             self.skipTest(f"No configuration files found in: {config_dir}")
         
-        for filename in config_files:
-            self._process_configuration(filename)
+        # For large_sample, process in dependency order to handle one_of schemas
+        if self.test_case == 'large_sample':
+            # Define dependency order: process dependencies first
+            dependency_order = [
+                'media.yaml', 
+                'organization.yaml',
+                'user.yaml',  # user must be processed before notification
+                'notification.yaml',  # notification depends on user
+                'content.yaml',  # content depends on user
+                'search.yaml'  # Process search last as it depends on others
+            ]
+            
+            # Filter to only include files that exist
+            ordered_files = [f for f in dependency_order if f in config_files]
+            
+            # Add any remaining files not in the dependency order
+            remaining_files = [f for f in config_files if f not in dependency_order]
+            ordered_files.extend(remaining_files)
+            
+            for filename in ordered_files:
+                self._process_configuration(filename)
+        else:
+            # For other test cases, process in alphabetical order
+            for filename in sorted(config_files):
+                self._process_configuration(filename)
 
     def _process_configuration(self, config_filename):
         """Process a single configuration file."""
@@ -160,8 +189,15 @@ class TestConfigurationIntegration(unittest.TestCase):
             configuration = Configuration(config_filename)
             event = configuration.process()
             
+            # Debug: Print the result events
+            print(f"Processing {config_filename} - status: {event.status}")
+            for sub_event in event.sub_events:
+                print(f"  Sub-event: {sub_event.type} - {sub_event.status}")
+                if hasattr(sub_event, 'data') and sub_event.data:
+                    print(f"    Data: {sub_event.data}")
+            
             if event.status == "FAILURE":
-                self.fail(f"Configuration processing failed for {config_filename}: {event.message}")
+                self.fail(f"Configuration processing failed for {config_filename}: {event.data.get('error', 'Unknown error')}")
             
         except Exception as e:
             self.fail(f"Exception processing configuration {config_filename}: {str(e)}")
@@ -191,6 +227,13 @@ class TestConfigurationIntegration(unittest.TestCase):
         with open(verified_file, 'r') as f:
             expected_documents = json.load(f)
         
+        # Debug: Print what we're comparing
+        print(f"Comparing {collection_name}:")
+        print(f"  Expected count: {len(expected_documents)}")
+        print(f"  Actual count: {len(actual_documents)}")
+        if actual_documents:
+            print(f"  Actual documents: {actual_documents}")
+        
         # Compare document counts
         self.assertEqual(
             len(actual_documents), 
@@ -199,8 +242,12 @@ class TestConfigurationIntegration(unittest.TestCase):
             f"expected {len(expected_documents)}, got {len(actual_documents)}"
         )
         
+        # Sort documents by collection_name for consistent comparison
+        actual_sorted = sorted(actual_documents, key=lambda x: x.get('collection_name', ''))
+        expected_sorted = sorted(expected_documents, key=lambda x: x.get('collection_name', ''))
+        
         # Compare each document
-        for i, (actual_doc, expected_doc) in enumerate(zip(actual_documents, expected_documents)):
+        for i, (actual_doc, expected_doc) in enumerate(zip(actual_sorted, expected_sorted)):
             self._assert_document_equality(
                 actual_doc, 
                 expected_doc, 
@@ -209,8 +256,17 @@ class TestConfigurationIntegration(unittest.TestCase):
 
     def _assert_document_equality(self, actual, expected, context):
         """Assert document equality with detailed diff reporting."""
-        if actual != expected:
-            diff = self._dict_diff(actual, expected)
+        # Remove _id fields for comparison since MongoDB generates new ObjectIds
+        actual_copy = actual.copy()
+        expected_copy = expected.copy()
+        
+        if '_id' in actual_copy:
+            del actual_copy['_id']
+        if '_id' in expected_copy:
+            del expected_copy['_id']
+            
+        if actual_copy != expected_copy:
+            diff = self._dict_diff(actual_copy, expected_copy)
             self.fail(f"{context} mismatch:\n{diff}")
 
     def _dict_diff(self, dict1, dict2):

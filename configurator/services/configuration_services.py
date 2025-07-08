@@ -89,12 +89,15 @@ class Configuration:
             # Load enumerators into database
             sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="LOAD_ENUMERATORS")
             try:
-                import os
-                enumerators_file = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, "enumerators.json")
-                if os.path.exists(enumerators_file):
-                    sub_event.append_events(mongo_io.load_json_data("enumerators", enumerators_file))
-                else:
-                    sub_event.record_success()  # No enumerators file is OK
+                enumerators = Enumerators(None)
+                for enum_doc in enumerators.dict:
+                    # Upsert based on version field
+                    mongo_io.upsert(
+                        "enumerators",
+                        {"version": enum_doc["version"]},
+                        enum_doc
+                    )
+                sub_event.record_success()
             except Exception as e:
                 sub_event.record_failure({"error": str(e)})
             event.append_events([sub_event])

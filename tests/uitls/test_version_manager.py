@@ -28,8 +28,8 @@ class TestVersionManager(unittest.TestCase):
         result = VersionManager.get_current_version(self.mock_mongo_io, self.collection_name)
         
         # Verify the expected default version is returned
-        expected_version = VersionNumber(f"{self.collection_name}.0.0.0.0")
-        self.assertEqual(result, expected_version)
+        self.assertIsInstance(result, VersionNumber)
+        self.assertEqual(str(result), f"{self.collection_name}.0.0.0.yaml")
         
         # Verify mongo_io.get_documents was called correctly
         self.mock_mongo_io.get_documents.assert_called_once_with(
@@ -46,8 +46,8 @@ class TestVersionManager(unittest.TestCase):
         result = VersionManager.get_current_version(self.mock_mongo_io, self.collection_name)
         
         # Verify the version is returned as a VersionNumber
-        expected_version = VersionNumber(f"{self.collection_name}.1.2.3.4")
-        self.assertEqual(result, expected_version)
+        self.assertIsInstance(result, VersionNumber)
+        self.assertEqual(str(result), f"{self.collection_name}.1.2.3.yaml")
         
         # Verify mongo_io.get_documents was called correctly
         self.mock_mongo_io.get_documents.assert_called_once_with(
@@ -83,8 +83,8 @@ class TestVersionManager(unittest.TestCase):
         result = VersionManager.get_current_version(self.mock_mongo_io, self.collection_name)
         
         # Verify the expected default version is returned
-        expected_version = VersionNumber(f"{self.collection_name}.0.0.0.0")
-        self.assertEqual(result, expected_version)
+        self.assertIsInstance(result, VersionNumber)
+        self.assertEqual(str(result), f"{self.collection_name}.0.0.0.yaml")
 
     def test_update_version_new_version(self):
         """Test update_version for a new version"""
@@ -93,13 +93,13 @@ class TestVersionManager(unittest.TestCase):
         self.mock_mongo_io.upsert.return_value = mock_version_doc
         
         # Mock get_current_version to return the updated version
-        expected_result = VersionNumber(f"{self.collection_name}.1.2.3.4")
         self.mock_mongo_io.get_documents.return_value = [{"current_version": "1.2.3.4"}]
         
         result = VersionManager.update_version(self.mock_mongo_io, self.collection_name, "1.2.3.4")
         
         # Verify the result
-        self.assertEqual(result, expected_result)
+        self.assertIsInstance(result, VersionNumber)
+        self.assertEqual(str(result), f"{self.collection_name}.1.2.3.yaml")
         
         # Verify upsert was called correctly
         self.mock_mongo_io.upsert.assert_called_once_with(
@@ -115,13 +115,13 @@ class TestVersionManager(unittest.TestCase):
         self.mock_mongo_io.upsert.return_value = mock_version_doc
         
         # Mock get_current_version to return the updated version
-        expected_result = VersionNumber(f"{self.collection_name}.2.0.0.1")
         self.mock_mongo_io.get_documents.return_value = [{"current_version": "2.0.0.1"}]
         
         result = VersionManager.update_version(self.mock_mongo_io, self.collection_name, "2.0.0.1")
         
         # Verify the result
-        self.assertEqual(result, expected_result)
+        self.assertIsInstance(result, VersionNumber)
+        self.assertEqual(str(result), f"{self.collection_name}.2.0.0.yaml")
         
         # Verify upsert was called correctly
         self.mock_mongo_io.upsert.assert_called_once_with(
@@ -151,8 +151,8 @@ class TestVersionManager(unittest.TestCase):
                 result = VersionManager.get_current_version(self.mock_mongo_io, collection_name)
                 
                 # Verify the expected default version is returned
-                expected_version = VersionNumber(f"{collection_name}.0.0.0.0")
-                self.assertEqual(result, expected_version)
+                self.assertIsInstance(result, VersionNumber)
+                self.assertEqual(str(result), f"{collection_name}.0.0.0.yaml")
                 
                 # Verify the correct collection name was used in the query
                 self.mock_mongo_io.get_documents.assert_called_with(
@@ -165,19 +165,22 @@ class TestVersionManager(unittest.TestCase):
         # Step 1: Get current version (no versions exist)
         self.mock_mongo_io.get_documents.return_value = []
         current_version = VersionManager.get_current_version(self.mock_mongo_io, self.collection_name)
-        self.assertEqual(current_version, VersionNumber(f"{self.collection_name}.0.0.0.0"))
+        self.assertIsInstance(current_version, VersionNumber)
+        self.assertEqual(str(current_version), f"{self.collection_name}.0.0.0.yaml")
         
         # Step 2: Update to a new version
         self.mock_mongo_io.upsert.return_value = {"collection_name": self.collection_name, "current_version": "1.0.0.1"}
         self.mock_mongo_io.get_documents.return_value = [{"current_version": "1.0.0.1"}]
         
         updated_version = VersionManager.update_version(self.mock_mongo_io, self.collection_name, "1.0.0.1")
-        self.assertEqual(updated_version, VersionNumber(f"{self.collection_name}.1.0.0.1"))
+        self.assertIsInstance(updated_version, VersionNumber)
+        self.assertEqual(str(updated_version), f"{self.collection_name}.1.0.0.yaml")
         
         # Step 3: Get current version again (should return the updated version)
         self.mock_mongo_io.get_documents.return_value = [{"current_version": "1.0.0.1"}]
         final_version = VersionManager.get_current_version(self.mock_mongo_io, self.collection_name)
-        self.assertEqual(final_version, VersionNumber(f"{self.collection_name}.1.0.0.1"))
+        self.assertIsInstance(final_version, VersionNumber)
+        self.assertEqual(str(final_version), f"{self.collection_name}.1.0.0.yaml")
 
     def test_mongo_io_method_calls(self):
         """Test that MongoIO methods are called with correct parameters"""

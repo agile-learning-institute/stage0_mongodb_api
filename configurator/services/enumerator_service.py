@@ -52,6 +52,10 @@ class Enumerators:
     def version(self, version: int):
         return self.versions[version]
     
+    def get_enum_values(self, enum_name: str):
+        """Get enum values from the active version (version 0)."""
+        return self.versions[0].get_enum_values(enum_name)
+    
     def to_dict(self):
         return self.dict
 

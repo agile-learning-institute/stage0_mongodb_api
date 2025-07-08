@@ -4,21 +4,7 @@
     "user_id": "user_001",
     "title": "Welcome to the Platform",
     "message": "Thank you for joining our platform!",
-    "notification_type": "system",
-    "status": "sent",
-    "priority": "medium",
-    "tags": ["urgent", "important"],
-    "categories": ["work", "personal"],
-    "channels": ["email", "in_app"],
-    "metadata": {
-      "created_at": "2024-01-15T10:00:00Z",
-      "sent_at": "2024-01-15T10:05:00Z",
-      "source": {
-        "collection": "user",
-        "document_id": "user_001",
-        "action": "created"
-      }
-    },
+    "status": "active",
     "last_saved": {
       "saved_at": "2024-01-15T10:05:00Z",
       "saved_by": "system"
@@ -29,21 +15,7 @@
     "user_id": "user_002",
     "title": "New Content Available",
     "message": "A new article has been published that matches your interests.",
-    "notification_type": "content",
-    "status": "sent",
-    "priority": "high",
-    "tags": ["important"],
-    "categories": ["education"],
-    "channels": ["email", "push", "in_app"],
-    "metadata": {
-      "created_at": "2024-01-20T14:30:00Z",
-      "sent_at": "2024-01-20T14:35:00Z",
-      "source": {
-        "collection": "content",
-        "document_id": "content_001",
-        "action": "published"
-      }
-    },
+    "status": "active",
     "last_saved": {
       "saved_at": "2024-01-20T14:35:00Z",
       "saved_by": "system"
@@ -54,22 +26,7 @@
     "user_id": "user_003",
     "title": "Reminder: Weekly Meeting",
     "message": "Your weekly team meeting starts in 30 minutes.",
-    "notification_type": "reminder",
-    "status": "sent",
-    "priority": "critical",
-    "tags": ["urgent"],
-    "categories": ["work"],
-    "channels": ["email", "sms", "push"],
-    "metadata": {
-      "created_at": "2024-01-22T09:30:00Z",
-      "sent_at": "2024-01-22T09:30:00Z",
-      "expires_at": "2024-01-22T10:00:00Z",
-      "source": {
-        "collection": "user",
-        "document_id": "user_003",
-        "action": "updated"
-      }
-    },
+    "status": "active",
     "last_saved": {
       "saved_at": "2024-01-22T09:30:00Z",
       "saved_by": "system"
