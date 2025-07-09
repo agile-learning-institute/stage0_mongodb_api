@@ -14,11 +14,7 @@ class File:
     """Class representing a file with its properties."""
     
     def __init__(self, file_path: str):
-        """Initialize a File instance with file properties.
-        
-        Args:
-            file_path: Path to the file
-        """
+        """Initialize a File instance with file properties."""
         self.name = os.path.basename(file_path)
         self.read_only = False
         self.created_at = datetime.now().isoformat()
@@ -52,17 +48,7 @@ class FileIO:
     
     @staticmethod
     def get_documents(folder_name: str) -> list[File]:
-        """Get all files from a folder.
-        
-        Args:
-            folder_name: Name of the folder to scan
-            
-        Returns:
-            List of File objects
-            
-        Raises:
-            ConfiguratorException: If folder access fails
-        """
+        """Get all files from a folder."""
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         files = []
@@ -82,18 +68,7 @@ class FileIO:
     
     @staticmethod
     def get_document(folder_name: str, file_name: str) -> dict:
-        """Read document content from a file.
-        
-        Args:
-            folder_name: Name of the folder to read from
-            file_name: Name of the file to read
-            
-        Returns:
-            Document content as dict
-            
-        Raises:
-            ConfiguratorException: If file read fails or unsupported file type
-        """
+        """Read document content from a file."""
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
@@ -125,19 +100,7 @@ class FileIO:
     
     @staticmethod
     def put_document(folder_name: str, file_name: str, document: dict) -> File:
-        """Write document content to a file.
-        
-        Args:
-            folder_name: Name of the folder to write to
-            file_name: Name of the file to write
-            document: Document content to write
-            
-        Returns:
-            File object representing the written file
-            
-        Raises:
-            ConfiguratorException: If file write fails or unsupported file type
-        """
+        """Write document content to a file."""
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
@@ -165,15 +128,7 @@ class FileIO:
     
     @staticmethod
     def delete_document(folder_name: str, file_name: str) -> ConfiguratorEvent:
-        """Delete a file.
-        
-        Args:
-            folder_name: Name of the folder containing the file
-            file_name: Name of the file to delete
-            
-        Returns:
-            ConfiguratorEvent with operation result
-        """
+        """Delete a file."""
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
@@ -193,18 +148,7 @@ class FileIO:
     
     @staticmethod
     def lock_unlock(folder_name: str, file_name: str) -> File:
-        """Toggle file read-only status.
-        
-        Args:
-            folder_name: Name of the folder containing the file
-            file_name: Name of the file to lock/unlock
-            
-        Returns:
-            Updated File object
-            
-        Raises:
-            ConfiguratorException: If file does not exist or error occurs
-        """
+        """Toggle file read-only status."""
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
