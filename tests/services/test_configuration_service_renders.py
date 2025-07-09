@@ -101,7 +101,7 @@ class TestConfigurationRendering(unittest.TestCase):
         
         # Load configuration and render with specific version
         configuration = Configuration("sample.yaml")
-        actual = configuration.get_bson_schema(version_str)
+        actual = configuration.get_bson_schema_for_version(version_str)
         
         # Load expected
         expected_path = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema/{expected_file}"

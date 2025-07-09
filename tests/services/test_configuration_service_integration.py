@@ -18,9 +18,6 @@ logging.getLogger().setLevel(logging.CRITICAL)
 def set_config_input_folder(folder):
     """Set the input folder for configuration processing."""
     os.environ['INPUT_FOLDER'] = folder
-    os.environ['BUILT_AT'] = 'Local'
-    os.environ['ENABLE_DROP_DATABASE'] = 'true'
-    os.environ['LOAD_TEST_DATA'] = 'true'
     from configurator.utils.config import Config
     Config._instance = None
     return Config.get_instance()
@@ -28,7 +25,7 @@ def set_config_input_folder(folder):
 
 def clear_config():
     """Clear the configuration environment."""
-    for key in ['INPUT_FOLDER', 'BUILT_AT', 'ENABLE_DROP_DATABASE', 'LOAD_TEST_DATA']:
+    for key in ['INPUT_FOLDER']:
         if key in os.environ:
             del os.environ[key]
     from configurator.utils.config import Config
@@ -125,12 +122,8 @@ class TestConfigurationIntegration(unittest.TestCase):
 
     def tearDown(self):
         """Clean up after tests."""
-        try:
-            # Drop the test database
-            self.mongo_io.drop_database()
-            self.mongo_io.disconnect()
-        except Exception:
-            pass
+        # Note: Database is NOT dropped here to allow inspection of final state
+        # Database is only dropped in setUp for clean start
         
         # Clean up temporary directory
         if os.path.exists(self.temp_dir):

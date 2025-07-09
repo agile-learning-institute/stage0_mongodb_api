@@ -1,7 +1,7 @@
 [
   {
     "_id": "notification_006",
-    "user_id": "user_001",
+    "user_id": "A00000000000000000000001",
     "title": "System Maintenance",
     "message": "Scheduled maintenance will begin in 2 hours.",
     "notification_type": "system",
@@ -22,13 +22,15 @@
       }
     },
     "last_saved": {
-      "saved_at": "2024-02-01T08:05:00Z",
-      "saved_by": "system"
+      "from_ip": "192.168.1.105",
+      "by_user": "system",
+      "at_time": "2024-02-01T08:05:00Z",
+      "correlation_id": "corr_006"
     }
   },
   {
     "_id": "notification_007",
-    "user_id": "user_003",
+    "user_id": "A00000000000000000000003",
     "title": "New Podcast Episode",
     "message": "Episode 16 of Weekly Tech Roundup is now available.",
     "notification_type": "content",
@@ -48,8 +50,10 @@
       }
     },
     "last_saved": {
-      "saved_at": "2024-02-05T12:05:00Z",
-      "saved_by": "system"
+      "from_ip": "192.168.1.106",
+      "by_user": "system",
+      "at_time": "2024-02-05T12:05:00Z",
+      "correlation_id": "corr_007"
     }
   }
 ] 

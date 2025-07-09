@@ -157,7 +157,7 @@ class TestConfigurationOperations(unittest.TestCase):
         config = Configuration("sample.yaml")
         
         # Test getting schema for existing version
-        schema = config.get_bson_schema("1.0.0.1")
+        schema = config.get_bson_schema_for_version("1.0.0.1")
         self.assertIsInstance(schema, dict)
         self.assertIn("bsonType", schema)
         self.assertEqual(schema["bsonType"], "object")
@@ -171,7 +171,7 @@ class TestConfigurationOperations(unittest.TestCase):
             config.get_json_schema("2.0.0.0")
         
         with self.assertRaises(Exception):
-            config.get_bson_schema("2.0.0.0")
+            config.get_bson_schema_for_version("2.0.0.0")
 
     def test_version_enumerator_access(self):
         """Test accessing enumerator version from Version object"""

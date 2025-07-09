@@ -237,17 +237,14 @@ class TypeProperty:
             schema["bsonType"] = schema["type"]
             del schema["type"]
             return {
-                "description": self.description,
                 **schema
             }
         if self.is_primitive:
             return {
-                "description": self.description,
                 **self.bson_type
             }
         if self.type == "array":
             return {
-                "description": self.description,
                 "bsonType": "array",
                 "items": self.items.get_bson_schema(type_stack)
             }
@@ -261,7 +258,6 @@ class TypeProperty:
                     required_properties.append(name)
             
             result = {
-                "description": self.description,
                 "bsonType": "object",
                 "properties": properties,
                 "additionalProperties": self.additional_properties
@@ -304,7 +300,6 @@ class TypeProperty:
                 custom_schema = custom_type.property.get_json_schema(type_stack)
             else:
                 custom_schema = custom_type.property.get_bson_schema(type_stack)
-            custom_schema["description"] = self.description
             return custom_schema
         finally:
             type_stack.pop()

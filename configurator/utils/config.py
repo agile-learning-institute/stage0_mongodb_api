@@ -14,8 +14,10 @@ class Config:
         else:
             Config._instance = self
             self.config_items = []
-            self.INPUT_FOLDER = "./input"
-            
+
+            # Set INPUT_FOLDER from environment or default FIRST
+            self.INPUT_FOLDER = os.getenv("INPUT_FOLDER", "./input")
+
             # Declare instance variables to support IDE code assist
             self.BUILT_AT = ''
             self.LOGGING_LEVEL = ''
@@ -76,21 +78,24 @@ class Config:
         """Initialize configuration values."""
         self.config_items = []
 
-        # Initialize Config Strings
+        # INPUT_FOLDER is already set in __init__
+        # Initialize Config Strings (except INPUT_FOLDER)
         for key, default in self.config_strings.items():
+            if key == "INPUT_FOLDER":
+                continue  # Already set
             value = self._get_config_value(key, default, False)
             setattr(self, key, value)
-            
+        
         # Initialize Config Integers
         for key, default in self.config_ints.items():
             value = int(self._get_config_value(key, default, False))
             setattr(self, key, value)
-            
+        
         # Initialize Config Booleans
         for key, default in self.config_booleans.items():
             value = (self._get_config_value(key, default, False)).lower() == "true"
             setattr(self, key, value)
-            
+        
         # Initialize String Secrets
         for key, default in self.config_string_secrets.items():
             value = self._get_config_value(key, default, True)
@@ -161,7 +166,6 @@ class Config:
         """Get the singleton instance of the Config class."""
         if Config._instance is None:
             Config()
-            
-
+        
         return Config._instance
         

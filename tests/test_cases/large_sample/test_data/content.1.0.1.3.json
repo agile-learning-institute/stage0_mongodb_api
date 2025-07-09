@@ -5,7 +5,7 @@
     "subtitle": "Advanced data processing techniques",
     "content_type": "article",
     "status": "published",
-    "author_id": "user_001",
+    "author_id": "A00000000000000000000001",
     "full_title": "MongoDB Aggregation Framework - Advanced data processing techniques",
     "content_data": {
       "body": "# MongoDB Aggregation Framework\n\nThe aggregation framework provides powerful data processing capabilities...",
@@ -25,8 +25,10 @@
       ]
     },
     "last_saved": {
-      "saved_at": "2024-02-02T14:30:00Z",
-      "saved_by": "admin"
+      "from_ip": "192.168.1.112",
+      "by_user": "admin",
+      "at_time": "2024-02-02T14:30:00Z",
+      "correlation_id": "corr_013"
     }
   },
   {
@@ -35,7 +37,7 @@
     "subtitle": "Building scalable real-time systems",
     "content_type": "video",
     "status": "published",
-    "author_id": "user_002",
+    "author_id": "A00000000000000000000002",
     "full_title": "Real-time Data Processing - Building scalable real-time systems",
     "content_data": {
       "url": "https://example.com/videos/real-time-data-processing.mp4",
@@ -55,8 +57,10 @@
       ]
     },
     "last_saved": {
-      "saved_at": "2024-02-06T16:00:00Z",
-      "saved_by": "user_002"
+      "from_ip": "192.168.1.113",
+      "by_user": "user_002",
+      "at_time": "2024-02-06T16:00:00Z",
+      "correlation_id": "corr_014"
     }
   }
 ] 

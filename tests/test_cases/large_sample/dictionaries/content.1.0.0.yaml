@@ -1,5 +1,5 @@
 title: Content Collection
-description: A content collection for testing one_of structures and advanced schema features
+description: A simple content collection for testing
 type: object
 properties:
   _id:
@@ -15,8 +15,7 @@ properties:
     type: sentence
   content_type:
     description: Type of content (article, video, podcast, etc.)
-    type: enum
-    enums: content_type
+    type: word
     required: true
   status:
     description: Content status
@@ -27,56 +26,39 @@ properties:
     description: Reference to author in user collection
     ref: user.1.0.0.yaml
   content_data:
-    description: The actual content data - varies by type
+    description: The actual content data
     type: object
     required: true
-    one_of:
-      type_property: content_type
-      schemas:
-        article:
-          description: Article content structure
-          type: object
-          properties:
-            body:
-              description: Article body text
-              type: markdown
-              required: true
-            tags:
-              description: Article tags
-              type: enum_array
-              enums: content_tags
-            word_count:
-              description: Article word count
-              type: count
-        video:
-          description: Video content structure
-          type: object
-          properties:
-            url:
-              description: Video URL
-              type: url
-              required: true
-            duration:
-              description: Video duration in seconds
-              type: count
-            quality:
-              description: Video quality
-              type: enum
-              enums: media_quality
-        podcast:
-          description: Podcast content structure
-          type: object
-          properties:
-            audio_url:
-              description: Audio file URL
-              type: url
-              required: true
-            transcript:
-              description: Podcast transcript
-              type: markdown
-            episode_number:
-              description: Episode number
-              type: count
+    properties:
+      body:
+        description: Article body text
+        type: markdown
+      url:
+        description: Video URL
+        type: url
+      audio_url:
+        description: Audio file URL
+        type: url
+      transcript:
+        description: Podcast transcript
+        type: markdown
+      tags:
+        description: Content tags
+        type: array
+        items:
+          type: word
+      word_count:
+        description: Article word count
+        type: count
+      duration:
+        description: Video duration in seconds
+        type: count
+      quality:
+        description: Video quality
+        type: word
+      episode_number:
+        description: Episode number
+        type: count
   metadata:
     description: Additional metadata for the content
     type: object
@@ -104,13 +86,13 @@ properties:
               required: true
             type:
               description: Category type
-              type: enum
-              enums: category_type
+              type: word
               required: true
             tags:
               description: Category tags
-              type: enum_array
-              enums: category_tags
+              type: array
+              items:
+                type: word
   last_saved:
     description: Last saved breadcrumb
     type: breadcrumb

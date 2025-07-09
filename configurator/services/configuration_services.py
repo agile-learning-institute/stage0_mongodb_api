@@ -123,7 +123,15 @@ class Configuration:
             raise ConfiguratorException("Version not found", event, data)
         return version_obj.get_json_schema()
     
-    def get_bson_schema(self, version: str):
+    def get_bson_schema(self):
+        enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
+        # Load dictionary data first
+        dictionary_filename = self.collection_version.get_schema_filename()
+        dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
+        dictionary = Dictionary(dictionary_filename, dictionary_data)
+        return dictionary.get_bson_schema(enumerators)
+
+    def get_bson_schema_for_version(self, version: str):
         version_obj = next((v for v in self.versions if v.version_str == version), None)
         if version_obj is None:
             data = {"message": f"Version {version} not found"}
@@ -152,23 +160,26 @@ class Version:
             "test_data": self.test_data,
         }
 
-    def get_json_schema(self):
-        enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
+    def get_json_schema(self) -> dict:
+        """Get JSON schema for this version with proper enumerators."""
+        enumerators: Enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
         # Load dictionary data first
-        dictionary_filename = self.collection_version.get_schema_filename()
-        dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
-        dictionary = Dictionary(dictionary_filename, dictionary_data)
+        dictionary_filename: str = self.collection_version.get_schema_filename()
+        dictionary_data: dict = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
+        dictionary: Dictionary = Dictionary(dictionary_filename, dictionary_data)
         return dictionary.get_json_schema(enumerators)
 
-    def get_bson_schema(self):
-        enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
+    def get_bson_schema(self) -> dict:
+        """Get BSON schema for this version with proper enumerators."""
+        enumerators: Enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
         # Load dictionary data first
-        dictionary_filename = self.collection_version.get_schema_filename()
-        dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
-        dictionary = Dictionary(dictionary_filename, dictionary_data)
+        dictionary_filename: str = self.collection_version.get_schema_filename()
+        dictionary_data: dict = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
+        dictionary: Dictionary = Dictionary(dictionary_filename, dictionary_data)
         return dictionary.get_bson_schema(enumerators)
 
-    def process(self, mongo_io: MongoIO):
+    def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
+        """Process this version with proper event nesting."""
         event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version_str}", event_type="PROCESS")
         try:
             # Remove schema validation
@@ -197,7 +208,24 @@ class Version:
 
             # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-05", event_type="APPLY_SCHEMA_VALIDATION")
-            sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name))
+            try:
+                # Render the BSON schema for this version
+                bson_schema: dict = self.get_bson_schema()
+                sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name, bson_schema))
+                sub_event.record_success()
+            except ConfiguratorException as e:
+                # Properly nest the exception event
+                sub_event.append_events([e.event])
+                sub_event.record_failure("error rendering schema")
+                event.append_events([sub_event])
+                event.record_failure("error processing version")
+                return event
+            except Exception as e:
+                # Handle unexpected exceptions
+                sub_event.record_failure("unexpected error rendering schema", {"error": str(e)})
+                event.append_events([sub_event])
+                event.record_failure("error processing version")
+                return event
             event.append_events([sub_event])
 
             # Load test data
@@ -226,6 +254,7 @@ class Version:
             return event
         
         except ConfiguratorException as e:
+            # This should not happen since we handle ConfiguratorException above
             event.append_events([e.event])
             event.record_failure("error processing version")
             return event

@@ -1,24 +1,28 @@
 [
   {
     "_id": "notification_004",
-    "user_id": "user_001",
+    "user_id": "A00000000000000000000001",
     "title": "Profile Update Required",
     "message": "Please update your profile information to continue using the platform.",
     "status": "active",
     "last_saved": {
-      "saved_at": "2024-01-25T11:05:00Z",
-      "saved_by": "system"
+      "from_ip": "192.168.1.103",
+      "by_user": "system",
+      "at_time": "2024-01-25T11:05:00Z",
+      "correlation_id": "corr_004"
     }
   },
   {
     "_id": "notification_005",
-    "user_id": "user_002",
+    "user_id": "A00000000000000000000002",
     "title": "New Video Available",
     "message": "A new video tutorial has been published in your area of interest.",
     "status": "active",
     "last_saved": {
-      "saved_at": "2024-01-28T15:05:00Z",
-      "saved_by": "system"
+      "from_ip": "192.168.1.104",
+      "by_user": "system",
+      "at_time": "2024-01-28T15:05:00Z",
+      "correlation_id": "corr_005"
     }
   }
 ] 

@@ -254,11 +254,12 @@ class MongoIO:
             event.record_failure({"error": str(e), "collection": collection_name, "index": index_spec})
             return [event]
 
-    def apply_schema_validation(self, collection_name):
+    def apply_schema_validation(self, collection_name, schema_dict):
         """Apply schema validation to a collection.
         
         Args:
             collection_name (str): Name of the collection
+            schema_dict (dict): BSON schema dictionary to apply
             
         Returns:
             list[ConfiguratorEvent]: List containing event with operation result
@@ -266,11 +267,20 @@ class MongoIO:
         event = ConfiguratorEvent(event_id="MON-10", event_type="APPLY_SCHEMA")
         
         try:
-            # This would need the schema to be passed in or retrieved
-            # For now, just record success as placeholder
+            # Apply schema validation to MongoDB collection
+            collection = self.get_collection(collection_name)
+            command = {
+                "collMod": collection_name,
+                "validator": {"$jsonSchema": schema_dict},
+                "validationLevel": "moderate",
+                "validationAction": "error"
+            }
+            
+            result = self.db.command(command)
             logger.info(f"Schema validation applied to collection: {collection_name}")
             event.record_success()
             return [event]
+            
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name})
             return [event]

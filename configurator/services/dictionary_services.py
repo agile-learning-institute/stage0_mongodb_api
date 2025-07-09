@@ -220,7 +220,6 @@ class Property:
 
         if self.type == "object":
             schema = {}
-            schema["description"] = self.description
             schema["bsonType"] = "object"
             schema["properties"] = {}
             for prop_name, prop in self.properties.items():
@@ -238,7 +237,6 @@ class Property:
             
         elif self.type == "array":
             schema = {}
-            schema["description"] = self.description
             schema["bsonType"] = "array"
             if self.items:
                 schema["items"] = self.items.get_bson_schema(enumerators, ref_stack)
@@ -246,7 +244,6 @@ class Property:
             
         elif self.type == "enum":
             schema = {}
-            schema["description"] = self.description
             schema["bsonType"] = "string"
             if self.enums:
                 schema["enum"] = enumerators.get_enum_values(self.enums)
@@ -254,7 +251,6 @@ class Property:
             
         elif self.type == "enum_array":
             schema = {}
-            schema["description"] = self.description
             schema["bsonType"] = "array"
             if self.enums:
                 schema["items"] = {"bsonType": "string", "enum": enumerators.get_enum_values(self.enums)}
@@ -264,7 +260,6 @@ class Property:
             # Reference a custom type
             custom_type = Type(f"{self.type}.yaml")
             custom_schema = custom_type.get_bson_schema()
-            custom_schema["description"] = self.description
             return custom_schema
         else:
             raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 

@@ -347,7 +347,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test successful GET /api/configurations/bson_schema/<file_name>/<version>/."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.get_bson_schema.return_value = {"type": "object"}
+        mock_configuration.get_bson_schema_for_version.return_value = {"type": "object"}
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -368,7 +368,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test GET /api/configurations/bson_schema/<file_name>/<version>/ when Configuration raises a general exception."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.get_bson_schema.side_effect = Exception("Unexpected error")
+        mock_configuration.get_bson_schema_for_version.side_effect = Exception("Unexpected error")
         mock_configuration_class.return_value = mock_configuration
 
         # Act

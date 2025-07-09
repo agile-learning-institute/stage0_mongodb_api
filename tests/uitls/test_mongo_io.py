@@ -161,7 +161,18 @@ class TestMongoIO(unittest.TestCase):
 
     def test_apply_schema_validation(self):
         """Test applying schema validation."""
-        events = self.mongo_io.apply_schema_validation(self.test_collection_name)
+        # Create a simple test schema
+        test_schema = {
+            "bsonType": "object",
+            "required": ["name"],
+            "properties": {
+                "name": {"bsonType": "string"},
+                "sort_value": {"bsonType": "int"},
+                "status": {"bsonType": "string"}
+            }
+        }
+        
+        events = self.mongo_io.apply_schema_validation(self.test_collection_name, test_schema)
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0].status, "SUCCESS")
 
