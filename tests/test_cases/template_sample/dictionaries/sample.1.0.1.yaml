@@ -5,12 +5,9 @@ properties:
     description: The unique identifier for the media
     type: identity
     required: true
-  first_name:
-    description: First Name
-    type: word
-  last_name:
-    description: Family Name
-    type: word
+  full_name:
+    description: Full Name
+    type: sentence
   status:
     description: The current status of the document
     type: enum

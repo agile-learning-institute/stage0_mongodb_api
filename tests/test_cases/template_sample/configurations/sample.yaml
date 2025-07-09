@@ -3,4 +3,28 @@ description: A collection for testing
 name: sample
 versions:
   - version: "1.0.0.1"
+    add_indexes:
+      - name: nameIndex
+        key:
+          first_name: 1
+          last_name: 1
+        options:
+          unique: true
+      - name: statusIndex
+        key:
+          status: 1
+        options:
+          unique: false
     test_data: sample.1.0.0.1.json
+  - version: "1.0.1.2"
+    drop_indexes:
+      - name: nameIndex
+    migrations:
+      - first_last_to_full_name.json
+    add_indexes:
+      - name: fullNameIndex
+        key:
+          full_name: 1
+        options:
+          unique: false
+    test_data: sample.1.0.1.2.json
