@@ -121,23 +121,19 @@ class Configuration:
             data = {"message": f"Version {version} not found"}
             event = ConfiguratorEvent(event_id="CFG-01", event_type="RENDER", event_data=data)
             raise ConfiguratorException("Version not found", event, data)
-        return version_obj.get_json_schema()
+        # Get the correct enumerations version for this configuration version
+        enumerations = Enumerators(None).version(version_obj.collection_version.get_enumerator_version())
+        return version_obj.get_json_schema(enumerations)
     
-    def get_bson_schema(self):
-        enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
-        # Load dictionary data first
-        dictionary_filename = self.collection_version.get_schema_filename()
-        dictionary_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
-        dictionary = Dictionary(dictionary_filename, dictionary_data)
-        return dictionary.get_bson_schema(enumerators)
-
     def get_bson_schema_for_version(self, version: str):
         version_obj = next((v for v in self.versions if v.version_str == version), None)
         if version_obj is None:
             data = {"message": f"Version {version} not found"}
             event = ConfiguratorEvent(event_id="CFG-02", event_type="RENDER", event_data=data)
             raise ConfiguratorException("Version not found", event, data)
-        return version_obj.get_bson_schema()
+        # Get the correct enumerations version for this configuration version
+        enumerations = Enumerators(None).version(version_obj.collection_version.get_enumerator_version())
+        return version_obj.get_bson_schema(enumerations)
 
 class Version:
     def __init__(self, collection_name: str, version: dict, config):
@@ -160,23 +156,21 @@ class Version:
             "test_data": self.test_data,
         }
 
-    def get_json_schema(self) -> dict:
-        """Get JSON schema for this version with proper enumerators."""
-        enumerators: Enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
+    def get_json_schema(self, enumerations) -> dict:
+        """Get JSON schema for this version with provided enumerations."""
         # Load dictionary data first
         dictionary_filename: str = self.collection_version.get_schema_filename()
         dictionary_data: dict = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
         dictionary: Dictionary = Dictionary(dictionary_filename, dictionary_data)
-        return dictionary.get_json_schema(enumerators)
+        return dictionary.get_json_schema(enumerations)
 
-    def get_bson_schema(self) -> dict:
-        """Get BSON schema for this version with proper enumerators."""
-        enumerators: Enumerators = Enumerators(None).version(self.collection_version.get_enumerator_version())
+    def get_bson_schema(self, enumerations) -> dict:
+        """Get BSON schema for this version with provided enumerations."""
         # Load dictionary data first
         dictionary_filename: str = self.collection_version.get_schema_filename()
         dictionary_data: dict = FileIO.get_document(self.config.DICTIONARY_FOLDER, dictionary_filename)
         dictionary: Dictionary = Dictionary(dictionary_filename, dictionary_data)
-        return dictionary.get_bson_schema(enumerators)
+        return dictionary.get_bson_schema(enumerations)
 
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         """Process this version with proper event nesting."""
@@ -209,8 +203,10 @@ class Version:
             # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-05", event_type="APPLY_SCHEMA_VALIDATION")
             try:
+                # Get the correct enumerations version for this version
+                enumerations = Enumerators(None).version(self.collection_version.get_enumerator_version())
                 # Render the BSON schema for this version
-                bson_schema: dict = self.get_bson_schema()
+                bson_schema: dict = self.get_bson_schema(enumerations)
                 sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name, bson_schema))
                 sub_event.record_success()
             except ConfiguratorException as e:

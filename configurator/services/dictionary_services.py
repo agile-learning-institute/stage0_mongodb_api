@@ -18,15 +18,15 @@ class Dictionary:
     def to_dict(self):
         return self.property.to_dict()
     
-    def get_json_schema(self, enumerators: Enumerators, ref_stack: list = None):
+    def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_json_schema(enumerators, ref_stack)
+        return self.property.get_json_schema(enumerations, ref_stack)
     
-    def get_bson_schema(self, enumerators: Enumerators, ref_stack: list = None):
+    def get_bson_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_bson_schema(enumerators, ref_stack)
+        return self.property.get_bson_schema(enumerations, ref_stack)
             
     def save(self) -> list[ConfiguratorEvent]:
         event = ConfiguratorEvent(event_id="DIC-03", event_type="SAVE_DICTIONARY")
@@ -152,12 +152,12 @@ class Property:
             
         return result    
     
-    def get_json_schema(self, enumerators: Enumerators, ref_stack: list = None):
+    def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
         
         if self.ref:
-            return self._handle_ref_schema(enumerators, ref_stack, "json")
+            return self._handle_ref_schema(enumerations, ref_stack, "json")
 
         if self.type == "object":
             schema = {}
@@ -165,7 +165,7 @@ class Property:
             schema["type"] = "object"
             schema["properties"] = {}
             for prop_name, prop in self.properties.items():
-                schema["properties"][prop_name] = prop.get_json_schema(enumerators, ref_stack)
+                schema["properties"][prop_name] = prop.get_json_schema(enumerations, ref_stack)
             required_props = self._get_required()
             if required_props:
                 schema["required"] = required_props
@@ -173,7 +173,7 @@ class Property:
             
             # Handle one_of structure
             if self.one_of:
-                schema["oneOf"] = self.one_of.get_json_schema(enumerators, ref_stack)
+                schema["oneOf"] = self.one_of.get_json_schema(enumerations, ref_stack)
             
             return schema
             
@@ -182,7 +182,7 @@ class Property:
             schema["description"] = self.description
             schema["type"] = "array"
             if self.items:
-                schema["items"] = self.items.get_json_schema(enumerators, ref_stack)
+                schema["items"] = self.items.get_json_schema(enumerations, ref_stack)
             return schema
             
         elif self.type == "enum":
@@ -190,7 +190,7 @@ class Property:
             schema["description"] = self.description
             schema["type"] = "string"
             if self.enums:
-                schema["enum"] = enumerators.get_enum_values(self.enums)
+                schema["enum"] = enumerations.get_enum_values(self.enums)
             return schema
             
         elif self.type == "enum_array":
@@ -198,7 +198,7 @@ class Property:
             schema["description"] = self.description
             schema["type"] = "array"
             if self.enums:
-                schema["items"] = {"type": "string", "enum": enumerators.get_enum_values(self.enums)}
+                schema["items"] = {"type": "string", "enum": enumerations.get_enum_values(self.enums)}
             return schema
             
         elif self.type:
@@ -211,19 +211,19 @@ class Property:
             raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 
                                       ConfiguratorEvent(event_id="DIC-99", event_type="INVALID_PROPERTY_TYPE"))
             
-    def get_bson_schema(self, enumerators: Enumerators, ref_stack: list = None):
+    def get_bson_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
         
         if self.ref:
-            return self._handle_ref_schema(enumerators, ref_stack, "bson")
+            return self._handle_ref_schema(enumerations, ref_stack, "bson")
 
         if self.type == "object":
             schema = {}
             schema["bsonType"] = "object"
             schema["properties"] = {}
             for prop_name, prop in self.properties.items():
-                schema["properties"][prop_name] = prop.get_bson_schema(enumerators, ref_stack)
+                schema["properties"][prop_name] = prop.get_bson_schema(enumerations, ref_stack)
             required_props = self._get_required()
             if required_props:
                 schema["required"] = required_props
@@ -231,7 +231,7 @@ class Property:
             
             # Handle one_of structure
             if self.one_of:
-                schema["oneOf"] = self.one_of.get_bson_schema(enumerators, ref_stack)
+                schema["oneOf"] = self.one_of.get_bson_schema(enumerations, ref_stack)
             
             return schema
             
@@ -239,21 +239,21 @@ class Property:
             schema = {}
             schema["bsonType"] = "array"
             if self.items:
-                schema["items"] = self.items.get_bson_schema(enumerators, ref_stack)
+                schema["items"] = self.items.get_bson_schema(enumerations, ref_stack)
             return schema
             
         elif self.type == "enum":
             schema = {}
             schema["bsonType"] = "string"
             if self.enums:
-                schema["enum"] = enumerators.get_enum_values(self.enums)
+                schema["enum"] = enumerations.get_enum_values(self.enums)
             return schema
             
         elif self.type == "enum_array":
             schema = {}
             schema["bsonType"] = "array"
             if self.enums:
-                schema["items"] = {"bsonType": "string", "enum": enumerators.get_enum_values(self.enums)}
+                schema["items"] = {"bsonType": "string", "enum": enumerations.get_enum_values(self.enums)}
             return schema
             
         elif self.type:
@@ -267,7 +267,7 @@ class Property:
             
         return schema
     
-    def _handle_ref_schema(self, enumerators: Enumerators, ref_stack: list, schema_type: str):
+    def _handle_ref_schema(self, enumerations, ref_stack: list, schema_type: str):
         """Handle reference schema processing with circular reference and depth checking."""
         # Check for circular reference
         if self.ref in ref_stack:
@@ -293,9 +293,9 @@ class Property:
         try:
             dictionary = Dictionary(self.ref)
             if schema_type == "json":
-                return dictionary.get_json_schema(enumerators, ref_stack)
+                return dictionary.get_json_schema(enumerations, ref_stack)
             else:
-                return dictionary.get_bson_schema(enumerators, ref_stack)
+                return dictionary.get_bson_schema(enumerations, ref_stack)
         finally:
             ref_stack.pop()
     
@@ -318,8 +318,8 @@ class OneOf:
             "schemas": {name: schema.to_dict() for name, schema in self.schemas.items()}
         }
     
-    def get_json_schema(self, enumerators: Enumerators, ref_stack: list = None):
-        return [schema.get_json_schema(enumerators, ref_stack) for schema in self.schemas.values()]
+    def get_json_schema(self, enumerations, ref_stack: list = None):
+        return [schema.get_json_schema(enumerations, ref_stack) for schema in self.schemas.values()]
     
-    def get_bson_schema(self, enumerators: Enumerators, ref_stack: list = None):
-        return [schema.get_bson_schema(enumerators, ref_stack) for schema in self.schemas.values()]
+    def get_bson_schema(self, enumerations, ref_stack: list = None):
+        return [schema.get_bson_schema(enumerations, ref_stack) for schema in self.schemas.values()]
