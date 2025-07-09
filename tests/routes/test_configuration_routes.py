@@ -59,13 +59,25 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_process_configurations_success(self, mock_configuration_class, mock_file_io):
         """Test successful POST /api/configurations/."""
         # Arrange
-        mock_files = [{"name": "config1.yaml"}, {"name": "config2.yaml"}]
+        # Create mock File objects with name attribute
+        mock_file1 = Mock()
+        mock_file1.name = "config1.yaml"
+        mock_file2 = Mock()
+        mock_file2.name = "config2.yaml"
+        mock_files = [mock_file1, mock_file2]
         mock_file_io.get_documents.return_value = mock_files
         
+        # Mock Configuration.process() to return ConfiguratorEvent objects
         mock_config1 = Mock()
-        mock_config1.process.return_value = {"result": "success1"}
+        mock_event1 = ConfiguratorEvent("CFG-00", "PROCESS")
+        mock_event1.record_success()
+        mock_config1.process.return_value = mock_event1
+        
         mock_config2 = Mock()
-        mock_config2.process.return_value = {"result": "success2"}
+        mock_event2 = ConfiguratorEvent("CFG-00", "PROCESS")
+        mock_event2.record_success()
+        mock_config2.process.return_value = mock_event2
+        
         mock_configuration_class.side_effect = [mock_config1, mock_config2]
 
         # Act
@@ -74,8 +86,13 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, [{"result": "success1"}, {"result": "success2"}])
+        # For endpoints that return events, expect event envelope structure
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
+        self.assertEqual(response_data["type"], "PROCESS_CONFIGURATIONS")
+        self.assertIn("sub_events", response_data)
 
     @patch('configurator.routes.configuration_routes.FileIO')
     def test_process_configurations_general_exception(self, mock_file_io):

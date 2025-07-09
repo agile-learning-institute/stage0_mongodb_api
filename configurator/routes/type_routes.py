@@ -17,7 +17,7 @@ def create_type_routes():
     @event_route("TYP-01", "GET_TYPES", "listing types")
     def get_types():
         files = FileIO.get_documents(config.TYPE_FOLDER)
-        return files
+        return [file.to_dict() for file in files]
 
     # PATCH /api/types - Clean Types
     @type_routes.route('/', methods=['PATCH'])

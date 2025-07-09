@@ -17,7 +17,7 @@ def create_dictionary_routes():
     @event_route("DIC-01", "GET_DICTIONARIES", "listing dictionaries")
     def get_dictionaries():
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-        return files
+        return [file.to_dict() for file in files]
     
     # PATCH /api/dictionaries - Clean Dictionaries
     @dictionary_routes.route('/', methods=['PATCH'])

@@ -22,12 +22,13 @@ def create_configuration_routes():
     @blueprint.route('/', methods=['POST'])
     @event_route("CFG-ROUTES-02", "PROCESS_CONFIGURATIONS", "processing configurations")
     def process_configurations():
-        results = []
-        configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        for configuration_name in configurations:
-            configuration = Configuration(configuration_name)
-            results.append(configuration.process())
-        return results
+        results = ConfiguratorEvent(event_id="CFG-ROUTES-02", event_type="PROCESS_CONFIGURATIONS")
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        for file in files:
+            configuration = Configuration(file.name)
+            results.append_events([configuration.process()])
+        results.record_success()
+        return results.to_dict()
 
     @blueprint.route('/', methods=['PATCH'])
     @event_route("CFG-ROUTES-03", "CLEAN_CONFIGURATIONS", "cleaning configurations")

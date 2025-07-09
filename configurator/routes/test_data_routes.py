@@ -16,7 +16,7 @@ def create_test_data_routes():
     @event_route("TST-01", "GET_TEST_DATA_FILES", "getting test data files")
     def get_data_files():
         files = FileIO.get_documents(config.TEST_DATA_FOLDER)
-        return files
+        return [file.to_dict() for file in files]
         
     # GET /api/test_data/<file_name> - Return a test_data file
     @test_data_routes.route('/<file_name>/', methods=['GET'])

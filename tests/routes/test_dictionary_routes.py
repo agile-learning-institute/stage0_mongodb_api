@@ -18,7 +18,12 @@ class TestDictionaryRoutes(unittest.TestCase):
     def test_get_dictionaries_success(self, mock_file_io):
         """Test successful GET /api/dictionaries."""
         # Arrange
-        mock_files = [{"name": "dict1.yaml"}, {"name": "dict2.yaml"}]
+        # Create mock File objects with to_dict() method
+        mock_file1 = Mock()
+        mock_file1.to_dict.return_value = {"name": "dict1.yaml"}
+        mock_file2 = Mock()
+        mock_file2.to_dict.return_value = {"name": "dict2.yaml"}
+        mock_files = [mock_file1, mock_file2]
         mock_file_io.get_documents.return_value = mock_files
 
         # Act
@@ -28,7 +33,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json
         # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, mock_files)
+        self.assertEqual(response_data, [{"name": "dict1.yaml"}, {"name": "dict2.yaml"}])
 
     @patch('configurator.routes.dictionary_routes.FileIO')
     def test_get_dictionaries_general_exception(self, mock_file_io):

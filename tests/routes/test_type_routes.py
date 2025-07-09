@@ -18,7 +18,12 @@ class TestTypeRoutes(unittest.TestCase):
     def test_get_types_success(self, mock_file_io):
         """Test successful GET /api/types."""
         # Arrange
-        mock_files = [{"name": "type1.yaml"}, {"name": "type2.yaml"}]
+        # Create mock File objects with to_dict() method
+        mock_file1 = Mock()
+        mock_file1.to_dict.return_value = {"name": "type1.yaml"}
+        mock_file2 = Mock()
+        mock_file2.to_dict.return_value = {"name": "type2.yaml"}
+        mock_files = [mock_file1, mock_file2]
         mock_file_io.get_documents.return_value = mock_files
 
         # Act
@@ -27,7 +32,8 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, mock_files)
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, [{"name": "type1.yaml"}, {"name": "type2.yaml"}])
 
     @patch('configurator.routes.type_routes.FileIO')
     def test_get_types_general_exception(self, mock_file_io):

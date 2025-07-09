@@ -18,7 +18,12 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_get_data_files_success(self, mock_file_io):
         """Test successful GET /api/test_data."""
         # Arrange
-        mock_files = [{"name": "data1.json"}, {"name": "data2.json"}]
+        # Create mock File objects with to_dict() method
+        mock_file1 = Mock()
+        mock_file1.to_dict.return_value = {"name": "data1.json"}
+        mock_file2 = Mock()
+        mock_file2.to_dict.return_value = {"name": "data2.json"}
+        mock_files = [mock_file1, mock_file2]
         mock_file_io.get_documents.return_value = mock_files
 
         # Act
@@ -27,7 +32,8 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, mock_files)
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, [{"name": "data1.json"}, {"name": "data2.json"}])
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_get_data_files_general_exception(self, mock_file_io):
