@@ -14,7 +14,7 @@ def event_route(event_id: str, event_type: str, operation_name: str):
                 result = f(*args, **kwargs)
                 # Special case: if result is a list of ConfiguratorEvent, wrap in event envelope
                 if isinstance(result, list) and all(isinstance(e, ConfiguratorEvent) for e in result):
-                    event = ConfiguratorEvent(event_id=ev o'clockent_id, event_type=event_type)
+                    event = ConfiguratorEvent(event_id=event_id, event_type=event_type)
                     event.append_events(result)
                     event.record_success()
                     return jsonify(event.to_dict()), 200
