@@ -221,7 +221,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-  /api/configurations/json_schema/{version_name}:
+  /api/configurations/json_schema/{file_name}/{version}/:
     get:
       summary: Get a Json Schema rendered for a schema
       description: Json Schema for a specific schema version (e.g., 1.0.0.1")
@@ -229,11 +229,17 @@ paths:
       tags:
         - Collection Configurations
       parameters:
-        - name: version_name
+        - name: file_name
           in: path
           required: true
           schema:
-            description: Version name with enumerators version (e.g., "sample.1.0.0.1")
+            description: Configuration file name
+            type: string
+        - name: version
+          in: path
+          required: true
+          schema:
+            description: Version string (e.g., "1.0.0.1")
             type: string
       responses:
         '200':
@@ -249,7 +255,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-  /api/configurations/bson_schema/{version_name}/:
+  /api/configurations/bson_schema/{file_name}/{version}/:
     get:
       summary: Get a Bson Schema rendered for a schema
       description: Bson Schema for a specific schema version (e.g., "sample.1.0.0.1")
@@ -257,12 +263,18 @@ paths:
       tags:
         - Collection Configurations
       parameters:
-        - name: version_name
+        - name: file_name
           in: path
           required: true
           schema:
+            description: Configuration file name
             type: string
-            description: Version name with enumerators version (e.g., "sample.1.0.0.1")
+        - name: version
+          in: path
+          required: true
+          schema:
+            description: Version string (e.g., "1.0.0.1")
+            type: string
       responses:
         '200':
           description: Schema
@@ -796,9 +808,23 @@ components:
         $ref: '#/components/schemas/enumerations'
     enumerations:
       type: object
-      properties: {}
-      additionalProperties:
-        type: string
+      properties:
+        name:
+          type: string
+          description: Name of the enumeration
+        status:
+          type: string
+          description: Status of the enumeration (e.g., "Active", "Deprecated")
+        version:
+          type: integer
+          description: Version number of the enumeration
+        enumerators:
+          type: object
+          description: Dictionary of enumerator names to their value mappings
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: string
     configuration:
       description: SchemaManager Collection Configuration
       type: object
@@ -827,7 +853,7 @@ components:
                 type: array
                 items:
                   type: string
-              aggregations:
+              migrations:
                 description: List of migration/aggregation pipelines to run to migrate data from previous version to this version. 
                 type: array
                 items:
@@ -863,7 +889,7 @@ components:
             - object
             - array
             - enum
-            - enum_list
+            - enum_array
             - TYPE
         required:
           description: Whether the property is required
@@ -883,7 +909,7 @@ components:
           items:
             $ref: '#/components/schemas/dictionary'
         enum:
-          description: Enum name for enum or enum_list types
+          description: Enum name for enum or enum_array types
           type: string
       required:
         - description
