@@ -30,7 +30,7 @@ def create_type_routes():
             events.extend(type.save())
         return events
 
-    # GET /api/types/<file_name> - Return a type file
+    # GET /api/types/<file_name>/ - Return a type file
     @type_routes.route('/<file_name>/', methods=['GET'])
     @event_route("TYP-02", "GET_TYPE", "getting type")
     def get_type(file_name):
