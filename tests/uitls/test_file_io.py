@@ -118,8 +118,9 @@ class TestFileIO(unittest.TestCase):
 
     def test_get_documents_empty_folder(self):
         """Test get_documents with empty folder"""
-        files = self.file_io.get_documents("nonexistent_folder")
-        self.assertEqual(files, [])
+        with self.assertRaises(ConfiguratorException) as context:
+            self.file_io.get_documents("nonexistent_folder")
+        self.assertIn("Folder not found", str(context.exception))
 
     def test_get_documents_with_files(self):
         """Test get_documents with existing files"""
