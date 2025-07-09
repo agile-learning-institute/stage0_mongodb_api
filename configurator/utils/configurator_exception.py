@@ -17,8 +17,13 @@ class ConfiguratorEvent:
         self.status = "SUCCESS"
         self.ends = datetime.datetime.now()
             
-    def record_failure(self, message: str, event_data: object = {}):
-        self.data = {"error": message, **(event_data if isinstance(event_data, dict) else {})}
+    def record_failure(self, message: str, event_data: object = None):
+        if event_data is None:
+            self.data = {"error": message}
+        elif isinstance(event_data, dict):
+            self.data = {"error": message, **event_data}
+        else:
+            self.data = {"error": message, "details": str(event_data)}
         self.status = "FAILURE"
         self.ends = datetime.datetime.now()
         

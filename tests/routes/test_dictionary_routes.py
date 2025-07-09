@@ -27,12 +27,8 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_files)
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, mock_files)
 
     @patch('configurator.routes.dictionary_routes.FileIO')
     def test_get_dictionaries_general_exception(self, mock_file_io):
@@ -65,12 +61,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_dictionary)
+        self.assertEqual(response_data, mock_dictionary)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_get_dictionary_general_exception(self, mock_dictionary_class):
@@ -107,12 +98,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], test_data)
+        self.assertEqual(response_data, test_data)
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_update_dictionary_general_exception(self, mock_dictionary_class):
@@ -147,12 +133,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"deleted": True})
+        self.assertEqual(response_data, {"deleted": True})
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_delete_dictionary_general_exception(self, mock_dictionary_class):
@@ -188,12 +169,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"read_only": True})
+        self.assertEqual(response_data, {"read_only": True})
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_lock_unlock_dictionary_general_exception(self, mock_dictionary_class):

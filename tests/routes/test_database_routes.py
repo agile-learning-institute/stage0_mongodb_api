@@ -27,12 +27,8 @@ class TestDatabaseRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"message": "Database Dropped"})
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"message": "Database Dropped"})
         mock_mongo_io.drop_database.assert_called_once()
         mock_mongo_io.disconnect.assert_called_once()
 

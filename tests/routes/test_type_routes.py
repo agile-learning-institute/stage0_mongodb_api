@@ -27,12 +27,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_files)
+        self.assertEqual(response_data, mock_files)
 
     @patch('configurator.routes.type_routes.FileIO')
     def test_get_types_general_exception(self, mock_file_io):
@@ -65,12 +60,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_type)
+        self.assertEqual(response_data, mock_type)
 
     @patch('configurator.routes.type_routes.Type')
     def test_get_type_general_exception(self, mock_type_class):
@@ -107,12 +97,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], test_data)
+        self.assertEqual(response_data, test_data)
 
     @patch('configurator.routes.type_routes.Type')
     def test_update_type_general_exception(self, mock_type_class):
@@ -147,12 +132,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"deleted": True})
+        self.assertEqual(response_data, {"deleted": True})
 
     @patch('configurator.routes.type_routes.Type')
     def test_delete_type_general_exception(self, mock_type_class):
@@ -188,12 +168,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"read_only": True})
+        self.assertEqual(response_data, {"read_only": True})
 
     @patch('configurator.routes.type_routes.Type')
     def test_lock_unlock_type_general_exception(self, mock_type_class):

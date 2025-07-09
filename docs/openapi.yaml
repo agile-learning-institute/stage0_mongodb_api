@@ -223,7 +223,7 @@ paths:
 
   /api/configurations/json_schema/{file_name}/{version}/:
     get:
-      summary: Get a Json Schema rendered for a schema
+      summary: Get a Json Schema 
       description: Json Schema for a specific schema version (e.g., 1.0.0.1")
       operationId: render_json_schema
       tags:
@@ -257,7 +257,7 @@ paths:
 
   /api/configurations/bson_schema/{file_name}/{version}/:
     get:
-      summary: Get a Bson Schema rendered for a schema
+      summary: Get a Bson Schema 
       description: Bson Schema for a specific schema version (e.g., "sample.1.0.0.1")
       operationId: render_bson_schema
       tags:

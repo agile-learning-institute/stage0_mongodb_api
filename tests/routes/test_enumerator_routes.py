@@ -29,12 +29,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], expected_content)
+        self.assertEqual(response_data, expected_content)
         mock_enumerators_class.assert_called_once_with(None)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
@@ -110,12 +105,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], test_data)
+        self.assertEqual(response_data, test_data)
         mock_enumerators_class.assert_called_once_with(data=test_data)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')

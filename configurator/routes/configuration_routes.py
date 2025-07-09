@@ -17,7 +17,7 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-01", "GET_CONFIGURATIONS", "listing configurations")
     def list_configurations():
         configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        return configurations
+        return [configuration.to_dict() for configuration in configurations]
 
     @blueprint.route('/', methods=['POST'])
     @event_route("CFG-ROUTES-02", "PROCESS_CONFIGURATIONS", "processing configurations")

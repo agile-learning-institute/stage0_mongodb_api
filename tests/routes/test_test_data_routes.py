@@ -27,12 +27,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_files)
+        self.assertEqual(response_data, mock_files)
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_get_data_files_general_exception(self, mock_file_io):
@@ -65,12 +60,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_data)
+        self.assertEqual(response_data, mock_data)
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_get_data_file_general_exception(self, mock_file_io):
@@ -103,12 +93,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"saved": True})
+        self.assertEqual(response_data, {"saved": True})
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_put_data_file_general_exception(self, mock_file_io):
@@ -141,12 +126,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"deleted": True})
+        self.assertEqual(response_data, {"deleted": True})
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_delete_data_file_general_exception(self, mock_file_io):

@@ -28,13 +28,9 @@ class TestConfigRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertIn("config_items", response_data["data"])
-        self.assertIsInstance(response_data["data"]["config_items"], list)
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertIn("config_items", response_data)
+        self.assertIsInstance(response_data["config_items"], list)
 
     def test_get_config_method_not_allowed(self):
         """Test that POST method is not allowed on /api/config."""

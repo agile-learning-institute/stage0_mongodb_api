@@ -18,7 +18,12 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_list_configurations_success(self, mock_file_io):
         """Test successful GET /api/configurations/."""
         # Arrange
-        mock_files = [{"name": "config1.yaml"}, {"name": "config2.yaml"}]
+        # Create mock File objects with to_dict method
+        mock_file1 = Mock()
+        mock_file1.to_dict.return_value = {"name": "config1.yaml", "read_only": False, "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
+        mock_file2 = Mock()
+        mock_file2.to_dict.return_value = {"name": "config2.yaml", "read_only": False, "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
+        mock_files = [mock_file1, mock_file2]
         mock_file_io.get_documents.return_value = mock_files
 
         # Act
@@ -27,12 +32,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_files)
+        # For successful responses, expect data directly, not wrapped in event envelope
+        expected_data = [mock_file1.to_dict.return_value, mock_file2.to_dict.return_value]
+        self.assertEqual(response_data, expected_data)
 
     @patch('configurator.routes.configuration_routes.FileIO')
     def test_list_configurations_general_exception(self, mock_file_io):
@@ -72,12 +74,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], [{"result": "success1"}, {"result": "success2"}])
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, [{"result": "success1"}, {"result": "success2"}])
 
     @patch('configurator.routes.configuration_routes.FileIO')
     def test_process_configurations_general_exception(self, mock_file_io):
@@ -110,12 +108,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], mock_configuration)
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, mock_configuration)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_configuration_general_exception(self, mock_configuration_class):
@@ -152,12 +146,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], test_data)
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, test_data)
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_general_exception(self, mock_configuration_class):
@@ -192,12 +182,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"deleted": True})
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"deleted": True})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_delete_configuration_general_exception(self, mock_configuration_class):
@@ -233,12 +219,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"read_only": True})
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"read_only": True})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_unlock_configuration_general_exception(self, mock_configuration_class):
@@ -274,12 +256,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"result": "success"})
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"result": "success"})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_general_exception(self, mock_configuration_class):
@@ -315,12 +293,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"type": "object"})
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"type": "object"})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_json_schema_general_exception(self, mock_configuration_class):
@@ -356,12 +330,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"type": "object"})
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"type": "object"})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_bson_schema_general_exception(self, mock_configuration_class):
@@ -397,12 +367,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"created": True})
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"created": True})
 
     @patch('configurator.routes.configuration_routes.TemplateService')
     def test_create_collection_configurator_exception(self, mock_template_service_class):
@@ -470,7 +436,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # Focus on structure and status, not specific event IDs
+        # For endpoints that return events, expect event envelope structure
         self.assertIn("id", response_data)
         self.assertIn("type", response_data)
         self.assertIn("status", response_data)

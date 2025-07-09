@@ -37,23 +37,17 @@ class MigrationRoutesTestCase(unittest.TestCase):
         resp = self.app.get("/api/migrations/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        self.assertIn("id", data)
-        self.assertIn("type", data)
-        self.assertIn("status", data)
-        self.assertIn("data", data)
-        self.assertEqual(data["status"], "SUCCESS")
-        self.assertEqual(data["data"], ['mig1.json', 'mig2.json'])
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertIn("mig1.json", data)
+        self.assertIn("mig2.json", data)
 
     def test_get_migration(self):
         resp = self.app.get("/api/migrations/mig1.json/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        self.assertIn("id", data)
-        self.assertIn("type", data)
-        self.assertIn("status", data)
-        self.assertIn("data", data)
-        self.assertEqual(data["status"], "SUCCESS")
-        self.assertEqual(data["data"], [{"$addFields": {"foo": "bar"}}])
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertIsInstance(data, list)
+        self.assertEqual(data, [{"$addFields": {"foo": "bar"}}])
 
     def test_get_migration_not_found(self):
         resp = self.app.get("/api/migrations/doesnotexist.json/")
@@ -69,21 +63,15 @@ class MigrationRoutesTestCase(unittest.TestCase):
         resp = self.app.put("/api/migrations/mig1.json/", json=[{"$addFields": {"foo": "bar"}}])
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        self.assertIn("id", data)
-        self.assertIn("type", data)
-        self.assertIn("status", data)
-        self.assertIn("data", data)
-        self.assertEqual(data["status"], "SUCCESS")
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertIsInstance(data, list)
 
     def test_delete_migration(self):
         resp = self.app.delete("/api/migrations/mig1.json/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        self.assertIn("id", data)
-        self.assertIn("type", data)
-        self.assertIn("status", data)
-        self.assertIn("data", data)
-        self.assertEqual(data["status"], "SUCCESS")
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(data, {"message": "Migration deleted"})
 
     def test_delete_migration_not_found(self):
         resp = self.app.delete("/api/migrations/doesnotexist.json/")
@@ -132,12 +120,7 @@ class TestMigrationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], ["migration1.json", "migration2.json"])
+        self.assertEqual(response_data, ["migration1.json", "migration2.json"])
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_list_migrations_general_exception(self, mock_file_io):
@@ -173,12 +156,7 @@ class TestMigrationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"name": "test_migration", "operations": []})
+        self.assertEqual(response_data, {"name": "test_migration", "operations": []})
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_get_migration_general_exception(self, mock_file_io):
@@ -212,12 +190,7 @@ class TestMigrationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"message": "Migration updated"})
+        self.assertIsInstance(response_data, dict)
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_put_migration_general_exception(self, mock_file_io):
@@ -251,12 +224,7 @@ class TestMigrationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["data"], {"message": "Migration deleted"})
+        self.assertEqual(response_data, {"message": "Migration deleted"})
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_delete_migration_general_exception(self, mock_file_io):

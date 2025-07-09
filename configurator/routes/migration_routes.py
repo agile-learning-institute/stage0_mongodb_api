@@ -56,7 +56,7 @@ def create_migration_routes():
         from bson import json_util
         with open(migration_path, 'w') as file:
             file.write(json_util.dumps(content))
-        return {"message": "Migration updated"}
+        return content
 
     # DELETE /api/migrations/<file_name>/ - Delete a migration file
     @migration_routes.route('/<file_name>/', methods=['DELETE'])
