@@ -1,23 +1,18 @@
 {
-  "description": "A user collection for testing the schema system",
   "bsonType": "object",
   "properties": {
     "_id": {
-      "description": "The unique identifier for a user",
       "bsonType": "objectId"
     },
     "user_name": {
-      "description": "Username",
       "pattern": "^\\S{1,40}$",
       "bsonType": "string"
     },
     "full_name": {
-      "description": "Users Full Name",
       "pattern": "^[^\\t\\n\\r]{0,255}$",
       "bsonType": "string"
     },
     "status": {
-      "description": "The status",
       "bsonType": "string",
       "enum": [
         "draft",
@@ -26,19 +21,15 @@
       ]
     },
     "categories": {
-      "description": "A users list of categorized tags",
       "bsonType": "array",
       "items": {
-        "description": "A user category",
         "bsonType": "object",
         "properties": {
           "name": {
-            "description": "Category Name assigned by the user",
             "pattern": "^\\S{1,40}$",
             "bsonType": "string"
           },
           "category": {
-            "description": "The category type assigned by the user",
             "bsonType": "string",
             "enum": [
               "work",
@@ -48,7 +39,6 @@
             ]
           },
           "tags": {
-            "description": "A list of enumerated values assigned by the user",
             "bsonType": "array",
             "items": {
               "bsonType": "string",
@@ -74,11 +64,9 @@
       }
     },
     "preferences": {
-      "description": "User preferences and settings",
       "bsonType": "object",
       "properties": {
         "notification_types": {
-          "description": "Types of notifications the user wants to receive",
           "bsonType": "array",
           "items": {
             "bsonType": "string",
@@ -91,7 +79,6 @@
           }
         },
         "delivery_channels": {
-          "description": "Preferred delivery channels for notifications",
           "bsonType": "array",
           "items": {
             "bsonType": "string",
@@ -104,7 +91,6 @@
           }
         },
         "content_tags": {
-          "description": "Content tags the user is interested in",
           "bsonType": "array",
           "items": {
             "bsonType": "string",
@@ -118,7 +104,6 @@
           }
         },
         "priority_levels": {
-          "description": "Priority levels the user wants to receive",
           "bsonType": "array",
           "items": {
             "bsonType": "string",
@@ -138,35 +123,28 @@
       "additionalProperties": false
     },
     "email": {
-      "description": "The person's email address",
       "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
       "bsonType": "string"
     },
     "phone": {
-      "description": "The person's phone number",
       "pattern": "^\\+1[2-9][0-9]{9}$",
       "bsonType": "string"
     },
     "last_saved": {
-      "description": "The last time this document was saved",
       "bsonType": "object",
       "properties": {
         "from_ip": {
-          "description": "Http Request remote IP address",
           "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
           "bsonType": "string"
         },
         "by_user": {
-          "description": "ID Of User",
           "pattern": "^\\S{1,40}$",
           "bsonType": "string"
         },
         "at_time": {
-          "description": "The date-time when last updated",
           "bsonType": "date"
         },
         "correlation_id": {
-          "description": "The logging correlation ID of the update transaction",
           "pattern": "^\\S{1,40}$",
           "bsonType": "string"
         }

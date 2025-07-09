@@ -1,30 +1,12 @@
-description: A simple content collection for testing
+description: A notification collection for testing enum_array and cross-collection
+  references
 type: object
 properties:
   _id:
-    description: The unique identifier for content
+    description: The unique identifier for notification
     type: string
     pattern: ^[0-9a-fA-F]{24}$
-  title:
-    description: Content title
-    type: string
-    pattern: ^\S{1,40}$
-  subtitle:
-    description: Content subtitle
-    type: string
-    pattern: ^[^\t\n\r]{0,255}$
-  content_type:
-    description: Type of content (article, video, podcast, etc.)
-    type: string
-    pattern: ^\S{1,40}$
-  status:
-    description: Content status
-    type: string
-    enum:
-    - draft
-    - active
-    - archived
-  author_id:
+  user_id:
     description: A user collection for testing the schema system
     type: object
     properties:
@@ -85,95 +67,111 @@ properties:
     - status
     - last_saved
     additionalProperties: false
-  content_data:
-    description: The actual content data
-    type: object
-    properties:
-      body:
-        description: Article body text
-        type: string
-        maxLength: 4096
-      url:
-        description: Video URL
-        type: string
-        pattern: ^https?://[^\s]+$
-      audio_url:
-        description: Audio file URL
-        type: string
-        pattern: ^https?://[^\s]+$
-      transcript:
-        description: Podcast transcript
-        type: string
-        maxLength: 4096
-      tags:
-        description: Content tags
-        type: array
-        items:
-          description: Missing Required Description
-          type: string
-          pattern: ^\S{1,40}$
-      word_count:
-        description: Article word count
-        type: number
-        minimum: 1
-        multipleOf: 1
-      duration:
-        description: Video duration in seconds
-        type: number
-        minimum: 1
-        multipleOf: 1
-      quality:
-        description: Video quality
-        type: string
-        pattern: ^\S{1,40}$
-      episode_number:
-        description: Episode number
-        type: number
-        minimum: 1
-        multipleOf: 1
-    additionalProperties: false
+  title:
+    description: Notification title
+    type: string
+    pattern: ^\S{1,40}$
+  message:
+    description: Notification message
+    type: string
+    pattern: ^[^\t\n\r]{0,255}$
+  notification_type:
+    description: Type of notification
+    type: string
+    enum:
+    - system
+    - user
+    - content
+    - reminder
+  status:
+    description: Notification status
+    type: string
+    enum:
+    - draft
+    - active
+    - archived
+  priority:
+    description: Notification priority level
+    type: string
+    enum:
+    - critical
+    - high
+    - medium
+    - low
+  tags:
+    description: Notification tags for categorization
+    type: array
+    items:
+      type: string
+      enum:
+      - urgent
+      - important
+      - normal
+      - low
+  categories:
+    description: Notification categories
+    type: array
+    items:
+      type: string
+      enum:
+      - work
+      - personal
+      - project
+      - reference
+  channels:
+    description: Delivery channels for this notification
+    type: array
+    items:
+      type: string
+      enum:
+      - email
+      - sms
+      - push
+      - in_app
   metadata:
-    description: Additional metadata for the content
+    description: Additional notification metadata
     type: object
     properties:
       created_at:
-        description: When the content was created
+        description: When the notification was created
         type: string
         format: date-time
-      updated_at:
-        description: When the content was last updated
+      sent_at:
+        description: When the notification was sent
         type: string
         format: date-time
-      published_at:
-        description: When the content was published
+      read_at:
+        description: When the notification was read
         type: string
         format: date-time
-      categories:
-        description: Content categories
-        type: array
-        items:
-          description: A content category
-          type: object
-          properties:
-            name:
-              description: Category name
-              type: string
-              pattern: ^\S{1,40}$
-            type:
-              description: Category type
-              type: string
-              pattern: ^\S{1,40}$
-            tags:
-              description: Category tags
-              type: array
-              items:
-                description: Missing Required Description
-                type: string
-                pattern: ^\S{1,40}$
-          required:
-          - name
-          - type
-          additionalProperties: false
+      expires_at:
+        description: When the notification expires
+        type: string
+        format: date-time
+      source:
+        description: Source of the notification
+        type: object
+        properties:
+          collection:
+            description: Source collection name
+            type: string
+            pattern: ^\S{1,40}$
+          document_id:
+            description: Source document ID
+            type: string
+            pattern: ^[0-9a-fA-F]{24}$
+          action:
+            description: Action that triggered the notification
+            type: string
+            enum:
+            - created
+            - updated
+            - deleted
+            - published
+        required:
+        - collection
+        - document_id
+        additionalProperties: false
     required:
     - created_at
     additionalProperties: false
@@ -207,9 +205,12 @@ properties:
     - correlation_id
 required:
 - _id
+- user_id
 - title
-- content_type
+- message
+- notification_type
 - status
-- content_data
+- priority
+- channels
 - last_saved
 additionalProperties: false

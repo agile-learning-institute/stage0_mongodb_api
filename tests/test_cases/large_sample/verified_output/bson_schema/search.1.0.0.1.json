@@ -227,7 +227,6 @@
         "status": {
           "bsonType": "string",
           "enum": [
-            "draft",
             "active",
             "archived"
           ]
@@ -314,127 +313,20 @@
           "pattern": "^\\S{1,40}$",
           "bsonType": "string"
         },
-        "full_name": {
-          "pattern": "^[^\\t\\n\\r]{0,255}$",
+        "first_name": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "last_name": {
+          "pattern": "^\\S{1,40}$",
           "bsonType": "string"
         },
         "status": {
           "bsonType": "string",
           "enum": [
-            "draft",
             "active",
             "archived"
           ]
-        },
-        "categories": {
-          "bsonType": "array",
-          "items": {
-            "bsonType": "object",
-            "properties": {
-              "name": {
-                "pattern": "^\\S{1,40}$",
-                "bsonType": "string"
-              },
-              "category": {
-                "bsonType": "string",
-                "enum": [
-                  "work",
-                  "personal",
-                  "project",
-                  "reference"
-                ]
-              },
-              "tags": {
-                "bsonType": "array",
-                "items": {
-                  "bsonType": "string",
-                  "enum": [
-                    "urgent",
-                    "important",
-                    "normal",
-                    "low",
-                    "completed",
-                    "in_progress",
-                    "blocked",
-                    "review"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "name",
-              "category",
-              "tags"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "preferences": {
-          "bsonType": "object",
-          "properties": {
-            "notification_types": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string",
-                "enum": [
-                  "system",
-                  "user",
-                  "content",
-                  "reminder"
-                ]
-              }
-            },
-            "delivery_channels": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string",
-                "enum": [
-                  "email",
-                  "sms",
-                  "push",
-                  "in_app"
-                ]
-              }
-            },
-            "content_tags": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string",
-                "enum": [
-                  "technology",
-                  "business",
-                  "entertainment",
-                  "education",
-                  "news"
-                ]
-              }
-            },
-            "priority_levels": {
-              "bsonType": "array",
-              "items": {
-                "bsonType": "string",
-                "enum": [
-                  "critical",
-                  "high",
-                  "medium",
-                  "low"
-                ]
-              }
-            }
-          },
-          "required": [
-            "notification_types",
-            "delivery_channels"
-          ],
-          "additionalProperties": false
-        },
-        "email": {
-          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
-          "bsonType": "string"
-        },
-        "phone": {
-          "pattern": "^\\+1[2-9][0-9]{9}$",
-          "bsonType": "string"
         },
         "last_saved": {
           "bsonType": "object",

@@ -1,18 +1,14 @@
 {
-  "description": "A media item in the system",
   "bsonType": "object",
   "properties": {
     "_id": {
-      "description": "The unique identifier for the media",
       "bsonType": "objectId"
     },
     "title": {
-      "description": "The title of the media",
       "pattern": "^[^\\t\\n\\r]{0,255}$",
       "bsonType": "string"
     },
     "type": {
-      "description": "The type of media",
       "bsonType": "string",
       "enum": [
         "movie",
@@ -22,7 +18,6 @@
       ]
     },
     "status": {
-      "description": "The current status of the media",
       "bsonType": "string",
       "enum": [
         "draft",
@@ -31,25 +26,20 @@
       ]
     },
     "last_saved": {
-      "description": "When the media was last updated",
       "bsonType": "object",
       "properties": {
         "from_ip": {
-          "description": "Http Request remote IP address",
           "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
           "bsonType": "string"
         },
         "by_user": {
-          "description": "ID Of User",
           "pattern": "^\\S{1,40}$",
           "bsonType": "string"
         },
         "at_time": {
-          "description": "The date-time when last updated",
           "bsonType": "date"
         },
         "correlation_id": {
-          "description": "The logging correlation ID of the update transaction",
           "pattern": "^\\S{1,40}$",
           "bsonType": "string"
         }
@@ -63,7 +53,6 @@
       ]
     },
     "tags": {
-      "description": "Tags associated with the media",
       "bsonType": "array",
       "items": {
         "bsonType": "string",
@@ -77,16 +66,13 @@
       }
     },
     "metadata": {
-      "description": "Additional metadata about the media",
       "bsonType": "object",
       "properties": {
         "duration": {
-          "description": "Duration in minutes",
           "bsonType": "int",
           "minimum": 1
         },
         "format": {
-          "description": "Media format",
           "bsonType": "string",
           "enum": [
             "dvd",
@@ -96,7 +82,6 @@
           ]
         },
         "quality": {
-          "description": "Quality rating",
           "bsonType": "string",
           "enum": [
             "sd",
@@ -105,31 +90,25 @@
           ]
         },
         "content_data": {
-          "description": "Media-specific content data",
           "bsonType": "object",
           "properties": {},
           "additionalProperties": false,
           "oneOf": [
             {
-              "description": "Movie-specific metadata",
               "bsonType": "object",
               "properties": {
                 "director": {
-                  "description": "Movie director",
                   "pattern": "^\\S{1,40}$",
                   "bsonType": "string"
                 },
                 "cast": {
-                  "description": "Movie cast members",
                   "bsonType": "array",
                   "items": {
-                    "description": "Cast member",
                     "pattern": "^\\S{1,40}$",
                     "bsonType": "string"
                   }
                 },
                 "genre": {
-                  "description": "Movie genre",
                   "bsonType": "array",
                   "items": {
                     "bsonType": "string",
@@ -149,21 +128,17 @@
               "additionalProperties": false
             },
             {
-              "description": "TV show-specific metadata",
               "bsonType": "object",
               "properties": {
                 "season": {
-                  "description": "Season number",
                   "bsonType": "int",
                   "minimum": 1
                 },
                 "episode": {
-                  "description": "Episode number",
                   "bsonType": "int",
                   "minimum": 1
                 },
                 "network": {
-                  "description": "Broadcasting network",
                   "pattern": "^\\S{1,40}$",
                   "bsonType": "string"
                 }
@@ -175,16 +150,13 @@
               "additionalProperties": false
             },
             {
-              "description": "Documentary-specific metadata",
               "bsonType": "object",
               "properties": {
                 "subject": {
-                  "description": "Documentary subject",
                   "pattern": "^[^\\t\\n\\r]{0,255}$",
                   "bsonType": "string"
                 },
                 "narrator": {
-                  "description": "Documentary narrator",
                   "pattern": "^\\S{1,40}$",
                   "bsonType": "string"
                 }
@@ -195,19 +167,15 @@
               "additionalProperties": false
             },
             {
-              "description": "Short film-specific metadata",
               "bsonType": "object",
               "properties": {
                 "festival": {
-                  "description": "Film festival",
                   "pattern": "^\\S{1,40}$",
                   "bsonType": "string"
                 },
                 "awards": {
-                  "description": "Awards received",
                   "bsonType": "array",
                   "items": {
-                    "description": "Award name",
                     "pattern": "^\\S{1,40}$",
                     "bsonType": "string"
                   }

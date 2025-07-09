@@ -1,4 +1,5 @@
-description: A simple content collection for testing
+description: A content collection for testing one_of structures and advanced schema
+  features
 type: object
 properties:
   _id:
@@ -16,7 +17,10 @@ properties:
   content_type:
     description: Type of content (article, video, podcast, etc.)
     type: string
-    pattern: ^\S{1,40}$
+    enum:
+    - article
+    - video
+    - podcast
   status:
     description: Content status
     type: string
@@ -85,53 +89,83 @@ properties:
     - status
     - last_saved
     additionalProperties: false
+  full_title:
+    description: Full title including subtitle
+    type: string
+    pattern: ^[^\t\n\r]{0,255}$
   content_data:
-    description: The actual content data
+    description: The actual content data - varies by type
     type: object
-    properties:
-      body:
-        description: Article body text
-        type: string
-        maxLength: 4096
-      url:
-        description: Video URL
-        type: string
-        pattern: ^https?://[^\s]+$
-      audio_url:
-        description: Audio file URL
-        type: string
-        pattern: ^https?://[^\s]+$
-      transcript:
-        description: Podcast transcript
-        type: string
-        maxLength: 4096
-      tags:
-        description: Content tags
-        type: array
-        items:
-          description: Missing Required Description
-          type: string
-          pattern: ^\S{1,40}$
-      word_count:
-        description: Article word count
-        type: number
-        minimum: 1
-        multipleOf: 1
-      duration:
-        description: Video duration in seconds
-        type: number
-        minimum: 1
-        multipleOf: 1
-      quality:
-        description: Video quality
-        type: string
-        pattern: ^\S{1,40}$
-      episode_number:
-        description: Episode number
-        type: number
-        minimum: 1
-        multipleOf: 1
+    properties: {}
     additionalProperties: false
+    oneOf:
+    - description: Article content structure
+      type: object
+      properties:
+        body:
+          description: Article body text
+          type: string
+          maxLength: 4096
+        tags:
+          description: Article tags
+          type: array
+          items:
+            type: string
+            enum:
+            - technology
+            - business
+            - entertainment
+            - education
+            - news
+        word_count:
+          description: Article word count
+          type: number
+          minimum: 1
+          multipleOf: 1
+      required:
+      - body
+      additionalProperties: false
+    - description: Video content structure
+      type: object
+      properties:
+        url:
+          description: Video URL
+          type: string
+          pattern: ^https?://[^\s]+$
+        duration:
+          description: Video duration in seconds
+          type: number
+          minimum: 1
+          multipleOf: 1
+        quality:
+          description: Video quality
+          type: string
+          enum:
+          - sd
+          - hd
+          - uhd
+      required:
+      - url
+      additionalProperties: false
+    - description: Podcast content structure
+      type: object
+      properties:
+        audio_url:
+          description: Audio file URL
+          type: string
+          pattern: ^https?://[^\s]+$
+        transcript:
+          description: Podcast transcript
+          type: string
+          maxLength: 4096
+        episode_number:
+          description: Episode number
+          type: number
+          minimum: 1
+          multipleOf: 1
+      required:
+      - audio_url
+      additionalProperties: false
   metadata:
     description: Additional metadata for the content
     type: object
@@ -162,14 +196,25 @@ properties:
             type:
               description: Category type
               type: string
-              pattern: ^\S{1,40}$
+              enum:
+              - work
+              - personal
+              - project
+              - reference
             tags:
               description: Category tags
               type: array
               items:
-                description: Missing Required Description
                 type: string
-                pattern: ^\S{1,40}$
+                enum:
+                - urgent
+                - important
+                - normal
+                - low
+                - completed
+                - in_progress
+                - blocked
+                - review
           required:
           - name
           - type

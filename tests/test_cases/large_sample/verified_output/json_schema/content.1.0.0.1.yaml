@@ -21,7 +21,6 @@ properties:
     description: Content status
     type: string
     enum:
-    - draft
     - active
     - archived
   author_id:
@@ -48,7 +47,6 @@ properties:
         description: document status
         type: string
         enum:
-        - draft
         - active
         - archived
       last_saved:

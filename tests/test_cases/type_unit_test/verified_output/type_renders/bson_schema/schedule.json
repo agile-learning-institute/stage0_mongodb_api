@@ -1,16 +1,12 @@
 {
-  "description": "A list of appointments",
   "bsonType": "array",
   "items": {
-    "description": "An appointment",
     "bsonType": "object",
     "properties": {
       "from": {
-        "description": "Starting Date/Time",
         "bsonType": "date"
       },
       "to": {
-        "description": "Ending Date/Time",
         "bsonType": "date"
       }
     },

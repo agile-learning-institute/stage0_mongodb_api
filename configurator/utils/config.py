@@ -16,7 +16,7 @@ class Config:
             self.config_items = []
 
             # Set INPUT_FOLDER from environment or default FIRST
-            self.INPUT_FOLDER = os.getenv("INPUT_FOLDER", "./input")
+            self.INPUT_FOLDER = os.getenv("INPUT_FOLDER", "/input")
 
             # Declare instance variables to support IDE code assist
             self.BUILT_AT = ''
@@ -78,7 +78,13 @@ class Config:
         """Initialize configuration values."""
         self.config_items = []
 
-        # INPUT_FOLDER is already set in __init__
+        # Add INPUT_FOLDER to config_items since it's already set
+        self.config_items.append({
+            "name": "INPUT_FOLDER",
+            "value": self.INPUT_FOLDER,
+            "from": "default" if not os.getenv("INPUT_FOLDER") else "environment"
+        })
+
         # Initialize Config Strings (except INPUT_FOLDER)
         for key, default in self.config_strings.items():
             if key == "INPUT_FOLDER":
@@ -125,25 +131,20 @@ class Config:
         value = default_value
         from_source = "default"
 
-        # Skip API_CONFIG_FOLDER in testing (like INPUT_FOLDER)
-        if name == "API_CONFIG_FOLDER" and os.getenv("INPUT_FOLDER"):
-            # Use default value when testing
-            from_source = "default"
-        else:
-            # Check for config file first - try api_config folder first, then root
-            api_config_path = Path(self.INPUT_FOLDER, "api_config", name)
-            root_path = Path(self.INPUT_FOLDER, name)
-            
-            if api_config_path.exists():
-                value = api_config_path.read_text().strip()
-                from_source = "file"
-            elif root_path.exists():
-                value = root_path.read_text().strip()
-                from_source = "file"
-            # If no file, check for environment variable
-            elif os.getenv(name):
-                value = os.getenv(name)
-                from_source = "environment"
+        # Check for config file first - try api_config folder first, then root
+        api_config_path = Path(self.INPUT_FOLDER, "api_config", name)
+        root_path = Path(self.INPUT_FOLDER, name)
+        
+        if api_config_path.exists():
+            value = api_config_path.read_text().strip()
+            from_source = "file"
+        elif root_path.exists():
+            value = root_path.read_text().strip()
+            from_source = "file"
+        # If no file, check for environment variable
+        elif os.getenv(name):
+            value = os.getenv(name)
+            from_source = "environment"
 
         # Record the source of the config value
         self.config_items.append({

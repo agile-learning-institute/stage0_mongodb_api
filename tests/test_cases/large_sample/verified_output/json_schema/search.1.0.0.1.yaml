@@ -210,7 +210,6 @@ oneOf:
       description: The current status of the organization
       type: string
       enum:
-      - draft
       - active
       - archived
     last_saved:
@@ -307,7 +306,6 @@ oneOf:
       description: document status
       type: string
       enum:
-      - draft
       - active
       - archived
     last_saved:

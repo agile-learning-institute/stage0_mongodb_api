@@ -19,7 +19,6 @@
     "status": {
       "bsonType": "string",
       "enum": [
-        "draft",
         "active",
         "archived"
       ]
