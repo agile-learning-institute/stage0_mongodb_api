@@ -40,11 +40,10 @@ if config.AUTO_PROCESS:
         for configuration_name in configurations:
             configuration = Configuration(configuration_name)
             processing_events.append(configuration.process())
-        logger.info(f"============= Auto Processing is Completed ===============")
         logger.info(f"Processing Output: {app.json.dumps(processing_events)}")
         logger.info(f"============= Auto Processing is Completed ===============")
     except ConfiguratorException as e:
-        logger.error(f"Configurator error processing all configurations: {e.to_dict()}")
+        logger.error(f"Configurator error processing all configurations: {app.json.dumps(e.to_dict())}")
         sys.exit(1)
     except Exception as e:
         logger.error(f"Unexpected error processing all configurations: {str(e)}") 
