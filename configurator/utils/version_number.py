@@ -1,9 +1,6 @@
 import re
 from typing import List, Optional
-
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
-
-# NOTE: All ConfiguratorEvent instances in this file use descriptive event_type and unique event_id for traceability.
 
 class VersionNumber:
     """Class for handling version numbers."""
