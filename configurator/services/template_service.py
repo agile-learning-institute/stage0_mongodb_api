@@ -46,43 +46,19 @@ class TemplateService:
         }
     
     def process_configuration_template(self, collection_name: str) -> dict:
-        """
-        Process the configuration template with the collection name.
-        
-        Args:
-            collection_name: Name to replace in template
-            
-        Returns:
-            dict: Processed configuration content
-        """
+        """Process the configuration template with the collection name."""
         template_content = self._load_template("configuration.yaml")
         processed_content = self._replace_placeholders(template_content, collection_name)
         return yaml.safe_load(processed_content)
     
     def process_dictionary_template(self, collection_name: str) -> dict:
-        """
-        Process the dictionary template with the collection name.
-        
-        Args:
-            collection_name: Name to replace in template
-            
-        Returns:
-            dict: Processed dictionary content
-        """
+        """Process the dictionary template with the collection name."""
         template_content = self._load_template("dictionary.yaml")
         processed_content = self._replace_placeholders(template_content, collection_name)
         return yaml.safe_load(processed_content)
     
     def _load_template(self, template_name: str) -> str:
-        """
-        Load a template file from the template folder.
-        
-        Args:
-            template_name: Name of the template file
-            
-        Returns:
-            str: Template content
-        """
+        """Load a template file from the template folder."""
         try:
             return FileIO.get_document(self.config.TEMPLATE_FOLDER, template_name)
         except Exception as e:
@@ -90,25 +66,11 @@ class TemplateService:
             raise ConfiguratorException(f"Template {template_name} not found", event)
     
     def _replace_placeholders(self, content: str, collection_name: str) -> str:
-        """
-        Replace placeholders in template content.
-        
-        Args:
-            content: Template content
-            collection_name: Name to replace placeholders with
-            
-        Returns:
-            str: Content with replaced placeholders
-        """
+        """Replace placeholders in template content."""
         return content.replace("{{collection_name}}", collection_name)
     
     def _validate_collection_name(self, collection_name: str):
-        """
-        Validate the collection name format.
-        
-        Args:
-            collection_name: Name to validate
-        """
+        """Validate the collection name format."""
         if not collection_name or not collection_name.strip():
             event = ConfiguratorEvent("TPL-02", "INVALID_COLLECTION_NAME", {"name": collection_name})
             raise ConfiguratorException("Collection name cannot be empty", event)
@@ -120,12 +82,7 @@ class TemplateService:
             raise ConfiguratorException("Collection name can only contain letters, numbers, underscores, and hyphens", event)
     
     def _check_existing_files(self, collection_name: str):
-        """
-        Check if configuration or dictionary files already exist.
-        
-        Args:
-            collection_name: Name to check
-        """
+        """Check if configuration or dictionary files already exist."""
         config_filename = f"{collection_name}.yaml"
         dict_filename = f"{collection_name}.0.0.1.yaml"
         
