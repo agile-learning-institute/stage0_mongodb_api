@@ -229,7 +229,7 @@ paths:
       tags:
         - Collection Configurations
       parameters:
-        - name: file_name
+        - name: version_name
           in: path
           required: true
           schema:
@@ -682,9 +682,10 @@ paths:
           description: Enumerators data
           content:
             application/json:
-              $ref: '#/components/schemas/enumerators'
               schema:
                 type: array
+                items:
+                  $ref: '#/components/schemas/enumerators'
         '500':
           description: Processing error
           content:
@@ -789,6 +790,15 @@ components:
         size:
           type: number
           description: Size in bytes
+    enumerators:
+      type: array
+      items:
+        $ref: '#/components/schemas/enumerations'
+    enumerations:
+      type: object
+      properties: {}
+      additionalProperties:
+        type: string
     configuration:
       description: SchemaManager Collection Configuration
       type: object
