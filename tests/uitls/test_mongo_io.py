@@ -20,6 +20,9 @@ class TestMongoIO(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
+        # Reset Config singleton to ensure we get default values, not test file values
+        Config._instance = None
+        
         os.environ['ENABLE_DROP_DATABASE'] = 'true'
         os.environ['BUILT_AT'] = 'Local'
         self.config = Config.get_instance()
@@ -60,6 +63,12 @@ class TestMongoIO(unittest.TestCase):
             except:
                 pass  # Database might not drop..
             self.mongo_io.disconnect()
+        
+        # Clean up environment variables set in setUp
+        if 'ENABLE_DROP_DATABASE' in os.environ:
+            del os.environ['ENABLE_DROP_DATABASE']
+        if 'BUILT_AT' in os.environ:
+            del os.environ['BUILT_AT']
 
     def test_connection_and_disconnect(self):
         """Test MongoDB connection and disconnection."""
