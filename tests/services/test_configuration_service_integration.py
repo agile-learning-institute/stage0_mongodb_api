@@ -100,7 +100,6 @@ class TestConfigurationIntegration(unittest.TestCase):
     """Test configuration processing integration against verified output files"""
 
     def setUp(self):
-        # Default to small_sample for backward compatibility
         self.test_case = getattr(self, 'test_case', 'small_sample')
         self.config = set_config_input_folder(f"./tests/test_cases/{self.test_case}")
         

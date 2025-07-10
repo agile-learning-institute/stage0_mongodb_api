@@ -55,20 +55,16 @@ class TestConfigurationRendering(unittest.TestCase):
     def _test_json_render(self, expected_file):
         """Test JSON schema render for a configuration"""
         # Parse version from expected file name
-        # Handle both formats: sample.1.0.0.yaml and simple.1.0.0.1.yaml
+        # Format: collection.major.minor.patch.enumerator.yaml
         base_name = expected_file.replace('.yaml', '')
         parts = base_name.split('.')
         
-        if len(parts) == 4:
-            # Format: sample.1.0.0.yaml (enumerator version 0)
-            collection_name = parts[0]
-            version_str = f"{parts[1]}.{parts[2]}.{parts[3]}.0"
-        elif len(parts) == 5:
-            # Format: simple.1.0.0.1.yaml (enumerator version 1)
-            collection_name = parts[0]
-            version_str = f"{parts[1]}.{parts[2]}.{parts[3]}.{parts[4]}"
-        else:
-            raise ValueError(f"Unexpected file format: {expected_file}")
+        if len(parts) != 5:
+            raise ValueError(f"Expected 5-part format (collection.major.minor.patch.enumerator), got: {expected_file}")
+        
+        # Format: collection.major.minor.patch.enumerator.yaml
+        collection_name = parts[0]
+        version_str = f"{parts[1]}.{parts[2]}.{parts[3]}.{parts[4]}"
         
         # Load configuration and render with specific version
         configuration = Configuration("sample.yaml")
@@ -84,20 +80,16 @@ class TestConfigurationRendering(unittest.TestCase):
     def _test_bson_render(self, expected_file):
         """Test BSON schema render for a configuration"""
         # Parse version from expected file name
-        # Handle both formats: sample.1.0.0.json and simple.1.0.0.1.json
+        # Format: collection.major.minor.patch.enumerator.json
         base_name = expected_file.replace('.json', '')
         parts = base_name.split('.')
         
-        if len(parts) == 4:
-            # Format: sample.1.0.0.json (enumerator version 0)
-            collection_name = parts[0]
-            version_str = f"{parts[1]}.{parts[2]}.{parts[3]}.0"
-        elif len(parts) == 5:
-            # Format: simple.1.0.0.1.json (enumerator version 1)
-            collection_name = parts[0]
-            version_str = f"{parts[1]}.{parts[2]}.{parts[3]}.{parts[4]}"
-        else:
-            raise ValueError(f"Unexpected file format: {expected_file}")
+        if len(parts) != 5:
+            raise ValueError(f"Expected 5-part format (collection.major.minor.patch.enumerator), got: {expected_file}")
+        
+        # Format: collection.major.minor.patch.enumerator.json
+        collection_name = parts[0]
+        version_str = f"{parts[1]}.{parts[2]}.{parts[3]}.{parts[4]}"
         
         # Load configuration and render with specific version
         configuration = Configuration("sample.yaml")

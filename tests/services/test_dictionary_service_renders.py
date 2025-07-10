@@ -32,7 +32,6 @@ class TestDictionaryRendering(unittest.TestCase):
     """Test dictionary rendering against verified output files"""
 
     def setUp(self):
-        # Default to small_sample for backward compatibility
         self.test_case = getattr(self, 'test_case', 'small_sample')
         self.config = set_config_input_folder(f"./tests/test_cases/{self.test_case}")
         self.enumerators_service = Enumerators(None)
@@ -57,20 +56,16 @@ class TestDictionaryRendering(unittest.TestCase):
     def _test_json_render(self, expected_file):
         """Test JSON schema render for a dictionary"""
         # Parse version from expected file name
-        # Handle both formats: sample.1.0.0.yaml and simple.1.0.0.1.yaml
+        # Format: collection.major.minor.patch.enumerator.yaml
         base_name = expected_file.replace('.yaml', '')
         parts = base_name.split('.')
         
-        if len(parts) == 4:
-            # Format: sample.1.0.0.yaml (enumerator version 0)
-            dictionary_name = f"{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}"
-            enumerator_version = 0
-        elif len(parts) == 5:
-            # Format: simple.1.0.0.1.yaml (enumerator version 1)
-            dictionary_name = f"{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}"
-            enumerator_version = int(parts[4])
-        else:
-            raise ValueError(f"Unexpected file format: {expected_file}")
+        if len(parts) != 5:
+            raise ValueError(f"Expected 5-part format (collection.major.minor.patch.enumerator), got: {expected_file}")
+        
+        # Format: collection.major.minor.patch.enumerator.yaml
+        dictionary_name = f"{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}"
+        enumerator_version = int(parts[4])
         
         # Load dictionary and render with specific enumerator version
         dictionary_path = f"{self.config.INPUT_FOLDER}/dictionaries/{dictionary_name}.yaml"
@@ -91,20 +86,16 @@ class TestDictionaryRendering(unittest.TestCase):
     def _test_bson_render(self, expected_file):
         """Test BSON schema render for a dictionary"""
         # Parse version from expected file name
-        # Handle both formats: sample.1.0.0.json and simple.1.0.0.1.json
+        # Format: collection.major.minor.patch.enumerator.json
         base_name = expected_file.replace('.json', '')
         parts = base_name.split('.')
         
-        if len(parts) == 4:
-            # Format: sample.1.0.0.json (enumerator version 0)
-            dictionary_name = f"{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}"
-            enumerator_version = 0
-        elif len(parts) == 5:
-            # Format: simple.1.0.0.1.json (enumerator version 1)
-            dictionary_name = f"{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}"
-            enumerator_version = int(parts[4])
-        else:
-            raise ValueError(f"Unexpected file format: {expected_file}")
+        if len(parts) != 5:
+            raise ValueError(f"Expected 5-part format (collection.major.minor.patch.enumerator), got: {expected_file}")
+        
+        # Format: collection.major.minor.patch.enumerator.json
+        dictionary_name = f"{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}"
+        enumerator_version = int(parts[4])
         
         # Load dictionary and render with specific enumerator version
         dictionary_path = f"{self.config.INPUT_FOLDER}/dictionaries/{dictionary_name}.yaml"
