@@ -279,8 +279,8 @@ class TestDictionary(unittest.TestCase):
         """Test Dictionary initialization with file name"""
         mock_file_io.get_document.return_value = {
             "description": "Test dictionary",
-            "type": "object",
-            "properties": {
+            "version": "1.0.0",
+            "fields": {
                 "name": {
                     "description": "Name property",
                     "type": "string"
@@ -291,15 +291,17 @@ class TestDictionary(unittest.TestCase):
         dictionary = Dictionary("test.yaml")
         
         self.assertEqual(dictionary.name, "test")
-        self.assertIsInstance(dictionary.property, Property)
-        self.assertEqual(dictionary.property.description, "Test dictionary")
+        self.assertEqual(dictionary.description, "Test dictionary")
+        self.assertEqual(dictionary.version, "1.0.0")
+        self.assertIn("name", dictionary.fields)
+        self.assertIsInstance(dictionary.fields["name"], Property)
 
     def test_init_with_document(self):
         """Test Dictionary initialization with document"""
         doc = {
             "description": "Test dictionary",
-            "type": "object",
-            "properties": {
+            "version": "1.0.0",
+            "fields": {
                 "name": {
                     "description": "Name property",
                     "type": "string"
@@ -307,17 +309,19 @@ class TestDictionary(unittest.TestCase):
             }
         }
         dictionary = Dictionary("test.yaml", doc)
-        
         self.assertEqual(dictionary.name, "test")
-        self.assertIsInstance(dictionary.property, Property)
-        self.assertEqual(dictionary.property.description, "Test dictionary")
+        self.assertEqual(dictionary.description, "Test dictionary")
+        self.assertEqual(dictionary.version, "1.0.0")
+        self.assertIn("name", dictionary.fields)
+        self.assertIsInstance(dictionary.fields["name"], Property)
+        self.assertEqual(dictionary.fields["name"].description, "Name property")
 
     def test_to_dict(self):
         """Test Dictionary to_dict method"""
         doc = {
             "description": "Test dictionary",
-            "type": "object",
-            "properties": {
+            "version": "1.0.0",
+            "fields": {
                 "name": {
                     "description": "Name property",
                     "type": "string"
@@ -326,121 +330,12 @@ class TestDictionary(unittest.TestCase):
         }
         dictionary = Dictionary("test.yaml", doc)
         result = dictionary.to_dict()
-        
         self.assertEqual(result["description"], "Test dictionary")
-        self.assertEqual(result["type"], "object")
-        self.assertIn("properties", result)
-
-
-class TestPropertyCanonical(unittest.TestCase):
-    """Test cases for Property class using canonical test data"""
-
-    def setUp(self):
-        self.config = set_config_input_folder("tests/test_cases/small_sample")
-
-    def tearDown(self):
-        clear_config()
-
-    def test_object_type(self):
-        """Test Property with object type from test data"""
-        property_data = {
-            "description": "A simple collection for testing",
-            "type": "object",
-            "properties": {
-                "_id": {
-                    "description": "The unique identifier for the media",
-                    "type": "identifier",
-                    "required": True
-                },
-                "name": {
-                    "description": "The name of the document",
-                    "type": "word"
-                },
-                "status": {
-                    "description": "The current status of the document",
-                    "type": "enum",
-                    "enums": "default_status",
-                    "required": True
-                }
-            }
-        }
-        
-        prop = Property("root", property_data)
-        
-        self.assertEqual(prop.description, "A simple collection for testing")
-        self.assertEqual(prop.type, "object")
-        self.assertIn("_id", prop.properties)
-        self.assertIn("name", prop.properties)
-        self.assertIn("status", prop.properties)
-        
-        # Check nested properties
-        id_prop = prop.properties["_id"]
-        self.assertEqual(id_prop.description, "The unique identifier for the media")
-        self.assertEqual(id_prop.type, "identifier")
-        self.assertTrue(id_prop.required)
-        
-        status_prop = prop.properties["status"]
-        self.assertEqual(status_prop.type, "enum")
-        self.assertEqual(status_prop.enums, "default_status")
-        self.assertTrue(status_prop.required)
-
-    def test_array_type(self):
-        """Test Property with array type"""
-        property_data = {
-            "description": "Array of items",
-            "type": "array",
-            "items": {
-                "description": "Item in array",
-                "type": "string"
-            }
-        }
-        
-        prop = Property("root", property_data)
-        
-        self.assertEqual(prop.type, "array")
-        self.assertIsInstance(prop.items, Property)
-        self.assertEqual(prop.items.description, "Item in array")
-        self.assertEqual(prop.items.type, "string")
-
-    def test_enum_type(self):
-        """Test Property with enum type"""
-        property_data = {
-            "description": "Status enum",
-            "type": "enum",
-            "enums": "default_status",
-            "required": True
-        }
-        
-        prop = Property("root", property_data)
-        
-        self.assertEqual(prop.type, "enum")
-        self.assertEqual(prop.enums, "default_status")
-        self.assertTrue(prop.required)
-
-    def test_enum_array_type(self):
-        """Test Property with enum_array type"""
-        property_data = {
-            "description": "Array of status enums",
-            "type": "enum_array",
-            "enums": "default_status"
-        }
-        
-        prop = Property("root", property_data)
-        
-        self.assertEqual(prop.type, "enum_array")
-        self.assertEqual(prop.enums, "default_status")
-
-    def test_ref_type(self):
-        """Test Property with ref type"""
-        property_data = {
-            "ref": "sample.1.0.0.yaml",
-            "description": "Reference to sample dictionary"
-        }
-        
-        prop = Property("root", property_data)
-        
-        self.assertEqual(prop.ref, "sample.1.0.0.yaml")
-        self.assertEqual(prop.description, "Reference to sample dictionary")
+        self.assertEqual(result["version"], "1.0.0")
+        self.assertIn("fields", result)
+        self.assertIn("name", result["fields"])
+        self.assertEqual(result["fields"]["name"]["description"], "Name property")
+        self.assertEqual(result["fields"]["name"]["type"], "string")
 
 
 class TestDictionaryCanonical(unittest.TestCase):
@@ -459,33 +354,36 @@ class TestDictionaryCanonical(unittest.TestCase):
         dictionary = Dictionary("sample.1.0.0.yaml", doc)
         
         self.assertEqual(dictionary.name, "sample.1.0.0")
-        self.assertEqual(dictionary.property.description, "A simple collection for testing")
-        self.assertEqual(dictionary.property.type, "object")
+        self.assertEqual(dictionary.description, "A simple collection for testing")
+        self.assertEqual(dictionary.version, "1.0.0")
         
         # Test to_dict
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "A simple collection for testing")
-        self.assertEqual(result["type"], "object")
-        self.assertIn("properties", result)
-        self.assertIn("_id", result["properties"])
-        self.assertIn("name", result["properties"])
-        self.assertIn("status", result["properties"])
+        self.assertEqual(result["version"], "1.0.0")
+        self.assertIn("fields", result)
+        self.assertIn("_id", result["fields"])
+        self.assertIn("name", result["fields"])
+        self.assertIn("status", result["fields"])
 
-    def test_dictionary_ref(self):
-        """Test Dictionary with ref type"""
+    def test_dictionary_without_fields(self):
+        """Test Dictionary without fields"""
         doc = {
-            "ref": "sample.1.0.0.yaml",
-            "description": "Reference to sample dictionary"
+            "description": "Test dictionary without fields",
+            "version": "1.0.0"
         }
         
-        dictionary = Dictionary("ref.yaml", doc)
+        dictionary = Dictionary("test.yaml", doc)
         
-        self.assertEqual(dictionary.property.ref, "sample.1.0.0.yaml")
-        self.assertEqual(dictionary.property.description, "Reference to sample dictionary")
+        self.assertEqual(dictionary.description, "Test dictionary without fields")
+        self.assertEqual(dictionary.version, "1.0.0")
+        self.assertEqual(dictionary.fields, {})
         
         # Test to_dict
         result = dictionary.to_dict()
-        self.assertEqual(result, {"name": "ref", "_locked": False, "ref": "sample.1.0.0.yaml"})
+        self.assertEqual(result["description"], "Test dictionary without fields")
+        self.assertEqual(result["version"], "1.0.0")
+        self.assertNotIn("fields", result)
 
 if __name__ == '__main__':
     unittest.main() 

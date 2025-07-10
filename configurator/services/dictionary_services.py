@@ -10,37 +10,73 @@ class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
         self.config = Config.get_instance()
         self.file_name = file_name
-        # Strip .yaml extension for the name property
         self.name = file_name.replace('.yaml', '')
-        self._locked = False  # Default to unlocked
-        
+        self._locked = False
+        self.description = ""
+        self.version = "1.0.0"
+        self.fields = {}
+
         if document:
-            self.property = Property("root", document)
-            # Extract _locked from document if present
             self._locked = document.get("_locked", False)
+            self.description = document.get("description", "")
+            self.version = document.get("version", "1.0.0")
+            # Handle old structure: convert 'properties' to 'fields'
+            fields_data = document.get("fields", document.get("properties", {}))
+            if fields_data:
+                for field_name, field_def in fields_data.items():
+                    self.fields[field_name] = Property(field_name, field_def)
         else:
             document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
-            self.property = Property("root", document_data)
-            # Extract _locked from loaded document if present
             self._locked = document_data.get("_locked", False)
+            self.description = document_data.get("description", "")
+            self.version = document_data.get("version", "1.0.0")
+            # Handle old structure: convert 'properties' to 'fields'
+            fields_data = document_data.get("fields", document_data.get("properties", {}))
+            if fields_data:
+                for field_name, field_def in fields_data.items():
+                    self.fields[field_name] = Property(field_name, field_def)
 
     def to_dict(self):
-        return {
-            "name": self.name,  # Return stripped name
-            "_locked": self._locked,  # Always include _locked
-            **self.property.to_dict()
+        result = {
+            "name": self.name,
+            "_locked": self._locked,
+            "description": self.description,
+            "version": self.version,
         }
-    
+        if self.fields:
+            result["fields"] = {k: v.to_dict() for k, v in self.fields.items()}
+        return result
+
     def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_json_schema(enumerations, ref_stack)
-    
+        
+        # Create a synthetic root property for schema generation
+        root_property = Property(
+            "root",
+            {
+                "description": self.description,
+                "type": "object",
+                "properties": {k: v.to_dict() for k, v in self.fields.items()} if self.fields else {},
+            },
+        )
+        return root_property.get_json_schema(enumerations, ref_stack)
+
     def get_bson_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_bson_schema(enumerations, ref_stack)
-            
+        
+        # Create a synthetic root property for schema generation
+        root_property = Property(
+            "root",
+            {
+                "description": self.description,
+                "type": "object",
+                "properties": {k: v.to_dict() for k, v in self.fields.items()} if self.fields else {},
+            },
+        )
+        return root_property.get_bson_schema(enumerations, ref_stack)
+
     def save(self):
         """Save the dictionary and return the Dictionary object."""
         try:
@@ -51,26 +87,26 @@ class Dictionary:
             event = ConfiguratorEvent("DIC-03", "PUT_DICTIONARY")
             event.record_failure(f"Failed to save dictionary {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}", event)
-    
+
     @staticmethod
     def lock_all():
         """Lock all dictionary files and return event with sub-events."""
         config = Config.get_instance()
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-        
+
         event = ConfiguratorEvent("DIC-04", "LOCK_ALL_DICTIONARIES")
         event.data = {
             "total_files": len(files),
             "operation": "lock_all"
         }
-        
+
         for file in files:
             try:
                 dictionary = Dictionary(file.name)
                 # Set locked state and save using normal save() method
                 dictionary._locked = True
                 dictionary.save()
-                
+
                 sub_event = ConfiguratorEvent(f"DIC-{file.name}", "LOCK_DICTIONARY")
                 sub_event.data = {
                     "file_name": file.name,
@@ -79,7 +115,7 @@ class Dictionary:
                 }
                 sub_event.record_success()
                 event.append_events([sub_event])
-                
+
             except Exception as e:
                 sub_event = ConfiguratorEvent(f"DIC-{file.name}", "LOCK_DICTIONARY")
                 sub_event.data = {
@@ -88,13 +124,13 @@ class Dictionary:
                 }
                 sub_event.record_failure(f"Failed to lock dictionary {file.name}")
                 event.append_events([sub_event])
-        
+
         # Record overall success/failure based on sub-events
         if any(sub.status == "FAILURE" for sub in event.sub_events):
             event.record_failure("Some dictionaries failed to lock")
         else:
             event.record_success()
-        
+
         return event
 
     def delete(self):
@@ -131,7 +167,7 @@ class Property:
         self.properties = {}
         self.items = None
         self.one_of = None
-                
+
         # Initialize properties if this is an object type
         if self.type == "object":
             for prop_name, prop_data in property.get("properties", {}).items():
@@ -140,18 +176,18 @@ class Property:
             one_of_data = property.get("one_of", None)
             if one_of_data:
                 self.one_of = OneOf(one_of_data)
-        
+
         # Initialize items if this is an array type
         if self.type == "array":
             items_data = property.get("items", {})
             if items_data:
                 self.items = Property("items", items_data)
-                    
+
     def to_dict(self):
         if self.ref:
             return {"ref": self.ref}
         result = {}
-        
+
         if self.type == "object":
             result["description"] = self.description
             result["type"] = self.type
@@ -160,35 +196,35 @@ class Property:
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()
             result["additionalProperties"] = self.additional_properties
-            
+
             # Add one_of if present
             if self.one_of:
                 result["one_of"] = self.one_of.to_dict()
-        
+
         elif self.type == "array":
             result["description"] = self.description
             result["type"] = self.type
             result["required"] = self.required
             result["items"] = self.items.to_dict()
-        
+
         elif self.type in ["enum", "enum_array"]:
             result["description"] = self.description
             result["type"] = self.type
             result["required"] = self.required
             result["enums"] = self.enums
-            
+
         elif self.type:
             # Custom type (like identifier, word, etc.)
             result["description"] = self.description
             result["type"] = self.type
             result["required"] = self.required
-            
-        return result    
-    
+
+        return result
+
     def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        
+
         if self.ref:
             return self._handle_ref_schema(enumerations, ref_stack, "json")
 
@@ -203,13 +239,13 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
-            
+
             # Handle one_of structure
             if self.one_of:
                 schema["oneOf"] = self.one_of.get_json_schema(enumerations, ref_stack)
-            
+
             return schema
-            
+
         elif self.type == "array":
             schema = {}
             schema["description"] = self.description
@@ -217,7 +253,7 @@ class Property:
             if self.items:
                 schema["items"] = self.items.get_json_schema(enumerations, ref_stack)
             return schema
-            
+
         elif self.type == "enum":
             schema = {}
             schema["description"] = self.description
@@ -225,7 +261,7 @@ class Property:
             if self.enums:
                 schema["enum"] = enumerations.get_enum_values(self.enums)
             return schema
-            
+
         elif self.type == "enum_array":
             schema = {}
             schema["description"] = self.description
@@ -233,7 +269,7 @@ class Property:
             if self.enums:
                 schema["items"] = {"type": "string", "enum": enumerations.get_enum_values(self.enums)}
             return schema
-            
+
         elif self.type:
             # Reference a custom type
             custom_type = Type(f"{self.type}.yaml")
@@ -241,13 +277,13 @@ class Property:
             custom_schema["description"] = self.description
             return custom_schema
         else:
-            raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 
+            raise ConfiguratorException(f"Invalid dictionary property type: {self.type}",
                                       ConfiguratorEvent(event_id="DIC-99", event_type="INVALID_PROPERTY_TYPE"))
-            
+
     def get_bson_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        
+
         if self.ref:
             return self._handle_ref_schema(enumerations, ref_stack, "bson")
 
@@ -261,66 +297,66 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
-            
+
             # Handle one_of structure
             if self.one_of:
                 schema["oneOf"] = self.one_of.get_bson_schema(enumerations, ref_stack)
-            
+
             return schema
-            
+
         elif self.type == "array":
             schema = {}
             schema["bsonType"] = "array"
             if self.items:
                 schema["items"] = self.items.get_bson_schema(enumerations, ref_stack)
             return schema
-            
+
         elif self.type == "enum":
             schema = {}
             schema["bsonType"] = "string"
             if self.enums:
                 schema["enum"] = enumerations.get_enum_values(self.enums)
             return schema
-            
+
         elif self.type == "enum_array":
             schema = {}
             schema["bsonType"] = "array"
             if self.enums:
                 schema["items"] = {"bsonType": "string", "enum": enumerations.get_enum_values(self.enums)}
             return schema
-            
+
         elif self.type:
             # Reference a custom type
             custom_type = Type(f"{self.type}.yaml")
             custom_schema = custom_type.get_bson_schema()
             return custom_schema
         else:
-            raise ConfiguratorException(f"Invalid dictionary property type: {self.type}", 
+            raise ConfiguratorException(f"Invalid dictionary property type: {self.type}",
                                       ConfiguratorEvent(event_id="DIC-99", event_type="INVALID_PROPERTY_TYPE"))
-            
+
         return schema
-    
+
     def _handle_ref_schema(self, enumerations, ref_stack: list, schema_type: str):
         """Handle reference schema processing with circular reference and depth checking."""
         # Check for circular reference
         if self.ref in ref_stack:
             ref_chain = " -> ".join(ref_stack + [self.ref])
             event = ConfiguratorEvent(
-                event_id="DIC-07", 
+                event_id="DIC-07",
                 event_type="CIRCULAR_REFERENCE",
                 event_data={"ref_chain": ref_chain, "ref_stack": ref_stack}
             )
             raise ConfiguratorException(f"Circular reference detected: {ref_chain}", event)
-        
+
         # Check stack depth limit
         if len(ref_stack) >= self.config.RENDER_STACK_MAX_DEPTH:
             event = ConfiguratorEvent(
-                event_id="DIC-08", 
+                event_id="DIC-08",
                 event_type="STACK_DEPTH_EXCEEDED",
                 event_data={"max_depth": self.config.RENDER_STACK_MAX_DEPTH, "current_depth": len(ref_stack)}
             )
             raise ConfiguratorException(f"Reference stack depth exceeded maximum of {self.config.RENDER_STACK_MAX_DEPTH}", event)
-        
+
         # Add current ref to stack and process
         ref_stack.append(self.ref)
         try:
@@ -331,7 +367,7 @@ class Property:
                 return dictionary.get_bson_schema(enumerations, ref_stack)
         finally:
             ref_stack.pop()
-    
+
     def _get_required(self):
         required = []
         for prop_name, prop in self.properties.items():
@@ -345,14 +381,14 @@ class OneOf:
         self.schemas = {}
         for schema_name, schema_data in one_of_data.get("schemas", {}).items():
             self.schemas[schema_name] = Property(schema_name, schema_data)
-    
+
     def to_dict(self):
         return {
             "schemas": {name: schema.to_dict() for name, schema in self.schemas.items()}
         }
-    
+
     def get_json_schema(self, enumerations, ref_stack: list = None):
         return [schema.get_json_schema(enumerations, ref_stack) for schema in self.schemas.values()]
-    
+
     def get_bson_schema(self, enumerations, ref_stack: list = None):
         return [schema.get_bson_schema(enumerations, ref_stack) for schema in self.schemas.values()]
