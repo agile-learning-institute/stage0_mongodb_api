@@ -24,11 +24,18 @@ def create_dictionary_routes():
     @event_route("DIC-04", "CLEAN_DICTIONARIES", "cleaning dictionaries")
     def clean_dictionaries():
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-        events = []
+        cleaned_files = []
+        
         for file in files:
-            dictionary = Dictionary(file.name)
-            events.extend(dictionary.save())
-        return events
+            try:
+                dictionary = Dictionary(file.name)
+                cleaned_file = dictionary.save()
+                cleaned_files.append(cleaned_file.to_dict())
+            except Exception as e:
+                # Raise to trigger 500 from decorator
+                raise ConfiguratorException(f"Failed to clean dictionary {file.name}: {str(e)}")
+        
+        return cleaned_files
     
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['GET'])
@@ -42,8 +49,8 @@ def create_dictionary_routes():
     @event_route("DIC-03", "PUT_DICTIONARY", "updating dictionary")
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
-        saved = dictionary.save()
-        return saved[0].data if saved else {}
+        saved_file = dictionary.save()
+        return saved_file.to_dict()
     
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")

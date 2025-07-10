@@ -1,7 +1,7 @@
 from configurator.services.type_services import Type
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.enumerator_service import Enumerators
-from configurator.utils.file_io import FileIO
+from configurator.utils.file_io import FileIO, File
 from configurator.utils.config import Config
 import os
 
@@ -28,38 +28,13 @@ class Dictionary:
             ref_stack = []
         return self.property.get_bson_schema(enumerations, ref_stack)
             
-    def save(self) -> list[ConfiguratorEvent]:
-        event = ConfiguratorEvent(event_id="DIC-03", event_type="SAVE_DICTIONARY")
+    def save(self) -> File:
+        """Save the dictionary and return the File object."""
         try:
-            # Get original content before saving
-            original_doc = FileIO.get_document(self.config.DICTIONARY_FOLDER, self.file_name)
-            
             # Save the cleaned content
-            FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.property.to_dict())
-            
-            # Re-read the saved content
-            saved_doc = FileIO.get_document(self.config.DICTIONARY_FOLDER, self.file_name)
-            
-            # Compare and set event data
-            original_keys = set(original_doc.keys())
-            saved_keys = set(saved_doc.keys())
-            
-            added = saved_keys - original_keys
-            removed = original_keys - saved_keys
-            
-            event.data = {
-                "added": {k: saved_doc[k] for k in added},
-                "removed": {k: original_doc[k] for k in removed}
-            }
-            
-            event.record_success()
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error saving document")
+            return FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.property.to_dict())
         except Exception as e:
-            event.append_events([ConfiguratorEvent(event_id="DIC-04", event_type="SAVE_DICTIONARY", event_data={"error": str(e)})])
-            event.record_failure("unexpected error saving document")
-        return [event]
+            raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}")
 
     def delete(self):
         event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")

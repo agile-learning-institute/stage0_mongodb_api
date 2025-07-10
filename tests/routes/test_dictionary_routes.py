@@ -92,9 +92,9 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Arrange
         test_data = {"name": "test_dict", "version": "1.0.0"}
         mock_dictionary = Mock()
-        mock_event = Mock()
-        mock_event.data = test_data
-        mock_dictionary.save.return_value = [mock_event]
+        mock_saved_file = Mock()
+        mock_saved_file.to_dict.return_value = {"name": "test_dict.yaml", "path": "/path/to/test_dict.yaml"}
+        mock_dictionary.save.return_value = mock_saved_file
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
@@ -103,7 +103,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, test_data)
+        self.assertEqual(response_data, {"name": "test_dict.yaml", "path": "/path/to/test_dict.yaml"})
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_update_dictionary_general_exception(self, mock_dictionary_class):
@@ -210,8 +210,9 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_file_io.get_documents.return_value = mock_files
         
         mock_dictionary = Mock()
-        mock_event = ConfiguratorEvent("DIC-03", "SUCCESS")
-        mock_dictionary.save.return_value = [mock_event]
+        mock_saved_file = Mock()
+        mock_saved_file.to_dict.return_value = {"name": "dict.yaml", "path": "/path/to/dict.yaml"}
+        mock_dictionary.save.return_value = mock_saved_file
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
@@ -220,10 +221,10 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data["id"], "DIC-04")
-        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertIn("sub_events", response_data)
+        # Should return a list of File objects serialized as dicts
+        self.assertEqual(len(response_data), 2)
+        self.assertEqual(response_data[0], {"name": "dict.yaml", "path": "/path/to/dict.yaml"})
+        self.assertEqual(response_data[1], {"name": "dict.yaml", "path": "/path/to/dict.yaml"})
 
     @patch('configurator.routes.dictionary_routes.FileIO')
     @patch('configurator.routes.dictionary_routes.Dictionary')
