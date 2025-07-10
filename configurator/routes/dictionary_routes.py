@@ -51,8 +51,8 @@ def create_dictionary_routes():
     @event_route("DIC-03", "PUT_DICTIONARY", "updating dictionary")
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
-        saved_file = dictionary.save()
-        return jsonify(saved_file.to_dict())
+        saved_dictionary = dictionary.save()
+        return jsonify(saved_dictionary.to_dict())
     
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")
@@ -61,12 +61,7 @@ def create_dictionary_routes():
         deleted = dictionary.delete()
         return jsonify(deleted.to_dict())
     
-    @dictionary_routes.route('/<file_name>/', methods=['PATCH'])
-    @event_route("DIC-06", "LOCK_UNLOCK_DICTIONARY", "locking/unlocking dictionary")
-    def lock_unlock_dictionary(file_name):
-        dictionary = Dictionary(file_name)
-        result = dictionary.lock_unlock()
-        return jsonify(result.to_dict())
+
     
     logger.info("dictionary Flask Routes Registered")
     return dictionary_routes

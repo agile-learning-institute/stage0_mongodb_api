@@ -485,7 +485,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         
         # Test to_dict
         result = dictionary.to_dict()
-        self.assertEqual(result, {"name": "ref", "ref": "sample.1.0.0.yaml"})
+        self.assertEqual(result, {"name": "ref", "_locked": False, "ref": "sample.1.0.0.yaml"})
 
 if __name__ == '__main__':
     unittest.main() 

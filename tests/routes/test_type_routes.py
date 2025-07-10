@@ -58,9 +58,7 @@ class TestTypeRoutes(unittest.TestCase):
         """Test successful GET /api/types/<file_name>."""
         # Arrange
         mock_type = Mock()
-        mock_property = Mock()
-        mock_property.to_dict.return_value = {"name": "test_type", "version": "1.0.0"}
-        mock_type.property = mock_property
+        mock_type.to_dict.return_value = {"name": "test_type", "_locked": False, "version": "1.0.0"}
         mock_type_class.return_value = mock_type
 
         # Act
@@ -69,7 +67,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, {"name": "test_type", "version": "1.0.0"})
+        self.assertEqual(response_data, {"name": "test_type", "_locked": False, "version": "1.0.0"})
 
     @patch('configurator.routes.type_routes.Type')
     def test_get_type_general_exception(self, mock_type_class):
@@ -165,43 +163,7 @@ class TestTypeRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.type_routes.Type')
-    def test_lock_unlock_type_success(self, mock_type_class):
-        """Test successful PATCH /api/types/<file_name>."""
-        # Arrange
-        mock_type = Mock()
-        mock_file = Mock()
-        mock_file.to_dict.return_value = {"read_only": True}
-        mock_type.flip_lock.return_value = mock_file
-        mock_type_class.return_value = mock_type
-
-        # Act
-        response = self.client.patch('/api/types/test_type/')
-
-        # Assert
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        self.assertEqual(response_data, {"read_only": True})
-
-    @patch('configurator.routes.type_routes.Type')
-    def test_lock_unlock_type_general_exception(self, mock_type_class):
-        """Test PATCH /api/types/<file_name> when Type raises a general exception."""
-        # Arrange
-        mock_type = Mock()
-        mock_type.flip_lock.side_effect = Exception("Unexpected error")
-        mock_type_class.return_value = mock_type
-
-        # Act
-        response = self.client.patch('/api/types/test_type/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "FAILURE")
+    # Lock/unlock tests removed as functionality was removed
 
     @patch('configurator.routes.type_routes.FileIO')
     @patch('configurator.routes.type_routes.Type')

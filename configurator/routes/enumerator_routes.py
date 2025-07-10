@@ -23,8 +23,8 @@ def create_enumerator_routes():
     def clean_enumerators():
         try:
             enumerators = Enumerators(None)
-            saved_file = enumerators.save()
-            return jsonify(saved_file.to_dict())
+            saved_enumerators = enumerators.save()
+            return jsonify(saved_enumerators.to_dict())
         except Exception as e:
             # Create event and raise ConfiguratorException to trigger 500 from decorator
             event = ConfiguratorEvent("ENU-04", "CLEAN_ENUMERATORS")
@@ -36,8 +36,8 @@ def create_enumerator_routes():
     @event_route("ENU-02", "PUT_ENUMERATORS", "saving enumerators")
     def put_enumerators():
         enumerators = Enumerators(data=request.get_json(force=True))
-        saved_file = enumerators.save()
-        return jsonify(saved_file.to_dict())
+        saved_enumerators = enumerators.save()
+        return jsonify(saved_enumerators.to_dict())
     
     logger.info("Enumerator Flask Routes Registered")
     return enumerator_routes

@@ -163,43 +163,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_lock_unlock_dictionary_success(self, mock_dictionary_class):
-        """Test successful PATCH /api/dictionaries/<file_name>."""
-        # Arrange
-        mock_dictionary = Mock()
-        mock_file = Mock()
-        mock_file.to_dict.return_value = {"read_only": True}
-        mock_dictionary.lock_unlock.return_value = mock_file
-        mock_dictionary_class.return_value = mock_dictionary
-
-        # Act
-        response = self.client.patch('/api/dictionaries/test_dict/')
-
-        # Assert
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        self.assertEqual(response_data, {"read_only": True})
-
-    @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_lock_unlock_dictionary_general_exception(self, mock_dictionary_class):
-        """Test PATCH /api/dictionaries/<file_name> when Dictionary raises a general exception."""
-        # Arrange
-        mock_dictionary = Mock()
-        mock_dictionary.flip_lock.side_effect = Exception("Unexpected error")
-        mock_dictionary_class.return_value = mock_dictionary
-
-        # Act
-        response = self.client.patch('/api/dictionaries/test_dict/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "FAILURE")
+    # Lock/unlock tests removed as functionality was removed
 
     @patch('configurator.routes.dictionary_routes.FileIO')
     @patch('configurator.routes.dictionary_routes.Dictionary')

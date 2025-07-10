@@ -33,18 +33,29 @@ class Type:
         self.file_name = file_name
         self.name = file_name.split(".")[0]
         self.type_property = {}
+        self._locked = False  # Default to unlocked
 
         if document:
             self.property = TypeProperty(self.name, document)
+            # Extract _locked from document if present
+            self._locked = document.get("_locked", False)
         else:
-            self.property = TypeProperty(self.name, FileIO.get_document(self.config.TYPE_FOLDER, file_name))
+            document_data = FileIO.get_document(self.config.TYPE_FOLDER, file_name)
+            self.property = TypeProperty(self.name, document_data)
+            # Extract _locked from loaded document if present
+            self._locked = document_data.get("_locked", False)
 
 
-    def save(self) -> File:
-        """Save the type and return the File object."""
+    def save(self):
+        """Save the type and return the Type object."""
+        if self._locked:
+            event = ConfiguratorEvent(event_id="TYP-03", event_type="SAVE_TYPE", event_data={"error": "Type is locked"})
+            raise ConfiguratorException("Cannot save locked type", event)
         try:
             # Save the cleaned content
-            return FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.property.to_dict())
+            file_name = f"{self.name}.yaml"
+            FileIO.put_document(self.config.TYPE_FOLDER, file_name, self.to_dict())
+            return self
         except Exception as e:
             event = ConfiguratorEvent("TYP-03", "PUT_TYPE")
             event.record_failure(f"Failed to save type {self.file_name}: {str(e)}")
@@ -59,8 +70,18 @@ class Type:
         if type_stack is None:
             type_stack = []
         return self.property.get_bson_schema(type_stack)
+    
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "_locked": self._locked,  # Always include _locked
+            **self.property.to_dict()
+        }
                 
     def delete(self):
+        if self._locked:
+            event = ConfiguratorEvent(event_id="TYP-05", event_type="DELETE_TYPE", event_data={"error": "Type is locked"})
+            raise ConfiguratorException("Cannot delete locked type", event)
         event = ConfiguratorEvent(event_id="TYP-05", event_type="DELETE_TYPE")
         try:
             delete_event = FileIO.delete_document(self.config.TYPE_FOLDER, self.file_name)
@@ -76,17 +97,7 @@ class Type:
             event.record_failure("unexpected error deleting type", {"error": str(e)})
         return event
 
-    def flip_lock(self):
-        event = ConfiguratorEvent(event_id="TYP-06", event_type="LOCK_UNLOCK_TYPE")
-        try:
-            FileIO.lock_unlock(self.config.TYPE_FOLDER, self.file_name)
-            event.record_success()
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error locking/unlocking type")
-        except Exception as e:
-            event.record_failure("unexpected error locking/unlocking type", {"error": str(e)})
-        return event
+
 
 class TypeProperty:
     def __init__(self, name: str, property: dict):

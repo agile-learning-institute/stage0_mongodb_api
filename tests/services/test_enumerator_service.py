@@ -29,11 +29,8 @@ class TestEnumerators(unittest.TestCase):
         # Mock get_document to return different original and saved content
         mock_get_document.side_effect = [original_data, cleaned_data]
         
-        # Mock put_document to return a File object
-        mock_file = Mock()
-        mock_file.name = "enumerators.json"
-        mock_file.path = "/path/to/enumerators.json"
-        mock_put_document.return_value = mock_file
+        # Mock put_document to return None (no longer returns File object)
+        mock_put_document.return_value = None
         
         enum = Enumerators(cleaned_data)
         
@@ -41,10 +38,11 @@ class TestEnumerators(unittest.TestCase):
         result = enum.save()
         
         # Assert
-        self.assertEqual(result, mock_file)
+        self.assertEqual(result, enum)  # save() now returns self
         
         # Verify FileIO calls
-        mock_put_document.assert_called_once_with("test_data", "enumerators.json", cleaned_data)
+        expected_data = {"enumerators": cleaned_data}
+        mock_put_document.assert_called_once_with("test_data", "enumerators.json", expected_data)
 
     @patch('configurator.services.enumerator_service.FileIO.put_document')
     @patch('configurator.services.enumerator_service.FileIO.get_document')
@@ -56,11 +54,8 @@ class TestEnumerators(unittest.TestCase):
         # Mock get_document to return same content for original and saved
         mock_get_document.side_effect = [same_data, same_data]
         
-        # Mock put_document to return a File object
-        mock_file = Mock()
-        mock_file.name = "enumerators.json"
-        mock_file.path = "/path/to/enumerators.json"
-        mock_put_document.return_value = mock_file
+        # Mock put_document to return None (no longer returns File object)
+        mock_put_document.return_value = None
         
         enum = Enumerators(same_data)
         
@@ -68,10 +63,11 @@ class TestEnumerators(unittest.TestCase):
         result = enum.save()
         
         # Assert
-        self.assertEqual(result, mock_file)
+        self.assertEqual(result, enum)  # save() now returns self
         
         # Verify FileIO calls
-        mock_put_document.assert_called_once_with("test_data", "enumerators.json", same_data)
+        expected_data = {"enumerators": same_data}
+        mock_put_document.assert_called_once_with("test_data", "enumerators.json", expected_data)
 
     @patch('configurator.services.enumerator_service.FileIO.put_document')
     @patch('configurator.services.enumerator_service.FileIO.get_document')
@@ -125,7 +121,8 @@ class TestEnumerators(unittest.TestCase):
         data = [{"version": 0, "enumerators": {"test": {"value": 1}}}]
         enum = Enumerators(data)
         result = enum.to_dict()
-        self.assertEqual(result, data)
+        expected = {"enumerators": data}
+        self.assertEqual(result, expected)
 
 class TestEnumerations(unittest.TestCase):
     def test_init_with_valid_data(self):
@@ -134,13 +131,43 @@ class TestEnumerations(unittest.TestCase):
             "name": "test",
             "status": "active",
             "version": 1,
-            "enumerators": {"foo": {"bar": 1}}
+            "enumerators": {"foo": {"bar": 1}},
+            "_locked": True
         }
         enum = Enumerations(data)
         self.assertEqual(enum.name, "test")
         self.assertEqual(enum.status, "active")
         self.assertEqual(enum.version, 1)
         self.assertEqual(enum.enumerators, {"foo": {"bar": 1}})
+        self.assertTrue(enum._locked)
+
+    def test_init_without_locked_defaults_to_false(self):
+        """Test Enumerations initialization without _locked defaults to False."""
+        data = {
+            "name": "test",
+            "status": "active",
+            "version": 1,
+            "enumerators": {"foo": {"bar": 1}}
+        }
+        enum = Enumerations(data)
+        self.assertFalse(enum._locked)
+
+    def test_to_dict_includes_locked(self):
+        """Test that to_dict includes _locked property."""
+        data = {
+            "name": "test",
+            "status": "active",
+            "version": 1,
+            "enumerators": {"foo": {"bar": 1}},
+            "_locked": True
+        }
+        enum = Enumerations(data)
+        result = enum.to_dict()
+        self.assertEqual(result["_locked"], True)
+        self.assertEqual(result["name"], "test")
+        self.assertEqual(result["status"], "active")
+        self.assertEqual(result["version"], 1)
+        self.assertEqual(result["enumerators"], {"foo": {"bar": 1}})
 
     def test_init_with_none_data_raises(self):
         """Test Enumerations initialization with None data raises ConfiguratorException."""

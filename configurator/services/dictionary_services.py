@@ -12,14 +12,22 @@ class Dictionary:
         self.file_name = file_name
         # Strip .yaml extension for the name property
         self.name = file_name.replace('.yaml', '')
+        self._locked = False  # Default to unlocked
+        
         if document:
             self.property = Property("root", document)
+            # Extract _locked from document if present
+            self._locked = document.get("_locked", False)
         else:
-            self.property = Property("root", FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name))
+            document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
+            self.property = Property("root", document_data)
+            # Extract _locked from loaded document if present
+            self._locked = document_data.get("_locked", False)
 
     def to_dict(self):
         return {
             "name": self.name,  # Return stripped name
+            "_locked": self._locked,  # Always include _locked
             **self.property.to_dict()
         }
     
@@ -33,17 +41,25 @@ class Dictionary:
             ref_stack = []
         return self.property.get_bson_schema(enumerations, ref_stack)
             
-    def save(self) -> File:
-        """Save the dictionary and return the File object."""
+    def save(self):
+        """Save the dictionary and return the Dictionary object."""
+        if self._locked:
+            event = ConfiguratorEvent(event_id="DIC-03", event_type="SAVE_DICTIONARY", event_data={"error": "Dictionary is locked"})
+            raise ConfiguratorException("Cannot save locked dictionary", event)
         try:
             # Save the cleaned content
-            return FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.property.to_dict())
+            file_name = f"{self.name}.yaml"
+            FileIO.put_document(self.config.DICTIONARY_FOLDER, file_name, self.to_dict())
+            return self
         except Exception as e:
             event = ConfiguratorEvent("DIC-03", "PUT_DICTIONARY")
             event.record_failure(f"Failed to save dictionary {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}", event)
 
     def delete(self):
+        if self._locked:
+            event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY", event_data={"error": "Dictionary is locked"})
+            raise ConfiguratorException("Cannot delete locked dictionary", event)
         event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
         try:
             delete_event = FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name)
@@ -59,17 +75,7 @@ class Dictionary:
             event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
         return event
 
-    def lock_unlock(self):
-        event = ConfiguratorEvent(event_id="DIC-06", event_type="LOCK_UNLOCK_DICTIONARY")
-        try:
-            FileIO.lock_unlock(self.config.DICTIONARY_FOLDER, self.file_name)
-            event.record_success()
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error locking/unlocking dictionary")
-        except Exception as e:
-            event.record_failure("unexpected error locking/unlocking dictionary", {"error": str(e)})
-        return event
+
 
 class Property:
     def __init__(self, name: str, property: dict):
