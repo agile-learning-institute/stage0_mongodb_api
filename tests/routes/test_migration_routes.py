@@ -196,7 +196,7 @@ class TestMigrationRoutes(unittest.TestCase):
     def test_put_migration_general_exception(self, mock_file_io):
         """Test PUT /api/migrations/<file_name> when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.save_document.side_effect = Exception("Unexpected error")
+        mock_file_io.put_document.side_effect = Exception("Unexpected error")
         test_data = {"name": "test_migration", "operations": []}
 
         # Act

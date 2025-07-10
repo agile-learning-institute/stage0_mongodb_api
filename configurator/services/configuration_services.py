@@ -2,7 +2,7 @@ from configurator.services.dictionary_services import Dictionary
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.enumerator_service import Enumerators
-from configurator.utils.file_io import FileIO
+from configurator.utils.file_io import FileIO, File
 from configurator.utils.mongo_io import MongoIO
 from configurator.utils.version_manager import VersionManager
 from configurator.utils.version_number import VersionNumber
@@ -27,38 +27,13 @@ class Configuration:
             "versions": [v.to_dict() for v in self.versions],
         }
 
-    def save(self) -> list[ConfiguratorEvent]:
-        event = ConfiguratorEvent(event_id="CFG-03", event_type="SAVE_CONFIGURATION")
+    def save(self) -> File:
+        """Save the configuration and return the File object."""
         try:
-            # Get original content before saving
-            original_doc = FileIO.get_document(self.config.CONFIGURATION_FOLDER, self.file_name)
-            
             # Save the cleaned content
-            FileIO.save_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
-            
-            # Re-read the saved content
-            saved_doc = FileIO.get_document(self.config.CONFIGURATION_FOLDER, self.file_name)
-            
-            # Compare and set event data
-            original_keys = set(original_doc.keys())
-            saved_keys = set(saved_doc.keys())
-            
-            added = saved_keys - original_keys
-            removed = original_keys - saved_keys
-            
-            event.data = {
-                "added": {k: saved_doc[k] for k in added},
-                "removed": {k: original_doc[k] for k in removed}
-            }
-            
-            event.record_success()
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error saving document")
+            return FileIO.put_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
         except Exception as e:
-            event.append_events([ConfiguratorEvent(event_id="CFG-04", event_type="SAVE_CONFIGURATION", event_data={"error": str(e)})])
-            event.record_failure("unexpected error saving document")
-        return [event]
+            raise ConfiguratorException(f"Failed to save configuration {self.file_name}: {str(e)}")
     
     def delete(self):
         FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)

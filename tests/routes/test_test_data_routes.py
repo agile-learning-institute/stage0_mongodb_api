@@ -105,7 +105,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_put_data_file_general_exception(self, mock_file_io):
         """Test PUT /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.save_document.side_effect = Exception("Unexpected error")
+        mock_file_io.put_document.side_effect = Exception("Unexpected error")
         test_data = {"test": "data"}
 
         # Act

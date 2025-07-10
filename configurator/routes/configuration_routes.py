@@ -34,11 +34,18 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-03", "CLEAN_CONFIGURATIONS", "cleaning configurations")
     def clean_configurations():
         files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        events = []
+        cleaned_files = []
+        
         for file in files:
-            configuration = Configuration(file.name)
-            events.extend(configuration.save())
-        return events
+            try:
+                configuration = Configuration(file.name)
+                cleaned_file = configuration.save()
+                cleaned_files.append(cleaned_file)
+            except Exception as e:
+                # Raise to trigger 500 from decorator
+                raise ConfiguratorException(f"Failed to clean configuration {file.name}: {str(e)}")
+        
+        return cleaned_files
 
     @blueprint.route('/collection/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-04", "CREATE_COLLECTION", "creating collection")
@@ -57,8 +64,8 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-06", "PUT_CONFIGURATION", "updating configuration")
     def put_configuration(file_name):
         configuration = Configuration(file_name, request.json)
-        saved = configuration.save()
-        return saved[0].data if saved else {}
+        saved_file = configuration.save()
+        return saved_file.to_dict()
     
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     @event_route("CFG-ROUTES-07", "DELETE_CONFIGURATION", "deleting configuration")

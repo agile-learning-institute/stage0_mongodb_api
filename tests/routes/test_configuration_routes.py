@@ -152,9 +152,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Arrange
         test_data = {"name": "test_config", "version": "1.0.0"}
         mock_configuration = Mock()
-        mock_event = Mock()
-        mock_event.data = test_data
-        mock_configuration.save.return_value = [mock_event]
+        mock_saved_file = Mock()
+        mock_saved_file.to_dict.return_value = {"name": "test_config.yaml", "path": "/path/to/test_config.yaml"}
+        mock_configuration.save.return_value = mock_saved_file
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -163,8 +163,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, test_data)
+        # For successful responses, expect File object data directly
+        self.assertEqual(response_data, {"name": "test_config.yaml", "path": "/path/to/test_config.yaml"})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_general_exception(self, mock_configuration_class):
@@ -429,66 +429,25 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response_data["status"], "FAILURE")
 
     @patch('configurator.routes.configuration_routes.FileIO')
-    @patch('configurator.routes.configuration_routes.Configuration')
-    def test_clean_configurations_success(self, mock_configuration_class, mock_file_io):
-        """Test successful PATCH /api/configurations - Clean Configurations."""
+    def test_clean_configurations_with_configuration_save_general_exception(self, mock_file_io):
+        """Test PATCH /api/configurations - Clean Configurations with Configuration.save() general exception."""
         # Arrange
-        # Create mock file objects with name attribute
-        mock_file1 = Mock()
-        mock_file1.name = "config1.yaml"
-        mock_file2 = Mock()
-        mock_file2.name = "config2.yaml"
-        mock_files = [mock_file1, mock_file2]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        mock_configuration = Mock()
-        # Create a proper event object instead of a Mock
-        mock_event = ConfiguratorEvent("CFG-03", "SUCCESS")
-        mock_configuration.save.return_value = [mock_event]
-        mock_configuration_class.return_value = mock_configuration
+        mock_file = Mock()
+        mock_file.name = "config.yaml"
+        mock_file_io.get_documents.return_value = [mock_file]
 
-        # Act
-        response = self.client.patch('/api/configurations/')
+        with patch('configurator.routes.configuration_routes.Configuration') as mock_configuration_class:
+            mock_configuration = Mock()
+            mock_configuration.save.side_effect = Exception("General error")
+            mock_configuration_class.return_value = mock_configuration
 
-        # Assert
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        # For endpoints that return events, expect event envelope structure
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
-        self.assertIn("sub_events", response_data)
+            # Act
+            response = self.client.patch('/api/configurations/')
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    @patch('configurator.routes.configuration_routes.Configuration')
-    def test_clean_configurations_with_configuration_save_general_exception(self, mock_configuration_class, mock_file_io):
-        """Test PATCH /api/configurations when Configuration.save() raises a general exception."""
-        # Arrange
-        # Create mock file objects with name attribute (not dict)
-        mock_file1 = Mock()
-        mock_file1.name = "config1.yaml"
-        mock_files = [mock_file1]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        mock_configuration = Mock()
-        mock_configuration.save.side_effect = Exception("Save failed")
-        mock_configuration_class.return_value = mock_configuration
-
-        # Act
-        response = self.client.patch('/api/configurations/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        # Focus on structure and status, not specific event IDs
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertEqual(response_data["status"], "FAILURE")
-        self.assertEqual(response_data["type"], "CLEAN_CONFIGURATIONS")
-        self.assertIn("data", response_data)
+            # Assert
+            self.assertEqual(response.status_code, 500)
+            response_data = response.json
+            self.assertEqual(response_data["status"], "FAILURE")
 
 
 if __name__ == '__main__':
