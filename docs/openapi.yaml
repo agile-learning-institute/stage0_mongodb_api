@@ -18,7 +18,7 @@ servers:
 paths:
   /docs/:
     get:
-      summary: API Explorer
+      summary: (this) API Explorer
       description: Interactive API documentation
       tags:
         - Documentation
