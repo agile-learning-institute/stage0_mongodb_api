@@ -1,6 +1,7 @@
 import json
 import sys
 import signal
+import os
 
 # Initialize Singletons
 from configurator.services.configuration_services import Configuration
@@ -17,9 +18,8 @@ logger.info(f"============= Starting Server Initialization ===============")
 # Define a signal handler for SIGTERM and SIGINT
 def handle_exit(signum, frame):
     logger.info(f"Received signal {signum}. Initiating shutdown...")
-    
     logger.info("============= Shutdown complete. ===============")
-    sys.exit(0)  
+    sys.exit(0)
 
 # Register the signal handler
 signal.signal(signal.SIGTERM, handle_exit)
@@ -28,7 +28,9 @@ signal.signal(signal.SIGINT, handle_exit)
 # Initialize Flask App
 from flask import Flask
 from configurator.utils.ejson_encoder import MongoJSONEncoder
-app = Flask(__name__)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+docs_path = os.path.join(project_root, 'docs')
+app = Flask(__name__, static_folder=docs_path, static_url_path='/docs')
 app.json = MongoJSONEncoder(app)
 
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
@@ -47,16 +49,12 @@ if config.AUTO_PROCESS:
         logger.error(f"Configurator error processing all configurations: {app.json.dumps(e.to_dict())}")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"Unexpected error processing all configurations: {str(e)}") 
+        logger.error(f"Unexpected error processing all configurations: {str(e)}")
         sys.exit(1)
 
 if config.EXIT_AFTER_PROCESSING:
     logger.info(f"============= Exiting After Processing ===============")
     sys.exit(0)
-
-# Configure static file serving for documentation
-app.static_folder = 'docs'
-app.static_url_path = '/docs'
 
 # Apply Prometheus monitoring middleware
 from prometheus_flask_exporter import PrometheusMetrics

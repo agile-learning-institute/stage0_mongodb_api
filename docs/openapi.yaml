@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: MongoDB Schema Management API
+  title: MongoDB Configurator API
   description: |
     API for managing MongoDB collections, indexes, and migrations
     
