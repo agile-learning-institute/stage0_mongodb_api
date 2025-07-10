@@ -16,7 +16,7 @@ servers:
   - url: http://localhost:8081
     description: Local development server
 paths:
-  /docs/:
+  /docs/index.html:
     get:
       summary: (this) API Explorer
       description: Interactive API documentation
@@ -883,6 +883,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/file'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+
+  /api/database/:
+    delete:
+      summary: Drop the Database
+      description: LIVE endpoint that DROPS THE DATABASE!!! There are three safety checks, 
+        BUILT_AT must be Local, ENABLE_DROP_DATABASE must be True, and the database must have no collections with 100 or more documents
+      operationId: drop_database
+      tags:
+        - Database
+      responses:
+        '200':
+          description: Database dropped
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/enumerators'
         '500':
           description: Processing error
           content:
