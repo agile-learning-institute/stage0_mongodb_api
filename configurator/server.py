@@ -54,6 +54,10 @@ if config.EXIT_AFTER_PROCESSING:
     logger.info(f"============= Exiting After Processing ===============")
     sys.exit(0)
 
+# Configure static file serving for documentation
+app.static_folder = 'docs'
+app.static_url_path = '/docs'
+
 # Apply Prometheus monitoring middleware
 from prometheus_flask_exporter import PrometheusMetrics
 metrics = PrometheusMetrics(app, path='/api/health')
@@ -77,10 +81,6 @@ app.register_blueprint(create_test_data_routes(), url_prefix='/api/test_data')
 app.register_blueprint(create_database_routes(), url_prefix='/api/database')
 app.register_blueprint(create_enumerator_routes(), url_prefix='/api/enumerators')
 app.register_blueprint(create_migration_routes(), url_prefix='/api/migrations')
-
-# Configure static file serving for documentation
-app.static_folder = 'docs'
-app.static_url_path = '/docs'
 
 logger.info(f"============= Routes Registered ===============")
 
