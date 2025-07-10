@@ -83,7 +83,7 @@ class TestMigrationEvents(unittest.TestCase):
         event = version.process(mongo_io)
         
         # Verify the main event structure
-        self.assertEqual(event.id, "test_collection.1.0.0.1")
+        self.assertEqual(event.id, "test.1.0.0.1")
         self.assertEqual(event.type, "PROCESS")
         self.assertEqual(event.status, "SUCCESS")
         

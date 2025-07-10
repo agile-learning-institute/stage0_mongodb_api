@@ -26,6 +26,9 @@ class TestConfigurationOperations(unittest.TestCase):
     """Test configuration service operations"""
 
     def setUp(self):
+        import os
+        print(f"[DEBUG] INPUT_FOLDER={os.environ.get('INPUT_FOLDER')}")
+        print(f"[DEBUG] CWD={os.getcwd()}")
         self.config = set_config_input_folder("./tests/test_cases/small_sample")
 
     def tearDown(self):
@@ -36,7 +39,7 @@ class TestConfigurationOperations(unittest.TestCase):
         config = Configuration("sample.yaml")
         
         self.assertEqual(config.name, "sample")
-        self.assertEqual(config.file_name, "sample.yaml")
+        # self.assertEqual(config.file_name, "sample.yaml")  # file_name removed, use name
         self.assertEqual(len(config.versions), 1)
         
         # Test version details
@@ -135,7 +138,7 @@ class TestConfigurationOperations(unittest.TestCase):
         # Test creating configuration from dict
         config = Configuration("test.yaml", config_data)
         
-        self.assertEqual(config.name, "multi_version")
+        self.assertEqual(config.name, "test")
         self.assertEqual(len(config.versions), 2)
         
         # Test version ordering

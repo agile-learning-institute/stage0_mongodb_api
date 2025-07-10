@@ -10,13 +10,18 @@ class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
         self.config = Config.get_instance()
         self.file_name = file_name
+        # Strip .yaml extension for the name property
+        self.name = file_name.replace('.yaml', '')
         if document:
             self.property = Property("root", document)
         else:
             self.property = Property("root", FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name))
 
     def to_dict(self):
-        return self.property.to_dict()
+        return {
+            "name": self.name,  # Return stripped name
+            **self.property.to_dict()
+        }
     
     def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:

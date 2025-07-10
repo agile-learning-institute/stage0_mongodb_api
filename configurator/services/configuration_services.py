@@ -11,17 +11,18 @@ import os
 class Configuration:
     def __init__(self, file_name: str, document: dict = None):
         self.config = Config.get_instance()
-        self.file_name = file_name
+        # Strip .yaml extension for the name property
+        self.name = file_name.replace('.yaml', '')
         if not document:
             document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
-        self.name = document["name"]
+        
         self.title = document.get("title", "")
-        self.description = document["description"]
-        self.versions = [Version(self.name, v, self.config) for v in document["versions"]]
+        self.description = document.get("description", "")
+        self.versions = [Version(self.name, v, self.config) for v in document.get("versions", [])]
 
     def to_dict(self):
         return {
-            "name": self.name,
+            "name": self.name,  # Return stripped name
             "title": self.title,
             "description": self.description,
             "versions": [v.to_dict() for v in self.versions],
@@ -31,14 +32,16 @@ class Configuration:
         """Save the configuration and return the File object."""
         try:
             # Save the cleaned content
-            return FileIO.put_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
+            file_name = f"{self.name}.yaml"
+            return FileIO.put_document(self.config.CONFIGURATION_FOLDER, file_name, self.to_dict())
         except Exception as e:
-            raise ConfiguratorException(f"Failed to save configuration {self.file_name}: {str(e)}")
+            raise ConfiguratorException(f"Failed to save configuration {self.name}: {str(e)}")
     
     def delete(self):
         event = ConfiguratorEvent(event_id="CFG-ROUTES-07", event_type="DELETE_CONFIGURATION")
         try:
-            delete_event = FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)
+            file_name = f"{self.name}.yaml"
+            delete_event = FileIO.delete_document(self.config.CONFIGURATION_FOLDER, file_name)
             if delete_event.status == "SUCCESS":
                 event.record_success()
             else:
@@ -53,7 +56,8 @@ class Configuration:
         
     def lock_unlock(self):
         try:
-            file = FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, self.file_name)
+            file_name = f"{self.name}.yaml"
+            file = FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, file_name)
             return file
         except ConfiguratorException as e:
             raise
@@ -69,7 +73,7 @@ class Configuration:
         try:
             # Add configuration context to main event
             event.data = {
-                "configuration_file": self.file_name,
+                "configuration_file": f"{self.name}.yaml",
                 "configuration_name": self.name,
                 "configuration_title": self.title,
                 "version_count": len(self.versions)
@@ -82,7 +86,7 @@ class Configuration:
                         event_id="PRO-00",
                         event_type="SKIP_VERSION",
                         event_data={
-                            "configuration_file": self.file_name,
+                            "configuration_file": f"{self.name}.yaml",
                             "version": version.to_dict(),
                             "current_version": current_version.get_version_str(),
                             "skip_reason": "version_already_processed"

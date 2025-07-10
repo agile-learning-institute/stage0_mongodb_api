@@ -290,7 +290,7 @@ class TestDictionary(unittest.TestCase):
         
         dictionary = Dictionary("test.yaml")
         
-        self.assertEqual(dictionary.file_name, "test.yaml")
+        self.assertEqual(dictionary.name, "test")
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
@@ -308,7 +308,7 @@ class TestDictionary(unittest.TestCase):
         }
         dictionary = Dictionary("test.yaml", doc)
         
-        self.assertEqual(dictionary.file_name, "test.yaml")
+        self.assertEqual(dictionary.name, "test")
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
@@ -458,7 +458,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         
         dictionary = Dictionary("sample.1.0.0.yaml", doc)
         
-        self.assertEqual(dictionary.file_name, "sample.1.0.0.yaml")
+        self.assertEqual(dictionary.name, "sample.1.0.0")
         self.assertEqual(dictionary.property.description, "A simple collection for testing")
         self.assertEqual(dictionary.property.type, "object")
         
@@ -485,7 +485,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         
         # Test to_dict
         result = dictionary.to_dict()
-        self.assertEqual(result, {"ref": "sample.1.0.0.yaml"})
+        self.assertEqual(result, {"name": "ref", "ref": "sample.1.0.0.yaml"})
 
 if __name__ == '__main__':
     unittest.main() 

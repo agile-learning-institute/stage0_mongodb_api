@@ -78,9 +78,11 @@ class FileIO:
         
         # Check if file exists
         if not os.path.exists(file_path):
-            event = ConfiguratorEvent(event_id="FIL-04", event_type="FILE_NOT_FOUND", 
-                event_data={"file_path": file_path})
-            raise ConfiguratorException(f"File not found: {file_path}", event)
+            abs_path = os.path.abspath(file_path)
+            cwd = os.getcwd()
+            event = ConfiguratorEvent(event_id="FIL-04", event_type="FILE_NOT_FOUND",
+                event_data={"file_path": file_path, "abs_path": abs_path, "cwd": cwd})
+            raise ConfiguratorException(f"File not found: {file_path} (abs: {abs_path}, cwd: {cwd})", event)
         
         # Get extension from file path
         extension = os.path.splitext(file_path)[1].lower()
