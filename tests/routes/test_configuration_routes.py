@@ -192,7 +192,13 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Arrange
         mock_configuration = Mock()
         mock_event = Mock()
-        mock_event.to_dict.return_value = {"deleted": True}
+        mock_event.to_dict.return_value = {
+            "id": "CFG-ROUTES-07",
+            "type": "DELETE_CONFIGURATION",
+            "status": "SUCCESS",
+            "data": {},
+            "sub_events": []
+        }
         mock_configuration.delete.return_value = mock_event
         mock_configuration_class.return_value = mock_configuration
 
@@ -202,8 +208,11 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, {"deleted": True})
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_delete_configuration_general_exception(self, mock_configuration_class):

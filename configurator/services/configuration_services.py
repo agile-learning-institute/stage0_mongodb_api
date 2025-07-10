@@ -36,7 +36,20 @@ class Configuration:
             raise ConfiguratorException(f"Failed to save configuration {self.file_name}: {str(e)}")
     
     def delete(self):
-        FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)
+        event = ConfiguratorEvent(event_id="CFG-ROUTES-07", event_type="DELETE_CONFIGURATION")
+        try:
+            delete_event = FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)
+            if delete_event.status == "SUCCESS":
+                event.record_success()
+            else:
+                event.append_events([delete_event])
+                event.record_failure("error deleting configuration")
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error deleting configuration")
+        except Exception as e:
+            event.record_failure("unexpected error deleting configuration", {"error": str(e)})
+        return event
         
     def lock_unlock(self):
         try:

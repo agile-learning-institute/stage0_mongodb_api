@@ -70,9 +70,13 @@ def create_configuration_routes():
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     @event_route("CFG-ROUTES-07", "DELETE_CONFIGURATION", "deleting configuration")
     def delete_configuration(file_name):
-        configuration = Configuration(file_name)
-        deleted = configuration.delete()
-        return jsonify(deleted.to_dict())
+        try:
+            configuration = Configuration(file_name)
+            event = configuration.delete()
+            return jsonify(event.to_dict())
+        except Exception as e:
+            logger.error(f"Error in delete_configuration: {str(e)}")
+            raise
 
     @blueprint.route('/<file_name>/', methods=['PATCH'])
     @event_route("CFG-ROUTES-08", "LOCK_UNLOCK_CONFIGURATION", "locking/unlocking configuration")
