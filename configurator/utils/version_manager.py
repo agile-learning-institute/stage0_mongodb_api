@@ -22,37 +22,27 @@ class VersionManager:
     def get_current_version(mongo_io: MongoIO, collection_name: str) -> VersionNumber:
         """Get the current version of a collection."""
         config = Config.get_instance()
-                    
         version_docs = mongo_io.get_documents(
             config.VERSION_COLLECTION_NAME,
             match={"collection_name": collection_name}
         )
-        
         if not version_docs or len(version_docs) == 0:
             return VersionNumber(f"{collection_name}.0.0.0.0")
-            
         if len(version_docs) > 1:
             event = ConfiguratorEvent(event_id="VER-01", event_type="GET_CURRENT_VERSION", event_data=version_docs)
             raise ConfiguratorException(f"Multiple versions found for collection: {collection_name}", event)
-        
         current_version = version_docs[0].get('current_version')
-        # Check if current_version already contains the collection name
-        if current_version.startswith(f"{collection_name}."):
-            return VersionNumber(current_version)
-        else:
-            return VersionNumber(f"{collection_name}.{current_version}")
+        return VersionNumber(current_version)
 
     @staticmethod
     def update_version(mongo_io: MongoIO, collection_name: str, version: str) -> str:
         """Update the version of a collection."""
         config = Config.get_instance()
-        version_obj = VersionNumber(f"{collection_name}.{version}")
-            
-        # Upsert version document
+        # version is now always expected to include the collection name
+        version_obj = VersionNumber(version)
         version_doc = mongo_io.upsert(
             config.VERSION_COLLECTION_NAME,
             match={"collection_name": collection_name},
             data={"collection_name": collection_name, "current_version": version}
         )
-        
         return VersionManager.get_current_version(mongo_io, collection_name)
