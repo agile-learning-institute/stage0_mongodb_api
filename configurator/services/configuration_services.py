@@ -298,20 +298,7 @@ class Version:
                 bson_schema: dict = self.get_bson_schema(enumerations)
                 
                 # Add schema context to event
-                sub_event.data = {
-                    "collection_name": self.collection_name,
-                    "version": self.version_str,
-                    "enumerator_version": self.collection_version.get_enumerator_version(),
-                    "schema_properties_count": len(bson_schema.get("properties", {})),
-                    "schema_required_fields": bson_schema.get("required", []),
-                    "schema_type": bson_schema.get("type", "unknown"),
-                    "schema_summary": {
-                        "type": bson_schema.get("type"),
-                        "properties_count": len(bson_schema.get("properties", {})),
-                        "required_count": len(bson_schema.get("required", []))
-                    }
-                }
-                
+                sub_event.data = {"collection_name": self.collection_name, "version": self.collection_version.get_version_str()}
                 sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name, bson_schema))
                 sub_event.record_success()
             except ConfiguratorException as e:

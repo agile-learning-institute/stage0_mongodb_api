@@ -185,11 +185,8 @@ class TestMongoIO(unittest.TestCase):
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0].status, "SUCCESS")
         
-        # Verify the event data includes the full BSON schema
-        self.assertIn("bson_schema", events[0].data)
-        self.assertEqual(events[0].data["bson_schema"], test_schema)
-        self.assertEqual(events[0].data["collection"], self.test_collection_name)
-        self.assertEqual(events[0].data["operation"], "schema_validation_applied")
+        # Verify the event data is the schema dictionary
+        self.assertEqual(events[0].data, test_schema)
 
     def test_load_json_data(self):
         """Test loading JSON data from file."""

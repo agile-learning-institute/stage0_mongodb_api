@@ -8,6 +8,7 @@ from configurator.utils.configurator_exception import ConfiguratorEvent, Configu
 
 import logging
 import os
+from pymongo.errors import BulkWriteError
 
 logger = logging.getLogger(__name__)
 
@@ -341,16 +342,7 @@ class MongoIO:
             
             result = self.db.command(command)
             logger.info(f"Schema validation applied to collection: {collection_name}")
-            
-            # Add detailed schema information to event data
-            properties = schema_dict.get("properties", {})
-            required_fields = schema_dict.get("required", [])
-            
-            event.data = {
-                "collection": collection_name,
-                "operation": "schema_validation_applied",
-                "bson_schema": schema_dict
-            }
+            event.data = schema_dict
             event.record_success()
             return [event]
             
@@ -391,8 +383,12 @@ class MongoIO:
             }
             event.record_success()
             return [event]
+        except BulkWriteError as e:
+            # Extract rich error information from bulk write result
+            event.record_failure("Bulk write operation failed", e.details)
+            return [event]
         except Exception as e:
-            event.record_failure({"error": str(e), "collection": collection_name, "data_file": data_file})
+            event.record_failure("Bulk write operation failed unexpectedly", {"error": str(e), "collection": collection_name, "data_file": data_file})
             return [event]
 
     def drop_database(self) -> list[ConfiguratorEvent]:
