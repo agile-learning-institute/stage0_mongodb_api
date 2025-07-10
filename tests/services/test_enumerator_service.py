@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, Mock
 from configurator.services.enumerator_service import Enumerators, Enumerations
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
@@ -29,29 +29,21 @@ class TestEnumerators(unittest.TestCase):
         # Mock get_document to return different original and saved content
         mock_get_document.side_effect = [original_data, cleaned_data]
         
+        # Mock put_document to return a File object
+        mock_file = Mock()
+        mock_file.name = "enumerators.json"
+        mock_file.path = "/path/to/enumerators.json"
+        mock_put_document.return_value = mock_file
+        
         enum = Enumerators(cleaned_data)
         
         # Act
-        events = enum.save()
+        result = enum.save()
         
         # Assert
-        self.assertEqual(len(events), 1)
-        event = events[0]
-        self.assertEqual(event.id, "ENU-03")
-        self.assertEqual(event.type, "SAVE_ENUMERATORS")
-        self.assertEqual(event.status, "SUCCESS")
-        
-        # Check that the event data shows the differences
-        self.assertIn("data", event.__dict__)
-        event_data = event.data
-        self.assertIn("original", event_data)
-        self.assertIn("saved", event_data)
-        self.assertTrue(event_data["changed"])
-        self.assertEqual(event_data["original"], original_data)
-        self.assertEqual(event_data["saved"], cleaned_data)
+        self.assertEqual(result, mock_file)
         
         # Verify FileIO calls
-        self.assertEqual(mock_get_document.call_count, 2)  # Once for original, once for saved
         mock_put_document.assert_called_once_with("test_data", "enumerators.json", cleaned_data)
 
     @patch('configurator.services.enumerator_service.FileIO.put_document')
@@ -64,24 +56,22 @@ class TestEnumerators(unittest.TestCase):
         # Mock get_document to return same content for original and saved
         mock_get_document.side_effect = [same_data, same_data]
         
+        # Mock put_document to return a File object
+        mock_file = Mock()
+        mock_file.name = "enumerators.json"
+        mock_file.path = "/path/to/enumerators.json"
+        mock_put_document.return_value = mock_file
+        
         enum = Enumerators(same_data)
         
         # Act
-        events = enum.save()
+        result = enum.save()
         
         # Assert
-        self.assertEqual(len(events), 1)
-        event = events[0]
-        self.assertEqual(event.id, "ENU-03")
-        self.assertEqual(event.type, "SAVE_ENUMERATORS")
-        self.assertEqual(event.status, "SUCCESS")
+        self.assertEqual(result, mock_file)
         
-        # Check that the event data shows no differences
-        self.assertIn("data", event.__dict__)
-        event_data = event.data
-        self.assertFalse(event_data["changed"])
-        self.assertNotIn("original", event_data)
-        self.assertNotIn("saved", event_data)
+        # Verify FileIO calls
+        mock_put_document.assert_called_once_with("test_data", "enumerators.json", same_data)
 
     @patch('configurator.services.enumerator_service.FileIO.put_document')
     @patch('configurator.services.enumerator_service.FileIO.get_document')
@@ -91,22 +81,15 @@ class TestEnumerators(unittest.TestCase):
         data = [{"version": 0, "enumerators": {}}]
         enum = Enumerators(data)
         
-        # Mock get_document to raise ConfiguratorException
+        # Mock put_document to raise ConfiguratorException
         event = ConfiguratorEvent("TEST-01", "TEST_ERROR")
-        mock_get_document.side_effect = ConfiguratorException("Test error", event)
+        mock_put_document.side_effect = ConfiguratorException("Test error", event)
         
-        # Act
-        events = enum.save()
+        # Act & Assert
+        with self.assertRaises(ConfiguratorException) as cm:
+            enum.save()
         
-        # Assert
-        self.assertEqual(len(events), 1)
-        event = events[0]
-        self.assertEqual(event.id, "ENU-03")
-        self.assertEqual(event.type, "SAVE_ENUMERATORS")
-        self.assertEqual(event.status, "FAILURE")
-        self.assertEqual(event.data["error"], "error saving document")
-        self.assertEqual(len(event.sub_events), 1)
-        self.assertEqual(event.sub_events[0].id, "TEST-01")
+        self.assertIn("Failed to save enumerators", str(cm.exception))
 
     @patch('configurator.services.enumerator_service.FileIO.put_document')
     @patch('configurator.services.enumerator_service.FileIO.get_document')
@@ -116,23 +99,14 @@ class TestEnumerators(unittest.TestCase):
         data = [{"version": 0, "enumerators": {}}]
         enum = Enumerators(data)
         
-        # Mock get_document to raise general Exception
-        mock_get_document.side_effect = Exception("Unexpected error")
+        # Mock put_document to raise general Exception
+        mock_put_document.side_effect = Exception("Unexpected error")
         
-        # Act
-        events = enum.save()
+        # Act & Assert
+        with self.assertRaises(ConfiguratorException) as cm:
+            enum.save()
         
-        # Assert
-        self.assertEqual(len(events), 1)
-        event = events[0]
-        self.assertEqual(event.id, "ENU-03")
-        self.assertEqual(event.type, "SAVE_ENUMERATORS")
-        self.assertEqual(event.status, "FAILURE")
-        self.assertEqual(event.data["error"], "unexpected error saving document")
-        self.assertEqual(len(event.sub_events), 1)
-        self.assertEqual(event.sub_events[0].id, "ENU-04")
-        self.assertEqual(event.sub_events[0].type, "SAVE_ENUMERATORS")
-        self.assertEqual(event.sub_events[0].data["error"], "Unexpected error")
+        self.assertIn("Failed to save enumerators", str(cm.exception))
 
     def test_version_returns_correct_version(self):
         """Test that version method returns the correct version."""

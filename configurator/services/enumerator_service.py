@@ -1,5 +1,5 @@
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.utils.file_io import FileIO
+from configurator.utils.file_io import FileIO, File
 from configurator.utils.config import Config
 import os
 
@@ -15,39 +15,14 @@ class Enumerators:
         for enumerators in self.dict:
             self.versions.append(Enumerations(enumerators))
                 
-    def save(self) -> list[ConfiguratorEvent]:
-        event = ConfiguratorEvent(event_id="ENU-03", event_type="SAVE_ENUMERATORS")
+    def save(self) -> File:
+        """Save the enumerators and return the File object."""
         try:
-            # Get original content before saving
-            original_doc = FileIO.get_document(self.config.TEST_DATA_FOLDER, "enumerators.json")
-            
             # Save the cleaned content
-            FileIO.put_document(self.config.TEST_DATA_FOLDER, "enumerators.json", self.dict)
-            
-            # Re-read the saved content
-            saved_doc = FileIO.get_document(self.config.TEST_DATA_FOLDER, "enumerators.json")
-            
-            # For enumerators, we're dealing with a list of versioned enumerations
-            # Compare the content directly since it's a list structure
-            if original_doc != saved_doc:
-                event.data = {
-                    "original": original_doc,
-                    "saved": saved_doc,
-                    "changed": True
-                }
-            else:
-                event.data = {
-                    "changed": False
-                }
-            
-            event.record_success()
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error saving document")
+            return FileIO.put_document(self.config.TEST_DATA_FOLDER, "enumerators.json", self.dict)
         except Exception as e:
-            event.append_events([ConfiguratorEvent(event_id="ENU-04", event_type="SAVE_ENUMERATORS", event_data={"error": str(e)})])
-            event.record_failure("unexpected error saving document")
-        return [event]
+            event = ConfiguratorEvent("ENU-03", "SAVE_ENUMERATORS", {"error": str(e)})
+            raise ConfiguratorException(f"Failed to save enumerators: {str(e)}", event)
     
     def version(self, version: int):
         return self.versions[version]

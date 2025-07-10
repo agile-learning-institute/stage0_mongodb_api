@@ -21,16 +21,21 @@ def create_enumerator_routes():
     @enumerator_routes.route('/', methods=['PATCH'])
     @event_route("ENU-04", "CLEAN_ENUMERATORS", "cleaning enumerators")
     def clean_enumerators():
-        enumerators = Enumerators(None)
-        return enumerators.save()
+        try:
+            enumerators = Enumerators(None)
+            saved_file = enumerators.save()
+            return saved_file.to_dict()
+        except Exception as e:
+            # Raise to trigger 500 from decorator
+            raise ConfiguratorException(f"Failed to clean enumerators: {str(e)}")
     
     # PUT /api/enumerators - Overwrite enumerators.json
     @enumerator_routes.route('/', methods=['PUT'])
     @event_route("ENU-02", "PUT_ENUMERATORS", "saving enumerators")
     def put_enumerators():
         enumerators = Enumerators(data=request.get_json(force=True))
-        events = enumerators.save()
-        return events[0].data if events else {}
+        saved_file = enumerators.save()
+        return saved_file.to_dict()
     
     logger.info("Enumerator Flask Routes Registered")
     return enumerator_routes

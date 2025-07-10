@@ -94,9 +94,9 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Arrange
         test_data = [{"name": "enum1", "status": "active", "version": 1, "enumerators": {}}]
         mock_enumerators = Mock()
-        mock_event = Mock()
-        mock_event.data = test_data
-        mock_enumerators.save.return_value = [mock_event]
+        mock_saved_file = Mock()
+        mock_saved_file.to_dict.return_value = {"name": "enumerators.json", "path": "/path/to/enumerators.json"}
+        mock_enumerators.save.return_value = mock_saved_file
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act
@@ -105,7 +105,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, test_data)
+        self.assertEqual(response_data, {"name": "enumerators.json", "path": "/path/to/enumerators.json"})
         mock_enumerators_class.assert_called_once_with(data=test_data)
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
@@ -160,8 +160,9 @@ class TestEnumeratorRoutes(unittest.TestCase):
         """Test successful PATCH /api/enumerators - Clean Enumerators."""
         # Arrange
         mock_enumerators = Mock()
-        mock_event = ConfiguratorEvent("ENU-03", "SUCCESS")
-        mock_enumerators.save.return_value = [mock_event]
+        mock_saved_file = Mock()
+        mock_saved_file.to_dict.return_value = {"name": "enumerators.json", "path": "/path/to/enumerators.json"}
+        mock_enumerators.save.return_value = mock_saved_file
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act
@@ -170,10 +171,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data["id"], "ENU-04")
-        self.assertEqual(response_data["type"], "CLEAN_ENUMERATORS")
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertIn("sub_events", response_data)
+        self.assertEqual(response_data, {"name": "enumerators.json", "path": "/path/to/enumerators.json"})
         mock_enumerators_class.assert_called_once()
         mock_enumerators.save.assert_called_once()
 
