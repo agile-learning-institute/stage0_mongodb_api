@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.route_decorators import event_route
@@ -14,7 +14,7 @@ def create_config_routes():
     @config_routes.route('/', methods=['GET'])
     @event_route("CFG-00", "GET_CONFIG", "getting config")
     def get_config():
-        return config.to_dict()
+        return jsonify(config.to_dict())
     
     logger.info("Config Flask Routes Registered")
     return config_routes

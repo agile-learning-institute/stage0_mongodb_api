@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
@@ -18,7 +18,7 @@ def create_migration_routes():
     def get_migrations():
         files = FileIO.get_documents(config.MIGRATIONS_FOLDER)
         filenames = [file.name for file in files]
-        return filenames
+        return jsonify(filenames)
 
     # PATCH /api/migrations/ - Clean all migration files (delete all)
     @migration_routes.route('/', methods=['PATCH'])
@@ -36,7 +36,7 @@ def create_migration_routes():
                 sub_event = ConfiguratorEvent(event_id="MIG-05", event_type="DELETE_MIGRATION")
                 sub_event.record_failure({"error": str(e)})
                 events.append(sub_event)
-        return events
+        return jsonify([event.to_dict() for event in events])
 
     # GET /api/migrations/<file_name>/ - Get a migration file
     @migration_routes.route('/<file_name>/', methods=['GET'])
@@ -44,7 +44,7 @@ def create_migration_routes():
     def get_migration(file_name):
         try:
             content = FileIO.get_document(config.MIGRATIONS_FOLDER, file_name)
-            return content
+            return jsonify(content)
         except Exception as e:
             raise ConfiguratorException(f"Migration file {file_name} not found", ConfiguratorEvent(event_id="MIG-01", event_type="MIGRATION_NOT_FOUND"))
 
@@ -54,7 +54,7 @@ def create_migration_routes():
     def put_migration(file_name):
         content = request.get_json(force=True)
         file = FileIO.put_document(config.MIGRATIONS_FOLDER, file_name, content)
-        return file.to_dict()
+        return jsonify(file.to_dict())
 
     # DELETE /api/migrations/<file_name>/ - Delete a migration file
     @migration_routes.route('/<file_name>/', methods=['DELETE'])
@@ -65,7 +65,7 @@ def create_migration_routes():
             raise ConfiguratorException(f"Migration file {file_name} not found", ConfiguratorEvent(event_id="MIG-03", event_type="MIGRATION_NOT_FOUND"))
         try:
             FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name)
-            return {"message": "Migration deleted"}
+            return jsonify({"message": "Migration deleted"})
         except Exception as e:
             raise ConfiguratorException(f"Migration file {file_name} not found", ConfiguratorEvent(event_id="MIG-03", event_type="MIGRATION_NOT_FOUND"))
     

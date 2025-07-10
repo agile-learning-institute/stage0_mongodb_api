@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.enumerator_service import Enumerators
@@ -15,7 +15,7 @@ def create_enumerator_routes():
     @event_route("ENU-01", "GET_ENUMERATORS", "getting enumerators")
     def get_enumerators():
         enumerators = Enumerators(None)
-        return enumerators.to_dict()
+        return jsonify(enumerators.to_dict())
     
     # PATCH /api/enumerators - Clean Enumerators
     @enumerator_routes.route('/', methods=['PATCH'])
@@ -24,7 +24,7 @@ def create_enumerator_routes():
         try:
             enumerators = Enumerators(None)
             saved_file = enumerators.save()
-            return saved_file.to_dict()
+            return jsonify(saved_file.to_dict())
         except Exception as e:
             # Raise to trigger 500 from decorator
             raise ConfiguratorException(f"Failed to clean enumerators: {str(e)}")
@@ -35,7 +35,7 @@ def create_enumerator_routes():
     def put_enumerators():
         enumerators = Enumerators(data=request.get_json(force=True))
         saved_file = enumerators.save()
-        return saved_file.to_dict()
+        return jsonify(saved_file.to_dict())
     
     logger.info("Enumerator Flask Routes Registered")
     return enumerator_routes

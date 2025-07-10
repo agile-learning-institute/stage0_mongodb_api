@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
@@ -17,7 +17,7 @@ def create_type_routes():
     @event_route("TYP-01", "GET_TYPES", "listing types")
     def get_types():
         files = FileIO.get_documents(config.TYPE_FOLDER)
-        return [file.to_dict() for file in files]
+        return jsonify([file.to_dict() for file in files])
 
     # PATCH /api/types - Clean Types
     @type_routes.route('/', methods=['PATCH'])
@@ -35,14 +35,14 @@ def create_type_routes():
                 # Raise to trigger 500 from decorator
                 raise ConfiguratorException(f"Failed to clean type {file.name}: {str(e)}")
         
-        return cleaned_files
+        return jsonify(cleaned_files)
 
     # GET /api/types/<file_name>/ - Return a type file
     @type_routes.route('/<file_name>/', methods=['GET'])
     @event_route("TYP-02", "GET_TYPE", "getting type")
     def get_type(file_name):
         type_obj = Type(file_name)
-        return type_obj
+        return jsonify(type_obj.property.to_dict())
     
     # PUT /api/types/<file_name> - Update a type file
     @type_routes.route('/<file_name>/', methods=['PUT'])
@@ -50,21 +50,21 @@ def create_type_routes():
     def update_type(file_name):
         type_obj = Type(file_name, request.json)
         saved_file = type_obj.save()
-        return saved_file.to_dict()
+        return jsonify(saved_file.to_dict())
     
     @type_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TYP-05", "DELETE_TYPE", "deleting type")
     def delete_type(file_name):
         type_obj = Type(file_name)
         deleted = type_obj.delete()
-        return deleted
+        return jsonify(deleted.to_dict())
     
     @type_routes.route('/<file_name>/', methods=['PATCH'])
     @event_route("TYP-06", "LOCK_UNLOCK_TYPE", "locking/unlocking type")
     def lock_unlock_type(file_name):
         type_obj = Type(file_name)
         result = type_obj.flip_lock()
-        return result
+        return jsonify(result.to_dict())
     
     logger.info("Type Flask Routes Registered")
     return type_routes

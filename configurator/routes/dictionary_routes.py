@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
@@ -17,7 +17,7 @@ def create_dictionary_routes():
     @event_route("DIC-01", "GET_DICTIONARIES", "listing dictionaries")
     def get_dictionaries():
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-        return [file.to_dict() for file in files]
+        return jsonify([file.to_dict() for file in files])
     
     # PATCH /api/dictionaries - Clean Dictionaries
     @dictionary_routes.route('/', methods=['PATCH'])
@@ -35,14 +35,14 @@ def create_dictionary_routes():
                 # Raise to trigger 500 from decorator
                 raise ConfiguratorException(f"Failed to clean dictionary {file.name}: {str(e)}")
         
-        return cleaned_files
+        return jsonify(cleaned_files)
     
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['GET'])
     @event_route("DIC-02", "GET_DICTIONARY", "getting dictionary")
     def get_dictionary(file_name):
         dictionary = Dictionary(file_name)
-        return dictionary
+        return jsonify(dictionary.to_dict())
     
     # PUT /api/dictionaries/<file_name> - Update a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['PUT'])
@@ -50,21 +50,21 @@ def create_dictionary_routes():
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
         saved_file = dictionary.save()
-        return saved_file.to_dict()
+        return jsonify(saved_file.to_dict())
     
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")
     def delete_dictionary(file_name):
         dictionary = Dictionary(file_name)
         deleted = dictionary.delete()
-        return deleted
+        return jsonify(deleted.to_dict())
     
     @dictionary_routes.route('/<file_name>/', methods=['PATCH'])
     @event_route("DIC-06", "LOCK_UNLOCK_DICTIONARY", "locking/unlocking dictionary")
     def lock_unlock_dictionary(file_name):
         dictionary = Dictionary(file_name)
-        result = dictionary.flip_lock()
-        return result
+        result = dictionary.lock_unlock()
+        return jsonify(result.to_dict())
     
     logger.info("dictionary Flask Routes Registered")
     return dictionary_routes

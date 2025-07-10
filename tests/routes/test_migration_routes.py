@@ -88,11 +88,13 @@ class MigrationRoutesTestCase(unittest.TestCase):
         resp = self.app.patch("/api/migrations/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        self.assertIn("id", data)
-        self.assertIn("type", data)
-        self.assertIn("status", data)
-        self.assertIn("data", data)
-        self.assertEqual(data["status"], "SUCCESS")
+        # Now returns a list of events
+        self.assertIsInstance(data, list)
+        self.assertGreater(len(data), 0)
+        for event in data:
+            self.assertIn("id", event)
+            self.assertIn("type", event)
+            self.assertIn("status", event)
 
 class TestMigrationRoutes(unittest.TestCase):
     """Test cases for migration routes."""

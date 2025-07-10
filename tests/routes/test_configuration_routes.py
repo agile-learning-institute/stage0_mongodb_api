@@ -116,7 +116,8 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_get_configuration_success(self, mock_configuration_class):
         """Test successful GET /api/configurations/<file_name>/."""
         # Arrange
-        mock_configuration = {"name": "test_config", "version": "1.0.0"}
+        mock_configuration = Mock()
+        mock_configuration.to_dict.return_value = {"name": "test_config", "version": "1.0.0"}
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -126,7 +127,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json
         # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, mock_configuration)
+        self.assertEqual(response_data, {"name": "test_config", "version": "1.0.0"})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_configuration_general_exception(self, mock_configuration_class):
@@ -190,7 +191,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test successful DELETE /api/configurations/<file_name>/."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.delete.return_value = {"deleted": True}
+        mock_event = Mock()
+        mock_event.to_dict.return_value = {"deleted": True}
+        mock_configuration.delete.return_value = mock_event
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -227,7 +230,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test successful PATCH /api/configurations/<file_name>/."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.flip_lock.return_value = {"read_only": True}
+        mock_file = Mock()
+        mock_file.to_dict.return_value = {"read_only": True}
+        mock_configuration.lock_unlock.return_value = mock_file
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -264,7 +269,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         """Test successful POST /api/configurations/<file_name>/."""
         # Arrange
         mock_configuration = Mock()
-        mock_configuration.process.return_value = {"result": "success"}
+        mock_event = Mock()
+        mock_event.to_dict.return_value = {"result": "success"}
+        mock_configuration.process.return_value = mock_event
         mock_configuration_class.return_value = mock_configuration
 
         # Act

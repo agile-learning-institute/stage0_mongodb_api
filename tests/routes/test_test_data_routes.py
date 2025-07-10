@@ -126,7 +126,9 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_delete_data_file_success(self, mock_file_io):
         """Test successful DELETE /api/test_data/<file_name>."""
         # Arrange
-        mock_file_io.delete_document.return_value = {"deleted": True}
+        mock_event = Mock()
+        mock_event.to_dict.return_value = {"deleted": True}
+        mock_file_io.delete_document.return_value = mock_event
 
         # Act
         response = self.client.delete('/api/test_data/test_file.json/')

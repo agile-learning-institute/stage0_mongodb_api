@@ -57,7 +57,8 @@ class TestDictionaryRoutes(unittest.TestCase):
     def test_get_dictionary_success(self, mock_dictionary_class):
         """Test successful GET /api/dictionaries/<file_name>."""
         # Arrange
-        mock_dictionary = {"name": "test_dict", "version": "1.0.0"}
+        mock_dictionary = Mock()
+        mock_dictionary.to_dict.return_value = {"name": "test_dict", "version": "1.0.0"}
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
@@ -66,7 +67,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, mock_dictionary)
+        self.assertEqual(response_data, {"name": "test_dict", "version": "1.0.0"})
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_get_dictionary_general_exception(self, mock_dictionary_class):
@@ -129,7 +130,9 @@ class TestDictionaryRoutes(unittest.TestCase):
         """Test successful DELETE /api/dictionaries/<file_name>."""
         # Arrange
         mock_dictionary = Mock()
-        mock_dictionary.delete.return_value = {"deleted": True}
+        mock_event = Mock()
+        mock_event.to_dict.return_value = {"deleted": True}
+        mock_dictionary.delete.return_value = mock_event
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act
@@ -165,7 +168,9 @@ class TestDictionaryRoutes(unittest.TestCase):
         """Test successful PATCH /api/dictionaries/<file_name>."""
         # Arrange
         mock_dictionary = Mock()
-        mock_dictionary.flip_lock.return_value = {"read_only": True}
+        mock_file = Mock()
+        mock_file.to_dict.return_value = {"read_only": True}
+        mock_dictionary.lock_unlock.return_value = mock_file
         mock_dictionary_class.return_value = mock_dictionary
 
         # Act

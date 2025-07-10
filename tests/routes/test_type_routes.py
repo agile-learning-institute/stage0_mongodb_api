@@ -57,7 +57,10 @@ class TestTypeRoutes(unittest.TestCase):
     def test_get_type_success(self, mock_type_class):
         """Test successful GET /api/types/<file_name>."""
         # Arrange
-        mock_type = {"name": "test_type", "version": "1.0.0"}
+        mock_type = Mock()
+        mock_property = Mock()
+        mock_property.to_dict.return_value = {"name": "test_type", "version": "1.0.0"}
+        mock_type.property = mock_property
         mock_type_class.return_value = mock_type
 
         # Act
@@ -66,7 +69,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, mock_type)
+        self.assertEqual(response_data, {"name": "test_type", "version": "1.0.0"})
 
     @patch('configurator.routes.type_routes.Type')
     def test_get_type_general_exception(self, mock_type_class):
@@ -129,7 +132,9 @@ class TestTypeRoutes(unittest.TestCase):
         """Test successful DELETE /api/types/<file_name>."""
         # Arrange
         mock_type = Mock()
-        mock_type.delete.return_value = {"deleted": True}
+        mock_event = Mock()
+        mock_event.to_dict.return_value = {"deleted": True}
+        mock_type.delete.return_value = mock_event
         mock_type_class.return_value = mock_type
 
         # Act
@@ -165,7 +170,9 @@ class TestTypeRoutes(unittest.TestCase):
         """Test successful PATCH /api/types/<file_name>."""
         # Arrange
         mock_type = Mock()
-        mock_type.flip_lock.return_value = {"read_only": True}
+        mock_file = Mock()
+        mock_file.to_dict.return_value = {"read_only": True}
+        mock_type.flip_lock.return_value = mock_file
         mock_type_class.return_value = mock_type
 
         # Act

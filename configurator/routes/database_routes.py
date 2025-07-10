@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.mongo_io import MongoIO
@@ -18,7 +18,7 @@ def create_database_routes():
         mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
         events = mongo_io.drop_database()
         mongo_io.disconnect()
-        return [event.to_dict() for event in events]
+        return jsonify([event.to_dict() for event in events])
     
     logger.info("database Flask Routes Registered")
     return database_routes
