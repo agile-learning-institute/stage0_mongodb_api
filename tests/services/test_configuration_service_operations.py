@@ -38,8 +38,7 @@ class TestConfigurationOperations(unittest.TestCase):
         """Test loading configuration from YAML file"""
         config = Configuration("sample.yaml")
         
-        self.assertEqual(config.name, "sample")
-        # self.assertEqual(config.file_name, "sample.yaml")  # file_name removed, use name
+        self.assertEqual(config.file_name, "sample.yaml")
         self.assertEqual(len(config.versions), 1)
         
         # Test version details
@@ -53,7 +52,7 @@ class TestConfigurationOperations(unittest.TestCase):
         config = Configuration("sample.yaml")
         config_dict = config.to_dict()
         
-        self.assertEqual(config_dict["name"], "sample")
+        self.assertEqual(config_dict["file_name"], "sample.yaml")
         self.assertEqual(len(config_dict["versions"]), 1)
         
         version_dict = config_dict["versions"][0]
@@ -112,38 +111,39 @@ class TestConfigurationOperations(unittest.TestCase):
 
     def test_configuration_with_multiple_versions(self):
         """Test configuration with multiple versions"""
-        # Create a test configuration with multiple versions
         config_data = {
-            "name": "multi_version",
-            "title": "Multi Version Test",
+            "title": "Test Configuration",
             "description": "Test configuration with multiple versions",
             "versions": [
                 {
-                    "version": "1.0.0.0",
-                    "drop_indexes": [],
-                    "add_indexes": ["v1_index"],
-                    "migrations": [],
-                    "test_data": "v1_data.json"
+                    "version": "1.0.0",
+                    "test_data": "test.1.0.0.1.json"
                 },
                 {
-                    "version": "1.0.0.1",
-                    "drop_indexes": ["v1_index"],
-                    "add_indexes": ["v2_index"],
-                    "migrations": ["v2_migration"],
-                    "test_data": "v2_data.json"
+                    "version": "1.1.0", 
+                    "test_data": "test.1.1.0.1.json"
                 }
             ]
         }
         
-        # Test creating configuration from dict
         config = Configuration("test.yaml", config_data)
         
-        self.assertEqual(config.name, "test")
+        self.assertEqual(config.file_name, "test.yaml")
+        self.assertEqual(config.title, "Test Configuration")
+        self.assertEqual(config.description, "Test configuration with multiple versions")
         self.assertEqual(len(config.versions), 2)
         
-        # Test version ordering
-        self.assertEqual(config.versions[0].version_str, "1.0.0.0")
-        self.assertEqual(config.versions[1].version_str, "1.0.0.1")
+        # Test first version - VersionNumber defaults enumerator to 0
+        version1 = config.versions[0]
+        self.assertEqual(version1.collection_name, "test")
+        self.assertEqual(version1.version_str, "1.0.0.0")
+        self.assertEqual(version1.test_data, "test.1.0.0.1.json")
+        
+        # Test second version - VersionNumber defaults enumerator to 0
+        version2 = config.versions[1]
+        self.assertEqual(version2.collection_name, "test")
+        self.assertEqual(version2.version_str, "1.1.0.0")
+        self.assertEqual(version2.test_data, "test.1.1.0.1.json")
 
     def test_get_json_schema_for_version(self):
         """Test getting JSON schema for a specific version"""

@@ -31,17 +31,16 @@ class Type:
     def __init__(self, file_name: str, document: dict = {}):
         self.config = Config.get_instance()
         self.file_name = file_name
-        self.name = file_name.split(".")[0]
         self.type_property = {}
         self._locked = False  # Default to unlocked
 
         if document:
-            self.property = TypeProperty(self.name, document)
+            self.property = TypeProperty(file_name.replace('.yaml', ''), document)
             # Extract _locked from document if present
             self._locked = document.get("_locked", False)
         else:
             document_data = FileIO.get_document(self.config.TYPE_FOLDER, file_name)
-            self.property = TypeProperty(self.name, document_data)
+            self.property = TypeProperty(file_name.replace('.yaml', ''), document_data)
             # Extract _locked from loaded document if present
             self._locked = document_data.get("_locked", False)
 
@@ -79,7 +78,7 @@ class Type:
                 sub_event = ConfiguratorEvent(f"TYP-{file.name}", "LOCK_TYPE")
                 sub_event.data = {
                     "file_name": file.name,
-                    "type_name": type_obj.name,
+                    "type_name": type_obj.file_name.replace('.yaml', ''),
                     "locked": True
                 }
                 sub_event.record_success()
@@ -114,7 +113,7 @@ class Type:
     
     def to_dict(self):
         return {
-            "name": self.name,
+            "file_name": self.file_name,
             "_locked": self._locked,  # Always include _locked
             **self.property.to_dict()
         }

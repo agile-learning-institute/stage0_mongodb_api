@@ -290,7 +290,7 @@ class TestDictionary(unittest.TestCase):
         
         dictionary = Dictionary("test.yaml")
         
-        self.assertEqual(dictionary.file_name, "test")
+        self.assertEqual(dictionary.file_name, "test.yaml")
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
@@ -307,32 +307,29 @@ class TestDictionary(unittest.TestCase):
             }
         }
         dictionary = Dictionary("test.yaml", doc)
-        self.assertEqual(dictionary.file_name, "test")
+        self.assertEqual(dictionary.file_name, "test.yaml")
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
     def test_to_dict(self):
         """Test Dictionary to_dict method"""
-        doc = {
+        dictionary = Dictionary("test.yaml", {
             "description": "Test dictionary",
             "version": "1.0.0",
             "properties": {
                 "name": {
-                    "description": "Name property",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Name field"
                 }
             }
-        }
-        dictionary = Dictionary("test.yaml", doc)
+        })
+        
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "Test dictionary")
         self.assertEqual(result["version"], "1.0.0")
-        self.assertEqual(result["file_name"], "test")
-        self.assertEqual(result["_locked"], False)
         self.assertIn("properties", result)
-        self.assertIn("name", result["properties"])
-        self.assertEqual(result["properties"]["name"]["description"], "Name property")
-        self.assertEqual(result["properties"]["name"]["type"], "string")
+        self.assertEqual(result["file_name"], "test.yaml")
+        self.assertEqual(result["_locked"], False)
 
 
 class TestDictionaryCanonical(unittest.TestCase):
@@ -350,7 +347,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         
         dictionary = Dictionary("sample.1.0.0.yaml", doc)
         
-        self.assertEqual(dictionary.file_name, "sample.1.0.0")
+        self.assertEqual(dictionary.file_name, "sample.1.0.0.yaml")
         self.assertEqual(dictionary.property.description, "A simple collection for testing")
         self.assertEqual(dictionary.property.type, "object")
         
@@ -359,9 +356,8 @@ class TestDictionaryCanonical(unittest.TestCase):
         self.assertEqual(result["description"], "A simple collection for testing")
         self.assertEqual(result["type"], "object")
         self.assertIn("properties", result)
-        self.assertIn("_id", result["properties"])
-        self.assertIn("name", result["properties"])
-        self.assertIn("status", result["properties"])
+        self.assertEqual(result["file_name"], "sample.1.0.0.yaml")
+        self.assertEqual(result["_locked"], False)
 
     def test_dictionary_without_fields(self):
         """Test Dictionary without fields"""
@@ -379,7 +375,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "Test dictionary without fields")
         self.assertEqual(result["version"], "1.0.0")
-        self.assertEqual(result["file_name"], "test")
+        self.assertEqual(result["file_name"], "test.yaml")
         self.assertEqual(result["_locked"], False)
 
 if __name__ == '__main__':

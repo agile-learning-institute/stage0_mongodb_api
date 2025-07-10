@@ -9,7 +9,7 @@ import os
 class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
         self.config = Config.get_instance()
-        self.file_name = file_name.replace('.yaml', '')
+        self.file_name = file_name
         self._locked = False
         self.property = None
 
@@ -27,16 +27,6 @@ class Dictionary:
         result["_locked"] = self._locked
         return result
 
-    def get_json_schema(self, enumerations, ref_stack: list = None):
-        if ref_stack is None:
-            ref_stack = []
-        return self.property.get_json_schema(enumerations, ref_stack)
-
-    def get_bson_schema(self, enumerations, ref_stack: list = None):
-        if ref_stack is None:
-            ref_stack = []
-        return self.property.get_bson_schema(enumerations, ref_stack)
-
     def save(self):
         """Save the dictionary and return the Dictionary object."""
         try:
@@ -47,6 +37,16 @@ class Dictionary:
             event = ConfiguratorEvent("DIC-03", "PUT_DICTIONARY")
             event.record_failure(f"Failed to save dictionary {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}", event)
+
+    def get_json_schema(self, enumerations, ref_stack: list = None):
+        if ref_stack is None:
+            ref_stack = []
+        return self.property.get_json_schema(enumerations, ref_stack)
+
+    def get_bson_schema(self, enumerations, ref_stack: list = None):
+        if ref_stack is None:
+            ref_stack = []
+        return self.property.get_bson_schema(enumerations, ref_stack)
 
     @staticmethod
     def lock_all():
@@ -70,7 +70,7 @@ class Dictionary:
                 sub_event = ConfiguratorEvent(f"DIC-{file.name}", "LOCK_DICTIONARY")
                 sub_event.data = {
                     "file_name": file.name,
-                    "dictionary_name": dictionary.file_name,
+                    "dictionary_name": dictionary.file_name.replace('.yaml', ''),
                     "locked": True
                 }
                 sub_event.record_success()
@@ -111,7 +111,6 @@ class Dictionary:
         except Exception as e:
             event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
         return event
-
 
 
 class Property:

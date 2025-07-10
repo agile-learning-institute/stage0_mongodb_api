@@ -15,42 +15,42 @@ tests:
 #          check:
 #            status: /200|500/
       
-#      # Create - PUT new dictionary
-#      - name: Create Test Dictionary
-#        http:
-#          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
-#          method: PUT
-#          headers:
-#            Content-Type: application/json
-#          body: |
-#            {
-#              "description": "Test dictionary for stepCI testing",
-#              "version": "1.0.0",
-#              "properties": {
-#                "name": {
-#                  "type": "string",
-#                  "description": "Name field"
-#                },
-#                "email": {
-#                  "type": "email",
-#                  "description": "Email field"
-#                }
-#              }
-#            }
-#          check:
-#            status: /200/
-#            jsonpath:
-#              name: test_dict
-#              _locked: false
-#            schema:
-#              created_at: 
-#                type: string
-#                format: date-time
-#              updated_at:
-#                type: string
-#                format: date-time
-#              size:
-#                type: number
+      # Create - PUT new dictionary
+      - name: Create Test Dictionary
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Test dictionary for stepCI testing",
+              "version": "1.0.0",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name field"
+                },
+                "email": {
+                  "type": "email",
+                  "description": "Email field"
+                }
+              }
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_dict.yaml
+              _locked: false
+            schema:
+              created_at: 
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              size:
+                type: number
                       
       # Read - GET the created dictionary
       - name: Get Test Dictionary

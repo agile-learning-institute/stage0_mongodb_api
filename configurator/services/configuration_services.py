@@ -11,20 +11,19 @@ import os
 class Configuration:
     def __init__(self, file_name: str, document: dict = None):
         self.config = Config.get_instance()
-        # Strip .yaml extension for the name property
-        self.name = file_name.replace('.yaml', '')
+        self.file_name = file_name
         if not document:
             document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
         
         self.title = document.get("title", "")
         self.description = document.get("description", "")
-        self.versions = [Version(self.name, v, self.config) for v in document.get("versions", [])]
+        self.versions = [Version(file_name.replace('.yaml', ''), v, self.config) for v in document.get("versions", [])]
         # Handle _locked from PUT request or existing file
         self._locked = document.get("_locked", False)
 
     def to_dict(self):
         return {
-            "name": self.name,  # Return stripped name
+            "file_name": self.file_name,
             "title": self.title,
             "description": self.description,
             "versions": [v.to_dict() for v in self.versions],
@@ -35,13 +34,12 @@ class Configuration:
         """Save the configuration and return the Configuration object."""
         try:
             # Save the cleaned content
-            file_name = f"{self.name}.yaml"
-            FileIO.put_document(self.config.CONFIGURATION_FOLDER, file_name, self.to_dict())
+            FileIO.put_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
             return self
         except Exception as e:
             event = ConfiguratorEvent("CFG-ROUTES-06", "PUT_CONFIGURATION")
-            event.record_failure(f"Failed to save configuration {self.name}: {str(e)}")
-            raise ConfiguratorException(f"Failed to save configuration {self.name}: {str(e)}", event)
+            event.record_failure(f"Failed to save configuration {self.file_name}: {str(e)}")
+            raise ConfiguratorException(f"Failed to save configuration {self.file_name}: {str(e)}", event)
     
     @staticmethod
     def lock_all():
@@ -65,7 +63,7 @@ class Configuration:
                 sub_event = ConfiguratorEvent(f"CFG-{file.name}", "LOCK_CONFIGURATION")
                 sub_event.data = {
                     "file_name": file.name,
-                    "configuration_name": configuration.name,
+                    "configuration_name": configuration.file_name,
                     "locked": True
                 }
                 sub_event.record_success()
@@ -96,8 +94,7 @@ class Configuration:
         
         event = ConfiguratorEvent(event_id="CFG-ROUTES-07", event_type="DELETE_CONFIGURATION")
         try:
-            file_name = f"{self.name}.yaml"
-            delete_event = FileIO.delete_document(self.config.CONFIGURATION_FOLDER, file_name)
+            delete_event = FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)
             if delete_event.status == "SUCCESS":
                 event.record_success()
             else:
@@ -115,10 +112,9 @@ class Configuration:
             # Toggle the locked state and persist it
             self._locked = not self._locked
             # Save the lock state directly without the lock check
-            file_name = f"{self.name}.yaml"
-            FileIO.put_document(self.config.CONFIGURATION_FOLDER, file_name, self.to_dict())
+            FileIO.put_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
             # Create a File object with the current lock state
-            file_path = os.path.join(self.config.INPUT_FOLDER, self.config.CONFIGURATION_FOLDER, file_name)
+            file_path = os.path.join(self.config.INPUT_FOLDER, self.config.CONFIGURATION_FOLDER, self.file_name)
             file = File(file_path)
             return file
         except ConfiguratorException as e:
@@ -135,20 +131,20 @@ class Configuration:
         try:
             # Add configuration context to main event
             event.data = {
-                "configuration_file": f"{self.name}.yaml",
-                "configuration_name": self.name,
+                "configuration_file": self.file_name,
+                "configuration_name": self.file_name.replace('.yaml', ''),
                 "configuration_title": self.title,
                 "version_count": len(self.versions)
             }
             
             for version in self.versions:
-                current_version = VersionManager.get_current_version(mongo_io, self.name)
+                current_version = VersionManager.get_current_version(mongo_io, self.file_name.replace('.yaml', ''))
                 if version.collection_version <= current_version:
                     sub_event = ConfiguratorEvent(
                         event_id="PRO-00",
                         event_type="SKIP_VERSION",
                         event_data={
-                            "configuration_file": f"{self.name}.yaml",
+                            "configuration_file": self.file_name,
                             "version": version.to_dict(),
                             "current_version": current_version.get_version_str(),
                             "skip_reason": "version_already_processed"
