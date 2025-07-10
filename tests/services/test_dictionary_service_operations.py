@@ -280,7 +280,7 @@ class TestDictionary(unittest.TestCase):
         mock_file_io.get_document.return_value = {
             "description": "Test dictionary",
             "version": "1.0.0",
-            "fields": {
+            "properties": {
                 "name": {
                     "description": "Name property",
                     "type": "string"
@@ -291,17 +291,15 @@ class TestDictionary(unittest.TestCase):
         dictionary = Dictionary("test.yaml")
         
         self.assertEqual(dictionary.name, "test")
-        self.assertEqual(dictionary.description, "Test dictionary")
-        self.assertEqual(dictionary.version, "1.0.0")
-        self.assertIn("name", dictionary.fields)
-        self.assertIsInstance(dictionary.fields["name"], Property)
+        self.assertIsInstance(dictionary.property, Property)
+        self.assertEqual(dictionary.property.description, "Test dictionary")
 
     def test_init_with_document(self):
         """Test Dictionary initialization with document"""
         doc = {
             "description": "Test dictionary",
             "version": "1.0.0",
-            "fields": {
+            "properties": {
                 "name": {
                     "description": "Name property",
                     "type": "string"
@@ -310,18 +308,15 @@ class TestDictionary(unittest.TestCase):
         }
         dictionary = Dictionary("test.yaml", doc)
         self.assertEqual(dictionary.name, "test")
-        self.assertEqual(dictionary.description, "Test dictionary")
-        self.assertEqual(dictionary.version, "1.0.0")
-        self.assertIn("name", dictionary.fields)
-        self.assertIsInstance(dictionary.fields["name"], Property)
-        self.assertEqual(dictionary.fields["name"].description, "Name property")
+        self.assertIsInstance(dictionary.property, Property)
+        self.assertEqual(dictionary.property.description, "Test dictionary")
 
     def test_to_dict(self):
         """Test Dictionary to_dict method"""
         doc = {
             "description": "Test dictionary",
             "version": "1.0.0",
-            "fields": {
+            "properties": {
                 "name": {
                     "description": "Name property",
                     "type": "string"
@@ -332,10 +327,12 @@ class TestDictionary(unittest.TestCase):
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "Test dictionary")
         self.assertEqual(result["version"], "1.0.0")
-        self.assertIn("fields", result)
-        self.assertIn("name", result["fields"])
-        self.assertEqual(result["fields"]["name"]["description"], "Name property")
-        self.assertEqual(result["fields"]["name"]["type"], "string")
+        self.assertEqual(result["name"], "test")
+        self.assertEqual(result["_locked"], False)
+        self.assertIn("properties", result)
+        self.assertIn("name", result["properties"])
+        self.assertEqual(result["properties"]["name"]["description"], "Name property")
+        self.assertEqual(result["properties"]["name"]["type"], "string")
 
 
 class TestDictionaryCanonical(unittest.TestCase):
@@ -354,17 +351,17 @@ class TestDictionaryCanonical(unittest.TestCase):
         dictionary = Dictionary("sample.1.0.0.yaml", doc)
         
         self.assertEqual(dictionary.name, "sample.1.0.0")
-        self.assertEqual(dictionary.description, "A simple collection for testing")
-        self.assertEqual(dictionary.version, "1.0.0")
+        self.assertEqual(dictionary.property.description, "A simple collection for testing")
+        self.assertEqual(dictionary.property.type, "object")
         
         # Test to_dict
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "A simple collection for testing")
-        self.assertEqual(result["version"], "1.0.0")
-        self.assertIn("fields", result)
-        self.assertIn("_id", result["fields"])
-        self.assertIn("name", result["fields"])
-        self.assertIn("status", result["fields"])
+        self.assertEqual(result["type"], "object")
+        self.assertIn("properties", result)
+        self.assertIn("_id", result["properties"])
+        self.assertIn("name", result["properties"])
+        self.assertIn("status", result["properties"])
 
     def test_dictionary_without_fields(self):
         """Test Dictionary without fields"""
@@ -375,15 +372,15 @@ class TestDictionaryCanonical(unittest.TestCase):
         
         dictionary = Dictionary("test.yaml", doc)
         
-        self.assertEqual(dictionary.description, "Test dictionary without fields")
-        self.assertEqual(dictionary.version, "1.0.0")
-        self.assertEqual(dictionary.fields, {})
+        self.assertEqual(dictionary.property.description, "Test dictionary without fields")
+        self.assertEqual(dictionary.property.version, "1.0.0")
         
         # Test to_dict
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "Test dictionary without fields")
         self.assertEqual(result["version"], "1.0.0")
-        self.assertNotIn("fields", result)
+        self.assertEqual(result["name"], "test")
+        self.assertEqual(result["_locked"], False)
 
 if __name__ == '__main__':
     unittest.main() 

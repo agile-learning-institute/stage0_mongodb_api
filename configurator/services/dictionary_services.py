@@ -12,70 +12,37 @@ class Dictionary:
         self.file_name = file_name
         self.name = file_name.replace('.yaml', '')
         self._locked = False
-        self.description = ""
-        self.version = "1.0.0"
-        self.fields = {}
+        self.property = None
 
         if document:
             self._locked = document.get("_locked", False)
-            self.description = document.get("description", "")
-            self.version = document.get("version", "1.0.0")
-            # Handle old structure: convert 'properties' to 'fields'
-            fields_data = document.get("fields", document.get("properties", {}))
-            if fields_data:
-                for field_name, field_def in fields_data.items():
-                    self.fields[field_name] = Property(field_name, field_def)
+            # Add file_name to the document for the Property
+            document_with_file_name = document.copy()
+            document_with_file_name["file_name"] = file_name
+            self.property = Property("root", document_with_file_name)
         else:
             document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
             self._locked = document_data.get("_locked", False)
-            self.description = document_data.get("description", "")
-            self.version = document_data.get("version", "1.0.0")
-            # Handle old structure: convert 'properties' to 'fields'
-            fields_data = document_data.get("fields", document_data.get("properties", {}))
-            if fields_data:
-                for field_name, field_def in fields_data.items():
-                    self.fields[field_name] = Property(field_name, field_def)
+            # Add file_name to the document for the Property
+            document_data_with_file_name = document_data.copy()
+            document_data_with_file_name["file_name"] = file_name
+            self.property = Property("root", document_data_with_file_name)
 
     def to_dict(self):
-        result = {
-            "name": self.name,
-            "_locked": self._locked,
-            "description": self.description,
-            "version": self.version,
-        }
-        if self.fields:
-            result["fields"] = {k: v.to_dict() for k, v in self.fields.items()}
+        result = self.property.to_dict()
+        result["name"] = self.name
+        result["_locked"] = self._locked
         return result
 
     def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        
-        # Create a synthetic root property for schema generation
-        root_property = Property(
-            "root",
-            {
-                "description": self.description,
-                "type": "object",
-                "properties": {k: v.to_dict() for k, v in self.fields.items()} if self.fields else {},
-            },
-        )
-        return root_property.get_json_schema(enumerations, ref_stack)
+        return self.property.get_json_schema(enumerations, ref_stack)
 
     def get_bson_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        
-        # Create a synthetic root property for schema generation
-        root_property = Property(
-            "root",
-            {
-                "description": self.description,
-                "type": "object",
-                "properties": {k: v.to_dict() for k, v in self.fields.items()} if self.fields else {},
-            },
-        )
-        return root_property.get_bson_schema(enumerations, ref_stack)
+        return self.property.get_bson_schema(enumerations, ref_stack)
 
     def save(self):
         """Save the dictionary and return the Dictionary object."""
@@ -160,6 +127,7 @@ class Property:
         self.name = name
         self.ref = property.get("ref", None)
         self.description = property.get("description", "Missing Required Description")
+        self.version = property.get("version", None)
         self.type = property.get("type", None)
         self.enums = property.get("enums", None)
         self.required = property.get("required", False)
@@ -168,9 +136,12 @@ class Property:
         self.items = None
         self.one_of = None
 
-        # Initialize properties if this is an object type
-        if self.type == "object":
-            for prop_name, prop_data in property.get("properties", {}).items():
+        # Handle both 'fields' and 'properties' - convert 'fields' to 'properties'
+        properties_data = property.get("properties", property.get("fields", {}))
+
+        # Initialize properties if this is an object type OR if this is a root document with properties
+        if self.type == "object" or (not self.type and properties_data):
+            for prop_name, prop_data in properties_data.items():
                 self.properties[prop_name] = Property(prop_name, prop_data)
             # Initialize one_of if present
             one_of_data = property.get("one_of", None)
@@ -187,6 +158,17 @@ class Property:
         if self.ref:
             return {"ref": self.ref}
         result = {}
+
+        # Handle root documents that have description/version but no type
+        if self.description and not self.type:
+            result["description"] = self.description
+            if self.version:
+                result["version"] = self.version
+            if self.properties:
+                result["properties"] = {}
+                for prop_name, prop in self.properties.items():
+                    result["properties"][prop_name] = prop.to_dict()
+            return result
 
         if self.type == "object":
             result["description"] = self.description
