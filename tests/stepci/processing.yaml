@@ -1,0 +1,9 @@
+processing:
+  name: Test Processing Endpoints
+  steps:
+    - name: Placeholder Step
+      http:
+        url: http://${{env.host}}/api/configurations
+        method: GET
+        check:
+          status: /200/
