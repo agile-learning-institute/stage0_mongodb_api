@@ -139,15 +139,15 @@ tests:
               file_name: test_dict.yaml
               _locked: true
 
-#      # Try to Delete a locked dictionary       
-#      - name: Delete a locked dictionary - should fail
-#        http:
-#          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
-#          method: DELETE
-#          check:
-#            status: /500/
-#            jsonpath:
-#              status: FAILURE
+      # Try to Delete a locked dictionary       
+      - name: Delete a locked dictionary - should fail
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: DELETE
+          check:
+            status: /500/
+            jsonpath:
+              status: FAILURE
               
 #      # Unlock - PUT to unlock the dictionary
 #      - name: Unlock Test Dictionary
