@@ -10,27 +10,20 @@ class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
         self.config = Config.get_instance()
         self.file_name = file_name
-        self.name = file_name.replace('.yaml', '')
         self._locked = False
         self.property = None
 
         if document:
             self._locked = document.get("_locked", False)
-            # Add file_name to the document for the Property
-            document_with_file_name = document.copy()
-            document_with_file_name["file_name"] = file_name
-            self.property = Property("root", document_with_file_name)
+            self.property = Property("root", document)
         else:
             document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
             self._locked = document_data.get("_locked", False)
-            # Add file_name to the document for the Property
-            document_data_with_file_name = document_data.copy()
-            document_data_with_file_name["file_name"] = file_name
-            self.property = Property("root", document_data_with_file_name)
+            self.property = Property("root", document_data)
 
     def to_dict(self):
         result = self.property.to_dict()
-        result["name"] = self.name
+        result["file_name"] = self.file_name
         result["_locked"] = self._locked
         return result
 
@@ -77,7 +70,7 @@ class Dictionary:
                 sub_event = ConfiguratorEvent(f"DIC-{file.name}", "LOCK_DICTIONARY")
                 sub_event.data = {
                     "file_name": file.name,
-                    "dictionary_name": dictionary.name,
+                    "dictionary_name": dictionary.file_name,
                     "locked": True
                 }
                 sub_event.record_success()

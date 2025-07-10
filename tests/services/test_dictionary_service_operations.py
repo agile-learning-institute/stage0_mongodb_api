@@ -290,7 +290,7 @@ class TestDictionary(unittest.TestCase):
         
         dictionary = Dictionary("test.yaml")
         
-        self.assertEqual(dictionary.name, "test")
+        self.assertEqual(dictionary.file_name, "test.yaml")
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
@@ -307,7 +307,7 @@ class TestDictionary(unittest.TestCase):
             }
         }
         dictionary = Dictionary("test.yaml", doc)
-        self.assertEqual(dictionary.name, "test")
+        self.assertEqual(dictionary.file_name, "test.yaml")
         self.assertIsInstance(dictionary.property, Property)
         self.assertEqual(dictionary.property.description, "Test dictionary")
 
@@ -327,7 +327,7 @@ class TestDictionary(unittest.TestCase):
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "Test dictionary")
         self.assertEqual(result["version"], "1.0.0")
-        self.assertEqual(result["name"], "test")
+        self.assertEqual(result["file_name"], "test.yaml")
         self.assertEqual(result["_locked"], False)
         self.assertIn("properties", result)
         self.assertIn("name", result["properties"])
@@ -350,7 +350,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         
         dictionary = Dictionary("sample.1.0.0.yaml", doc)
         
-        self.assertEqual(dictionary.name, "sample.1.0.0")
+        self.assertEqual(dictionary.file_name, "sample.1.0.0.yaml")
         self.assertEqual(dictionary.property.description, "A simple collection for testing")
         self.assertEqual(dictionary.property.type, "object")
         
@@ -379,7 +379,7 @@ class TestDictionaryCanonical(unittest.TestCase):
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "Test dictionary without fields")
         self.assertEqual(result["version"], "1.0.0")
-        self.assertEqual(result["name"], "test")
+        self.assertEqual(result["file_name"], "test.yaml")
         self.assertEqual(result["_locked"], False)
 
 if __name__ == '__main__':
