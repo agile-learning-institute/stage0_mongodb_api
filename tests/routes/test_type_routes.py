@@ -92,9 +92,9 @@ class TestTypeRoutes(unittest.TestCase):
         # Arrange
         test_data = {"name": "test_type", "version": "1.0.0"}
         mock_type = Mock()
-        mock_event = Mock()
-        mock_event.data = test_data
-        mock_type.save.return_value = [mock_event]
+        mock_saved_file = Mock()
+        mock_saved_file.to_dict.return_value = {"name": "test_type.yaml", "path": "/path/to/test_type.yaml"}
+        mock_type.save.return_value = mock_saved_file
         mock_type_class.return_value = mock_type
 
         # Act
@@ -103,7 +103,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, test_data)
+        self.assertEqual(response_data, {"name": "test_type.yaml", "path": "/path/to/test_type.yaml"})
 
     @patch('configurator.routes.type_routes.Type')
     def test_update_type_general_exception(self, mock_type_class):
@@ -210,8 +210,9 @@ class TestTypeRoutes(unittest.TestCase):
         mock_file_io.get_documents.return_value = mock_files
         
         mock_type = Mock()
-        mock_event = ConfiguratorEvent("TYP-03", "SUCCESS")
-        mock_type.save.return_value = [mock_event]
+        mock_saved_file = Mock()
+        mock_saved_file.to_dict.return_value = {"name": "type.yaml", "path": "/path/to/type.yaml"}
+        mock_type.save.return_value = mock_saved_file
         mock_type_class.return_value = mock_type
 
         # Act
@@ -220,10 +221,10 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data["id"], "TYP-04")
-        self.assertEqual(response_data["type"], "CLEAN_TYPES")
-        self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertIn("sub_events", response_data)
+        # Should return a list of File objects serialized as dicts
+        self.assertEqual(len(response_data), 2)
+        self.assertEqual(response_data[0], {"name": "type.yaml", "path": "/path/to/type.yaml"})
+        self.assertEqual(response_data[1], {"name": "type.yaml", "path": "/path/to/type.yaml"})
 
     @patch('configurator.routes.type_routes.FileIO')
     @patch('configurator.routes.type_routes.Type')

@@ -24,11 +24,18 @@ def create_type_routes():
     @event_route("TYP-04", "CLEAN_TYPES", "cleaning types")
     def clean_types():
         files = FileIO.get_documents(config.TYPE_FOLDER)
-        events = []
+        cleaned_files = []
+        
         for file in files:
-            type = Type(file.name)
-            events.extend(type.save())
-        return events
+            try:
+                type_obj = Type(file.name)
+                cleaned_file = type_obj.save()
+                cleaned_files.append(cleaned_file.to_dict())
+            except Exception as e:
+                # Raise to trigger 500 from decorator
+                raise ConfiguratorException(f"Failed to clean type {file.name}: {str(e)}")
+        
+        return cleaned_files
 
     # GET /api/types/<file_name>/ - Return a type file
     @type_routes.route('/<file_name>/', methods=['GET'])
@@ -42,8 +49,8 @@ def create_type_routes():
     @event_route("TYP-03", "PUT_TYPE", "updating type")
     def update_type(file_name):
         type_obj = Type(file_name, request.json)
-        saved = type_obj.save()
-        return saved[0].data if saved else {}
+        saved_file = type_obj.save()
+        return saved_file.to_dict()
     
     @type_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TYP-05", "DELETE_TYPE", "deleting type")

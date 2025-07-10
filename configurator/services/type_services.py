@@ -19,7 +19,7 @@ A valid Type in this system must be one of the following three forms:
 
 Any other combination (e.g., 'schema' containing 'json_type'/'bson_type', or both 'schema' and 'json_type'/'bson_type' at the top level) is invalid and will raise an error.
 """
-from configurator.utils.file_io import FileIO
+from configurator.utils.file_io import FileIO, File
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 import os
@@ -40,38 +40,13 @@ class Type:
             self.property = TypeProperty(self.name, FileIO.get_document(self.config.TYPE_FOLDER, file_name))
 
 
-    def save(self) -> list[ConfiguratorEvent]:
-        event = ConfiguratorEvent(event_id="TYP-03", event_type="SAVE_TYPE")
+    def save(self) -> File:
+        """Save the type and return the File object."""
         try:
-            # Get original content before saving
-            original_doc = FileIO.get_document(self.config.TYPE_FOLDER, self.file_name)
-            
             # Save the cleaned content
-            FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.property.to_dict())
-            
-            # Re-read the saved content
-            saved_doc = FileIO.get_document(self.config.TYPE_FOLDER, self.file_name)
-            
-            # Compare and set event data
-            original_keys = set(original_doc.keys())
-            saved_keys = set(saved_doc.keys())
-            
-            added = saved_keys - original_keys
-            removed = original_keys - saved_keys
-            
-            event.data = {
-                "added": {k: saved_doc[k] for k in added},
-                "removed": {k: original_doc[k] for k in removed}
-            }
-            
-            event.record_success()
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error saving document")
+            return FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.property.to_dict())
         except Exception as e:
-            event.append_events([ConfiguratorEvent(event_id="TYP-04", event_type="SAVE_TYPE", event_data={"error": str(e)})])
-            event.record_failure("unexpected error saving document")
-        return [event]
+            raise ConfiguratorException(f"Failed to save type {self.file_name}: {str(e)}")
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:
