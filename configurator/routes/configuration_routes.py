@@ -78,8 +78,8 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-08", "LOCK_UNLOCK_CONFIGURATION", "locking/unlocking configuration")
     def lock_unlock_configuration(file_name):
         configuration = Configuration(file_name)
-        result = configuration.lock_unlock()
-        return jsonify(result.to_dict())
+        file = configuration.lock_unlock()
+        return jsonify(file.to_dict())
 
     @blueprint.route('/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-09", "PROCESS_CONFIGURATION", "processing configuration")

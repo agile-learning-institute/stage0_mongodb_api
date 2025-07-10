@@ -241,7 +241,6 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
         self.assertEqual(response_data, {"read_only": True})
 
     @patch('configurator.routes.configuration_routes.Configuration')

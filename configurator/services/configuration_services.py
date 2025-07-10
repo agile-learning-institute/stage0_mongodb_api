@@ -39,7 +39,15 @@ class Configuration:
         FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)
         
     def lock_unlock(self):
-        FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, self.file_name)
+        try:
+            file = FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, self.file_name)
+            return file
+        except ConfiguratorException as e:
+            raise
+        except Exception as e:
+            event = ConfiguratorEvent(event_id="CFG-ROUTES-08", event_type="LOCK_UNLOCK_CONFIGURATION")
+            event.record_failure("unexpected error locking/unlocking configuration", {"error": str(e)})
+            raise ConfiguratorException("Unexpected error locking/unlocking configuration", event)
         
     def process(self) -> ConfiguratorEvent:
         config = Config.get_instance()
