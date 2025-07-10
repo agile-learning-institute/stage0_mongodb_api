@@ -182,10 +182,10 @@ tests:
               file_name: test_dict.yaml
               _locked: false
       
-#      # Cleanup - DELETE the test dictionary
-#      - name: Delete Test Dictionary (Cleanup)
-#        http:
-#          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
-#          method: DELETE
-#          check:
-#            status: /200/
+      # Cleanup - DELETE the test dictionary
+      - name: Delete Test Dictionary (Cleanup)
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: DELETE
+          check:
+            status: /200/
