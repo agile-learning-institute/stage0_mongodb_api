@@ -3,7 +3,7 @@ from configurator.services.configuration_services import Configuration
 from configurator.services.template_service import TemplateService
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.config import Config
-from configurator.utils.file_io import FileIO
+from configurator.utils.file_io import FileIO, File
 from configurator.utils.route_decorators import event_route
 import logging
 

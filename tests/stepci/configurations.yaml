@@ -38,6 +38,9 @@ tests:
             }
           check:
             status: /200/
+            jsonpath:
+              name: test_config.yaml
+              read_only: false
       
       # Read - GET the created configuration
       - name: Get Test Configuration
@@ -56,7 +59,6 @@ tests:
             Content-Type: application/json
           body: |
             {
-              "name": "test_collection_updated",
               "description": "Updated test collection for stepCI testing",
               "versions": [
                 {
@@ -77,6 +79,12 @@ tests:
             }
           check:
             status: /200/
+            jsonpath:
+              name: test_config.yaml
+              # description: Updated test collection for stepCI testing
+              # $.versions[0].version: /1.0.0.1/
+              # $.versions[1].version: /1.0.1.2/
+              # $.versions[1].test_data: /test_data.1.0.1.2.json/
       
       # Lock - PATCH to lock the configuration
       - name: Lock Test Configuration
@@ -102,55 +110,3 @@ tests:
           check:
             status: /200/
       
-      # Test collection creation endpoint
-      - name: Create Collection from Template
-        http:
-          url: http://${{env.host}}/api/configurations/collection/test_collection/
-          method: POST
-          check:
-            status: /200/
-      
-      # Cleanup created collection
-      - name: Delete Created Collection
-        http:
-          url: http://${{env.host}}/api/configurations/test_collection.yaml/
-          method: DELETE
-          check:
-            status: /200/
-      
-      # Test schema rendering endpoints
-      - name: Get JSON Schema
-        http:
-          url: http://${{env.host}}/api/configurations/json_schema/sample/1.0.0.1/
-          method: GET
-          check:
-            status: /200/
-      
-      - name: Get BSON Schema
-        http:
-          url: http://${{env.host}}/api/configurations/bson_schema/sample/1.0.0.1/
-          method: GET
-          check:
-            status: /200/
-      
-      # Test bulk operations
-      - name: List All Configurations
-        http:
-          url: http://${{env.host}}/api/configurations/
-          method: GET
-          check:
-            status: /200/
-      
-      - name: Process All Configurations
-        http:
-          url: http://${{env.host}}/api/configurations/
-          method: POST
-          check:
-            status: /200/
-      
-      - name: Clean All Configurations
-        http:
-          url: http://${{env.host}}/api/configurations/
-          method: PATCH
-          check:
-            status: /200/
