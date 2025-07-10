@@ -5,7 +5,7 @@ import signal
 # Initialize Singletons
 from configurator.services.configuration_services import Configuration
 from configurator.utils.config import Config
-from configurator.utils.configurator_exception import ConfiguratorException
+from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
 config = Config.get_instance()
 
@@ -28,19 +28,20 @@ signal.signal(signal.SIGINT, handle_exit)
 # Initialize Flask App
 from flask import Flask
 from configurator.utils.ejson_encoder import MongoJSONEncoder
-app = Flask(__name__)
+app = Flask(__name__, static_folder='docs', static_url_path='/docs')
 app.json = MongoJSONEncoder(app)
 
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
 if config.AUTO_PROCESS:
     try:
         logger.info(f"============= Auto Processing is Starting ===============")
-        processing_events = []
-        configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        for configuration_name in configurations:
-            configuration = Configuration(configuration_name)
-            processing_events.append(configuration.process())
-        logger.info(f"Processing Output: {app.json.dumps(processing_events)}")
+        event = ConfiguratorEvent(event_id="AUTO-00", event_type="PROCESS")
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        for file in files:
+            logger.info(f"Processing Configuration: {file.name}")
+            configuration = Configuration(file.name)
+            event.append_events([configuration.process()])
+        logger.info(f"Processing Output: {app.json.dumps(event.to_dict())}")
         logger.info(f"============= Auto Processing is Completed ===============")
     except ConfiguratorException as e:
         logger.error(f"Configurator error processing all configurations: {app.json.dumps(e.to_dict())}")

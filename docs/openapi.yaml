@@ -1,7 +1,10 @@
 openapi: 3.0.3
 info:
   title: MongoDB Schema Management API
-  description: API for managing MongoDB collections, indexes, and migrations
+  description: |
+    API for managing MongoDB collections, indexes, and migrations
+    
+    **API Explorer**: [Interactive Documentation](/docs/)
   version: 1.0.0
   contact:
     email: devs@agile-learning.institute
@@ -13,6 +16,19 @@ servers:
   - url: http://localhost:8081
     description: Local development server
 paths:
+  /docs/:
+    get:
+      summary: API Explorer
+      description: Interactive API documentation
+      tags:
+        - Documentation
+      responses:
+        '200':
+          description: API Explorer HTML page
+          content:
+            text/html:
+              schema:
+                type: string
   /api/configurations/:
     get:
       summary: List all Collection Configurations
