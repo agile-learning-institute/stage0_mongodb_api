@@ -28,7 +28,7 @@ signal.signal(signal.SIGINT, handle_exit)
 # Initialize Flask App
 from flask import Flask
 from configurator.utils.ejson_encoder import MongoJSONEncoder
-app = Flask(__name__, static_folder='docs', static_url_path='/docs')
+app = Flask(__name__)
 app.json = MongoJSONEncoder(app)
 
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
@@ -77,6 +77,11 @@ app.register_blueprint(create_test_data_routes(), url_prefix='/api/test_data')
 app.register_blueprint(create_database_routes(), url_prefix='/api/database')
 app.register_blueprint(create_enumerator_routes(), url_prefix='/api/enumerators')
 app.register_blueprint(create_migration_routes(), url_prefix='/api/migrations')
+
+# Configure static file serving for documentation
+app.static_folder = 'docs'
+app.static_url_path = '/docs'
+
 logger.info(f"============= Routes Registered ===============")
 
 # Start the server (only when run directly, not when imported by Gunicorn)
