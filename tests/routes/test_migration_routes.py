@@ -63,8 +63,9 @@ class MigrationRoutesTestCase(unittest.TestCase):
         resp = self.app.put("/api/migrations/mig1.json/", json=[{"$addFields": {"foo": "bar"}}])
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertIsInstance(data, list)
+        # For successful responses, expect File object dict, not wrapped in event envelope
+        self.assertIsInstance(data, dict)
+        self.assertIn("name", data)
 
     def test_delete_migration(self):
         resp = self.app.delete("/api/migrations/mig1.json/")
@@ -140,15 +141,11 @@ class TestMigrationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.migration_routes.open', create=True)
-    @patch('configurator.routes.migration_routes.os.path.exists')
-    def test_get_migration_success(self, mock_exists, mock_open):
+    @patch('configurator.routes.migration_routes.FileIO')
+    def test_get_migration_success(self, mock_file_io):
         """Test successful GET /api/migrations/<file_name>."""
         # Arrange
-        mock_exists.return_value = True
-        mock_file = Mock()
-        mock_file.read.return_value = '{"name": "test_migration", "operations": []}'
-        mock_open.return_value.__enter__.return_value = mock_file
+        mock_file_io.get_document.return_value = {"name": "test_migration", "operations": []}
 
         # Act
         response = self.client.get('/api/migrations/test_migration.json/')
@@ -176,13 +173,14 @@ class TestMigrationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.migration_routes.open', create=True)
-    def test_put_migration_success(self, mock_open):
+    @patch('configurator.routes.migration_routes.FileIO')
+    def test_put_migration_success(self, mock_file_io):
         """Test successful PUT /api/migrations/<file_name>."""
         # Arrange
         test_data = {"name": "test_migration", "operations": []}
         mock_file = Mock()
-        mock_open.return_value.__enter__.return_value = mock_file
+        mock_file.to_dict.return_value = {"name": "test_migration.json", "size": 100}
+        mock_file_io.put_document.return_value = mock_file
 
         # Act
         response = self.client.put('/api/migrations/test_migration.json/', json=test_data)
@@ -191,6 +189,7 @@ class TestMigrationRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json
         self.assertIsInstance(response_data, dict)
+        self.assertIn("name", response_data)
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_put_migration_general_exception(self, mock_file_io):
@@ -211,12 +210,13 @@ class TestMigrationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.migration_routes.os.remove')
     @patch('configurator.routes.migration_routes.os.path.exists')
-    def test_delete_migration_success(self, mock_exists, mock_remove):
+    @patch('configurator.routes.migration_routes.FileIO')
+    def test_delete_migration_success(self, mock_file_io, mock_exists):
         """Test successful DELETE /api/migrations/<file_name>."""
         # Arrange
         mock_exists.return_value = True
+        mock_file_io.delete_document.return_value = None
 
         # Act
         response = self.client.delete('/api/migrations/test_migration.json/')
@@ -245,23 +245,14 @@ class TestMigrationRoutes(unittest.TestCase):
         self.assertEqual(response_data["status"], "FAILURE")
 
     def test_migrations_post_method_not_allowed(self):
-        """Test that POST method is not allowed on /api/migrations."""
-        # Act
+        """Test that POST method is not allowed."""
         response = self.client.post('/api/migrations/')
-
-        # Assert
         self.assertEqual(response.status_code, 405)
 
     def test_migrations_patch_method_not_allowed(self):
-        """Test that PATCH method is not allowed on /api/migrations."""
-        # Act
-        response = self.client.patch('/api/migrations/')
-        # Assert
-        # Accept 200 (if folder exists) or 500 (if folder is missing)
-        self.assertIn(response.status_code, [200, 500])
-        if response.status_code == 500:
-            data = response.get_json()
-            self.assertIn("Folder not found", str(data))
+        """Test that PATCH method is not allowed for individual migrations."""
+        response = self.client.patch('/api/migrations/test_migration.json/')
+        self.assertEqual(response.status_code, 405)
 
 if __name__ == "__main__":
     unittest.main() 
