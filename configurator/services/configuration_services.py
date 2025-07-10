@@ -70,6 +70,14 @@ class Configuration:
         event = ConfiguratorEvent(event_id="CFG-00", event_type="PROCESS")
         mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         try:
+            # Add configuration context to main event
+            event.data = {
+                "configuration_file": self.file_name,
+                "configuration_name": self.name,
+                "configuration_title": self.title,
+                "version_count": len(self.versions)
+            }
+            
             for version in self.versions:
                 current_version = VersionManager.get_current_version(mongo_io, self.name)
                 if version.collection_version <= current_version:
@@ -77,8 +85,10 @@ class Configuration:
                         event_id="PRO-00",
                         event_type="SKIP_VERSION",
                         event_data={
+                            "configuration_file": self.file_name,
                             "version": version.to_dict(),
                             "current_version": current_version.get_version_str(),
+                            "skip_reason": "version_already_processed"
                         },
                     )
                     sub_event.record_success()
@@ -90,6 +100,11 @@ class Configuration:
             sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="LOAD_ENUMERATORS")
             try:
                 enumerators = Enumerators(None)
+                sub_event.data = {
+                    "configuration_file": self.file_name,
+                    "enumerator_count": len(enumerators.dict),
+                    "enumerator_versions": [enum_doc["version"] for enum_doc in enumerators.dict]
+                }
                 for enum_doc in enumerators.dict:
                     # Upsert based on version field
                     mongo_io.upsert(
@@ -175,29 +190,103 @@ class Version:
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         """Process this version with proper event nesting."""
         event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version_str}", event_type="PROCESS")
+        
+        # Add version context to main event
+        event.data = {
+            "collection_name": self.collection_name,
+            "version": self.version_str,
+            "drop_indexes_count": len(self.drop_indexes),
+            "add_indexes_count": len(self.add_indexes),
+            "migrations_count": len(self.migrations),
+            "has_test_data": self.test_data is not None,
+            "test_data_file": self.test_data
+        }
+        
         try:
             # Remove schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-01", event_type="REMOVE_SCHEMA_VALIDATION")
+            sub_event.data = {
+                "collection_name": self.collection_name,
+                "version": self.version_str
+            }
             sub_event.append_events(mongo_io.remove_schema_validation(self.collection_name))
+            sub_event.record_success()
             event.append_events([sub_event])
 
             # Remove indexes
             sub_event = ConfiguratorEvent(event_id="PRO-02", event_type="REMOVE_INDEXES")
-            for index in self.drop_indexes:
-                sub_event.append_events(mongo_io.remove_index(self.collection_name, index))
+            if self.drop_indexes:
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "indexes_to_drop": self.drop_indexes,
+                    "index_count": len(self.drop_indexes)
+                }
+                for index in self.drop_indexes:
+                    sub_event.append_events(mongo_io.remove_index(self.collection_name, index))
+                # Check if any child events failed
+                if any(child.status == "FAILURE" for child in sub_event.sub_events):
+                    sub_event.record_failure("One or more index removal operations failed")
+                else:
+                    sub_event.record_success()
+            else:
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "message": "No indexes to drop"
+                }
+                sub_event.record_success()
             event.append_events([sub_event])
 
             # Execute migrations
             sub_event = ConfiguratorEvent(event_id="PRO-03", event_type="EXECUTE_MIGRATIONS")
-            for filename in self.migrations:
-                migration_file = os.path.join(self.config.INPUT_FOLDER, self.config.MIGRATIONS_FOLDER, filename)
-                sub_event.append_events(mongo_io.execute_migration_from_file(self.collection_name, migration_file))
+            if self.migrations:
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "migration_files": self.migrations,
+                    "migration_count": len(self.migrations)
+                }
+                for filename in self.migrations:
+                    migration_file = os.path.join(self.config.INPUT_FOLDER, self.config.MIGRATIONS_FOLDER, filename)
+                    sub_event.append_events(mongo_io.execute_migration_from_file(self.collection_name, migration_file))
+                # Check if any child events failed
+                if any(child.status == "FAILURE" for child in sub_event.sub_events):
+                    sub_event.record_failure("One or more migration operations failed")
+                else:
+                    sub_event.record_success()
+            else:
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "message": "No migrations to execute"
+                }
+                sub_event.record_success()
             event.append_events([sub_event])
 
             # Add indexes
             sub_event = ConfiguratorEvent(event_id="PRO-04", event_type="ADD_INDEXES")
-            for index in self.add_indexes:
-                sub_event.append_events(mongo_io.add_index(self.collection_name, index))
+            if self.add_indexes:
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "indexes_to_add": self.add_indexes,
+                    "index_count": len(self.add_indexes)
+                }
+                for index in self.add_indexes:
+                    sub_event.append_events(mongo_io.add_index(self.collection_name, index))
+                # Check if any child events failed
+                if any(child.status == "FAILURE" for child in sub_event.sub_events):
+                    sub_event.record_failure("One or more index creation operations failed")
+                else:
+                    sub_event.record_success()
+            else:
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "message": "No indexes to add"
+                }
+                sub_event.record_success()
             event.append_events([sub_event])
 
             # Apply schema validation
@@ -207,6 +296,22 @@ class Version:
                 enumerations = Enumerators(None).version(self.collection_version.get_enumerator_version())
                 # Render the BSON schema for this version
                 bson_schema: dict = self.get_bson_schema(enumerations)
+                
+                # Add schema context to event
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "enumerator_version": self.collection_version.get_enumerator_version(),
+                    "schema_properties_count": len(bson_schema.get("properties", {})),
+                    "schema_required_fields": bson_schema.get("required", []),
+                    "schema_type": bson_schema.get("type", "unknown"),
+                    "schema_summary": {
+                        "type": bson_schema.get("type"),
+                        "properties_count": len(bson_schema.get("properties", {})),
+                        "required_count": len(bson_schema.get("required", []))
+                    }
+                }
+                
                 sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name, bson_schema))
                 sub_event.record_success()
             except ConfiguratorException as e:
@@ -228,8 +333,24 @@ class Version:
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="LOAD_TEST_DATA")
             if self.test_data:
                 test_data_path = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, self.test_data)
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "test_data_file": self.test_data,
+                    "test_data_path": test_data_path
+                }
                 sub_event.append_events(mongo_io.load_json_data(self.collection_name, test_data_path))
+                # Check if any child events failed
+                if any(child.status == "FAILURE" for child in sub_event.sub_events):
+                    sub_event.record_failure("Test data loading operation failed")
+                else:
+                    sub_event.record_success()
             else:
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "version": self.version_str,
+                    "message": "No test data to load"
+                }
                 sub_event.record_success()
             event.append_events([sub_event])
 
@@ -241,6 +362,11 @@ class Version:
                     {"collection_name": self.collection_name},
                     {"collection_name": self.collection_name, "current_version": self.collection_version.version}
                 )
+                sub_event.data = {
+                    "collection_name": self.collection_name,
+                    "new_version": self.collection_version.get_version_str(),
+                    "version_number": self.collection_version.version
+                }
                 sub_event.record_success()
             except Exception as e:
                 sub_event.record_failure({"error": str(e)})

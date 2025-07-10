@@ -184,6 +184,12 @@ class TestMongoIO(unittest.TestCase):
         events = self.mongo_io.apply_schema_validation(self.test_collection_name, test_schema)
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0].status, "SUCCESS")
+        
+        # Verify the event data includes the full BSON schema
+        self.assertIn("bson_schema", events[0].data)
+        self.assertEqual(events[0].data["bson_schema"], test_schema)
+        self.assertEqual(events[0].data["collection"], self.test_collection_name)
+        self.assertEqual(events[0].data["operation"], "schema_validation_applied")
 
     def test_load_json_data(self):
         """Test loading JSON data from file."""
@@ -202,6 +208,16 @@ class TestMongoIO(unittest.TestCase):
             self.assertEqual(len(events), 1)
             self.assertEqual(events[0].status, "SUCCESS")
             self.assertEqual(events[0].data["documents_loaded"], 2)
+            
+            # Verify the event data includes the full insert result
+            self.assertIn("insert_many_result", events[0].data)
+            self.assertIn("collection", events[0].data)
+            self.assertIn("data_file", events[0].data)
+            self.assertIn("documents_loaded", events[0].data)
+            self.assertEqual(events[0].data["collection"], "test_load_collection")
+            self.assertEqual(events[0].data["documents_loaded"], 2)
+            self.assertIn("inserted_ids", events[0].data["insert_many_result"])
+            self.assertIn("acknowledged", events[0].data["insert_many_result"])
         finally:
             import os
             os.unlink(temp_file)

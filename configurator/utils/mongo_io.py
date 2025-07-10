@@ -7,6 +7,7 @@ from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +135,10 @@ class MongoIO:
             
             result = self.db.command(command)
             logger.info(f"Schema validation cleared successfully: {collection_name}")
+            event.data = {
+                "collection": collection_name,
+                "operation": "schema_validation_removed"
+            }
             event.record_success()
             return [event]
         except Exception as e:
@@ -156,6 +161,11 @@ class MongoIO:
             collection = self.get_collection(collection_name)
             collection.drop_index(index_name)
             logger.info(f"Dropped index {index_name} from collection: {collection_name}")
+            event.data = {
+                "collection": collection_name,
+                "index_name": index_name,
+                "operation": "dropped"
+            }
             event.record_success()
             return [event]
         except Exception as e:
@@ -172,7 +182,7 @@ class MongoIO:
         Returns:
             list[ConfiguratorEvent]: List containing event with operation result
         """
-        event = ConfiguratorEvent(event_id="MON-08", event_type="EXECUTE_MIGRATION")
+        event = ConfiguratorEvent(event_id="MON-08", event_type="EXECUTE_MIGRATION", event_data={"collection": collection_name})
         
         try:
             collection = self.get_collection(collection_name)
@@ -191,11 +201,17 @@ class MongoIO:
             migration_file (str): Path to the migration JSON file
             
         Returns:
-            list: List of pipeline stages to execute
+            tuple: (pipeline, events) where pipeline is the list of stages and events is a list of ConfiguratorEvent
             
         Raises:
             ConfiguratorException: If file cannot be loaded or parsed
         """
+        event = ConfiguratorEvent(event_id="MON-13", event_type="LOAD_MIGRATION")
+        event.data = {
+            "file": migration_file,
+            "file_name": os.path.basename(migration_file)
+        }
+        
         try:
             with open(migration_file, 'r') as file:
                 # Use bson.json_util.loads to preserve $ prefixes in MongoDB operators
@@ -205,9 +221,14 @@ class MongoIO:
                 raise ValueError("Migration file must contain a list of pipeline stages")
             
             logger.info(f"Loaded migration pipeline from: {migration_file}")
-            return pipeline
+            event.data.update({
+                "pipeline_stages": len(pipeline),
+                "pipeline_operations": [list(stage.keys())[0] for stage in pipeline if stage]
+            })
+            event.record_success()
+            return pipeline, [event]
         except Exception as e:
-            event = ConfiguratorEvent(event_id="MON-13", event_type="LOAD_MIGRATION", event_data={"error": str(e), "file": migration_file})
+            event.record_failure({"error": str(e), "file": migration_file})
             raise ConfiguratorException(f"Failed to load migration pipeline from {migration_file}", event)
 
     def execute_migration_from_file(self, collection_name, migration_file):
@@ -221,12 +242,48 @@ class MongoIO:
             list[ConfiguratorEvent]: List containing event with operation result
         """
         event = ConfiguratorEvent(event_id="MON-14", event_type="EXECUTE_MIGRATION_FILE")
+        event.data = {
+            "collection": collection_name,
+            "migration_file": os.path.basename(migration_file),
+            "migration_path": migration_file
+        }
         
         try:
-            pipeline = self.load_migration_pipeline(migration_file)
-            result = self.execute_migration(collection_name, pipeline)
-            event.record_success()
-            return result
+            # Load the migration pipeline (this can create MON-13 events)
+            pipeline, load_events = self.load_migration_pipeline(migration_file)
+            
+            # Execute the migration (this creates MON-08 events)
+            execution_events = self.execute_migration(collection_name, pipeline)
+            
+            # Add detailed migration information to event data
+            event.data.update({
+                "pipeline_stages": len(pipeline),
+                "pipeline_summary": [
+                    {
+                        "stage": i + 1,
+                        "operation": list(stage.keys())[0] if stage else "unknown",
+                        "details": stage
+                    }
+                    for i, stage in enumerate(pipeline)
+                ],
+                "pipeline_operations": [list(stage.keys())[0] for stage in pipeline if stage]
+            })
+            
+            # Nest the load and execution events as sub-events
+            event.append_events(load_events + execution_events)
+            
+            # Check if any child events failed
+            if any(child.status == "FAILURE" for child in event.sub_events):
+                event.record_failure("One or more migration operations failed")
+            else:
+                event.record_success()
+                
+            return [event]
+        except ConfiguratorException as e:
+            # Nest the exception event
+            event.append_events([e.event])
+            event.record_failure("Migration file processing failed")
+            return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name, "file": migration_file})
             return [event]
@@ -248,6 +305,12 @@ class MongoIO:
             index_model = IndexModel(index_spec["key"], name=index_spec["name"])
             collection.create_indexes([index_model])
             logger.info(f"Created index {index_spec['name']} on collection: {collection_name}")
+            event.data = {
+                "collection": collection_name,
+                "index_name": index_spec["name"],
+                "index_keys": index_spec["key"],
+                "operation": "created"
+            }
             event.record_success()
             return [event]
         except Exception as e:
@@ -278,6 +341,16 @@ class MongoIO:
             
             result = self.db.command(command)
             logger.info(f"Schema validation applied to collection: {collection_name}")
+            
+            # Add detailed schema information to event data
+            properties = schema_dict.get("properties", {})
+            required_fields = schema_dict.get("required", [])
+            
+            event.data = {
+                "collection": collection_name,
+                "operation": "schema_validation_applied",
+                "bson_schema": schema_dict
+            }
             event.record_success()
             return [event]
             
@@ -308,8 +381,13 @@ class MongoIO:
             result = collection.insert_many(data)
             
             event.data = {
+                "collection": collection_name,
+                "data_file": os.path.basename(data_file),
                 "documents_loaded": len(data),
-                "inserted_ids": [str(oid) for oid in result.inserted_ids]
+                "insert_many_result": {
+                    "inserted_ids": [str(oid) for oid in result.inserted_ids],
+                    "acknowledged": result.acknowledged
+                }
             }
             event.record_success()
             return [event]
