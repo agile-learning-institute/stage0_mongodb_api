@@ -182,6 +182,25 @@ tests:
               file_name: test_dict.yaml
               _locked: false
       
+      # Lock All - PATCH to lock all dictionaries
+      - name: Lock All Dictionaries
+        http:
+          url: http://${{env.host}}/api/dictionaries/
+          method: PATCH
+          check:
+            status: /200/
+            jsonpath:
+              status: SUCCESS
+              data.total_files: /[0-9]+/
+              data.operation: "lock_all"
+            schema:
+              event_id:
+                type: string
+              event_type:
+                type: string
+              sub_events:
+                type: array
+      
       # Cleanup - DELETE the test dictionary
       - name: Delete Test Dictionary (Cleanup)
         http:
