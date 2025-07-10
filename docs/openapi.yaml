@@ -181,30 +181,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Lock/Unlock a collection configuration
-      operationId: lock_unlock_configuration
-      tags:
-        - Collection Configurations
-      parameters:
-        - name: file_name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Collection configuration locked/unlocked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
+
   
   /api/configurations/collection/{name}:
     post:
@@ -413,24 +390,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Lock/Unlock a dictionary
-      operationId: lock_unlock_dictionary
-      tags:
-        - Data Dictionaries
-      parameters:
-        - name: file_name
-          in: path
-          required: true  
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Dictionary locked/unlocked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/file'
+
 
   /api/types/:
     get:
@@ -542,30 +502,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Lock/Unlock a type
-      operationId: lock_unlock_type
-      tags:
-        - Data Types
-      parameters:
-        - name: file_name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Type locked/unlocked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/file'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
+
 
   /api/test_data/:
     get:
@@ -673,30 +610,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Lock/Unlock a test data file
-      operationId: lock_unlock_data_file
-      tags:
-        - Test Data
-      parameters:
-        - name: file_name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Test Data File locked/unlocked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/file'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema: 
-                $ref: '#/components/schemas/events'
+
 
   /api/migrations/:
     get:
@@ -957,9 +871,6 @@ components:
       properties:
         name:
           type: string
-        read_only:
-          type: boolean
-          default: false
         created_at:
           type: string
           format: date-time

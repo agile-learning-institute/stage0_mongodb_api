@@ -46,7 +46,9 @@ class Type:
             # Save the cleaned content
             return FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.property.to_dict())
         except Exception as e:
-            raise ConfiguratorException(f"Failed to save type {self.file_name}: {str(e)}")
+            event = ConfiguratorEvent("TYP-03", "PUT_TYPE")
+            event.record_failure(f"Failed to save type {self.file_name}: {str(e)}")
+            raise ConfiguratorException(f"Failed to save type {self.file_name}: {str(e)}", event)
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:
@@ -102,9 +104,13 @@ class TypeProperty:
 
         # Enforce mutual exclusivity
         if self.schema is not None and (self.json_type is not None or self.bson_type is not None):
-            raise ConfiguratorException("Type definition cannot have both 'schema' and 'json_type'/'bson_type' at the top level.")
+            event = ConfiguratorEvent("TYP-99", "INVALID_TYPE_DEFINITION")
+            event.record_failure("Type definition cannot have both 'schema' and 'json_type'/'bson_type' at the top level.")
+            raise ConfiguratorException("Type definition cannot have both 'schema' and 'json_type'/'bson_type' at the top level.", event)
         if self.schema is not None and ("json_type" in self.schema or "bson_type" in self.schema):
-            raise ConfiguratorException("'json_type' and 'bson_type' must not be nested under 'schema'. They must be top-level properties.")
+            event = ConfiguratorEvent("TYP-99", "INVALID_TYPE_DEFINITION")
+            event.record_failure("'json_type' and 'bson_type' must not be nested under 'schema'. They must be top-level properties.")
+            raise ConfiguratorException("'json_type' and 'bson_type' must not be nested under 'schema'. They must be top-level properties.", event)
 
         # Universal primitive: schema only
         if self.schema is not None:

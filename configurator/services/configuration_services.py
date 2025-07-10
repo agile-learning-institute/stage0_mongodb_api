@@ -19,6 +19,8 @@ class Configuration:
         self.title = document.get("title", "")
         self.description = document.get("description", "")
         self.versions = [Version(self.name, v, self.config) for v in document.get("versions", [])]
+        # Handle _locked from PUT request or existing file
+        self._locked = document.get("_locked", False)
 
     def to_dict(self):
         return {
@@ -26,18 +28,30 @@ class Configuration:
             "title": self.title,
             "description": self.description,
             "versions": [v.to_dict() for v in self.versions],
+            "_locked": bool(self._locked),
         }
 
-    def save(self) -> File:
-        """Save the configuration and return the File object."""
+    def save(self):
+        """Save the configuration and return the configuration object."""
+        if self._locked:
+            event = ConfiguratorEvent(event_id="CFG-03", event_type="SAVE_CONFIGURATION", event_data={"error": "Configuration is locked"})
+            raise ConfiguratorException("Cannot save locked configuration", event)
         try:
             # Save the cleaned content
             file_name = f"{self.name}.yaml"
-            return FileIO.put_document(self.config.CONFIGURATION_FOLDER, file_name, self.to_dict())
+            FileIO.put_document(self.config.CONFIGURATION_FOLDER, file_name, self.to_dict())
+            return self
         except Exception as e:
-            raise ConfiguratorException(f"Failed to save configuration {self.name}: {str(e)}")
+            event = ConfiguratorEvent("CFG-ROUTES-06", "PUT_CONFIGURATION")
+            event.record_failure(f"Failed to save configuration {self.name}: {str(e)}")
+            raise ConfiguratorException(f"Failed to save configuration {self.name}: {str(e)}", event)
     
     def delete(self):
+        if self._locked:
+            event = ConfiguratorEvent(event_id="CFG-ROUTES-07", event_type="DELETE_CONFIGURATION")
+            event.record_failure("Cannot delete locked configuration")
+            raise ConfiguratorException("Cannot delete locked configuration", event)
+        
         event = ConfiguratorEvent(event_id="CFG-ROUTES-07", event_type="DELETE_CONFIGURATION")
         try:
             file_name = f"{self.name}.yaml"
@@ -56,8 +70,14 @@ class Configuration:
         
     def lock_unlock(self):
         try:
+            # Toggle the locked state and persist it
+            self._locked = not self._locked
+            # Save the lock state directly without the lock check
             file_name = f"{self.name}.yaml"
-            file = FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, file_name)
+            FileIO.put_document(self.config.CONFIGURATION_FOLDER, file_name, self.to_dict())
+            # Create a File object with the current lock state
+            file_path = os.path.join(self.config.INPUT_FOLDER, self.config.CONFIGURATION_FOLDER, file_name)
+            file = File(file_path)
             return file
         except ConfiguratorException as e:
             raise

@@ -32,8 +32,10 @@ def create_dictionary_routes():
                 cleaned_file = dictionary.save()
                 cleaned_files.append(cleaned_file.to_dict())
             except Exception as e:
-                # Raise to trigger 500 from decorator
-                raise ConfiguratorException(f"Failed to clean dictionary {file.name}: {str(e)}")
+                # Create event and raise ConfiguratorException to trigger 500 from decorator
+                event = ConfiguratorEvent("DIC-04", "CLEAN_DICTIONARIES")
+                event.record_failure(f"Failed to clean dictionary {file.name}: {str(e)}")
+                raise ConfiguratorException(f"Failed to clean dictionary {file.name}: {str(e)}", event)
         
         return jsonify(cleaned_files)
     

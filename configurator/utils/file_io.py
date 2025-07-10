@@ -16,7 +16,6 @@ class File:
     def __init__(self, file_path: str):
         """Initialize a File instance with file properties."""
         self.name = os.path.basename(file_path)
-        self.read_only = False
         self.created_at = None
         self.updated_at = None
         self.size = 0
@@ -27,7 +26,6 @@ class File:
             self.size = stat.st_size
             self.created_at = datetime.fromtimestamp(stat.st_ctime).isoformat()
             self.updated_at = datetime.fromtimestamp(stat.st_mtime).isoformat()
-            self.read_only = not os.access(file_path, os.W_OK)
         except Exception as e:
             event = ConfiguratorEvent(event_id="FIL-01", event_type="GET_FILE_PROPERTIES", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to get file properties for {file_path}", event)
@@ -36,7 +34,6 @@ class File:
         """Convert file properties to dictionary matching OpenAPI schema (flat)."""
         return {
             "name": self.name,
-            "read_only": self.read_only,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "size": self.size
@@ -125,7 +122,6 @@ class FileIO:
                 elif extension == ".json":
                     f.write(json_util.dumps(document, indent=2))
             
-            # Return updated file object with current properties
             return File(file_path)
         except Exception as e:
             event = ConfiguratorEvent(event_id="FIL-08", event_type="PUT_DOCUMENT", event_data={"error": str(e)})
@@ -150,26 +146,4 @@ class FileIO:
         except Exception as e:
             event.record_failure({"error": str(e), "file_path": file_path})
             return event
-    
-    @staticmethod
-    def lock_unlock(folder_name: str, file_name: str) -> File:
-        """Toggle file read-only status."""
-        config = Config.get_instance()
-        folder = os.path.join(config.INPUT_FOLDER, folder_name)
-        file_path = os.path.join(folder, file_name)
-        
-        if not os.path.exists(file_path):
-            event = ConfiguratorEvent(event_id="FIL-10", event_type="LOCK_UNLOCK", event_data={"error": "File not found", "file_path": file_path})
-            raise ConfiguratorException(f"File not found: {file_path}", event)
-        
-        try:
-            file_stats = File(file_path)
-            if file_stats.read_only:
-                os.chmod(file_path, 0o666)  # Make writable
-            else:
-                os.chmod(file_path, 0o444)  # Make read-only
-            return File(file_path)
-        except Exception as e:
-            event = ConfiguratorEvent(event_id="FIL-08", event_type="LOCK_UNLOCK", event_data={"error": str(e), "file_path": file_path})
-            raise ConfiguratorException(f"Failed to lock/unlock file: {file_path}", event)
     

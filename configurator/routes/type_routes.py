@@ -32,8 +32,10 @@ def create_type_routes():
                 cleaned_file = type_obj.save()
                 cleaned_files.append(cleaned_file.to_dict())
             except Exception as e:
-                # Raise to trigger 500 from decorator
-                raise ConfiguratorException(f"Failed to clean type {file.name}: {str(e)}")
+                # Create event and raise ConfiguratorException to trigger 500 from decorator
+                event = ConfiguratorEvent("TYP-04", "CLEAN_TYPES")
+                event.record_failure(f"Failed to clean type {file.name}: {str(e)}")
+                raise ConfiguratorException(f"Failed to clean type {file.name}: {str(e)}", event)
         
         return jsonify(cleaned_files)
 

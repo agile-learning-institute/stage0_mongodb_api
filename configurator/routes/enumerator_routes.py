@@ -26,8 +26,10 @@ def create_enumerator_routes():
             saved_file = enumerators.save()
             return jsonify(saved_file.to_dict())
         except Exception as e:
-            # Raise to trigger 500 from decorator
-            raise ConfiguratorException(f"Failed to clean enumerators: {str(e)}")
+            # Create event and raise ConfiguratorException to trigger 500 from decorator
+            event = ConfiguratorEvent("ENU-04", "CLEAN_ENUMERATORS")
+            event.record_failure(f"Failed to clean enumerators: {str(e)}")
+            raise ConfiguratorException(f"Failed to clean enumerators: {str(e)}", event)
     
     # PUT /api/enumerators - Overwrite enumerators.json
     @enumerator_routes.route('/', methods=['PUT'])

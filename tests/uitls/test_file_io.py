@@ -45,21 +45,9 @@ class TestFile(unittest.TestCase):
         self.assertIn("Failed to get file properties", str(context.exception))
 
     def test_file_read_only_property(self):
-        """Test file read-only property detection"""
-        # Create a test file
-        with open(self.test_file_path, 'w') as f:
-            f.write("test content")
-        
-        # Make file read-only
-        os.chmod(self.test_file_path, 0o444)
-        
-        file_obj = File(self.test_file_path)
-        self.assertTrue(file_obj.read_only)
-        
-        # Make file writable
-        os.chmod(self.test_file_path, 0o666)
-        file_obj = File(self.test_file_path)
-        self.assertFalse(file_obj.read_only)
+        """Test file read-only property detection - removed as no longer supported"""
+        # This test is no longer applicable as we removed read_only functionality
+        pass
 
     def test_file_to_dict(self):
         """Test file to_dict method"""
@@ -70,7 +58,7 @@ class TestFile(unittest.TestCase):
         file_obj = File(self.test_file_path)
         file_dict = file_obj.to_dict()
         
-        expected_keys = ["name", "read_only", "created_at", "updated_at", "size"]
+        expected_keys = ["name", "created_at", "updated_at", "size"]
         for key in expected_keys:
             self.assertIn(key, file_dict)
         
@@ -225,29 +213,14 @@ class TestFileIO(unittest.TestCase):
         self.assertIn("File not found", str(result.data))
 
     def test_lock_unlock_success(self):
-        """Test lock_unlock functionality"""
-        # Create test file
-        with open(self.test_yaml_path, 'w') as f:
-            f.write("test content")
-        
-        # Test locking (making read-only)
-        result = self.file_io.lock_unlock("", "test.yaml")
-        self.assertIsInstance(result, File)
-        self.assertEqual(result.name, "test.yaml")
-        self.assertTrue(result.read_only)
-        
-        # Test unlocking (making writable)
-        result = self.file_io.lock_unlock("", "test.yaml")
-        self.assertIsInstance(result, File)
-        self.assertEqual(result.name, "test.yaml")
-        self.assertFalse(result.read_only)
+        """Test lock_unlock functionality - removed as no longer supported"""
+        # This test is no longer applicable as we removed lock/unlock functionality
+        pass
 
     def test_lock_unlock_file_not_found(self):
-        """Test lock_unlock with non-existent file"""
-        with self.assertRaises(ConfiguratorException) as context:
-            self.file_io.lock_unlock("", "nonexistent.yaml")
-        
-        self.assertIn("File not found", str(context.exception))
+        """Test lock_unlock with non-existent file - removed as no longer supported"""
+        # This test is no longer applicable as we removed lock/unlock functionality
+        pass
 
 
 if __name__ == '__main__':

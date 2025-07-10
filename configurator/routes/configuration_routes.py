@@ -42,8 +42,10 @@ def create_configuration_routes():
                 cleaned_file = configuration.save()
                 cleaned_files.append(cleaned_file.to_dict())
             except Exception as e:
-                # Raise to trigger 500 from decorator
-                raise ConfiguratorException(f"Failed to clean configuration {file.name}: {str(e)}")
+                # Create event and raise ConfiguratorException to trigger 500 from decorator
+                event = ConfiguratorEvent("CFG-ROUTES-03", "CLEAN_CONFIGURATIONS")
+                event.record_failure(f"Failed to clean configuration {file.name}: {str(e)}")
+                raise ConfiguratorException(f"Failed to clean configuration {file.name}: {str(e)}", event)
         
         return jsonify(cleaned_files)
 
@@ -64,26 +66,17 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-06", "PUT_CONFIGURATION", "updating configuration")
     def put_configuration(file_name):
         configuration = Configuration(file_name, request.json)
-        saved_file = configuration.save()
-        return jsonify(saved_file.to_dict())
+        configuration.save()
+        return jsonify(configuration.to_dict())
     
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     @event_route("CFG-ROUTES-07", "DELETE_CONFIGURATION", "deleting configuration")
     def delete_configuration(file_name):
-        try:
-            configuration = Configuration(file_name)
-            event = configuration.delete()
-            return jsonify(event.to_dict())
-        except Exception as e:
-            logger.error(f"Error in delete_configuration: {str(e)}")
-            raise
-
-    @blueprint.route('/<file_name>/', methods=['PATCH'])
-    @event_route("CFG-ROUTES-08", "LOCK_UNLOCK_CONFIGURATION", "locking/unlocking configuration")
-    def lock_unlock_configuration(file_name):
         configuration = Configuration(file_name)
-        file = configuration.lock_unlock()
-        return jsonify(file.to_dict())
+        event = configuration.delete()
+        return jsonify(event.to_dict())
+
+
 
     @blueprint.route('/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-09", "PROCESS_CONFIGURATION", "processing configuration")

@@ -39,7 +39,9 @@ class Dictionary:
             # Save the cleaned content
             return FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.property.to_dict())
         except Exception as e:
-            raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}")
+            event = ConfiguratorEvent("DIC-03", "PUT_DICTIONARY")
+            event.record_failure(f"Failed to save dictionary {self.file_name}: {str(e)}")
+            raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}", event)
 
     def delete(self):
         event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")

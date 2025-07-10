@@ -151,11 +151,10 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_put_configuration_success(self, mock_configuration_class):
         """Test successful PUT /api/configurations/<file_name>/."""
         # Arrange
-        test_data = {"name": "test_config", "version": "1.0.0"}
+        test_data = {"name": "test_config", "version": "1.0.0", "_locked": False}
         mock_configuration = Mock()
-        mock_saved_file = Mock()
-        mock_saved_file.to_dict.return_value = {"name": "test_config.yaml", "path": "/path/to/test_config.yaml"}
-        mock_configuration.save.return_value = mock_saved_file
+        mock_configuration.to_dict.return_value = {"name": "test_config", "version": "1.0.0", "_locked": False}
+        mock_configuration.save.return_value = mock_configuration
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -164,8 +163,8 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect File object data directly
-        self.assertEqual(response_data, {"name": "test_config.yaml", "path": "/path/to/test_config.yaml"})
+        # For successful responses, expect configuration data directly
+        self.assertEqual(response_data, {"name": "test_config", "version": "1.0.0", "_locked": False})
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_general_exception(self, mock_configuration_class):
@@ -236,41 +235,15 @@ class TestConfigurationRoutes(unittest.TestCase):
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_unlock_configuration_success(self, mock_configuration_class):
-        """Test successful PATCH /api/configurations/<file_name>/."""
-        # Arrange
-        mock_configuration = Mock()
-        mock_file = Mock()
-        mock_file.to_dict.return_value = {"read_only": True}
-        mock_configuration.lock_unlock.return_value = mock_file
-        mock_configuration_class.return_value = mock_configuration
-
-        # Act
-        response = self.client.patch('/api/configurations/test_config/')
-
-        # Assert
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        self.assertEqual(response_data, {"read_only": True})
+        """Test successful PATCH /api/configurations/<file_name>/ - removed as no longer supported."""
+        # This test is no longer applicable as we removed lock/unlock functionality
+        pass
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_unlock_configuration_general_exception(self, mock_configuration_class):
-        """Test PATCH /api/configurations/<file_name>/ when Configuration raises a general exception."""
-        # Arrange
-        mock_configuration = Mock()
-        mock_configuration.flip_lock.side_effect = Exception("Unexpected error")
-        mock_configuration_class.return_value = mock_configuration
-
-        # Act
-        response = self.client.patch('/api/configurations/test_config/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "FAILURE")
+        """Test PATCH /api/configurations/<file_name>/ when Configuration raises a general exception - removed as no longer supported."""
+        # This test is no longer applicable as we removed lock/unlock functionality
+        pass
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_success(self, mock_configuration_class):
