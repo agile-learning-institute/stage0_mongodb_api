@@ -71,12 +71,16 @@ class MigrationRoutesTestCase(unittest.TestCase):
         resp = self.app.delete("/api/migrations/mig1.json/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(data, {"message": "Migration deleted"})
+        # For successful responses, expect ConfiguratorEvent with SUCCESS status
+        self.assertIn("id", data)
+        self.assertIn("type", data)
+        self.assertIn("status", data)
+        self.assertIn("data", data)
+        self.assertEqual(data["status"], "SUCCESS")
 
     def test_delete_migration_not_found(self):
         resp = self.app.delete("/api/migrations/doesnotexist.json/")
-        self.assertEqual(resp.status_code, 500)
+        self.assertEqual(resp.status_code, 200)  # Now returns 200 with failure event
         data = resp.get_json()
         self.assertIn("id", data)
         self.assertIn("type", data)
@@ -218,7 +222,9 @@ class TestMigrationRoutes(unittest.TestCase):
         """Test successful DELETE /api/migrations/<file_name>."""
         # Arrange
         mock_exists.return_value = True
-        mock_file_io.delete_document.return_value = None
+        mock_event = Mock()
+        mock_event.status = "SUCCESS"
+        mock_file_io.delete_document.return_value = mock_event
 
         # Act
         response = self.client.delete('/api/migrations/test_migration.json/')
@@ -226,7 +232,11 @@ class TestMigrationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, {"message": "Migration deleted"})
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_delete_migration_general_exception(self, mock_file_io):
@@ -238,7 +248,7 @@ class TestMigrationRoutes(unittest.TestCase):
         response = self.client.delete('/api/migrations/test_migration.json/')
 
         # Assert
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 200)  # Now returns 200 with failure event
         response_data = response.json
         self.assertIn("id", response_data)
         self.assertIn("type", response_data)

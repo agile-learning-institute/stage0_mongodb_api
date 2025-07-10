@@ -60,14 +60,20 @@ def create_migration_routes():
     @migration_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("MIG-06", "DELETE_MIGRATION", "deleting migration")
     def delete_migration(file_name):
-        file_path = os.path.join(config.INPUT_FOLDER, config.MIGRATIONS_FOLDER, file_name)
-        if not os.path.exists(file_path):
-            raise ConfiguratorException(f"Migration file {file_name} not found", ConfiguratorEvent(event_id="MIG-03", event_type="MIGRATION_NOT_FOUND"))
+        event = ConfiguratorEvent(event_id="MIG-06", event_type="DELETE_MIGRATION")
         try:
-            FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name)
-            return jsonify({"message": "Migration deleted"})
+            delete_event = FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name)
+            if delete_event.status == "SUCCESS":
+                event.record_success()
+            else:
+                event.append_events([delete_event])
+                event.record_failure("error deleting migration")
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error deleting migration")
         except Exception as e:
-            raise ConfiguratorException(f"Migration file {file_name} not found", ConfiguratorEvent(event_id="MIG-03", event_type="MIGRATION_NOT_FOUND"))
+            event.record_failure("unexpected error deleting migration", {"error": str(e)})
+        return jsonify(event.to_dict())
     
     logger.info("Migration Flask Routes Registered")
     return migration_routes 

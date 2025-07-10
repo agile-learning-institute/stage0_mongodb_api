@@ -39,8 +39,12 @@ class Dictionary:
     def delete(self):
         event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
         try:
-            FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name)
-            event.record_success()
+            delete_event = FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name)
+            if delete_event.status == "SUCCESS":
+                event.record_success()
+            else:
+                event.append_events([delete_event])
+                event.record_failure("error deleting dictionary")
         except ConfiguratorException as e:
             event.append_events([e.event])
             event.record_failure("error deleting dictionary")

@@ -61,8 +61,12 @@ class Type:
     def delete(self):
         event = ConfiguratorEvent(event_id="TYP-05", event_type="DELETE_TYPE")
         try:
-            FileIO.delete_document(self.config.TYPE_FOLDER, self.file_name)
-            event.record_success()
+            delete_event = FileIO.delete_document(self.config.TYPE_FOLDER, self.file_name)
+            if delete_event.status == "SUCCESS":
+                event.record_success()
+            else:
+                event.append_events([delete_event])
+                event.record_failure("error deleting type")
         except ConfiguratorException as e:
             event.append_events([e.event])
             event.record_failure("error deleting type")
