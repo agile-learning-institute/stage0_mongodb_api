@@ -9,7 +9,7 @@ import os
 class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
         self.config = Config.get_instance()
-        self.file_name = file_name
+        self.file_name = file_name.replace('.yaml', '')
         self._locked = False
         self.property = None
 
