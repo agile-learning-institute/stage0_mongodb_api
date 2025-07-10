@@ -31,23 +31,10 @@ def create_configuration_routes():
         return jsonify(results.to_dict())
 
     @blueprint.route('/', methods=['PATCH'])
-    @event_route("CFG-ROUTES-03", "CLEAN_CONFIGURATIONS", "cleaning configurations")
-    def clean_configurations():
-        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        cleaned_files = []
-        
-        for file in files:
-            try:
-                configuration = Configuration(file.name)
-                cleaned_file = configuration.save()
-                cleaned_files.append(cleaned_file.to_dict())
-            except Exception as e:
-                # Create event and raise ConfiguratorException to trigger 500 from decorator
-                event = ConfiguratorEvent("CFG-ROUTES-03", "CLEAN_CONFIGURATIONS")
-                event.record_failure(f"Failed to clean configuration {file.name}: {str(e)}")
-                raise ConfiguratorException(f"Failed to clean configuration {file.name}: {str(e)}", event)
-        
-        return jsonify(cleaned_files)
+    @event_route("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS", "locking all configurations")
+    def lock_all_configurations():
+        result = Configuration.lock_all()
+        return jsonify(result.to_dict())
 
     @blueprint.route('/collection/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-04", "CREATE_COLLECTION", "creating collection")

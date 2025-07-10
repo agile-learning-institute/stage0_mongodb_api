@@ -19,25 +19,12 @@ def create_dictionary_routes():
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
         return jsonify([file.to_dict() for file in files])
     
-    # PATCH /api/dictionaries - Clean Dictionaries
+    # PATCH /api/dictionaries/ - Lock All Dictionaries
     @dictionary_routes.route('/', methods=['PATCH'])
-    @event_route("DIC-04", "CLEAN_DICTIONARIES", "cleaning dictionaries")
-    def clean_dictionaries():
-        files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-        cleaned_files = []
-        
-        for file in files:
-            try:
-                dictionary = Dictionary(file.name)
-                cleaned_file = dictionary.save()
-                cleaned_files.append(cleaned_file.to_dict())
-            except Exception as e:
-                # Create event and raise ConfiguratorException to trigger 500 from decorator
-                event = ConfiguratorEvent("DIC-04", "CLEAN_DICTIONARIES")
-                event.record_failure(f"Failed to clean dictionary {file.name}: {str(e)}")
-                raise ConfiguratorException(f"Failed to clean dictionary {file.name}: {str(e)}", event)
-        
-        return jsonify(cleaned_files)
+    @event_route("DIC-04", "LOCK_ALL_DICTIONARIES", "locking all dictionaries")
+    def lock_all_dictionaries():
+        result = Dictionary.lock_all()
+        return jsonify(result.to_dict())
     
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['GET'])

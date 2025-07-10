@@ -66,18 +66,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+  /api/configurations/:
     patch:
-      summary: Clean all Collection Configurations
-      operationId: clean_configurations
+      summary: Lock all Collection Configurations
+      operationId: lock_all_configurations
       tags:
         - Collection Configurations
       responses:
         '200':
-          description: All configurations cleaned successfully
+          description: All configurations locked successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/files'
+                type: object
+                properties:
+                  total_files:
+                    type: integer
+                    description: Total number of files processed
+                  locked_files:
+                    type: integer
+                    description: Number of files successfully locked
+                  failed_files:
+                    type: integer
+                    description: Number of files that failed to lock
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the file
+                        locked:
+                          type: boolean
+                          description: Whether the file was successfully locked
+                        error:
+                          type: string
+                          description: Error message if locking failed
         '500':
           description: Processing error
           content:
@@ -301,18 +326,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+  /api/dictionaries/:
     patch:
-      summary: Clean all Dictionaries
-      operationId: clean_dictionaries
+      summary: Lock all Dictionaries
+      operationId: lock_all_dictionaries
       tags:
         - Data Dictionaries
       responses:
         '200':
-          description: All dictionaries cleaned successfully
+          description: All dictionaries locked successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/files'
+                type: object
+                properties:
+                  total_files:
+                    type: integer
+                    description: Total number of files processed
+                  locked_files:
+                    type: integer
+                    description: Number of files successfully locked
+                  failed_files:
+                    type: integer
+                    description: Number of files that failed to lock
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the file
+                        locked:
+                          type: boolean
+                          description: Whether the file was successfully locked
+                        error:
+                          type: string
+                          description: Error message if locking failed
         '500':
           description: Processing error
           content:
@@ -411,18 +461,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+  /api/types/:
     patch:
-      summary: Clean all Types
-      operationId: clean_types
+      summary: Lock all Types
+      operationId: lock_all_types
       tags:
         - Data Types
       responses:
         '200':
-          description: All types cleaned successfully
+          description: All types locked successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/files'
+                type: object
+                properties:
+                  total_files:
+                    type: integer
+                    description: Total number of files processed
+                  locked_files:
+                    type: integer
+                    description: Number of files successfully locked
+                  failed_files:
+                    type: integer
+                    description: Number of files that failed to lock
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the file
+                        locked:
+                          type: boolean
+                          description: Whether the file was successfully locked
+                        error:
+                          type: string
+                          description: Error message if locking failed
         '500':
           description: Processing error
           content:
@@ -633,24 +708,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Clean all Migration Files
-      operationId: clean_migrations
-      tags:
-        - Migrations
-      responses:
-        '200':
-          description: All migrations cleaned successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
+
   /api/migrations/{file_name}/:
     get:
       summary: Get a migration file
@@ -785,24 +843,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Clean Enumerators
-      operationId: clean_enumerators
-      tags:
-        - Enumerator Values
-      responses:
-        '200':
-          description: Enumerators file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/file'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
+
 
   /api/database/:
     delete:

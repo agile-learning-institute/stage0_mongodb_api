@@ -48,18 +48,59 @@ class Type:
 
     def save(self):
         """Save the type and return the Type object."""
-        if self._locked:
-            event = ConfiguratorEvent(event_id="TYP-03", event_type="SAVE_TYPE", event_data={"error": "Type is locked"})
-            raise ConfiguratorException("Cannot save locked type", event)
         try:
             # Save the cleaned content
-            file_name = f"{self.name}.yaml"
-            FileIO.put_document(self.config.TYPE_FOLDER, file_name, self.to_dict())
+            FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.to_dict())
             return self
         except Exception as e:
             event = ConfiguratorEvent("TYP-03", "PUT_TYPE")
             event.record_failure(f"Failed to save type {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Failed to save type {self.file_name}: {str(e)}", event)
+    
+    @staticmethod
+    def lock_all():
+        """Lock all type files and return event with sub-events."""
+        config = Config.get_instance()
+        files = FileIO.get_documents(config.TYPE_FOLDER)
+        
+        event = ConfiguratorEvent("TYP-04", "LOCK_ALL_TYPES")
+        event.data = {
+            "total_files": len(files),
+            "operation": "lock_all"
+        }
+        
+        for file in files:
+            try:
+                type_obj = Type(file.name)
+                # Set locked state and save using normal save() method
+                type_obj._locked = True
+                type_obj.save()
+                
+                sub_event = ConfiguratorEvent(f"TYP-{file.name}", "LOCK_TYPE")
+                sub_event.data = {
+                    "file_name": file.name,
+                    "type_name": type_obj.name,
+                    "locked": True
+                }
+                sub_event.record_success()
+                event.append_events([sub_event])
+                
+            except Exception as e:
+                sub_event = ConfiguratorEvent(f"TYP-{file.name}", "LOCK_TYPE")
+                sub_event.data = {
+                    "file_name": file.name,
+                    "error": str(e)
+                }
+                sub_event.record_failure(f"Failed to lock type {file.name}")
+                event.append_events([sub_event])
+        
+        # Record overall success/failure based on sub-events
+        if any(sub.status == "FAILURE" for sub in event.sub_events):
+            event.record_failure("Some types failed to lock")
+        else:
+            event.record_success()
+        
+        return event
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:

@@ -165,89 +165,31 @@ class TestDictionaryRoutes(unittest.TestCase):
 
     # Lock/unlock tests removed as functionality was removed
 
-    @patch('configurator.routes.dictionary_routes.FileIO')
     @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_clean_dictionaries_success(self, mock_dictionary_class, mock_file_io):
-        """Test successful PATCH /api/dictionaries - Clean Dictionaries."""
+    def test_lock_all_dictionaries(self, mock_dictionary_class):
+        """Test locking all dictionaries."""
         # Arrange
-        # Create mock file objects with name attribute
-        mock_file1 = Mock()
-        mock_file1.name = "dict1.yaml"
-        mock_file2 = Mock()
-        mock_file2.name = "dict2.yaml"
-        mock_files = [mock_file1, mock_file2]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        mock_dictionary = Mock()
-        mock_saved_file = Mock()
-        mock_saved_file.to_dict.return_value = {"name": "dict.yaml", "path": "/path/to/dict.yaml"}
-        mock_dictionary.save.return_value = mock_saved_file
-        mock_dictionary_class.return_value = mock_dictionary
+        mock_event = ConfiguratorEvent("DIC-04", "LOCK_ALL_DICTIONARIES")
+        mock_event.data = {
+            "total_files": 2,
+            "operation": "lock_all"
+        }
+        mock_event.record_success()
+        mock_dictionary_class.lock_all.return_value = mock_event
 
         # Act
         response = self.client.patch('/api/dictionaries/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        # Should return a list of File objects serialized as dicts
-        self.assertEqual(len(response_data), 2)
-        self.assertEqual(response_data[0], {"name": "dict.yaml", "path": "/path/to/dict.yaml"})
-        self.assertEqual(response_data[1], {"name": "dict.yaml", "path": "/path/to/dict.yaml"})
-
-    @patch('configurator.routes.dictionary_routes.FileIO')
-    @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_clean_dictionaries_with_dictionary_save_exception(self, mock_dictionary_class, mock_file_io):
-        """Test PATCH /api/dictionaries when Dictionary.save() raises an exception."""
-        # Arrange
-        # Create mock file object with name attribute
-        mock_file = Mock()
-        mock_file.name = "dict1.yaml"
-        mock_files = [mock_file]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        mock_dictionary = Mock()
-        event = ConfiguratorEvent("test", "save_error")
-        mock_dictionary.save.side_effect = ConfiguratorException("Save error", event)
-        mock_dictionary_class.return_value = mock_dictionary
-
-        # Act
-        response = self.client.patch('/api/dictionaries/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        self.assertEqual(response_data["id"], "DIC-04")
-        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
-        self.assertEqual(response_data["status"], "FAILURE")
-        self.assertIn("data", response_data)
-        self.assertIn("sub_events", response_data)
-
-    @patch('configurator.routes.dictionary_routes.FileIO')
-    @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_clean_dictionaries_with_dictionary_save_general_exception(self, mock_dictionary_class, mock_file_io):
-        """Test PATCH /api/dictionaries when Dictionary.save() raises a general exception."""
-        # Arrange
-        # Create mock file object with name attribute
-        mock_file = Mock()
-        mock_file.name = "dict1.yaml"
-        mock_files = [mock_file]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        mock_dictionary = Mock()
-        mock_dictionary.save.side_effect = Exception("Save failed")
-        mock_dictionary_class.return_value = mock_dictionary
-
-        # Act
-        response = self.client.patch('/api/dictionaries/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        self.assertEqual(response_data["id"], "DIC-04")
-        self.assertEqual(response_data["type"], "CLEAN_DICTIONARIES")
-        self.assertEqual(response_data["status"], "FAILURE")
-        self.assertIn("data", response_data)
+        data = response.get_json()
+        self.assertIn('id', data)
+        self.assertIn('type', data)
+        self.assertIn('status', data)
+        self.assertIn('sub_events', data)
+        self.assertIn('data', data)
+        self.assertIn('total_files', data['data'])
+        self.assertIn('operation', data['data'])
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ def event_route(event_id: str, event_type: str, operation_name: str):
             except Exception as e:
                 logger.error(f"Unexpected error in {operation_name}: {str(e)}")
                 event = ConfiguratorEvent(event_id=event_id, event_type=event_type)
-                event.record_failure(f"Unexpected error in {operation_name}", e)
+                event.record_failure(f"Unexpected error in {operation_name}", {"details": str(e)})
                 return jsonify(event.to_dict()), 500
         return wrapper
     return decorator 

@@ -20,24 +20,6 @@ def create_migration_routes():
         filenames = [file.name for file in files]
         return jsonify(filenames)
 
-    # PATCH /api/migrations/ - Clean all migration files (delete all)
-    @migration_routes.route('/', methods=['PATCH'])
-    @event_route("MIG-04", "CLEAN_MIGRATIONS", "cleaning migrations")
-    def clean_migrations():
-        files = FileIO.get_documents(config.MIGRATIONS_FOLDER)
-        events = []
-        for file in files:
-            try:
-                FileIO.delete_document(config.MIGRATIONS_FOLDER, file.name)
-                sub_event = ConfiguratorEvent(event_id="MIG-05", event_type="DELETE_MIGRATION")
-                sub_event.record_success()
-                events.append(sub_event)
-            except Exception as e:
-                sub_event = ConfiguratorEvent(event_id="MIG-05", event_type="DELETE_MIGRATION")
-                sub_event.record_failure({"error": str(e)})
-                events.append(sub_event)
-        return jsonify([event.to_dict() for event in events])
-
     # GET /api/migrations/<file_name>/ - Get a migration file
     @migration_routes.route('/<file_name>/', methods=['GET'])
     @event_route("MIG-02", "GET_MIGRATION", "getting migration")

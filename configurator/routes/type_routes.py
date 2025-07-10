@@ -19,25 +19,12 @@ def create_type_routes():
         files = FileIO.get_documents(config.TYPE_FOLDER)
         return jsonify([file.to_dict() for file in files])
 
-    # PATCH /api/types - Clean Types
+    # PATCH /api/types/ - Lock All Types
     @type_routes.route('/', methods=['PATCH'])
-    @event_route("TYP-04", "CLEAN_TYPES", "cleaning types")
-    def clean_types():
-        files = FileIO.get_documents(config.TYPE_FOLDER)
-        cleaned_files = []
-        
-        for file in files:
-            try:
-                type_obj = Type(file.name)
-                cleaned_file = type_obj.save()
-                cleaned_files.append(cleaned_file.to_dict())
-            except Exception as e:
-                # Create event and raise ConfiguratorException to trigger 500 from decorator
-                event = ConfiguratorEvent("TYP-04", "CLEAN_TYPES")
-                event.record_failure(f"Failed to clean type {file.name}: {str(e)}")
-                raise ConfiguratorException(f"Failed to clean type {file.name}: {str(e)}", event)
-        
-        return jsonify(cleaned_files)
+    @event_route("TYP-04", "LOCK_ALL_TYPES", "locking all types")
+    def lock_all_types():
+        result = Type.lock_all()
+        return jsonify(result.to_dict())
 
     # GET /api/types/<file_name>/ - Return a type file
     @type_routes.route('/<file_name>/', methods=['GET'])

@@ -34,6 +34,7 @@ class MigrationRoutesTestCase(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_list_migrations(self):
+        """Test GET /api/migrations/ endpoint."""
         resp = self.app.get("/api/migrations/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
@@ -88,18 +89,6 @@ class MigrationRoutesTestCase(unittest.TestCase):
         self.assertIn("data", data)
         self.assertEqual(data["status"], "FAILURE")
 
-    def test_clean_migrations(self):
-        resp = self.app.patch("/api/migrations/")
-        self.assertEqual(resp.status_code, 200)
-        data = resp.get_json()
-        # Now returns a list of events
-        self.assertIsInstance(data, list)
-        self.assertGreater(len(data), 0)
-        for event in data:
-            self.assertIn("id", event)
-            self.assertIn("type", event)
-            self.assertIn("status", event)
-
 class TestMigrationRoutes(unittest.TestCase):
     """Test cases for migration routes."""
 
@@ -113,21 +102,22 @@ class TestMigrationRoutes(unittest.TestCase):
     def test_list_migrations_success(self, mock_file_io):
         """Test successful GET /api/migrations/."""
         # Arrange
-        # Create mock file objects with name attribute
         mock_file1 = Mock()
         mock_file1.name = "migration1.json"
         mock_file2 = Mock()
         mock_file2.name = "migration2.json"
         mock_files = [mock_file1, mock_file2]
-        mock_file_io.get_documents.return_value = mock_files
-
-        # Act
-        response = self.client.get('/api/migrations/')
-
-        # Assert
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        self.assertEqual(response_data, ["migration1.json", "migration2.json"])
+        
+        with patch('configurator.routes.migration_routes.FileIO') as mock_file_io:
+            mock_file_io.get_documents.return_value = mock_files
+            
+            # Act
+            response = self.client.get('/api/migrations/')
+            
+            # Assert
+            self.assertEqual(response.status_code, 200)
+            response_data = response.json
+            self.assertEqual(response_data, ["migration1.json", "migration2.json"])
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_list_migrations_general_exception(self, mock_file_io):
@@ -265,6 +255,26 @@ class TestMigrationRoutes(unittest.TestCase):
         """Test that PATCH method is not allowed for individual migrations."""
         response = self.client.patch('/api/migrations/test_migration.json/')
         self.assertEqual(response.status_code, 405)
+
+    def test_get_migrations_success(self):
+        """Test successful GET /api/migrations/."""
+        # Arrange
+        mock_file1 = Mock()
+        mock_file1.name = "migration1.json"
+        mock_file2 = Mock()
+        mock_file2.name = "migration2.json"
+        mock_files = [mock_file1, mock_file2]
+        
+        with patch('configurator.routes.migration_routes.FileIO') as mock_file_io:
+            mock_file_io.get_documents.return_value = mock_files
+            
+            # Act
+            response = self.client.get('/api/migrations/')
+            
+            # Assert
+            self.assertEqual(response.status_code, 200)
+            response_data = response.json
+            self.assertEqual(response_data, ["migration1.json", "migration2.json"])
 
 if __name__ == "__main__":
     unittest.main() 

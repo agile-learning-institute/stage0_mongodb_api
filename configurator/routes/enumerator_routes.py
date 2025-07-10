@@ -17,20 +17,6 @@ def create_enumerator_routes():
         enumerators = Enumerators(None)
         return jsonify(enumerators.to_dict())
     
-    # PATCH /api/enumerators - Clean Enumerators
-    @enumerator_routes.route('/', methods=['PATCH'])
-    @event_route("ENU-04", "CLEAN_ENUMERATORS", "cleaning enumerators")
-    def clean_enumerators():
-        try:
-            enumerators = Enumerators(None)
-            saved_enumerators = enumerators.save()
-            return jsonify(saved_enumerators.to_dict())
-        except Exception as e:
-            # Create event and raise ConfiguratorException to trigger 500 from decorator
-            event = ConfiguratorEvent("ENU-04", "CLEAN_ENUMERATORS")
-            event.record_failure(f"Failed to clean enumerators: {str(e)}")
-            raise ConfiguratorException(f"Failed to clean enumerators: {str(e)}", event)
-    
     # PUT /api/enumerators - Overwrite enumerators.json
     @enumerator_routes.route('/', methods=['PUT'])
     @event_route("ENU-02", "PUT_ENUMERATORS", "saving enumerators")

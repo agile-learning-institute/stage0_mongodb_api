@@ -165,61 +165,31 @@ class TestTypeRoutes(unittest.TestCase):
 
     # Lock/unlock tests removed as functionality was removed
 
-    @patch('configurator.routes.type_routes.FileIO')
     @patch('configurator.routes.type_routes.Type')
-    def test_clean_types_success(self, mock_type_class, mock_file_io):
-        """Test successful PATCH /api/types - Clean Types."""
+    def test_lock_all_types(self, mock_type_class):
+        """Test locking all types."""
         # Arrange
-        # Create mock file objects with name attribute
-        mock_file1 = Mock()
-        mock_file1.name = "type1.yaml"
-        mock_file2 = Mock()
-        mock_file2.name = "type2.yaml"
-        mock_files = [mock_file1, mock_file2]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        mock_type = Mock()
-        mock_saved_file = Mock()
-        mock_saved_file.to_dict.return_value = {"name": "type.yaml", "path": "/path/to/type.yaml"}
-        mock_type.save.return_value = mock_saved_file
-        mock_type_class.return_value = mock_type
+        mock_event = ConfiguratorEvent("TYP-04", "LOCK_ALL_TYPES")
+        mock_event.data = {
+            "total_files": 2,
+            "operation": "lock_all"
+        }
+        mock_event.record_success()
+        mock_type_class.lock_all.return_value = mock_event
 
         # Act
         response = self.client.patch('/api/types/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        # Should return a list of File objects serialized as dicts
-        self.assertEqual(len(response_data), 2)
-        self.assertEqual(response_data[0], {"name": "type.yaml", "path": "/path/to/type.yaml"})
-        self.assertEqual(response_data[1], {"name": "type.yaml", "path": "/path/to/type.yaml"})
-
-    @patch('configurator.routes.type_routes.FileIO')
-    @patch('configurator.routes.type_routes.Type')
-    def test_clean_types_with_type_save_general_exception(self, mock_type_class, mock_file_io):
-        """Test PATCH /api/types when Type.save() raises a general exception."""
-        # Arrange
-        # Create mock file object with name attribute
-        mock_file = Mock()
-        mock_file.name = "type1.yaml"
-        mock_files = [mock_file]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        mock_type = Mock()
-        mock_type.save.side_effect = Exception("Save failed")
-        mock_type_class.return_value = mock_type
-
-        # Act
-        response = self.client.patch('/api/types/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        self.assertEqual(response_data["id"], "TYP-04")
-        self.assertEqual(response_data["type"], "CLEAN_TYPES")
-        self.assertEqual(response_data["status"], "FAILURE")
-        self.assertIn("data", response_data)
+        data = response.get_json()
+        self.assertIn('id', data)
+        self.assertIn('type', data)
+        self.assertIn('status', data)
+        self.assertIn('sub_events', data)
+        self.assertIn('data', data)
+        self.assertIn('total_files', data['data'])
+        self.assertIn('operation', data['data'])
 
 
 if __name__ == '__main__':

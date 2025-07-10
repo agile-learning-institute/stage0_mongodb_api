@@ -416,26 +416,31 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    def test_clean_configurations_with_configuration_save_general_exception(self, mock_file_io):
-        """Test PATCH /api/configurations - Clean Configurations with Configuration.save() general exception."""
+    @patch('configurator.routes.configuration_routes.Configuration')
+    def test_lock_all_configurations(self, mock_configuration_class):
+        """Test locking all configurations."""
         # Arrange
-        mock_file = Mock()
-        mock_file.name = "config.yaml"
-        mock_file_io.get_documents.return_value = [mock_file]
+        mock_event = ConfiguratorEvent("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS")
+        mock_event.data = {
+            "total_files": 2,
+            "operation": "lock_all"
+        }
+        mock_event.record_success()
+        mock_configuration_class.lock_all.return_value = mock_event
 
-        with patch('configurator.routes.configuration_routes.Configuration') as mock_configuration_class:
-            mock_configuration = Mock()
-            mock_configuration.save.side_effect = Exception("General error")
-            mock_configuration_class.return_value = mock_configuration
+        # Act
+        response = self.client.patch('/api/configurations/')
 
-            # Act
-            response = self.client.patch('/api/configurations/')
-
-            # Assert
-            self.assertEqual(response.status_code, 500)
-            response_data = response.json
-            self.assertEqual(response_data["status"], "FAILURE")
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertIn('id', data)
+        self.assertIn('type', data)
+        self.assertIn('status', data)
+        self.assertIn('sub_events', data)
+        self.assertIn('data', data)
+        self.assertIn('total_files', data['data'])
+        self.assertIn('operation', data['data'])
 
 
 if __name__ == '__main__':
