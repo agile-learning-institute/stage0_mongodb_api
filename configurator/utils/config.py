@@ -47,6 +47,7 @@ class Config:
                 "LOGGING_LEVEL": "INFO", 
                 "MONGO_DB_NAME": "configurator",
                 "VERSION_COLLECTION_NAME": "CollectionVersions",
+                "ENUMERATORS_COLLECTION_NAME": "DatabaseEnumerators",
                 "TYPE_FOLDER": "types",
                 "DICTIONARY_FOLDER": "dictionaries",
                 "CONFIGURATION_FOLDER": "configurations",

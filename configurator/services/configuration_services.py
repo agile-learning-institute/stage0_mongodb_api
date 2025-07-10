@@ -67,6 +67,7 @@ class Configuration:
         FileIO.lock_unlock(self.config.CONFIGURATION_FOLDER, self.file_name)
         
     def process(self) -> ConfiguratorEvent:
+        config = Config.get_instance()
         event = ConfiguratorEvent(event_id="CFG-00", event_type="PROCESS")
         mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         try:
@@ -100,15 +101,10 @@ class Configuration:
             sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="LOAD_ENUMERATORS")
             try:
                 enumerators = Enumerators(None)
-                sub_event.data = {
-                    "configuration_file": self.file_name,
-                    "enumerator_count": len(enumerators.dict),
-                    "enumerator_versions": [enum_doc["version"] for enum_doc in enumerators.dict]
-                }
+                sub_event.data = enumerators.to_dict()
                 for enum_doc in enumerators.dict:
-                    # Upsert based on version field
-                    mongo_io.upsert(
-                        "enumerators",
+                    # Upsert based on enums version number
+                    mongo_io.upsert(config.ENUMERATORS_COLLECTION_NAME,
                         {"version": enum_doc["version"]},
                         enum_doc
                     )
