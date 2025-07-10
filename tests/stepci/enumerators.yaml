@@ -1,0 +1,9 @@
+enumerators:
+  name: Test Enumerators Endpoints
+  steps:
+    - name: Placeholder Step
+      http:
+        url: http://${{env.host}}/api/enumerators
+        method: GET
+        check:
+          status: /200/

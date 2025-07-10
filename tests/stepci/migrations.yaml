@@ -1,0 +1,9 @@
+migrations:
+  name: Test Migrations Endpoints
+  steps:
+    - name: Placeholder Step
+      http:
+        url: http://${{env.host}}/api/migrations
+        method: GET
+        check:
+          status: /200/

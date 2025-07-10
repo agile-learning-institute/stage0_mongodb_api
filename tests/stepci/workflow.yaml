@@ -1,0 +1,21 @@
+version: "1.1"
+name: Full Test Suite
+env:
+  host: localhost:8081
+
+tests:
+  observable:
+    $ref: ./tests/stepci/observability.yaml#/observable
+  configurations:
+    $ref: ./tests/stepci/configurations.yaml#/configurations
+  dictionaries:
+    $ref: ./tests/stepci/dictionaries.yaml#/dictionaries
+  custom_types:
+    $ref: ./tests/stepci/types.yaml#/custom_types
+  test_data:
+    $ref: ./tests/stepci/test_data.yaml#/test_data
+  migrations:
+    $ref: ./tests/stepci/migrations.yaml#/migrations
+  enumerators:
+    $ref: ./tests/stepci/enumerators.yaml#/enumerators
+

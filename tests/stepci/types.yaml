@@ -1,0 +1,9 @@
+custom_types:
+  name: Test Types Endpoints
+  steps:
+    - name: Placeholder Step
+      http:
+        url: http://${{env.host}}/api/types
+        method: GET
+        check:
+          status: /200/

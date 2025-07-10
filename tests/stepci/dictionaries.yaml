@@ -1,0 +1,9 @@
+dictionaries:
+  name: Test Dictionaries Endpoints
+  steps:
+    - name: Placeholder Step
+      http:
+        url: http://${{env.host}}/api/dictionaries
+        method: GET
+        check:
+          status: /200/

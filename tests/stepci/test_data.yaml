@@ -1,0 +1,9 @@
+test_data:
+  name: Test Test Data Endpoints
+  steps:
+    - name: Placeholder Step
+      http:
+        url: http://${{env.host}}/api/test_data
+        method: GET
+        check:
+          status: /200/
