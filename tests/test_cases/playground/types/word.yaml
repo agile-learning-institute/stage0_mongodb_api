@@ -1,0 +1,5 @@
+description: A String of text, 1 to 40 characters with no spaces, or special characters like /t or /n
+schema:
+  type: string
+  pattern: "^\\S{1,40}$"
+

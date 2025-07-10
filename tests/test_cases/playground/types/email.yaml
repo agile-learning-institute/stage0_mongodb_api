@@ -1,0 +1,4 @@
+description: A valid email address
+schema:
+  type: string
+  pattern: "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$" 
