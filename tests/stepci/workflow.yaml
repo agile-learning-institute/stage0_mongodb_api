@@ -7,7 +7,7 @@ tests:
   observable:
     $ref: ./tests/stepci/observability.yaml#/observable
   configurations:
-    $ref: ./tests/stepci/configurations.yaml#/configurations
+    $ref: ./tests/stepci/configurations.yaml#/tests/configurations
   rendering:
     $ref: ./tests/stepci/rendering.yaml#/rendering
   processing:
