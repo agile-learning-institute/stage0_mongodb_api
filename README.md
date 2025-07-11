@@ -9,7 +9,7 @@ This project builds a the [MongoDB Configurator](https://github.com/agile-learni
 - [Python](https://www.python.org/downloads/) 3.12 or later
 - [Pipenv](https://pipenv.pypa.io/en/latest/installation.html)
 - [Docker Desktop](https://github.com/agile-learning-institute/stage0/tree/main/developer_edition)
-- [MongoDB Compass]() *optional*
+- [MongoDB Compass](https://www.mongodb.com/products/compass) *optional*
 
 ### Quick Start
 ```bash
@@ -47,15 +47,15 @@ pipenv install --dev
 # Run Unit Tests and generate coverage report
 pipenv run test
 
-# Drop the Testing Database - Live - Real Drop Database!!!
-pipenv run drop
-
 #####################
 # Running test server  - uses INPUT_FOLDER setting# 
 pipenv run database     # Start the backing mongo database
 pipenv run local        # Start the server locally
 pipenv run debug        # Start locally with DEBUG logging
 pipenv run batch        # Run locally in Batch mode (process and exit)
+
+# Drop the Testing Database - Live - Real Drop Database!!!
+pipenv run drop
 
 #####################
 # Building and Testing the container (before a PR)
@@ -65,10 +65,11 @@ pipenv run service      # Run the DB, API, and SPA containers
 
 pipenv run down         # Stops all testing containers
 
-#####################
-# Black Box Testing #
-pipenv run stepci-observe   # Observability endpoints
-pipenv run stepci-<type>    # [configurations, dictionaries, types, test_data, enumerators]
+################################
+# Black Box Testing with StepCI 
+# https://github.com/stepci/stepci/blob/main/README.md 
+export INPUT_FOLDER=./tests/test_cases/stepci
+pipenv run stepci
 
 ```
 
@@ -116,16 +117,17 @@ tests/
 ├── test_cases/             # Test data 
 │   ├── small_sample/       # Simple test configuration
 │   ├── large_sample/       # Complex test configuration
-│   ├── empty_input/        # Load Error testing
+│   ├── stepci/             # For step ci testing
 │   ├── sample_template/    # Configuration for Template
-│   ├── playground/         # Served with Stack for UI testing
+│   ├── playground/         # Served with Stack for interactive UI testing
 │   ├── .../                # Additional test cases
 ```
-the unit tests TestConfigurationIntegration and TestTypeRendering are integration tests that use the input folders in test_cases. 
+the unit tests TestConfigurationIntegration and TestTypeRendering are integration tests that use the small_sample and large_sample input folders in test_cases. 
 
 ## API Documentation
 
 The complete API documentation with interactive testing is available:
+- [API Server docs/index.html](http://localhost:8081/docs/index.html) if the API is running
 - GoLive on [index.html](./docs/index.html)
 
 The Swagger UI provides:
@@ -149,7 +151,7 @@ curl -X GET http://localhost:8081/api/configurations/
 # Process all configurations
 curl -X POST http://localhost:8081/api/configurations/
 
-# Clean all types
+# Lock all types
 curl -X PATCH http://localhost:8081/api/types/
 ```
 ---
