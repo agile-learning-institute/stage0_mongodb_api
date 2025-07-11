@@ -21,5 +21,5 @@ tests:
   migrations:
     $ref: ./tests/stepci/migrations.yaml#/tests/migrations
   enumerators:
-    $ref: ./tests/stepci/enumerators.yaml#/enumerators
+    $ref: ./tests/stepci/enumerators.yaml#/tests/enumerators
 
