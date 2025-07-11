@@ -1,9 +1,111 @@
-migrations:
-  name: Test Migrations Endpoints
-  steps:
-    - name: Placeholder Step
-      http:
-        url: http://${{env.host}}/api/migrations
-        method: GET
-        check:
-          status: /200/
+version: "1.1"
+name: Test Migrations Endpoints
+env:
+  host: localhost:8081
+
+tests:
+  migrations:
+    name: Test Migrations Endpoints
+    steps:
+      # Setup - Delete test file if it exists (no checks needed)
+      - name: Delete Test Migration (Setup)
+        http:
+          url: http://${{env.host}}/api/migrations/test_migration.json/
+          method: DELETE
+          check:
+            status: /200|500/
+      
+      # Create - PUT new migration
+      - name: Create Test Migration
+        http:
+          url: http://${{env.host}}/api/migrations/test_migration.json/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            [
+              {
+                "$addFields": {
+                  "test_field": "test_value"
+                }
+              },
+              {
+                "$out": "test_collection"
+              }
+            ]
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_migration.json
+            schema:
+              created_at: 
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              size:
+                type: number
+                    
+      # Read - GET the created migration
+      - name: Get Test Migration
+        http:
+          url: http://${{env.host}}/api/migrations/test_migration.json/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              $[0].$addFields.test_field: "test_value"
+              $[1].$out: "test_collection"
+
+      # Update - PUT to modify the migration
+      - name: Update Test Migration
+        http:
+          url: http://${{env.host}}/api/migrations/test_migration.json/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            [
+              {
+                "$addFields": {
+                  "updated_field": "updated_value"
+                }
+              },
+              {
+                "$out": "updated_collection"
+              }
+            ]
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_migration.json
+            schema:
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              size:
+                type: number
+
+      # List all migrations
+      - name: List All Migrations
+        http:
+          url: http://${{env.host}}/api/migrations/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              $: /.*test_migration\.json.*/
+
+      # Cleanup - DELETE the test migration
+      - name: Delete Test Migration (Cleanup)
+        http:
+          url: http://${{env.host}}/api/migrations/test_migration.json/
+          method: DELETE
+          check:
+            status: /200/
+            jsonpath:
+              status: SUCCESS
