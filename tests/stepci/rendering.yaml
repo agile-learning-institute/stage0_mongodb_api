@@ -1,9 +1,36 @@
 rendering:
   name: Test Rendering Endpoints
   steps:
-    - name: Placeholder Step
+    - name: Render JSON Schema for sample.1.0.0.1
       http:
-        url: http://${{env.host}}/api/configurations
+        url: http://${{env.host}}/api/configurations/sample.yaml/render/json_schema?version=1.0.0.1
         method: GET
         check:
           status: /200/
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              properties:
+                type: object
+            required:
+              - type
+              - properties
+
+    - name: Render BSON Schema for sample.1.0.0.1
+      http:
+        url: http://${{env.host}}/api/configurations/sample.yaml/render/bson_schema?version=1.0.0.1
+        method: GET
+        check:
+          status: /200/
+          schema:
+            type: object
+            properties:
+              bsonType:
+                type: string
+              properties:
+                type: object
+            required:
+              - bsonType
+              - properties
