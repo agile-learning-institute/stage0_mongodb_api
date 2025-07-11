@@ -72,6 +72,7 @@ class Dictionary:
                 event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
                 raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
         
+        event.record_success()
         return event
 
     def delete(self):

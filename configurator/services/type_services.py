@@ -79,6 +79,7 @@ class Type:
                 event.record_failure(f"Unexpected error locking type {file.file_name}")
                 raise ConfiguratorException(f"Unexpected error locking type {file.file_name}", event)
         
+        event.record_success()
         return event
     
     def get_json_schema(self, type_stack: list = None):

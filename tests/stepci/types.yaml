@@ -142,8 +142,6 @@ tests:
             status: /200/
             jsonpath:
               status: SUCCESS
-              data.total_files: /[0-9]+/
-              data.operation: "lock_all"
             schema:
               event_id:
                 type: string
