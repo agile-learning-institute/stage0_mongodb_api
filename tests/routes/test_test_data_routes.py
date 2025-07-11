@@ -18,11 +18,10 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_get_data_files_success(self, mock_file_io):
         """Test successful GET /api/test_data."""
         # Arrange
-        # Create mock File objects with to_dict() method
         mock_file1 = Mock()
-        mock_file1.to_dict.return_value = {"name": "data1.json"}
+        mock_file1.to_dict.return_value = {"file_name": "data1.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_file2 = Mock()
-        mock_file2.to_dict.return_value = {"name": "data2.json"}
+        mock_file2.to_dict.return_value = {"file_name": "data2.json", "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_files = [mock_file1, mock_file2]
         mock_file_io.get_documents.return_value = mock_files
 
@@ -32,8 +31,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, [{"name": "data1.json"}, {"name": "data2.json"}])
+        self.assertEqual(response_data, [{"file_name": "data1.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}, {"file_name": "data2.json", "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}])
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_get_data_files_general_exception(self, mock_file_io):
@@ -56,17 +54,18 @@ class TestTestDataRoutes(unittest.TestCase):
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_get_data_file_success(self, mock_file_io):
         """Test successful GET /api/test_data/<file_name>."""
+        import json
+        from unittest.mock import mock_open, patch
         # Arrange
-        mock_data = {"test": "data"}
-        mock_file_io.get_document.return_value = mock_data
-
-        # Act
-        response = self.client.get('/api/test_data/test_file.json/')
-
-        # Assert
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        self.assertEqual(response_data, mock_data)
+        mock_file_io.get_document.return_value = {"data": "test content"}
+        mock_json = '{"data": "test content"}'
+        with patch('builtins.open', mock_open(read_data=mock_json)):
+            # Act
+            response = self.client.get('/api/test_data/test_file.json/')
+            # Assert
+            self.assertEqual(response.status_code, 200)
+            response_data = json.loads(response.data)
+            self.assertEqual(response_data, {"data": "test content"})
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_get_data_file_general_exception(self, mock_file_io):
@@ -90,9 +89,9 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_put_data_file_success(self, mock_file_io):
         """Test successful PUT /api/test_data/<file_name>."""
         # Arrange
-        test_data = {"test": "data"}
+        test_data = {"data": "test content"}
         mock_file = Mock()
-        mock_file.to_dict.return_value = {"name": "test_file.json", "saved": True}
+        mock_file.to_dict.return_value = {"name": "test_file.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_file_io.put_document.return_value = mock_file
 
         # Act
@@ -101,14 +100,14 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, {"name": "test_file.json", "saved": True})
+        self.assertEqual(response_data, {"file_name": "test_file.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"})
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_put_data_file_general_exception(self, mock_file_io):
         """Test PUT /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
         mock_file_io.put_document.side_effect = Exception("Unexpected error")
-        test_data = {"test": "data"}
+        test_data = {"data": "test content"}
 
         # Act
         response = self.client.put('/api/test_data/test_file.json/', json=test_data)
@@ -127,7 +126,7 @@ class TestTestDataRoutes(unittest.TestCase):
         """Test successful DELETE /api/test_data/<file_name>."""
         # Arrange
         mock_event = Mock()
-        mock_event.to_dict.return_value = {"deleted": True}
+        mock_event.to_dict.return_value = {"deleted": True, "file_name": "test_file.json"}
         mock_file_io.delete_document.return_value = mock_event
 
         # Act
@@ -136,7 +135,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, {"deleted": True})
+        self.assertEqual(response_data, {"deleted": True, "file_name": "test_file.json"})
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_delete_data_file_general_exception(self, mock_file_io):

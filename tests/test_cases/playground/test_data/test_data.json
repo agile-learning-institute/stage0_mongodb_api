@@ -1,0 +1,60 @@
+[
+  {
+    "_id": {
+      "$oid": "A00000000000000000000001"
+    },
+    "name": "John Doe Updated",
+    "email": "john.doe.updated@example.com",
+    "created_at": {
+      "$date": "2024-01-01T00:00:00Z"
+    },
+    "status": "active",
+    "metadata": {
+      "last_login": {
+        "$date": "2024-01-20T15:30:00Z"
+      },
+      "user_id": {
+        "$oid": "B00000000000000000000001"
+      },
+      "new_field": "added value"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "A00000000000000000000002"
+    },
+    "name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "created_at": {
+      "$date": "2024-01-02T12:00:00Z"
+    },
+    "status": "active",
+    "metadata": {
+      "last_login": {
+        "$date": "2024-01-18T09:15:00Z"
+      },
+      "user_id": {
+        "$oid": "B00000000000000000000002"
+      }
+    }
+  },
+  {
+    "_id": {
+      "$oid": "A00000000000000000000003"
+    },
+    "name": "Bob Wilson",
+    "email": "bob.wilson@example.com",
+    "created_at": {
+      "$date": "2024-01-03T08:00:00Z"
+    },
+    "status": "pending",
+    "metadata": {
+      "last_login": {
+        "$date": "2024-01-19T11:20:00Z"
+      },
+      "user_id": {
+        "$oid": "B00000000000000000000003"
+      }
+    }
+  }
+]

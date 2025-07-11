@@ -13,11 +13,12 @@ def create_configuration_routes():
     blueprint = Blueprint('configurations', __name__)
     config = Config.get_instance()
 
+    # GET /api/configurations - Return the current configuration files
     @blueprint.route('/', methods=['GET'])
-    @event_route("CFG-ROUTES-01", "GET_CONFIGURATIONS", "listing configurations")
-    def list_configurations():
-        configurations = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        return jsonify([configuration.to_dict() for configuration in configurations])
+    @event_route("CFG-01", "GET_CONFIGURATIONS", "listing configurations")
+    def get_configurations():
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        return jsonify([file.to_dict() for file in files])
 
     @blueprint.route('/', methods=['POST'])
     @event_route("CFG-ROUTES-02", "PROCESS_CONFIGURATIONS", "processing configurations")

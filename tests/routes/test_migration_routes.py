@@ -61,12 +61,20 @@ class MigrationRoutesTestCase(unittest.TestCase):
         self.assertEqual(data["status"], "FAILURE")
 
     def test_put_migration(self):
-        resp = self.app.put("/api/migrations/mig1.json/", json=[{"$addFields": {"foo": "bar"}}])
-        self.assertEqual(resp.status_code, 200)
-        data = resp.get_json()
-        # For successful responses, expect File object dict, not wrapped in event envelope
-        self.assertIsInstance(data, dict)
-        self.assertIn("name", data)
+        """Test PUT /api/migrations/<file_name>/."""
+        # Arrange
+        test_data = {"migration": "test data"}
+        
+        # Act
+        response = self.app.put('/api/migrations/mig1.json/', json=test_data)
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertIn("file_name", data)
+        self.assertIn("created_at", data)
+        self.assertIn("updated_at", data)
+        self.assertIn("size", data)
 
     def test_delete_migration(self):
         resp = self.app.delete("/api/migrations/mig1.json/")
@@ -103,9 +111,9 @@ class TestMigrationRoutes(unittest.TestCase):
         """Test successful GET /api/migrations/."""
         # Arrange
         mock_file1 = Mock()
-        mock_file1.name = "migration1.json"
+        mock_file1.file_name = "migration1.json"
         mock_file2 = Mock()
-        mock_file2.name = "migration2.json"
+        mock_file2.file_name = "migration2.json"
         mock_files = [mock_file1, mock_file2]
         
         with patch('configurator.routes.migration_routes.FileIO') as mock_file_io:
@@ -175,7 +183,7 @@ class TestMigrationRoutes(unittest.TestCase):
         # Arrange
         test_data = {"name": "test_migration", "operations": []}
         mock_file = Mock()
-        mock_file.to_dict.return_value = {"name": "test_migration.json", "size": 100}
+        mock_file.to_dict.return_value = {"file_name": "test_migration.json", "size": 100}
         mock_file_io.put_document.return_value = mock_file
 
         # Act
@@ -185,7 +193,7 @@ class TestMigrationRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json
         self.assertIsInstance(response_data, dict)
-        self.assertIn("name", response_data)
+        self.assertIn("file_name", response_data)
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_put_migration_general_exception(self, mock_file_io):
@@ -260,9 +268,9 @@ class TestMigrationRoutes(unittest.TestCase):
         """Test successful GET /api/migrations/."""
         # Arrange
         mock_file1 = Mock()
-        mock_file1.name = "migration1.json"
+        mock_file1.file_name = "migration1.json"
         mock_file2 = Mock()
-        mock_file2.name = "migration2.json"
+        mock_file2.file_name = "migration2.json"
         mock_files = [mock_file1, mock_file2]
         
         with patch('configurator.routes.migration_routes.FileIO') as mock_file_io:

@@ -18,11 +18,11 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_list_configurations_success(self, mock_file_io):
         """Test successful GET /api/configurations/."""
         # Arrange
-        # Create mock File objects with to_dict method
+        # Create mock File objects with file_name attribute
         mock_file1 = Mock()
-        mock_file1.to_dict.return_value = {"name": "config1.yaml", "read_only": False, "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
+        mock_file1.to_dict.return_value = {"file_name": "config1.yaml", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_file2 = Mock()
-        mock_file2.to_dict.return_value = {"name": "config2.yaml", "read_only": False, "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
+        mock_file2.to_dict.return_value = {"file_name": "config2.yaml", "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_files = [mock_file1, mock_file2]
         mock_file_io.get_documents.return_value = mock_files
 
@@ -32,7 +32,6 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
         expected_data = [mock_file1.to_dict.return_value, mock_file2.to_dict.return_value]
         self.assertEqual(response_data, expected_data)
 

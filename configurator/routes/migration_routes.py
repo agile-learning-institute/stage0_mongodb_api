@@ -17,7 +17,7 @@ def create_migration_routes():
     @event_route("MIG-01", "GET_MIGRATIONS", "listing migrations")
     def get_migrations():
         files = FileIO.get_documents(config.MIGRATIONS_FOLDER)
-        filenames = [file.name for file in files]
+        filenames = [file.file_name for file in files]
         return jsonify(filenames)
 
     # GET /api/migrations/<file_name>/ - Get a migration file

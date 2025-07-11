@@ -57,45 +57,29 @@ class Type:
     
     @staticmethod
     def lock_all():
-        """Lock all type files and return event with sub-events."""
+        """Lock all type files."""
         config = Config.get_instance()
         files = FileIO.get_documents(config.TYPE_FOLDER)
-        
-        event = ConfiguratorEvent("TYP-04", "LOCK_ALL_TYPES")
-        event.data = {
-            "total_files": len(files),
-            "operation": "lock_all"
-        }
+        event = ConfiguratorEvent("TYP-06", "LOCK_ALL_TYPES")
         
         for file in files:
             try:
-                type_obj = Type(file.name)
-                type_obj._locked = True
-                type_obj.save()
-                
-                sub_event = ConfiguratorEvent(f"TYP-{file.name}", "LOCK_TYPE")
-                sub_event.data = {
-                    "file_name": file.name,
-                    "type_name": type_obj.file_name.replace('.yaml', ''),
-                    "locked": True
-                }
-                sub_event.record_success()
-                event.append_events([sub_event])
-                
+                type_obj = Type(file.file_name)
+                sub_event = ConfiguratorEvent(f"TYP-{file.file_name}", "LOCK_TYPE")
+                sub_event.record_success({
+                    "file_name": file.file_name,
+                    "status": "SUCCESS"
+                })
+                event.add_sub_event(sub_event)
             except Exception as e:
-                sub_event = ConfiguratorEvent(f"TYP-{file.name}", "LOCK_TYPE")
-                sub_event.data = {
-                    "file_name": file.name,
+                sub_event = ConfiguratorEvent(f"TYP-{file.file_name}", "LOCK_TYPE")
+                sub_event.record_failure({
+                    "file_name": file.file_name,
                     "error": str(e)
-                }
-                sub_event.record_failure(f"Failed to lock type {file.name}")
-                event.append_events([sub_event])
-        
-        # Record overall success/failure based on sub-events
-        if any(sub.status == "FAILURE" for sub in event.sub_events):
-            event.record_failure("Some types failed to lock")
-        else:
-            event.record_success()
+                })
+                event.add_sub_event(sub_event)
+                sub_event.record_failure(f"Failed to lock type {file.file_name}")
+                event.add_sub_event(sub_event)
         
         return event
     

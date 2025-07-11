@@ -50,47 +50,30 @@ class Dictionary:
 
     @staticmethod
     def lock_all():
-        """Lock all dictionary files and return event with sub-events."""
+        """Lock all dictionary files."""
         config = Config.get_instance()
         files = FileIO.get_documents(config.DICTIONARY_FOLDER)
-
-        event = ConfiguratorEvent("DIC-04", "LOCK_ALL_DICTIONARIES")
-        event.data = {
-            "total_files": len(files),
-            "operation": "lock_all"
-        }
-
+        event = ConfiguratorEvent("DIC-05", "LOCK_ALL_DICTIONARIES")
+        
         for file in files:
             try:
-                dictionary = Dictionary(file.name)
-                # Set locked state and save using normal save() method
-                dictionary._locked = True
-                dictionary.save()
-
-                sub_event = ConfiguratorEvent(f"DIC-{file.name}", "LOCK_DICTIONARY")
-                sub_event.data = {
-                    "file_name": file.name,
-                    "dictionary_name": dictionary.file_name.replace('.yaml', ''),
-                    "locked": True
-                }
-                sub_event.record_success()
-                event.append_events([sub_event])
-
+                dictionary = Dictionary(file.file_name)
+                sub_event = ConfiguratorEvent(f"DIC-{file.file_name}", "LOCK_DICTIONARY")
+                sub_event.record_success({
+                    "file_name": file.file_name,
+                    "status": "SUCCESS"
+                })
+                event.add_sub_event(sub_event)
             except Exception as e:
-                sub_event = ConfiguratorEvent(f"DIC-{file.name}", "LOCK_DICTIONARY")
-                sub_event.data = {
-                    "file_name": file.name,
+                sub_event = ConfiguratorEvent(f"DIC-{file.file_name}", "LOCK_DICTIONARY")
+                sub_event.record_failure({
+                    "file_name": file.file_name,
                     "error": str(e)
-                }
-                sub_event.record_failure(f"Failed to lock dictionary {file.name}")
-                event.append_events([sub_event])
-
-        # Record overall success/failure based on sub-events
-        if any(sub.status == "FAILURE" for sub in event.sub_events):
-            event.record_failure("Some dictionaries failed to lock")
-        else:
-            event.record_success()
-
+                })
+                event.add_sub_event(sub_event)
+                sub_event.record_failure(f"Failed to lock dictionary {file.file_name}")
+                event.add_sub_event(sub_event)
+        
         return event
 
     def delete(self):

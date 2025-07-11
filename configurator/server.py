@@ -31,7 +31,7 @@ from configurator.utils.ejson_encoder import MongoJSONEncoder
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 docs_path = os.path.join(project_root, 'docs')
 app = Flask(__name__, static_folder=docs_path, static_url_path='/docs')
-app.json = MongoJSONEncoder(app)
+# app.json = MongoJSONEncoder(app)  # Commented out to test if this causes MongoDB object conversion
 
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
 if config.AUTO_PROCESS:
@@ -40,8 +40,8 @@ if config.AUTO_PROCESS:
         event = ConfiguratorEvent(event_id="AUTO-00", event_type="PROCESS")
         files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
         for file in files:
-            logger.info(f"Processing Configuration: {file.name}")
-            configuration = Configuration(file.name)
+            logger.info(f"Processing Configuration: {file.file_name}")
+            configuration = Configuration(file.file_name)
             event.append_events([configuration.process()])
         logger.info(f"Processing Output: {app.json.dumps(event.to_dict())}")
         logger.info(f"============= Auto Processing is Completed ===============")

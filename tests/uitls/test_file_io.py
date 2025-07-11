@@ -32,7 +32,7 @@ class TestFile(unittest.TestCase):
         
         file_obj = File(self.test_file_path)
         
-        self.assertEqual(file_obj.name, "test_file.txt")
+        self.assertEqual(file_obj.file_name, "test_file.txt")
         self.assertGreater(file_obj.size, 0)
         self.assertIsInstance(file_obj.created_at, str)
         self.assertIsInstance(file_obj.updated_at, str)
@@ -58,11 +58,11 @@ class TestFile(unittest.TestCase):
         file_obj = File(self.test_file_path)
         file_dict = file_obj.to_dict()
         
-        expected_keys = ["name", "created_at", "updated_at", "size"]
+        expected_keys = ["file_name", "created_at", "updated_at", "size"]
         for key in expected_keys:
             self.assertIn(key, file_dict)
         
-        self.assertEqual(file_dict["name"], "test_file.txt")
+        self.assertEqual(file_dict["file_name"], "test_file.txt")
         self.assertGreater(file_dict["size"], 0)
 
     def test_file_with_different_extensions(self):
@@ -75,7 +75,7 @@ class TestFile(unittest.TestCase):
                 f.write("content")
             
             file_obj = File(file_path)
-            self.assertEqual(file_obj.name, f"test{ext}")
+            self.assertEqual(file_obj.file_name, f"test{ext}")
 
 
 class TestFileIO(unittest.TestCase):
@@ -121,7 +121,7 @@ class TestFileIO(unittest.TestCase):
         files = self.file_io.get_documents("")
         self.assertEqual(len(files), 2)
         
-        file_names = [f.name for f in files]
+        file_names = [f.file_name for f in files]
         self.assertIn("test.yaml", file_names)
         self.assertIn("test.json", file_names)
 
@@ -166,7 +166,7 @@ class TestFileIO(unittest.TestCase):
         result = self.file_io.put_document("", "test.yaml", self.yaml_data)
         
         self.assertIsInstance(result, File)
-        self.assertEqual(result.name, "test.yaml")
+        self.assertEqual(result.file_name, "test.yaml")
         self.assertGreaterEqual(result.size, 0)
         
         # Verify file content
@@ -179,7 +179,7 @@ class TestFileIO(unittest.TestCase):
         result = self.file_io.put_document("", "test.json", self.json_data)
         
         self.assertIsInstance(result, File)
-        self.assertEqual(result.name, "test.json")
+        self.assertEqual(result.file_name, "test.json")
         self.assertGreaterEqual(result.size, 0)
         
         # Verify file content

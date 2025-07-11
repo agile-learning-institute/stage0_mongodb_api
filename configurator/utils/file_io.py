@@ -15,7 +15,7 @@ class File:
     
     def __init__(self, file_path: str):
         """Initialize a File instance with file properties."""
-        self.name = os.path.basename(file_path)
+        self.file_name = os.path.basename(file_path)
         self.created_at = None
         self.updated_at = None
         self.size = 0
@@ -33,7 +33,7 @@ class File:
     def to_dict(self):
         """Convert file properties to dictionary matching OpenAPI schema (flat)."""
         return {
-            "name": self.name,
+            "file_name": self.file_name,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "size": self.size

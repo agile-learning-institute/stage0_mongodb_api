@@ -42,41 +42,29 @@ class Configuration:
     
     @staticmethod
     def lock_all():
-        """Lock all configuration files and return event with sub-events."""
+        """Lock all configuration files."""
         config = Config.get_instance()
         files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-
-        event = ConfiguratorEvent("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS")
-        event.data = {
-            "total_files": len(files),
-            "operation": "lock_all"
-        }
-
-        for file in files:
-            sub_event = ConfiguratorEvent(f"CFG-{file.name}", "LOCK_CONFIGURATION")
-            try:
-                configuration = Configuration(file.name)
-                sub_event.data = {
-                    "file_name": file.name,
-                    "configuration_name": configuration.file_name,
-                    "locked": True
-                }
-                sub_event.record_success()
-                event.append_events([sub_event])
-                configuration._locked = True
-                configuration.save()
-
-            except ConfiguratorException as e:
-                sub_event.record_failure(f"Failed to lock configuration {file.name}", e)
-                event.append_events([sub_event])
-                raise ConfiguratorException(f"Failed to lock configuration {file.name}", event)
-            
-            except Exception as e:
-                sub_event.record_failure(f"Failed to lock configuration {file.name}", e)
-                event.append_events([sub_event])
-                raise ConfiguratorException(f"Failed to lock configuration {file.name}", event)
+        event = ConfiguratorEvent("CFG-07", "LOCK_ALL_CONFIGURATIONS")
         
-        event.record_success()
+        for file in files:
+            try:
+                sub_event = ConfiguratorEvent(f"CFG-{file.file_name}", "LOCK_CONFIGURATION")
+                configuration = Configuration(file.file_name)
+                sub_event.record_success({
+                    "file_name": file.file_name,
+                    "status": "SUCCESS"
+                })
+                event.add_sub_event(sub_event)
+            except Exception as e:
+                sub_event.record_failure(f"Failed to lock configuration {file.file_name}", e)
+                event.add_sub_event(sub_event)
+                raise ConfiguratorException(f"Failed to lock configuration {file.file_name}", event)
+            except Exception as e:
+                sub_event.record_failure(f"Failed to lock configuration {file.file_name}", e)
+                event.add_sub_event(sub_event)
+                raise ConfiguratorException(f"Failed to lock configuration {file.file_name}", event)
+        
         return event
     
     def delete(self):
