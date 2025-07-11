@@ -1,9 +1,181 @@
-custom_types:
-  name: Test Types Endpoints
-  steps:
-    - name: Placeholder Step
-      http:
-        url: http://${{env.host}}/api/types
-        method: GET
-        check:
-          status: /200/
+version: "1.1"
+name: Test Types Endpoints
+env:
+  host: localhost:8081
+
+tests:
+  types:
+    name: Test Types Endpoints
+    steps:
+      # Setup - Delete test file if it exists (no checks needed)
+      - name: Delete Test Type (Setup)
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: DELETE
+          check:
+            status: /200|500/
+      
+      # Create - PUT new type
+      - name: Create Test Type
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Test type for stepCI testing",
+              "type": "string",
+              "required": false
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_type.yaml
+              _locked: false
+            schema:
+              created_at: 
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              size:
+                type: number
+                    
+      # Read - GET the created type
+      - name: Get Test Type
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              description: "Test type for stepCI testing"
+              type: "string"
+              required: false
+
+      # Update - PUT to modify the type
+      - name: Update Test Type
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test type for stepCI testing",
+              "type": "string",
+              "required": true
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_type.yaml
+              _locked: false
+            schema:
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              size:
+                type: number
+
+      # Lock - PUT to lock the type
+      - name: Lock Test Type
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test type for stepCI testing",
+              "type": "string",
+              "required": true,
+              "_locked": true
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_type.yaml
+              _locked: true
+
+      # Try to Delete a locked type       
+      - name: Delete a locked type - should fail
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: DELETE
+          check:
+            status: /500/
+            jsonpath:
+              status: FAILURE
+              
+      # Unlock - PUT to unlock the type
+      - name: Unlock Test Type
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test type for stepCI testing",
+              "type": "string",
+              "required": true,
+              "_locked": false
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_type.yaml
+              _locked: false
+      
+      # Lock All - PATCH to lock all types
+      - name: Lock All Types
+        http:
+          url: http://${{env.host}}/api/types/
+          method: PATCH
+          check:
+            status: /200/
+            jsonpath:
+              status: SUCCESS
+              data.total_files: /[0-9]+/
+              data.operation: "lock_all"
+            schema:
+              event_id:
+                type: string
+              event_type:
+                type: string
+              sub_events:
+                type: array
+      
+      # Unlock before cleanup
+      - name: Unlock Test Type (Cleanup)
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test type for stepCI testing",
+              "type": "string",
+              "required": true,
+              "_locked": false
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_type.yaml
+              _locked: false
+
+      # Cleanup - DELETE the test type
+      - name: Delete Test Type (Cleanup)
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: DELETE
+          check:
+            status: /200/
