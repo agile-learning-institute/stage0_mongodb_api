@@ -7,7 +7,7 @@ tests:
   enumerators:
     name: Test Enumerators Endpoints
     steps:
-      # Test PUT with modified data
+      # Test PUT with modified data (preserving existing content and adding new test values)
       - name: Put Enumerators
         http:
           url: http://${{env.host}}/api/enumerators/
@@ -23,6 +23,23 @@ tests:
               {
                 "version": 1,
                 "enumerators": {
+                  "default_status": {
+                    "active": "Not Deleted",
+                    "archived": "Soft Delete Indicator"
+                  },
+                  "test_enum": {
+                    "foo": "bar"
+                  }
+                }
+              },
+              {
+                "version": 2,
+                "enumerators": {
+                  "default_status": {
+                    "draft": "Draft",
+                    "active": "Not Deleted",
+                    "archived": "Soft Delete Indicator"
+                  },
                   "test_enum": {
                     "foo": "bar"
                   }
@@ -33,6 +50,7 @@ tests:
             status: /200/
             jsonpath:
               $[1].enumerators.test_enum.foo: "bar"
+              $[1].enumerators.default_status.active: "Not Deleted"
             schema:
               created_at:
                 type: string
@@ -52,6 +70,7 @@ tests:
             status: /200/
             jsonpath:
               $[1].enumerators.test_enum.foo: "bar"
+              $[1].enumerators.default_status.active: "Not Deleted"
 
       # Restore to original state from enumerators.json
       - name: Restore Original Enumerators
