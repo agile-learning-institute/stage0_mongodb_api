@@ -19,7 +19,7 @@ tests:
   test_data:
     $ref: ./tests/stepci/test_data.yaml#/tests/test_data
   migrations:
-    $ref: ./tests/stepci/migrations.yaml#/migrations
+    $ref: ./tests/stepci/migrations.yaml#/tests/migrations
   enumerators:
     $ref: ./tests/stepci/enumerators.yaml#/enumerators
 
