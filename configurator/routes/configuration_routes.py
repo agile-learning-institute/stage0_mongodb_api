@@ -1,11 +1,15 @@
 from flask import Blueprint, request, jsonify
 from configurator.services.configuration_services import Configuration
+from configurator.services.dictionary_services import Dictionary
 from configurator.services.template_service import TemplateService
-from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
+from configurator.services.enumerator_service import Enumerators
+from configurator.utils.configurator_exception import ConfiguratorEvent
 from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO, File
 from configurator.utils.route_decorators import event_route
+from configurator.utils.version_number import VersionNumber
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +67,6 @@ def create_configuration_routes():
         configuration = Configuration(file_name)
         event = configuration.delete()
         return jsonify(event.to_dict())
-
-
 
     @blueprint.route('/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-09", "PROCESS_CONFIGURATION", "processing configuration")

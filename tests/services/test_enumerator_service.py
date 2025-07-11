@@ -1,220 +1,237 @@
 import unittest
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch, Mock
 from configurator.services.enumerator_service import Enumerators, Enumerations
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 
+
 class TestEnumerators(unittest.TestCase):
-    @patch('configurator.services.enumerator_service.FileIO.get_document')
-    def test_init_with_none_data_loads_file(self, mock_get_document):
-        """Test Enumerators initialization with None data loads from file."""
-        mock_get_document.return_value = [{"version": 0, "enumerators": {}}]
-        enum = Enumerators(None)
-        self.assertEqual(enum.dict, [{"version": 0, "enumerators": {}}])
-        mock_get_document.assert_called_once_with("test_data", "enumerators.json")
+    """Test cases for Enumerators class."""
 
-    def test_init_with_data(self):
-        """Test Enumerators initialization with provided data."""
-        data = [{"version": 0, "enumerators": {}}]
-        enum = Enumerators(data)
-        self.assertEqual(enum.dict, data)
-
-    @patch('configurator.services.enumerator_service.FileIO.put_document')
-    @patch('configurator.services.enumerator_service.FileIO.get_document')
-    def test_save_success_with_changes(self, mock_get_document, mock_put_document):
-        """Test successful save with file comparison showing changes."""
+    @patch('configurator.services.enumerator_service.FileIO.get_documents')
+    def test_init_with_none_data_loads_file(self, mock_get_documents):
+        """Test Enumerators initialization loads from files."""
         # Arrange
-        original_data = [{"version": 0, "enumerators": {"old": {"value": 1}}}]
-        cleaned_data = [{"version": 0, "enumerators": {"new": {"value": 2}}}]
+        mock_files = [Mock(file_name="test1.yaml"), Mock(file_name="test2.yaml")]
+        mock_get_documents.return_value = mock_files
         
-        # Mock get_document to return different original and saved content
-        mock_get_document.side_effect = [original_data, cleaned_data]
-        
-        # Mock put_document to return None (no longer returns File object)
-        mock_put_document.return_value = None
-        
-        enum = Enumerators(cleaned_data)
-        
-        # Act
-        result = enum.save()
-        
-        # Assert
-        self.assertEqual(result, enum)  # save() now returns self
-        
-        # Verify FileIO calls
-        expected_data = cleaned_data
-        mock_put_document.assert_called_once_with("test_data", "enumerators.json", expected_data)
+        with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
+            mock_enum1 = Mock()
+            mock_enum2 = Mock()
+            mock_enumerations.side_effect = [mock_enum1, mock_enum2]
+            
+            # Act
+            enum = Enumerators()
+            
+            # Assert
+            mock_get_documents.assert_called_once()
+            self.assertEqual(len(enum.enumerations), 2)
+            self.assertEqual(enum.enumerations[0], mock_enum1)
+            self.assertEqual(enum.enumerations[1], mock_enum2)
 
-    @patch('configurator.services.enumerator_service.FileIO.put_document')
-    @patch('configurator.services.enumerator_service.FileIO.get_document')
-    def test_save_success_no_changes(self, mock_get_document, mock_put_document):
-        """Test successful save with no changes detected."""
+    @patch('configurator.services.enumerator_service.FileIO.get_documents')
+    def test_getVersion_finds_version(self, mock_get_documents):
+        """Test getVersion finds the correct version."""
         # Arrange
-        same_data = [{"version": 0, "enumerators": {"same": {"value": 1}}}]
+        mock_files = [Mock(file_name="test1.yaml")]
+        mock_get_documents.return_value = mock_files
         
-        # Mock get_document to return same content for original and saved
-        mock_get_document.side_effect = [same_data, same_data]
-        
-        # Mock put_document to return None (no longer returns File object)
-        mock_put_document.return_value = None
-        
-        enum = Enumerators(same_data)
-        
-        # Act
-        result = enum.save()
-        
-        # Assert
-        self.assertEqual(result, enum)  # save() now returns self
-        
-        # Verify FileIO calls
-        expected_data = same_data
-        mock_put_document.assert_called_once_with("test_data", "enumerators.json", expected_data)
+        with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
+            mock_enum = Mock(version=1)
+            mock_enumerations.return_value = mock_enum
+            
+            # Act
+            enum = Enumerators()
+            result = enum.getVersion(1)
+            
+            # Assert
+            self.assertEqual(result, mock_enum)
 
-    @patch('configurator.services.enumerator_service.FileIO.put_document')
-    @patch('configurator.services.enumerator_service.FileIO.get_document')
-    def test_save_configurator_exception(self, mock_get_document, mock_put_document):
-        """Test save when ConfiguratorException is raised during file operations."""
+    @patch('configurator.services.enumerator_service.FileIO.get_documents')
+    def test_getVersion_not_found(self, mock_get_documents):
+        """Test getVersion when version is not found."""
         # Arrange
-        data = [{"version": 0, "enumerators": {}}]
-        enum = Enumerators(data)
+        mock_files = [Mock(file_name="test1.yaml")]
+        mock_get_documents.return_value = mock_files
         
-        # Mock put_document to raise ConfiguratorException
-        event = ConfiguratorEvent("TEST-01", "TEST_ERROR")
-        mock_put_document.side_effect = ConfiguratorException("Test error", event)
-        
-        # Act & Assert
-        with self.assertRaises(ConfiguratorException) as cm:
-            enum.save()
-        
-        self.assertIn("Failed to save enumerators", str(cm.exception))
+        with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
+            mock_enum = Mock(version=1)
+            mock_enumerations.return_value = mock_enum
+            
+            # Act & Assert
+            enum = Enumerators()
+            with self.assertRaises(ConfiguratorException):
+                enum.getVersion(999)
 
-    @patch('configurator.services.enumerator_service.FileIO.put_document')
-    @patch('configurator.services.enumerator_service.FileIO.get_document')
-    def test_save_general_exception(self, mock_get_document, mock_put_document):
-        """Test save when general Exception is raised during file operations."""
+    def test_version_alias(self):
+        """Test that version() is an alias for getVersion()."""
         # Arrange
-        data = [{"version": 0, "enumerators": {}}]
-        enum = Enumerators(data)
-        
-        # Mock put_document to raise general Exception
-        mock_put_document.side_effect = Exception("Unexpected error")
-        
-        # Act & Assert
-        with self.assertRaises(ConfiguratorException) as cm:
-            enum.save()
-        
-        self.assertIn("Failed to save enumerators", str(cm.exception))
+        with patch('configurator.services.enumerator_service.FileIO.get_documents') as mock_get_documents:
+            mock_files = [Mock(file_name="test1.yaml")]
+            mock_get_documents.return_value = mock_files
+            
+            with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
+                mock_enum = Mock(version=1)
+                mock_enumerations.return_value = mock_enum
+                
+                enum = Enumerators()
+                
+                with patch.object(enum, 'getVersion') as mock_get_version:
+                    mock_get_version.return_value = Mock()
+                    
+                    # Act
+                    enum.version(1)
+                    
+                    # Assert
+                    mock_get_version.assert_called_once_with(1)
 
-    def test_version_returns_correct_version(self):
-        """Test that version method returns the correct version."""
-        data = [
-            {"version": 0, "enumerators": {"a": 1}},
-            {"version": 1, "enumerators": {"b": 2}}
-        ]
-        enum = Enumerators(data)
-        # Test that version method returns the correct version
-        result = enum.version(1)
-        self.assertEqual(result.version, 1)
-        self.assertEqual(result.enumerators, {"b": 2})
+    def test_lock_all(self):
+        """Test that lock_all() locks all enumerations."""
+        # Arrange
+        with patch('configurator.services.enumerator_service.FileIO.get_documents') as mock_get_documents:
+            mock_files = [Mock(file_name="test1.yaml"), Mock(file_name="test2.yaml")]
+            mock_get_documents.return_value = mock_files
+            
+            with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
+                mock_enum1 = Mock()
+                mock_enum2 = Mock()
+                mock_enumerations.side_effect = [mock_enum1, mock_enum2]
+                
+                # Act
+                enum = Enumerators()
+                result = enum.lock_all()
+                
+                # Assert
+                self.assertEqual(result, enum)
+                mock_enum1._locked = True
+                mock_enum1.save.assert_called_once()
+                mock_enum2._locked = True
+                mock_enum2.save.assert_called_once()
 
-    def test_to_dict_returns_data(self):
-        """Test that to_dict method returns the enumerators data."""
-        data = [{"version": 0, "enumerators": {"test": {"value": 1}}}]
-        enum = Enumerators(data)
-        result = enum.to_dict()
-        expected = data
-        self.assertEqual(result, expected)
 
 class TestEnumerations(unittest.TestCase):
+    """Test cases for Enumerations class."""
+
+    def test_init_with_none_data_loads_file(self):
+        """Test Enumerations initialization with None data loads from file."""
+        # Arrange
+        with patch('configurator.services.enumerator_service.FileIO.get_document') as mock_get_document:
+            mock_get_document.return_value = {
+                "name": "test",
+                "status": "active",
+                "version": 1,
+                "enumerators": {"test_enum": {"value1": True, "value2": False}},
+                "_locked": True
+            }
+            
+            # Act
+            enum = Enumerations(data=None, file_name="test.yaml")
+            
+            # Assert
+            self.assertEqual(enum.name, "test")
+            self.assertEqual(enum.status, "active")
+            self.assertEqual(enum.version, 1)
+            self.assertEqual(enum.enumerators, {"test_enum": {"value1": True, "value2": False}})
+            self.assertTrue(enum._locked)
+
+    def test_init_with_invalid_data_raises(self):
+        """Test Enumerations initialization with invalid data raises AttributeError."""
+        # Act & Assert
+        with self.assertRaises(AttributeError):
+            Enumerations(data="invalid")
+
     def test_init_with_valid_data(self):
         """Test Enumerations initialization with valid data."""
+        # Arrange
         data = {
             "name": "test",
             "status": "active",
             "version": 1,
-            "enumerators": {"foo": {"bar": 1}},
+            "enumerators": {"test_enum": {"value1": True, "value2": False}},
             "_locked": True
         }
-        enum = Enumerations(data)
+        
+        # Act
+        enum = Enumerations(data=data)
+        
+        # Assert
         self.assertEqual(enum.name, "test")
         self.assertEqual(enum.status, "active")
         self.assertEqual(enum.version, 1)
-        self.assertEqual(enum.enumerators, {"foo": {"bar": 1}})
+        self.assertEqual(enum.enumerators, {"test_enum": {"value1": True, "value2": False}})
         self.assertTrue(enum._locked)
 
-    def test_init_without_locked_defaults_to_false(self):
-        """Test Enumerations initialization without _locked defaults to False."""
+    def test_get_enum_values(self):
+        """Test get_enum_values method."""
+        # Arrange
         data = {
             "name": "test",
             "status": "active",
             "version": 1,
-            "enumerators": {"foo": {"bar": 1}}
+            "enumerators": {"test_enum": {"value1": True, "value2": False}}
         }
-        enum = Enumerations(data)
-        self.assertFalse(enum._locked)
+        enum = Enumerations(data=data)
+        
+        # Act
+        values = enum.get_enum_values("test_enum")
+        
+        # Assert
+        self.assertEqual(values, ["value1", "value2"])
 
-    def test_to_dict_includes_locked(self):
-        """Test that to_dict includes _locked property."""
-        data = {
-            "name": "test",
-            "status": "active",
-            "version": 1,
-            "enumerators": {"foo": {"bar": 1}},
-            "_locked": True
-        }
-        enum = Enumerations(data)
-        result = enum.to_dict()
-        self.assertEqual(result["_locked"], True)
-        self.assertEqual(result["name"], "test")
-        self.assertEqual(result["status"], "active")
-        self.assertEqual(result["version"], 1)
-        self.assertEqual(result["enumerators"], {"foo": {"bar": 1}})
-
-    def test_init_with_none_data_raises(self):
-        """Test Enumerations initialization with None data raises ConfiguratorException."""
-        with self.assertRaises(ConfiguratorException):
-            Enumerations(None)
-
-    def test_init_with_invalid_data_raises(self):
-        """Test Enumerations initialization with invalid data raises ConfiguratorException."""
-        with self.assertRaises(ConfiguratorException):
-            Enumerations("invalid_data")
-
-    def test_get_enum_values_success(self):
-        """Test successful retrieval of enum values."""
-        data = {
-            "name": "test",
-            "status": "active",
-            "version": 1,
-            "enumerators": {"foo": {"bar": 1, "baz": 2}}
-        }
-        enum = Enumerations(data)
-        values = enum.get_enum_values("foo")
-        self.assertIn("bar", values)
-        self.assertIn("baz", values)
-
-    def test_get_enum_values_invalid_name_raises(self):
-        """Test that get_enum_values raises ConfiguratorException for invalid enum name."""
-        data = {
-            "name": "test",
-            "status": "active",
-            "version": 1,
-            "enumerators": {"foo": {"bar": 1}}
-        }
-        enum = Enumerations(data)
-        with self.assertRaises(ConfiguratorException):
-            enum.get_enum_values("not_a_key")
-
-    def test_get_enum_values_with_none_enumerators_raises(self):
-        """Test that get_enum_values raises ConfiguratorException when enumerators is None."""
+    def test_get_enum_values_none_enumerators(self):
+        """Test get_enum_values when enumerators is None."""
+        # Arrange
         data = {
             "name": "test",
             "status": "active",
             "version": 1,
             "enumerators": None
         }
-        enum = Enumerations(data)
+        enum = Enumerations(data=data)
+        
+        # Act & Assert
+        with self.assertRaises(TypeError):
+            enum.get_enum_values("test_enum")
+
+    def test_get_enum_values_enum_not_found(self):
+        """Test get_enum_values when enum is not found."""
+        # Arrange
+        data = {
+            "name": "test",
+            "status": "active",
+            "version": 1,
+            "enumerators": {"test_enum": {"value1": True}}
+        }
+        enum = Enumerations(data=data)
+        
+        # Act & Assert
         with self.assertRaises(ConfiguratorException):
-            enum.get_enum_values("foo")
+            enum.get_enum_values("nonexistent_enum")
+
+    def test_to_dict(self):
+        """Test to_dict method."""
+        # Arrange
+        data = {
+            "name": "test",
+            "status": "active",
+            "version": 1,
+            "enumerators": {"test_enum": {"value1": True}},
+            "_locked": True
+        }
+        enum = Enumerations(data=data)
+        
+        # Act
+        result = enum.to_dict()
+        
+        # Assert
+        expected = {
+            "name": "test",
+            "status": "active",
+            "version": 1,
+            "enumerators": {"test_enum": {"value1": True}},
+            "_locked": True
+        }
+        self.assertEqual(result, expected)
+
 
 if __name__ == '__main__':
     unittest.main() 

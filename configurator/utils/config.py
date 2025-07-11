@@ -55,7 +55,8 @@ class Config:
                 "TEST_DATA_FOLDER": "test_data",
                 "TEMPLATE_FOLDER": "templates",
                 "MIGRATIONS_FOLDER": "migrations",
-                "API_CONFIG_FOLDER": "api_config"
+                "API_CONFIG_FOLDER": "api_config",
+                "ENUMERATOR_FOLDER": "enumerators"
             }
             self.config_ints = {
                 "API_PORT": "8081",

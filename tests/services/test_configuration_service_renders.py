@@ -33,7 +33,7 @@ class TestConfigurationRendering(unittest.TestCase):
 
     def setUp(self):
         self.config = set_config_input_folder("./tests/test_cases/small_sample")
-        self.enumerators_service = Enumerators(None)
+        self.enumerators_service = Enumerators()
 
     def tearDown(self):
         clear_config()

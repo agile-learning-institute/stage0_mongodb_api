@@ -1,10 +1,8 @@
 from configurator.services.type_services import Type
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.services.enumerator_service import Enumerators
-from configurator.utils.file_io import FileIO, File
+from configurator.utils.file_io import FileIO
 from configurator.utils.config import Config
 import os
-
 
 class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
@@ -30,11 +28,14 @@ class Dictionary:
     def save(self):
         """Save the dictionary and return the Dictionary object."""
         try:
-            # Save the cleaned content
-            FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.to_dict())
-            return self
-        except Exception as e:
             event = ConfiguratorEvent("DIC-03", "PUT_DICTIONARY")
+            document = FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.to_dict())
+            return document
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure(f"Failed to save dictionary {self.file_name}: {str(e)}")
+            raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}", event)
+        except Exception as e:
             event.record_failure(f"Failed to save dictionary {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Failed to save dictionary {self.file_name}: {str(e)}", event)
 
@@ -52,28 +53,27 @@ class Dictionary:
     def lock_all():
         """Lock all dictionary files."""
         config = Config.get_instance()
-        files = FileIO.get_documents(config.DICTIONARY_FOLDER)
         event = ConfiguratorEvent("DIC-05", "LOCK_ALL_DICTIONARIES")
         
-        for file in files:
-            try:
+        try:
+            files = FileIO.get_documents(config.DICTIONARY_FOLDER)
+            for file in files:
+                sub_event = ConfiguratorEvent(f"DIC-{file.file_name}", "LOCK_DICTIONARY")
+                event.append_events([sub_event])
                 dictionary = Dictionary(file.file_name)
-                sub_event = ConfiguratorEvent(f"DIC-{file.file_name}", "LOCK_DICTIONARY")
+                dictionary._locked = True
+                dictionary.save()                
                 sub_event.record_success()
-                event.append_events([sub_event])
-            except ConfiguratorException as ce:
-                event.append_events([ce.event])
-                event.record_failure(f"ConfiguratorException locking dictionary {file.file_name}")
-                raise ConfiguratorException(f"ConfiguratorException locking dictionary {file.file_name}", event)
-            except Exception as e:
-                sub_event = ConfiguratorEvent(f"DIC-{file.file_name}", "LOCK_DICTIONARY")
-                sub_event.record_failure(f"Failed to lock dictionary {file.file_name}: {str(e)}")
-                event.append_events([sub_event])
-                event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
-                raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
+            event.record_success()
+            return event
+        except ConfiguratorException as ce:
+            event.append_events([ce.event])
+            event.record_failure(f"ConfiguratorException locking dictionary {file.file_name}")
+            raise ConfiguratorException(f"ConfiguratorException locking dictionary {file.file_name}", event)
+        except Exception as e:
+            event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
+            raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
         
-        event.record_success()
-        return event
 
     def delete(self):
         if self._locked:
@@ -81,18 +81,16 @@ class Dictionary:
             raise ConfiguratorException("Cannot delete locked dictionary", event)
         event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
         try:
-            delete_event = FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name)
-            if delete_event.status == "SUCCESS":
-                event.record_success()
-            else:
-                event.append_events([delete_event])
-                event.record_failure("error deleting dictionary")
+            event.append_events(FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name))
+            event.record_success()
+            return event
         except ConfiguratorException as e:
             event.append_events([e.event])
             event.record_failure("error deleting dictionary")
+            return event
         except Exception as e:
             event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
-        return event
+            return event
 
 
 class Property:

@@ -20,6 +20,20 @@ def create_migration_routes():
         filenames = [file.file_name for file in files]
         return jsonify(filenames)
 
+    # PATCH /api/migrations/ - Lock all migration files
+    @migration_routes.route('/', methods=['PATCH'])
+    @event_route("MIG-07", "LOCK_ALL_MIGRATIONS", "locking all migration files")
+    def lock_all_migrations():
+        event = ConfiguratorEvent("MIG-07", "LOCK_ALL_MIGRATIONS")
+        files = FileIO.get_documents(config.MIGRATIONS_FOLDER)
+        
+        for file in files:
+            file._locked = True
+            file.save()
+            
+        event.record_success()
+        return jsonify(event.to_dict())
+
     # GET /api/migrations/<file_name>/ - Get a migration file
     @migration_routes.route('/<file_name>/', methods=['GET'])
     @event_route("MIG-02", "GET_MIGRATION", "getting migration")

@@ -38,6 +38,22 @@ def create_test_data_routes():
             for file in files if file.file_name.endswith('.json')
         ])
         
+    # PATCH /api/test_data - Lock all test data files
+    @test_data_routes.route('/', methods=['PATCH'])
+    @event_route("TST-05", "LOCK_ALL_TEST_DATA", "locking all test data files")
+    def lock_all_test_data():
+        event = ConfiguratorEvent("TST-05", "LOCK_ALL_TEST_DATA")
+        files = FileIO.get_documents(config.TEST_DATA_FOLDER)
+        # Only lock .json files
+        json_files = [file for file in files if file.file_name.endswith('.json')]
+        
+        for file in json_files:
+            file._locked = True
+            file.save()
+            
+        event.record_success()
+        return jsonify(event.to_dict())
+        
     # GET /api/test_data/<file_name> - Return a test_data file (only .json)
     @test_data_routes.route('/<file_name>/', methods=['GET'])
     @event_route("TST-02", "GET_TEST_DATA", "getting test data")

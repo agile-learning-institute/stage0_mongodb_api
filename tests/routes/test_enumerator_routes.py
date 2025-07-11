@@ -11,35 +11,37 @@ class TestEnumeratorRoutes(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.app = Flask(__name__)
-        self.app.register_blueprint(create_enumerator_routes(), url_prefix='/api/enumerators')
+        self.app.register_blueprint(create_enumerator_routes(), url_prefix='/api/enumerations')
         self.client = self.app.test_client()
 
-    def test_get_enumerators_success(self):
-        """Test successful GET /api/enumerators - Get Enumerators."""
+    @patch('configurator.routes.enumerator_routes.FileIO.get_documents')
+    def test_get_enumerations_success(self, mock_get_documents):
+        """Test successful GET /api/enumerations - Get enumeration files."""
         # Arrange
-        mock_enumerators = Mock()
-        mock_enumerators.to_dict.return_value = {"enumerators": []}
+        mock_files = [
+            Mock(file_name="test1.yaml", to_dict=lambda: {"name": "test1.yaml", "path": "/path/to/test1.yaml"}),
+            Mock(file_name="test2.yaml", to_dict=lambda: {"name": "test2.yaml", "path": "/path/to/test2.yaml"})
+        ]
+        mock_get_documents.return_value = mock_files
         
-        with patch('configurator.routes.enumerator_routes.Enumerators') as mock_enumerators_class:
-            mock_enumerators_class.return_value = mock_enumerators
-            
-            # Act
-            response = self.client.get('/api/enumerators/')
-            
-            # Assert
-            self.assertEqual(response.status_code, 200)
-            response_data = response.json
-            self.assertEqual(response_data, {"enumerators": []})
+        # Act
+        response = self.client.get('/api/enumerations/')
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertEqual(len(response_data), 2)
+        self.assertEqual(response_data[0]["name"], "test1.yaml")
+        self.assertEqual(response_data[1]["name"], "test2.yaml")
 
-    @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_get_enumerators_not_found(self, mock_enumerators_class):
-        """Test GET /api/enumerators when file is not found."""
+    @patch('configurator.routes.enumerator_routes.FileIO.get_documents')
+    def test_get_enumerations_exception(self, mock_get_documents):
+        """Test GET /api/enumerations when FileIO raises exception."""
         # Arrange
-        event = ConfiguratorEvent("FIL-02", "FILE_NOT_FOUND", {"file_path": "/input/test_data/enumerators.json"})
-        mock_enumerators_class.side_effect = ConfiguratorException("File not found", event)
+        mock_get_documents.side_effect = Exception("File error")
 
         # Act
-        response = self.client.get('/api/enumerators/')
+        response = self.client.get('/api/enumerations/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -50,15 +52,39 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_get_enumerators_configurator_exception(self, mock_enumerators_class):
-        """Test GET /api/enumerators when Enumerators raises ConfiguratorException."""
+    @patch('configurator.routes.enumerator_routes.Enumerations')
+    def test_get_enumeration_success(self, mock_enumerations_class):
+        """Test successful GET /api/enumerations/{name} - Get specific enumeration."""
         # Arrange
-        event = ConfiguratorEvent("TEST-01", "TEST", {"error": "test"})
-        mock_enumerators_class.side_effect = ConfiguratorException("Other error", event)
+        mock_enumeration = Mock()
+        mock_enumeration.to_dict.return_value = {
+            "name": "test",
+            "status": "active",
+            "version": 1,
+            "enumerators": {"test_enum": {"value1": True}}
+        }
+        mock_enumerations_class.return_value = mock_enumeration
+        
+        # Act
+        response = self.client.get('/api/enumerations/test/')
+        
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertEqual(response_data["name"], "test")
+        self.assertEqual(response_data["status"], "active")
+        self.assertEqual(response_data["version"], 1)
+        mock_enumerations_class.assert_called_once_with(file_name="test")
+
+    @patch('configurator.routes.enumerator_routes.Enumerations')
+    def test_get_enumeration_exception(self, mock_enumerations_class):
+        """Test GET /api/enumerations/{name} when Enumerations raises exception."""
+        # Arrange
+        event = ConfiguratorEvent("ENU-02", "GET_ENUMERATION")
+        mock_enumerations_class.side_effect = ConfiguratorException("File not found", event)
 
         # Act
-        response = self.client.get('/api/enumerators/')
+        response = self.client.get('/api/enumerations/test/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -69,54 +95,40 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_get_enumerators_general_exception(self, mock_enumerators_class):
-        """Test GET /api/enumerators when Enumerators raises a general exception."""
+    @patch('configurator.routes.enumerator_routes.Enumerations')
+    def test_put_enumeration_success(self, mock_enumerations_class):
+        """Test successful PUT /api/enumerations/{name} - Update specific enumeration."""
         # Arrange
-        mock_enumerators_class.side_effect = Exception("Unexpected error")
+        test_data = {
+            "name": "test",
+            "status": "active",
+            "version": 1,
+            "enumerators": {"test_enum": {"value1": True}}
+        }
+        mock_enumeration = Mock()
+        mock_enumeration.to_dict.return_value = test_data
+        mock_enumeration.save.return_value = mock_enumeration
+        mock_enumerations_class.return_value = mock_enumeration
 
         # Act
-        response = self.client.get('/api/enumerators/')
-
-        # Assert
-        self.assertEqual(response.status_code, 500)
-        response_data = response.json
-        self.assertIn("id", response_data)
-        self.assertIn("type", response_data)
-        self.assertIn("status", response_data)
-        self.assertIn("data", response_data)
-        self.assertEqual(response_data["status"], "FAILURE")
-
-    @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_put_enumerators_success(self, mock_enumerators_class):
-        """Test successful PUT /api/enumerators."""
-        # Arrange
-        test_data = [{"name": "enum1", "status": "active", "version": 1, "enumerators": {}}]
-        mock_enumerators = Mock()
-        mock_saved_file = Mock()
-        mock_saved_file.to_dict.return_value = {"name": "enumerators.json", "path": "/path/to/enumerators.json"}
-        mock_enumerators.save.return_value = mock_saved_file
-        mock_enumerators_class.return_value = mock_enumerators
-
-        # Act
-        response = self.client.put('/api/enumerators/', json=test_data)
+        response = self.client.put('/api/enumerations/test/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, {"name": "enumerators.json", "path": "/path/to/enumerators.json"})
-        mock_enumerators_class.assert_called_once_with(data=test_data)
+        self.assertEqual(response_data, test_data)
+        mock_enumerations_class.assert_called_once_with(data=test_data, file_name="test")
 
-    @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_put_enumerators_configurator_exception(self, mock_enumerators_class):
-        """Test PUT /api/enumerators when Enumerators raises ConfiguratorException."""
+    @patch('configurator.routes.enumerator_routes.Enumerations')
+    def test_put_enumeration_exception(self, mock_enumerations_class):
+        """Test PUT /api/enumerations/{name} when Enumerations raises exception."""
         # Arrange
-        event = ConfiguratorEvent("TEST-01", "TEST", {"error": "test"})
-        mock_enumerators_class.side_effect = ConfiguratorException("Save error", event)
-        test_data = [{"name": "enum1", "status": "active", "version": 1, "enumerators": {}}]
+        event = ConfiguratorEvent("ENU-03", "PUT_ENUMERATION")
+        mock_enumerations_class.side_effect = ConfiguratorException("Save error", event)
+        test_data = {"name": "test", "status": "active", "version": 1, "enumerators": {}}
 
         # Act
-        response = self.client.put('/api/enumerators/', json=test_data)
+        response = self.client.put('/api/enumerations/test/', json=test_data)
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -128,14 +140,35 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertEqual(response_data["status"], "FAILURE")
 
     @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_put_enumerators_general_exception(self, mock_enumerators_class):
-        """Test PUT /api/enumerators when Enumerators raises a general exception."""
+    def test_lock_enumerations_success(self, mock_enumerators_class):
+        """Test successful PATCH /api/enumerations - Lock all enumerations."""
         # Arrange
-        mock_enumerators_class.side_effect = Exception("Unexpected error")
-        test_data = [{"name": "enum1", "status": "active", "version": 1, "enumerators": {}}]
+        mock_enumerators = Mock()
+        mock_enumerators.enumerations = []
+        mock_enumerators.lock_all.return_value = mock_enumerators
+        mock_enumerators_class.return_value = mock_enumerators
 
         # Act
-        response = self.client.put('/api/enumerators/', json=test_data)
+        response = self.client.patch('/api/enumerations/')
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
+        mock_enumerators.lock_all.assert_called_once()
+
+    @patch('configurator.routes.enumerator_routes.Enumerators')
+    def test_lock_enumerations_exception(self, mock_enumerators_class):
+        """Test PATCH /api/enumerations when Enumerators raises exception."""
+        # Arrange
+        event = ConfiguratorEvent("ENU-04", "LOCK_ENUMERATIONS")
+        mock_enumerators_class.side_effect = ConfiguratorException("Lock error", event)
+
+        # Act
+        response = self.client.patch('/api/enumerations/')
 
         # Assert
         self.assertEqual(response.status_code, 500)
@@ -146,21 +179,13 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    def test_enumerators_delete_method_not_allowed(self):
-        """Test that DELETE method is not allowed on /api/enumerators."""
+    def test_enumerations_with_filename_not_allowed(self):
+        """Test that enumerations with filename is not allowed."""
         # Act
-        response = self.client.delete('/api/enumerators/')
+        response = self.client.get('/api/enumerations/test.json')
 
         # Assert
-        self.assertEqual(response.status_code, 405)
-
-    def test_enumerators_with_filename_not_allowed(self):
-        """Test that enumerators with filename is not allowed."""
-        # Act
-        response = self.client.get('/api/enumerators/test.json')
-
-        # Assert
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 308)  # Redirect to trailing slash
 
 
 if __name__ == '__main__':

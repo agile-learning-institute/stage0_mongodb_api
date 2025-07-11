@@ -163,13 +163,23 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 405)
 
-    def test_test_data_patch_method_not_allowed(self):
-        """Test that PATCH method is not allowed on /api/test_data."""
+    @patch('configurator.routes.test_data_routes.FileIO')
+    def test_test_data_patch_method_success(self, mock_file_io):
+        """Test that PATCH method is allowed on /api/test_data for locking all files."""
+        # Arrange
+        mock_files = [Mock(), Mock()]
+        mock_file_io.get_documents.return_value = mock_files
+
         # Act
         response = self.client.patch('/api/test_data/')
 
         # Assert
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
 
 
 if __name__ == '__main__':

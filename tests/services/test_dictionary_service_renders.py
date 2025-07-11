@@ -34,7 +34,7 @@ class TestDictionaryRendering(unittest.TestCase):
     def setUp(self):
         self.test_case = getattr(self, 'test_case', 'small_sample')
         self.config = set_config_input_folder(f"./tests/test_cases/{self.test_case}")
-        self.enumerators_service = Enumerators(None)
+        self.enumerators_service = Enumerators()
 
     def tearDown(self):
         clear_config()
