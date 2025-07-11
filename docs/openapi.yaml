@@ -522,24 +522,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Lock all Test Data Files
-      operationId: lock_all_test_data
-      tags:
-        - Test Data
-      responses:
-        '200':
-          description: All test data files locked successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
+
 
   /api/test_data/{file_name}/:
     get:
@@ -650,24 +633,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-    patch:
-      summary: Lock all Migration Files
-      operationId: lock_all_migrations
-      tags:
-        - Migrations
-      responses:
-        '200':
-          description: All migration files locked successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
+
 
 
   /api/migrations/{file_name}/:
@@ -954,8 +920,9 @@ components:
     file:
       type: object
       properties:
-        name:
+        file_name:
           type: string
+          description: Name of the file
         created_at:
           type: string
           format: date-time
@@ -1065,7 +1032,7 @@ components:
         properties:
           description: Properties of an Object type
           type: object
-          properties:
+          additionalProperties:
             $ref: '#/components/schemas/dictionary'
         additionalProperties:
           description: Should the object type allow additional properties
