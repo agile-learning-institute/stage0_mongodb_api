@@ -38,7 +38,7 @@ tests:
           check:
             status: /200/
             jsonpath:
-              name: test_config
+              file_name: test_config.yaml
               _locked: false
             schema:
               created_at: 
@@ -95,7 +95,7 @@ tests:
           check:
             status: /200/
             jsonpath:
-              name: test_config
+              file_name: test_config.yaml
               _locked: false
             schema:
               created_at:
@@ -138,7 +138,7 @@ tests:
           check:
             status: /200/
             jsonpath:
-              name: test_config
+              file_name: test_config.yaml
               _locked: true
 
       # Try to Delete a locked configuration       
@@ -182,7 +182,7 @@ tests:
           check:
             status: /200/
             jsonpath:
-              name: test_config
+              file_name: test_config.yaml
               _locked: false
       
       # Lock All - PATCH to lock all configurations
@@ -204,6 +204,40 @@ tests:
               sub_events:
                 type: array
       
+      # Unlock before cleanup
+      - name: Unlock Test Configuration (Cleanup)
+        http:
+          url: http://${{env.host}}/api/configurations/test_config.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test collection for stepCI testing",
+              "versions": [
+                {
+                  "version": "1.0.0.1",
+                  "drop_indexes": [],
+                  "migrations": [],
+                  "add_indexes": [],
+                  "test_data": "test_data.1.0.0.1.json"
+                },
+                {
+                  "version": "1.0.1.2",
+                  "drop_indexes": [],
+                  "migrations": [],
+                  "add_indexes": [],
+                  "test_data": "test_data.1.0.1.2.json"
+                }
+              ],
+              "_locked": false
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_config.yaml
+              _locked: false
+
       # Cleanup - DELETE the test configuration
       - name: Delete Test Configuration (Cleanup)
         http:
