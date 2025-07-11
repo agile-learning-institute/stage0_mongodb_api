@@ -55,15 +55,17 @@ class Configuration:
                     "file_name": file.file_name,
                     "status": "SUCCESS"
                 })
-                event.add_sub_event(sub_event)
+                event.append_events([sub_event])
+            except ConfiguratorException as ce:
+                event.append_events([ce.event])
+                event.record_failure(f"ConfiguratorException locking configuration {file.file_name}")
+                raise ConfiguratorException(f"ConfiguratorException locking configuration {file.file_name}", event)
             except Exception as e:
-                sub_event.record_failure(f"Failed to lock configuration {file.file_name}", e)
-                event.add_sub_event(sub_event)
-                raise ConfiguratorException(f"Failed to lock configuration {file.file_name}", event)
-            except Exception as e:
-                sub_event.record_failure(f"Failed to lock configuration {file.file_name}", e)
-                event.add_sub_event(sub_event)
-                raise ConfiguratorException(f"Failed to lock configuration {file.file_name}", event)
+                sub_event = ConfiguratorEvent(f"CFG-{file.file_name}", "LOCK_CONFIGURATION")
+                sub_event.record_failure(f"Failed to lock configuration {file.file_name}: {str(e)}")
+                event.append_events([sub_event])
+                event.record_failure(f"Unexpected error locking configuration {file.file_name}")
+                raise ConfiguratorException(f"Unexpected error locking configuration {file.file_name}", event)
         
         return event
     

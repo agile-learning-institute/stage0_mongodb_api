@@ -63,16 +63,17 @@ class Dictionary:
                     "file_name": file.file_name,
                     "status": "SUCCESS"
                 })
-                event.add_sub_event(sub_event)
+                event.append_events([sub_event])
+            except ConfiguratorException as ce:
+                event.append_events([ce.event])
+                event.record_failure(f"ConfiguratorException locking dictionary {file.file_name}")
+                raise ConfiguratorException(f"ConfiguratorException locking dictionary {file.file_name}", event)
             except Exception as e:
                 sub_event = ConfiguratorEvent(f"DIC-{file.file_name}", "LOCK_DICTIONARY")
-                sub_event.record_failure({
-                    "file_name": file.file_name,
-                    "error": str(e)
-                })
-                event.add_sub_event(sub_event)
-                sub_event.record_failure(f"Failed to lock dictionary {file.file_name}")
-                event.add_sub_event(sub_event)
+                sub_event.record_failure(f"Failed to lock dictionary {file.file_name}: {str(e)}")
+                event.append_events([sub_event])
+                event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
+                raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
         
         return event
 

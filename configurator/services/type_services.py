@@ -70,16 +70,17 @@ class Type:
                     "file_name": file.file_name,
                     "status": "SUCCESS"
                 })
-                event.add_sub_event(sub_event)
+                event.append_events([sub_event])
+            except ConfiguratorException as ce:
+                event.append_events([ce.event])
+                event.record_failure(f"ConfiguratorException locking type {file.file_name}")
+                raise ConfiguratorException(f"ConfiguratorException locking type {file.file_name}", event)
             except Exception as e:
                 sub_event = ConfiguratorEvent(f"TYP-{file.file_name}", "LOCK_TYPE")
-                sub_event.record_failure({
-                    "file_name": file.file_name,
-                    "error": str(e)
-                })
-                event.add_sub_event(sub_event)
-                sub_event.record_failure(f"Failed to lock type {file.file_name}")
-                event.add_sub_event(sub_event)
+                sub_event.record_failure(f"Failed to lock type {file.file_name}: {str(e)}")
+                event.append_events([sub_event])
+                event.record_failure(f"Unexpected error locking type {file.file_name}")
+                raise ConfiguratorException(f"Unexpected error locking type {file.file_name}", event)
         
         return event
     
