@@ -1,9 +1,18 @@
-enumerators:
-  name: Test Enumerators Endpoints
-  steps:
-    - name: Placeholder Step
-      http:
-        url: http://${{env.host}}/api/enumerators
-        method: GET
-        check:
-          status: /200/
+version: "1.1"
+name: Test Enumerators Endpoints
+env:
+  host: localhost:8081
+
+tests:
+  enumerators:
+    name: Test Enumerators Endpoints
+    steps:
+      - name: Get Enumerators
+        http:
+          url: http://${{env.host}}/api/enumerators/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              $.enumerators[1].enumerators.default_status.active: "Not Deleted"
+              $.enumerators[2].enumerators.default_status.draft: "Draft"
