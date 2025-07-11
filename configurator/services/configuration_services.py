@@ -18,7 +18,6 @@ class Configuration:
         self.title = document.get("title", "")
         self.description = document.get("description", "")
         self.versions = [Version(file_name.replace('.yaml', ''), v, self.config) for v in document.get("versions", [])]
-        # Handle _locked from PUT request or existing file
         self._locked = document.get("_locked", False)
 
     def to_dict(self):
@@ -46,21 +45,17 @@ class Configuration:
         """Lock all configuration files and return event with sub-events."""
         config = Config.get_instance()
         files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        
+
         event = ConfiguratorEvent("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS")
         event.data = {
             "total_files": len(files),
             "operation": "lock_all"
         }
-        
+
         for file in files:
+            sub_event = ConfiguratorEvent(f"CFG-{file.name}", "LOCK_CONFIGURATION")
             try:
                 configuration = Configuration(file.name)
-                # Set locked state and save using normal save() method
-                configuration._locked = True
-                configuration.save()
-                
-                sub_event = ConfiguratorEvent(f"CFG-{file.name}", "LOCK_CONFIGURATION")
                 sub_event.data = {
                     "file_name": file.name,
                     "configuration_name": configuration.file_name,
@@ -68,22 +63,20 @@ class Configuration:
                 }
                 sub_event.record_success()
                 event.append_events([sub_event])
-                
-            except Exception as e:
-                sub_event = ConfiguratorEvent(f"CFG-{file.name}", "LOCK_CONFIGURATION")
-                sub_event.data = {
-                    "file_name": file.name,
-                    "error": str(e)
-                }
-                sub_event.record_failure(f"Failed to lock configuration {file.name}")
+                configuration._locked = True
+                configuration.save()
+
+            except ConfiguratorException as e:
+                sub_event.record_failure(f"Failed to lock configuration {file.name}", e)
                 event.append_events([sub_event])
+                raise ConfiguratorException(f"Failed to lock configuration {file.name}", event)
+            
+            except Exception as e:
+                sub_event.record_failure(f"Failed to lock configuration {file.name}", e)
+                event.append_events([sub_event])
+                raise ConfiguratorException(f"Failed to lock configuration {file.name}", event)
         
-        # Record overall success/failure based on sub-events
-        if any(sub.status == "FAILURE" for sub in event.sub_events):
-            event.record_failure("Some configurations failed to lock")
-        else:
-            event.record_success()
-        
+        event.record_success()
         return event
     
     def delete(self):
