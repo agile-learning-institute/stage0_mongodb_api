@@ -3,7 +3,7 @@ rendering:
   steps:
     - name: Render JSON Schema for sample.1.0.0.1
       http:
-        url: http://${{env.host}}/api/configurations/sample.yaml/render/json_schema?version=1.0.0.1
+        url: http://${{env.host}}/api/configurations/json_schema/sample.yaml/1.0.0.1/
         method: GET
         check:
           status: /200/
@@ -20,7 +20,7 @@ rendering:
 
     - name: Render BSON Schema for sample.1.0.0.1
       http:
-        url: http://${{env.host}}/api/configurations/sample.yaml/render/bson_schema?version=1.0.0.1
+        url: http://${{env.host}}/api/configurations/bson_schema/sample.yaml/1.0.0.1/
         method: GET
         check:
           status: /200/

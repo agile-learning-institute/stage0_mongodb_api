@@ -1,7 +1,7 @@
 processing:
   name: Test Processing Endpoints
   steps:
-    - name: Placeholder Step
+    - name: Test Processing Endpoint
       http:
         url: http://${{env.host}}/api/configurations
         method: GET
