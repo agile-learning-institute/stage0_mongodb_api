@@ -59,10 +59,7 @@ class Dictionary:
             try:
                 dictionary = Dictionary(file.file_name)
                 sub_event = ConfiguratorEvent(f"DIC-{file.file_name}", "LOCK_DICTIONARY")
-                sub_event.record_success({
-                    "file_name": file.file_name,
-                    "status": "SUCCESS"
-                })
+                sub_event.record_success()
                 event.append_events([sub_event])
             except ConfiguratorException as ce:
                 event.append_events([ce.event])

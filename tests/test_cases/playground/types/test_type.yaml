@@ -1,0 +1,5 @@
+file_name: test_type.yaml
+_locked: false
+description: Updated test type for stepCI testing
+required: true
+type: string
