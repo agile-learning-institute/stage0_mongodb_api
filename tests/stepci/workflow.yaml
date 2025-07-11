@@ -13,9 +13,9 @@ tests:
   processing:
     $ref: ./tests/stepci/processing.yaml#/processing
   dictionaries:
-    $ref: ./tests/stepci/dictionaries.yaml#/dictionaries
+    $ref: ./tests/stepci/dictionaries.yaml#/tests/dictionaries
   custom_types:
-    $ref: ./tests/stepci/types.yaml#/custom_types
+    $ref: ./tests/stepci/types.yaml#/tests/types
   test_data:
     $ref: ./tests/stepci/test_data.yaml#/test_data
   migrations:
