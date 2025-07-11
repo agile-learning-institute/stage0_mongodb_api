@@ -20,6 +20,7 @@ class Config:
 
             # Declare instance variables to support IDE code assist
             self.BUILT_AT = ''
+            self.API_BUILT_AT = ''
             self.LOGGING_LEVEL = ''
             self.MONGO_DB_NAME = ''
             self.MONGO_CONNECTION_STRING = ''
@@ -85,6 +86,9 @@ class Config:
             "value": self.INPUT_FOLDER,
             "from": "default" if not os.getenv("INPUT_FOLDER") else "environment"
         })
+
+        # Initialize API_BUILT_AT from configurator directory
+        self._initialize_api_built_at()
 
         # Initialize Config Strings (except INPUT_FOLDER)
         for key, default in self.config_strings.items():
@@ -154,6 +158,30 @@ class Config:
             "from": from_source
         })
         return value
+    
+    def _initialize_api_built_at(self):
+        """Initialize API_BUILT_AT from the configurator directory."""
+        import sys
+        # Get the path to the configurator directory (where this file is located)
+        configurator_dir = Path(__file__).parent.parent
+        api_built_at_path = configurator_dir / "API_BUILT_AT"
+        
+        if api_built_at_path.exists():
+            value = api_built_at_path.read_text().strip()
+            from_source = "file"
+        else:
+            logger.fatal("API_BUILT_AT file is missing in the configurator directory. This value is required for API startup.")
+            sys.exit(1)
+        
+        # Set the value
+        self.API_BUILT_AT = value
+        
+        # Record the source
+        self.config_items.append({
+            "name": "API_BUILT_AT",
+            "value": value,
+            "from": from_source
+        })
     
     # Serializer
     def to_dict(self):
