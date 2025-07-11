@@ -58,7 +58,7 @@ class TestProperty(unittest.TestCase):
         
         self.assertEqual(prop.ref, "sample.1.0.0.yaml")
         self.assertEqual(prop.description, "Reference to another dictionary")
-        self.assertIsNone(prop.type)
+        self.assertEqual(prop.type, "void")
         self.assertFalse(prop.required)
 
     def test_init_with_enum(self):
@@ -135,7 +135,7 @@ class TestProperty(unittest.TestCase):
         
         self.assertEqual(prop.description, "Missing Required Description")
         self.assertIsNone(prop.ref)
-        self.assertIsNone(prop.type)
+        self.assertEqual(prop.type, "void")
         self.assertIsNone(prop.enums)
         self.assertFalse(prop.required)
         self.assertFalse(prop.additional_properties)
@@ -316,6 +316,7 @@ class TestDictionary(unittest.TestCase):
         dictionary = Dictionary("test.yaml", {
             "description": "Test dictionary",
             "version": "1.0.0",
+            "type": "object",
             "properties": {
                 "name": {
                     "type": "string",
@@ -326,7 +327,6 @@ class TestDictionary(unittest.TestCase):
         
         result = dictionary.to_dict()
         self.assertEqual(result["description"], "Test dictionary")
-        self.assertEqual(result["version"], "1.0.0")
         self.assertIn("properties", result)
         self.assertEqual(result["file_name"], "test.yaml")
         self.assertEqual(result["_locked"], False)
@@ -359,22 +359,20 @@ class TestDictionaryCanonical(unittest.TestCase):
         self.assertEqual(result["file_name"], "sample.1.0.0.yaml")
         self.assertEqual(result["_locked"], False)
 
-    def test_dictionary_without_fields(self):
-        """Test Dictionary without fields"""
+    def test_dictionary_without_properties(self):
+        """Test Dictionary without properties"""
         doc = {
-            "description": "Test dictionary without fields",
+            "description": "Test dictionary without properties",
             "version": "1.0.0"
         }
         
         dictionary = Dictionary("test.yaml", doc)
         
-        self.assertEqual(dictionary.property.description, "Test dictionary without fields")
-        self.assertEqual(dictionary.property.version, "1.0.0")
+        self.assertEqual(dictionary.property.description, "Test dictionary without properties")
         
         # Test to_dict
         result = dictionary.to_dict()
-        self.assertEqual(result["description"], "Test dictionary without fields")
-        self.assertEqual(result["version"], "1.0.0")
+        self.assertEqual(result["description"], "Test dictionary without properties")
         self.assertEqual(result["file_name"], "test.yaml")
         self.assertEqual(result["_locked"], False)
 

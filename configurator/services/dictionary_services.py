@@ -119,22 +119,21 @@ class Property:
         self.name = name
         self.ref = property.get("ref", None)
         self.description = property.get("description", "Missing Required Description")
-        self.version = property.get("version", None)
-        self.type = property.get("type", None)
-        self.enums = property.get("enums", None)
+        self.type = property.get("type", "void")
         self.required = property.get("required", False)
+        self.enums = property.get("enums", None)
         self.additional_properties = property.get("additionalProperties", False)
         self.properties = {}
         self.items = None
         self.one_of = None
 
-        # Handle both 'fields' and 'properties' - convert 'fields' to 'properties'
-        properties_data = property.get("properties", property.get("fields", {}))
+        properties_data = property.get("properties", {})
 
-        # Initialize properties if this is an object type OR if this is a root document with properties
-        if self.type == "object" or (not self.type and properties_data):
+        # Initialize properties if this is an object type
+        if self.type == "object":
             for prop_name, prop_data in properties_data.items():
                 self.properties[prop_name] = Property(prop_name, prop_data)
+
             # Initialize one_of if present
             one_of_data = property.get("one_of", None)
             if one_of_data:
@@ -146,26 +145,18 @@ class Property:
             if items_data:
                 self.items = Property("items", items_data)
 
+        if self.type == "enum" or self.type == "enum_array":
+            self.enums = property.get("enums", None)
+
     def to_dict(self):
         if self.ref:
             return {"ref": self.ref}
         result = {}
-
-        # Handle root documents that have description/version but no type
-        if self.description and not self.type:
-            result["description"] = self.description
-            if self.version:
-                result["version"] = self.version
-            if self.properties:
-                result["properties"] = {}
-                for prop_name, prop in self.properties.items():
-                    result["properties"][prop_name] = prop.to_dict()
-            return result
+        result["description"] = self.description
+        result["type"] = self.type
+        result["required"] = self.required
 
         if self.type == "object":
-            result["description"] = self.description
-            result["type"] = self.type
-            result["required"] = self.required
             result["properties"] = {}
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()
@@ -176,22 +167,10 @@ class Property:
                 result["one_of"] = self.one_of.to_dict()
 
         elif self.type == "array":
-            result["description"] = self.description
-            result["type"] = self.type
-            result["required"] = self.required
             result["items"] = self.items.to_dict()
 
         elif self.type in ["enum", "enum_array"]:
-            result["description"] = self.description
-            result["type"] = self.type
-            result["required"] = self.required
             result["enums"] = self.enums
-
-        elif self.type:
-            # Custom type (like identifier, word, etc.)
-            result["description"] = self.description
-            result["type"] = self.type
-            result["required"] = self.required
 
         return result
 
