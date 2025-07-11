@@ -730,7 +730,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                type: array
+                items: {}
         '500':
           description: Processing error
           content:
@@ -756,14 +757,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
+              type: array
+              items: {}
       responses:
         '200':
           description: Migration file saved
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/file'
         '500':
           description: Processing error
           content:
@@ -787,10 +789,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/events'
         '500':
           description: Processing error
           content:
@@ -810,9 +809,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/enumerators'
+                type: object
+                properties:
+                  enumerators:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/enumerations'
         '500':
           description: Processing error
           content:
