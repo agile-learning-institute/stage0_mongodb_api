@@ -1,4 +1,3 @@
-title: Search
 description: A search index that is used to support an elastic search polymorphic query service
 type: object
 properties:
@@ -11,12 +10,11 @@ properties:
     type: identity
     required: true
 one_of:
-  type_property: collection_name
   schemas:
     media:
-      $ref: media.1.0.0
+      ref: media.1.0.0
     organization:
-      $ref: organization.1.0.0
+      ref: organization.1.0.0
     user:
-      $ref: user.1.0.0
+      ref: user.1.0.0
   

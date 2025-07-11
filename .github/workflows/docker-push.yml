@@ -35,4 +35,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/agile-learning-institute/stage0_mongodb_api:latest
+          tags: ghcr.io/agile-learning-institute/mongodb_configurator_api:latest

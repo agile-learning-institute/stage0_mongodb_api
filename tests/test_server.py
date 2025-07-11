@@ -1,37 +1,30 @@
 import unittest
-from unittest.mock import patch, MagicMock
-import signal
-import sys
-
-# Mock Config to prevent auto-processing during tests
-mock_config = MagicMock()
-mock_config.AUTO_PROCESS = False
-mock_config.EXIT_AFTER_PROCESSING = False
-mock_config.MONGODB_API_PORT = 8081
-mock_config.BUILT_AT = "test"
-
-# Patch both Config and MongoIO before importing server
-with patch('stage0_py_utils.Config.get_instance', return_value=mock_config), \
-     patch('stage0_py_utils.MongoIO.get_instance') as mock_get_instance:
-    mock_get_instance.return_value = MagicMock()
-    from stage0_mongodb_api.server import app, handle_exit
+from configurator.server import app
+from configurator.utils.config import Config
 
 class TestServer(unittest.TestCase):
-    """Test suite for server initialization and configuration."""
+    """Test suite for server initialization and configuration.
+    NOTE: Config is never mocked in these tests. The real Config singleton is used, and config values are set/reset in setUp/tearDown.
+    """
 
     def setUp(self):
         """Set up test fixtures."""
         self.app = app.test_client()
-        # Patch MongoIO for every test to ensure no real DB connection
-        patcher = patch('stage0_py_utils.MongoIO.get_instance', return_value=MagicMock())
-        self.addCleanup(patcher.stop)
-        self.mock_mongo = patcher.start()
+        self.config = Config.get_instance()
+        self._original_api_port = self.config.API_PORT
+        self._original_built_at = self.config.BUILT_AT
+        self.config.API_PORT = 8081
+        self.config.BUILT_AT = "test"
+
+    def tearDown(self):
+        self.config.API_PORT = self._original_api_port
+        self.config.BUILT_AT = self._original_built_at
 
     def test_app_initialization(self):
         """Test Flask app initialization."""
         # Assert
         self.assertIsNotNone(app)
-        self.assertEqual(app.name, 'stage0_mongodb_api.server')
+        self.assertEqual(app.name, 'configurator.server')
 
     def test_health_endpoint(self):
         """Test health check endpoint."""
@@ -49,21 +42,53 @@ class TestServer(unittest.TestCase):
         # Assert
         self.assertNotEqual(response.status_code, 404)
 
-    def test_collection_routes_registered(self):
-        """Test collection routes are registered."""
-        with patch('stage0_mongodb_api.routes.collection_routes.CollectionService.list_collections', return_value=[{"collection_name": "dummy", "version": "1.0.0"}]):
-            # Act
-            response = self.app.get('/api/collections/')
-            # Assert
-            self.assertEqual(response.status_code, 200)
-
-    def test_render_routes_registered(self):
-        """Test render routes are registered."""
+    def test_configuration_routes_registered(self):
+        """Test configuration routes are registered."""
         # Act
-        response = self.app.get('/api/render/json_schema/users')
+        response = self.app.get('/api/configurations')
 
         # Assert
         self.assertNotEqual(response.status_code, 404)
+
+    def test_dictionary_routes_registered(self):
+        """Test dictionary routes are registered."""
+        # Act
+        response = self.app.get('/api/dictionaries')
+
+        # Assert
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_type_routes_registered(self):
+        """Test type routes are registered."""
+        # Act
+        response = self.app.get('/api/types')
+
+        # Assert
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_database_routes_registered(self):
+        """Test database routes are registered."""
+        # Act
+        response = self.app.get('/api/database/')
+
+        # Assert
+        self.assertNotEqual(response.status_code, 404)
+
+    def test_enumerator_routes_registered(self):
+        """Test enumerator routes are registered."""
+        # Act
+        response = self.app.get('/api/enumerators/')
+
+        # Assert
+        # The route is registered, but may return 500 if file doesn't exist
+        # This is expected behavior - the route exists but the file is missing
+        self.assertIn(response.status_code, [200, 500])
+        if response.status_code == 500:
+            # If 500, verify it's a proper error response
+            self.assertIsInstance(response.json, dict)
+        else:
+            # If 200, verify it returns valid JSON
+            self.assertIsInstance(response.json, list)
 
 if __name__ == '__main__':
     unittest.main()

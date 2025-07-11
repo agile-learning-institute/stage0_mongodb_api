@@ -1,0 +1,260 @@
+description: A content collection for testing one_of structures and advanced schema
+  features
+type: object
+properties:
+  _id:
+    description: The unique identifier for content
+    type: string
+    pattern: ^[0-9a-fA-F]{24}$
+  title:
+    description: Content title
+    type: string
+    pattern: ^\S{1,40}$
+  subtitle:
+    description: Content subtitle
+    type: string
+    pattern: ^[^\t\n\r]{0,255}$
+  content_type:
+    description: Type of content (article, video, podcast, etc.)
+    type: string
+    enum:
+    - article
+    - video
+    - podcast
+  status:
+    description: Content status
+    type: string
+    enum:
+    - draft
+    - active
+    - archived
+  author_id:
+    description: A user collection for testing the schema system
+    type: object
+    properties:
+      _id:
+        description: The unique identifier for a user
+        type: string
+        pattern: ^[0-9a-fA-F]{24}$
+      user_name:
+        description: Username
+        type: string
+        pattern: ^\S{1,40}$
+      first_name:
+        description: Users First Name
+        type: string
+        pattern: ^\S{1,40}$
+      last_name:
+        description: Users Last Name
+        type: string
+        pattern: ^\S{1,40}$
+      status:
+        description: document status
+        type: string
+        enum:
+        - draft
+        - active
+        - archived
+      last_saved:
+        description: The last time this document was saved
+        type: object
+        properties:
+          from_ip:
+            description: A valid IP Address
+            type: string
+            pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+          by_user:
+            description: A String of text, 1 to 40 characters with no spaces, or special
+              characters like /t or /n
+            type: string
+            pattern: ^\S{1,40}$
+          at_time:
+            description: An ISO 8601 formatted date-time string
+            type: string
+            format: date-time
+          correlation_id:
+            description: A String of text, 1 to 40 characters with no spaces, or special
+              characters like /t or /n
+            type: string
+            pattern: ^\S{1,40}$
+        additionalProperties: false
+        required:
+        - from_ip
+        - by_user
+        - at_time
+        - correlation_id
+    required:
+    - _id
+    - user_name
+    - status
+    - last_saved
+    additionalProperties: false
+  full_title:
+    description: Full title including subtitle
+    type: string
+    pattern: ^[^\t\n\r]{0,255}$
+  content_data:
+    description: The actual content data - varies by type
+    type: object
+    properties: {}
+    additionalProperties: false
+    oneOf:
+    - description: Article content structure
+      type: object
+      properties:
+        body:
+          description: Article body text
+          type: string
+          maxLength: 4096
+        tags:
+          description: Article tags
+          type: array
+          items:
+            type: string
+            enum:
+            - technology
+            - business
+            - entertainment
+            - education
+            - news
+        word_count:
+          description: Article word count
+          type: number
+          minimum: 1
+          multipleOf: 1
+      required:
+      - body
+      additionalProperties: false
+    - description: Video content structure
+      type: object
+      properties:
+        url:
+          description: Video URL
+          type: string
+          pattern: ^https?://[^\s]+$
+        duration:
+          description: Video duration in seconds
+          type: number
+          minimum: 1
+          multipleOf: 1
+        quality:
+          description: Video quality
+          type: string
+          enum:
+          - sd
+          - hd
+          - uhd
+      required:
+      - url
+      additionalProperties: false
+    - description: Podcast content structure
+      type: object
+      properties:
+        audio_url:
+          description: Audio file URL
+          type: string
+          pattern: ^https?://[^\s]+$
+        transcript:
+          description: Podcast transcript
+          type: string
+          maxLength: 4096
+        episode_number:
+          description: Episode number
+          type: number
+          minimum: 1
+          multipleOf: 1
+      required:
+      - audio_url
+      additionalProperties: false
+  metadata:
+    description: Additional metadata for the content
+    type: object
+    properties:
+      created_at:
+        description: When the content was created
+        type: string
+        format: date-time
+      updated_at:
+        description: When the content was last updated
+        type: string
+        format: date-time
+      published_at:
+        description: When the content was published
+        type: string
+        format: date-time
+      categories:
+        description: Content categories
+        type: array
+        items:
+          description: A content category
+          type: object
+          properties:
+            name:
+              description: Category name
+              type: string
+              pattern: ^\S{1,40}$
+            type:
+              description: Category type
+              type: string
+              enum:
+              - work
+              - personal
+              - project
+              - reference
+            tags:
+              description: Category tags
+              type: array
+              items:
+                type: string
+                enum:
+                - urgent
+                - important
+                - normal
+                - low
+                - completed
+                - in_progress
+                - blocked
+                - review
+          required:
+          - name
+          - type
+          additionalProperties: false
+    required:
+    - created_at
+    additionalProperties: false
+  last_saved:
+    description: Last saved breadcrumb
+    type: object
+    properties:
+      from_ip:
+        description: A valid IP Address
+        type: string
+        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+      by_user:
+        description: A String of text, 1 to 40 characters with no spaces, or special
+          characters like /t or /n
+        type: string
+        pattern: ^\S{1,40}$
+      at_time:
+        description: An ISO 8601 formatted date-time string
+        type: string
+        format: date-time
+      correlation_id:
+        description: A String of text, 1 to 40 characters with no spaces, or special
+          characters like /t or /n
+        type: string
+        pattern: ^\S{1,40}$
+    additionalProperties: false
+    required:
+    - from_ip
+    - by_user
+    - at_time
+    - correlation_id
+required:
+- _id
+- title
+- content_type
+- status
+- content_data
+- last_saved
+additionalProperties: false

@@ -1,0 +1,19 @@
+{
+  "bsonType": "array",
+  "items": {
+    "bsonType": "object",
+    "properties": {
+      "from": {
+        "bsonType": "date"
+      },
+      "to": {
+        "bsonType": "date"
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "from",
+      "to"
+    ]
+  }
+}

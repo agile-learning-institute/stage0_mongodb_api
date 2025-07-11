@@ -1,0 +1,29 @@
+title: Notification Collection
+description: A simple notification collection for testing
+type: object
+properties:
+  _id:
+    description: The unique identifier for notification
+    type: identity
+    required: true
+  user_id:
+    description: Reference to user receiving the notification
+    ref: user.1.0.0.yaml
+    required: true
+  title:
+    description: Notification title
+    type: word
+    required: true
+  message:
+    description: Notification message
+    type: sentence
+    required: true
+  status:
+    description: Notification status
+    type: enum
+    enums: default_status
+    required: true
+  last_saved:
+    description: Last saved breadcrumb
+    type: breadcrumb
+    required: true 

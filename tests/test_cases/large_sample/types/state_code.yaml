@@ -1,6 +1,4 @@
-title: State Code
-description: 2 character state code
+description: A two character state code
 schema:
   type: string
   pattern: "^[A-Z]{2}$"
-

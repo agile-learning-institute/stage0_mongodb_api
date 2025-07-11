@@ -1,0 +1,215 @@
+{
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId"
+    },
+    "title": {
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "subtitle": {
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
+    },
+    "content_type": {
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "status": {
+      "bsonType": "string",
+      "enum": [
+        "active",
+        "archived"
+      ]
+    },
+    "author_id": {
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "user_name": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "first_name": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "last_name": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "status": {
+          "bsonType": "string",
+          "enum": [
+            "active",
+            "archived"
+          ]
+        },
+        "last_saved": {
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "bsonType": "string"
+            },
+            "by_user": {
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "at_time": {
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "from_ip",
+            "by_user",
+            "at_time",
+            "correlation_id"
+          ]
+        }
+      },
+      "required": [
+        "_id",
+        "user_name",
+        "status",
+        "last_saved"
+      ],
+      "additionalProperties": false
+    },
+    "content_data": {
+      "bsonType": "object",
+      "properties": {
+        "body": {
+          "maxLength": 4096,
+          "bsonType": "string"
+        },
+        "url": {
+          "pattern": "^https?://[^\\s]+$",
+          "bsonType": "string"
+        },
+        "audio_url": {
+          "pattern": "^https?://[^\\s]+$",
+          "bsonType": "string"
+        },
+        "transcript": {
+          "maxLength": 4096,
+          "bsonType": "string"
+        },
+        "tags": {
+          "bsonType": "array",
+          "items": {
+            "pattern": "^\\S{1,40}$",
+            "bsonType": "string"
+          }
+        },
+        "word_count": {
+          "bsonType": "int",
+          "minimum": 1
+        },
+        "duration": {
+          "bsonType": "int",
+          "minimum": 1
+        },
+        "quality": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "episode_number": {
+          "bsonType": "int",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "bsonType": "object",
+      "properties": {
+        "created_at": {
+          "bsonType": "date"
+        },
+        "updated_at": {
+          "bsonType": "date"
+        },
+        "published_at": {
+          "bsonType": "date"
+        },
+        "categories": {
+          "bsonType": "array",
+          "items": {
+            "bsonType": "object",
+            "properties": {
+              "name": {
+                "pattern": "^\\S{1,40}$",
+                "bsonType": "string"
+              },
+              "type": {
+                "pattern": "^\\S{1,40}$",
+                "bsonType": "string"
+              },
+              "tags": {
+                "bsonType": "array",
+                "items": {
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                }
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "last_saved": {
+      "bsonType": "object",
+      "properties": {
+        "from_ip": {
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
+        },
+        "by_user": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "at_time": {
+          "bsonType": "date"
+        },
+        "correlation_id": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
+    }
+  },
+  "required": [
+    "_id",
+    "title",
+    "content_type",
+    "status",
+    "content_data",
+    "last_saved"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,18 @@
+description: A list of appointments
+type: array
+items:
+  description: A date/time range
+  type: object
+  properties:
+    from:
+      description: An ISO 8601 formatted date-time string
+      type: string
+      format: date-time
+    to:
+      description: An ISO 8601 formatted date-time string
+      type: string
+      format: date-time
+  additionalProperties: false
+  required:
+  - from
+  - to

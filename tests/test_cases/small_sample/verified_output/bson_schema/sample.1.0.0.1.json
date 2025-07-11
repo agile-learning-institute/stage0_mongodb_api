@@ -1,0 +1,24 @@
+{
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId"
+    },
+    "name": {
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "status": {
+      "bsonType": "string",
+      "enum": [
+        "active",
+        "archived"
+      ]
+    }
+  },
+  "required": [
+    "_id",
+    "status"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "_id": {
+      "$oid": "68571f0d11401f03ab91007c"
+    },
+    "collection_name": "search",
+    "current_version": "search.1.0.1.3"
+  },
+  {
+    "_id": {
+      "$oid": "68571f0d11401f03ab9100a2"
+    },
+    "collection_name": "organization",
+    "current_version": "organization.1.0.0.1"
+  },
+  {
+    "_id": {
+      "$oid": "68571f0d11401f03ab9100bd"
+    },
+    "collection_name": "media",
+    "current_version": "media.1.0.0.1"
+  },
+  {
+    "_id": {
+      "$oid": "68571f0d11401f03ab9100d1"
+    },
+    "collection_name": "user",
+    "current_version": "user.1.0.1.3"
+  },
+  {
+    "_id": {
+      "$oid": "68571f0d11401f03ab9100e5"
+    },
+    "collection_name": "content",
+    "current_version": "content.1.0.1.3"
+  },
+  {
+    "_id": {
+      "$oid": "68571f0d11401f03ab9100f9"
+    },
+    "collection_name": "notification",
+    "current_version": "notification.1.0.1.3"
+  }
+]

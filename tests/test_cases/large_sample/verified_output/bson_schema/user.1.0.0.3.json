@@ -1,0 +1,62 @@
+{
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId"
+    },
+    "user_name": {
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "first_name": {
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "last_name": {
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "status": {
+      "bsonType": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ]
+    },
+    "last_saved": {
+      "bsonType": "object",
+      "properties": {
+        "from_ip": {
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
+        },
+        "by_user": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "at_time": {
+          "bsonType": "date"
+        },
+        "correlation_id": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
+    }
+  },
+  "required": [
+    "_id",
+    "user_name",
+    "status",
+    "last_saved"
+  ],
+  "additionalProperties": false
+}

@@ -1,10 +1,9 @@
-title: Breadcrumb
 description: A tracking breadcrumb
 type: object
 properties:
   from_ip:
     description: Http Request remote IP address
-    type: word
+    type: ip_address
     required: true
   by_user:
     description: ID Of User

@@ -1,0 +1,226 @@
+{
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId"
+    },
+    "user_id": {
+      "bsonType": "object",
+      "properties": {
+        "_id": {
+          "bsonType": "objectId"
+        },
+        "user_name": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "first_name": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "last_name": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "status": {
+          "bsonType": "string",
+          "enum": [
+            "draft",
+            "active",
+            "archived"
+          ]
+        },
+        "last_saved": {
+          "bsonType": "object",
+          "properties": {
+            "from_ip": {
+              "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+              "bsonType": "string"
+            },
+            "by_user": {
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "at_time": {
+              "bsonType": "date"
+            },
+            "correlation_id": {
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "from_ip",
+            "by_user",
+            "at_time",
+            "correlation_id"
+          ]
+        }
+      },
+      "required": [
+        "_id",
+        "user_name",
+        "status",
+        "last_saved"
+      ],
+      "additionalProperties": false
+    },
+    "title": {
+      "pattern": "^\\S{1,40}$",
+      "bsonType": "string"
+    },
+    "message": {
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
+    },
+    "notification_type": {
+      "bsonType": "string",
+      "enum": [
+        "system",
+        "user",
+        "content",
+        "reminder"
+      ]
+    },
+    "status": {
+      "bsonType": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ]
+    },
+    "priority": {
+      "bsonType": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "tags": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "urgent",
+          "important",
+          "normal",
+          "low"
+        ]
+      }
+    },
+    "categories": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "work",
+          "personal",
+          "project",
+          "reference"
+        ]
+      }
+    },
+    "channels": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "email",
+          "sms",
+          "push",
+          "in_app"
+        ]
+      }
+    },
+    "metadata": {
+      "bsonType": "object",
+      "properties": {
+        "created_at": {
+          "bsonType": "date"
+        },
+        "sent_at": {
+          "bsonType": "date"
+        },
+        "read_at": {
+          "bsonType": "date"
+        },
+        "expires_at": {
+          "bsonType": "date"
+        },
+        "source": {
+          "bsonType": "object",
+          "properties": {
+            "collection": {
+              "pattern": "^\\S{1,40}$",
+              "bsonType": "string"
+            },
+            "document_id": {
+              "bsonType": "objectId"
+            },
+            "action": {
+              "bsonType": "string",
+              "enum": [
+                "created",
+                "updated",
+                "deleted",
+                "published"
+              ]
+            }
+          },
+          "required": [
+            "collection",
+            "document_id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "created_at"
+      ],
+      "additionalProperties": false
+    },
+    "last_saved": {
+      "bsonType": "object",
+      "properties": {
+        "from_ip": {
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
+        },
+        "by_user": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "at_time": {
+          "bsonType": "date"
+        },
+        "correlation_id": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
+    }
+  },
+  "required": [
+    "_id",
+    "user_id",
+    "title",
+    "message",
+    "notification_type",
+    "status",
+    "priority",
+    "channels",
+    "last_saved"
+  ],
+  "additionalProperties": false
+}

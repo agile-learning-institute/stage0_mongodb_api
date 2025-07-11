@@ -1,0 +1,25 @@
+[
+  {
+    "version": 0,
+    "enumerators": {}
+  },
+  {
+    "version": 1,
+    "enumerators": {
+      "default_status": {
+        "active": "Not Deleted",
+        "archived": "Soft Delete Indicator"
+      }
+    }
+  },
+  {
+    "version": 2,
+    "enumerators": {
+      "default_status": {
+        "draft": "Draft",
+        "active": "Not Deleted",
+        "archived": "Soft Delete Indicator"
+      }
+    }
+  }
+]

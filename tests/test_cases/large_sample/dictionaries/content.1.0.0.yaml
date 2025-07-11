@@ -1,0 +1,99 @@
+title: Content Collection
+description: A simple content collection for testing
+type: object
+properties:
+  _id:
+    description: The unique identifier for content
+    type: identity
+    required: true
+  title:
+    description: Content title
+    type: word
+    required: true
+  subtitle:
+    description: Content subtitle
+    type: sentence
+  content_type:
+    description: Type of content (article, video, podcast, etc.)
+    type: word
+    required: true
+  status:
+    description: Content status
+    type: enum
+    enums: default_status
+    required: true
+  author_id:
+    description: Reference to author in user collection
+    ref: user.1.0.0.yaml
+  content_data:
+    description: The actual content data
+    type: object
+    required: true
+    properties:
+      body:
+        description: Article body text
+        type: markdown
+      url:
+        description: Video URL
+        type: url
+      audio_url:
+        description: Audio file URL
+        type: url
+      transcript:
+        description: Podcast transcript
+        type: markdown
+      tags:
+        description: Content tags
+        type: array
+        items:
+          type: word
+      word_count:
+        description: Article word count
+        type: count
+      duration:
+        description: Video duration in seconds
+        type: count
+      quality:
+        description: Video quality
+        type: word
+      episode_number:
+        description: Episode number
+        type: count
+  metadata:
+    description: Additional metadata for the content
+    type: object
+    properties:
+      created_at:
+        description: When the content was created
+        type: date-time
+        required: true
+      updated_at:
+        description: When the content was last updated
+        type: date-time
+      published_at:
+        description: When the content was published
+        type: date-time
+      categories:
+        description: Content categories
+        type: array
+        items:
+          description: A content category
+          type: object
+          properties:
+            name:
+              description: Category name
+              type: word
+              required: true
+            type:
+              description: Category type
+              type: word
+              required: true
+            tags:
+              description: Category tags
+              type: array
+              items:
+                type: word
+  last_saved:
+    description: Last saved breadcrumb
+    type: breadcrumb
+    required: true 

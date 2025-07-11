@@ -1,4 +1,3 @@
-title: Media
 description: A media item in the system
 type: object
 properties:
@@ -6,7 +5,7 @@ properties:
     description: The unique identifier for the media
     type: identity
   type:
-    $ref: bad_file_ref
+    ref: bad_file_ref
   missing_type:
     description: A property missing the type field
   bad_type:

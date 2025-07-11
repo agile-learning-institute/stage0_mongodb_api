@@ -1,0 +1,15 @@
+[
+  {
+    "$addFields": {
+      "full_message": {
+        "$concat": ["$title", ": ", "$message"]
+      }
+    }
+  },
+  {
+    "$unset": ["message"]
+  },
+  {
+    "$out": "notification"
+  }
+] 

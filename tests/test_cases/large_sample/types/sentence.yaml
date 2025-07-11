@@ -1,5 +1,4 @@
-title: Sentence
-description: A String of text, at least 4 and no more than 255 characters with no special characters
+description: A String of text, 0 to 255 characters with no special characters
 schema:
   type: string
-  pattern: "^[a-zA-Z0-9\\s.,!?-]{4,255}$"
+  pattern: "^[^\\t\\n\\r]{0,255}$"

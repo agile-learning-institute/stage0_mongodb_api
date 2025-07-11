@@ -1,0 +1,107 @@
+title: Media
+description: A media item in the system
+type: object
+properties:
+  _id:
+    description: The unique identifier for the media
+    type: identity
+    required: true
+  title:
+    description: The title of the media
+    type: sentence
+    required: true
+  type:
+    description: The type of media
+    type: enum
+    enums: media_type
+  status:
+    description: The current status of the media
+    type: enum
+    enums: media_status
+    required: true
+  last_saved:
+    description: When the media was last updated
+    type: breadcrumb
+    required: true
+  tags:
+    description: Tags associated with the media
+    type: enum_array
+    enums: media_tags
+  metadata:
+    description: Additional metadata about the media
+    type: object
+    properties:
+      duration:
+        description: Duration in minutes
+        type: count
+      format:
+        description: Media format
+        type: enum
+        enums: media_format
+      quality:
+        description: Quality rating
+        type: enum
+        enums: media_quality
+      content_data:
+        description: Media-specific content data
+        type: object
+        one_of:
+          type_property: type
+          schemas:
+            movie:
+              description: Movie-specific metadata
+              type: object
+              properties:
+                director:
+                  description: Movie director
+                  type: word
+                  required: true
+                cast:
+                  description: Movie cast members
+                  type: array
+                  items:
+                    description: Cast member
+                    type: word
+                genre:
+                  description: Movie genre
+                  type: enum_array
+                  enums: media_tags
+            tv_show:
+              description: TV show-specific metadata
+              type: object
+              properties:
+                season:
+                  description: Season number
+                  type: count
+                  required: true
+                episode:
+                  description: Episode number
+                  type: count
+                  required: true
+                network:
+                  description: Broadcasting network
+                  type: word
+            documentary:
+              description: Documentary-specific metadata
+              type: object
+              properties:
+                subject:
+                  description: Documentary subject
+                  type: sentence
+                  required: true
+                narrator:
+                  description: Documentary narrator
+                  type: word
+            short:
+              description: Short film-specific metadata
+              type: object
+              properties:
+                festival:
+                  description: Film festival
+                  type: word
+                awards:
+                  description: Awards received
+                  type: array
+                  items:
+                    description: Award name
+                    type: word 

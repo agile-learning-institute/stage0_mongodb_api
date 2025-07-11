@@ -11,50 +11,51 @@ services:
     extra_hosts:
       - "mongodb:127.0.0.1"
     healthcheck:
-      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}) }" | mongosh --port 27017 --quiet
+      test: echo "db.runCommand('ping')" | mongosh --port 27017 --quiet
       interval: 5s
       timeout: 30s
       start_period: 0s
-      retries: 30
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+      retries: 3
+    command: ["--bind_ip_all", "--port", "27017"]
     profiles:
-      - mongodb-only
-      - mongodb-api
       - mongodb
+      - configurator
+      - configurator-api
 
   ##################################
   # MongoDB configuration Service
   ##################################
-  mongodb_api:
-    image: ghcr.io/agile-learning-institute/stage0_mongodb_api:latest
+  configurator_api:
+    image: ghcr.io/agile-learning-institute/mongodb_configurator_api:latest
     restart: no
     ports:
       - 8081:8081
     environment:
-      MONGO_CONNECTION_STRING: mongodb://mongodb:27017/?replicaSet=rs0
+      MONGO_CONNECTION_STRING: mongodb://mongodb:27017/
       AUTO_PROCESS: False
       LOAD_TEST_DATA: True
       MONGO_DB_NAME: test_database
-      MONGODB_API_PORT: 8081
+      API_PORT: 8081
+      SPA_PORT: 8082
     volumes:
-      - ${INPUT_FOLDER:-./tests/test_cases/large_sample}:/input
+      - ${INPUT_FOLDER:-./tests/test_cases/playground}:/input
     depends_on:
       mongodb:
         condition: service_healthy
     profiles:
-      - mongodb-api
-      - mongodb
+      - configurator-api
+      - configurator
 
-  mongodb_spa:
-    image: ghcr.io/agile-learning-institute/stage0_mongodb_spa:latest
+  configurator_spa:
+    image: ghcr.io/agile-learning-institute/mongodb_configurator_spa:latest
     restart: no
     environment:
-      MONGODB_API_HOST: mongodb_api
-      MONGODB_API_PORT: 8081
-      MONGODB_SPA_PORT: 8082
+      API_HOST: configurator_api
+      API_PORT: 8081
+      SPA_PORT: 8082
     ports:
       - 8082:8082
     depends_on:
-      - mongodb_api
+      - configurator_api
     profiles:
-      - mongodb
+      - configurator

@@ -1,0 +1,4 @@
+{
+  "pattern": "^[^\\t\\n\\r]{0,255}$",
+  "bsonType": "string"
+}

@@ -1,0 +1,4 @@
+{
+  "pattern": "^\\S{1,40}$",
+  "bsonType": "string"
+}

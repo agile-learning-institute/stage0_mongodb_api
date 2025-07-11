@@ -1,10 +1,10 @@
-title: Street Address
 description: A street address
 type: object
 properties:
   street:
     description: Street address
     type: sentence
+    required: true
   city:
     description: City
     type: word

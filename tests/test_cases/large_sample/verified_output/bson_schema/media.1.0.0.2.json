@@ -1,0 +1,199 @@
+{
+  "bsonType": "object",
+  "properties": {
+    "_id": {
+      "bsonType": "objectId"
+    },
+    "title": {
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
+    },
+    "type": {
+      "bsonType": "string",
+      "enum": [
+        "movie",
+        "tv_show",
+        "documentary",
+        "short"
+      ]
+    },
+    "status": {
+      "bsonType": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ]
+    },
+    "last_saved": {
+      "bsonType": "object",
+      "properties": {
+        "from_ip": {
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
+        },
+        "by_user": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        },
+        "at_time": {
+          "bsonType": "date"
+        },
+        "correlation_id": {
+          "pattern": "^\\S{1,40}$",
+          "bsonType": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from_ip",
+        "by_user",
+        "at_time",
+        "correlation_id"
+      ]
+    },
+    "tags": {
+      "bsonType": "array",
+      "items": {
+        "bsonType": "string",
+        "enum": [
+          "action",
+          "comedy",
+          "drama",
+          "sci_fi",
+          "documentary"
+        ]
+      }
+    },
+    "metadata": {
+      "bsonType": "object",
+      "properties": {
+        "duration": {
+          "bsonType": "int",
+          "minimum": 1
+        },
+        "format": {
+          "bsonType": "string",
+          "enum": [
+            "dvd",
+            "bluray",
+            "digital",
+            "streaming"
+          ]
+        },
+        "quality": {
+          "bsonType": "string",
+          "enum": [
+            "sd",
+            "hd",
+            "uhd"
+          ]
+        },
+        "content_data": {
+          "bsonType": "object",
+          "properties": {},
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "bsonType": "object",
+              "properties": {
+                "director": {
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                },
+                "cast": {
+                  "bsonType": "array",
+                  "items": {
+                    "pattern": "^\\S{1,40}$",
+                    "bsonType": "string"
+                  }
+                },
+                "genre": {
+                  "bsonType": "array",
+                  "items": {
+                    "bsonType": "string",
+                    "enum": [
+                      "action",
+                      "comedy",
+                      "drama",
+                      "sci_fi",
+                      "documentary"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "director"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "bsonType": "object",
+              "properties": {
+                "season": {
+                  "bsonType": "int",
+                  "minimum": 1
+                },
+                "episode": {
+                  "bsonType": "int",
+                  "minimum": 1
+                },
+                "network": {
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                }
+              },
+              "required": [
+                "season",
+                "episode"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "bsonType": "object",
+              "properties": {
+                "subject": {
+                  "pattern": "^[^\\t\\n\\r]{0,255}$",
+                  "bsonType": "string"
+                },
+                "narrator": {
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                }
+              },
+              "required": [
+                "subject"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "bsonType": "object",
+              "properties": {
+                "festival": {
+                  "pattern": "^\\S{1,40}$",
+                  "bsonType": "string"
+                },
+                "awards": {
+                  "bsonType": "array",
+                  "items": {
+                    "pattern": "^\\S{1,40}$",
+                    "bsonType": "string"
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "_id",
+    "title",
+    "status",
+    "last_saved"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,228 @@
+version: "1.1"
+name: Test Dictionaries Endpoints
+env:
+  host: localhost:8081
+
+tests:
+  dictionaries:
+    name: Test Dictionaries Endpoints
+    steps:
+#      # Setup - Delete test file if it exists (no checks needed)
+#      - name: Delete Test Dictionary (Setup)
+#        http:
+#          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+#          method: DELETE
+#          check:
+#            status: /200|500/
+      
+      # Create - PUT new dictionary (simple, no properties)
+      - name: Create Test Dictionary
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Test dictionary for stepCI testing"
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_dict.yaml
+              _locked: false
+            schema:
+              created_at: 
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              size:
+                type: number
+                      
+      # Read - GET the created dictionary (expect no version, no properties)
+      - name: Get Test Dictionary
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              description: "Test dictionary for stepCI testing"
+              type: "void"
+
+      # Update - PUT to modify the dictionary
+      - name: Update Test Dictionary
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test dictionary for stepCI testing",
+              "version": "1.0.1",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name field"
+                },
+                "email": {
+                  "type": "email",
+                  "description": "Email field"
+                },
+                "phone": {
+                  "type": "us_phone",
+                  "description": "Phone field"
+                }
+              }
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_dict.yaml
+              _locked: false
+            schema:
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
+              size:
+                type: number
+
+      # Lock - PUT to lock the dictionary
+      - name: Lock Test Dictionary
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test dictionary for stepCI testing",
+              "version": "1.0.1",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name field"
+                },
+                "email": {
+                  "type": "email",
+                  "description": "Email field"
+                },
+                "phone": {
+                  "type": "us_phone",
+                  "description": "Phone field"
+                }
+              },
+              "_locked": true
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_dict.yaml
+              _locked: true
+
+      # Try to Delete a locked dictionary       
+      - name: Delete a locked dictionary - should fail
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: DELETE
+          check:
+            status: /500/
+            jsonpath:
+              status: FAILURE
+              
+      # Unlock - PUT to unlock the dictionary
+      - name: Unlock Test Dictionary
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test dictionary for stepCI testing",
+              "version": "1.0.1",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name field"
+                },
+                "email": {
+                  "type": "email",
+                  "description": "Email field"
+                },
+                "phone": {
+                  "type": "us_phone",
+                  "description": "Phone field"
+                }
+              },
+              "_locked": false
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_dict.yaml
+              _locked: false
+      
+      # Lock All - PATCH to lock all dictionaries
+      - name: Lock All Dictionaries
+        http:
+          url: http://${{env.host}}/api/dictionaries/
+          method: PATCH
+          check:
+            status: /200/
+            jsonpath:
+              status: SUCCESS
+            schema:
+              event_id:
+                type: string
+              event_type:
+                type: string
+              sub_events:
+                type: array
+      
+      # Unlock before cleanup
+      - name: Unlock Test Dictionary (Cleanup)
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "description": "Updated test dictionary for stepCI testing",
+              "version": "1.0.1",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name field"
+                },
+                "email": {
+                  "type": "email",
+                  "description": "Email field"
+                },
+                "phone": {
+                  "type": "us_phone",
+                  "description": "Phone field"
+                }
+              },
+              "_locked": false
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: test_dict.yaml
+              _locked: false
+
+      # Cleanup - DELETE the test dictionary
+      - name: Delete Test Dictionary (Cleanup)
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: DELETE
+          check:
+            status: /200/

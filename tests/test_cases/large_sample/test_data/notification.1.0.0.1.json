@@ -1,0 +1,41 @@
+[
+  {
+    "_id": "notification_001",
+    "user_id": "A00000000000000000000001",
+    "title": "Welcome to the Platform",
+    "message": "Thank you for joining our platform!",
+    "status": "active",
+    "last_saved": {
+      "from_ip": "192.168.1.100",
+      "by_user": "system",
+      "at_time": "2024-01-15T10:05:00Z",
+      "correlation_id": "corr_001"
+    }
+  },
+  {
+    "_id": "notification_002",
+    "user_id": "A00000000000000000000002",
+    "title": "New Content Available",
+    "message": "A new article has been published that matches your interests.",
+    "status": "active",
+    "last_saved": {
+      "from_ip": "192.168.1.101",
+      "by_user": "system",
+      "at_time": "2024-01-20T14:35:00Z",
+      "correlation_id": "corr_002"
+    }
+  },
+  {
+    "_id": "notification_003",
+    "user_id": "A00000000000000000000003",
+    "title": "Reminder: Weekly Meeting",
+    "message": "Your weekly team meeting starts in 30 minutes.",
+    "status": "active",
+    "last_saved": {
+      "from_ip": "192.168.1.102",
+      "by_user": "system",
+      "at_time": "2024-01-22T09:30:00Z",
+      "correlation_id": "corr_003"
+    }
+  }
+] 
