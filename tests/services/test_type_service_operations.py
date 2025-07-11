@@ -113,7 +113,7 @@ class TestTypeProperty(unittest.TestCase):
         self.assertIsNone(type_prop.schema)
         self.assertIsNone(type_prop.json_type)
         self.assertIsNone(type_prop.bson_type)
-        self.assertIsNone(type_prop.type)
+        self.assertEqual(type_prop.type, "void")
         self.assertFalse(type_prop.required)
         self.assertFalse(type_prop.additional_properties)
 
@@ -130,6 +130,7 @@ class TestTypeProperty(unittest.TestCase):
         expected = {
             "description": "Test description",
             "type": "string",
+            "required": True
         }
         self.assertEqual(result, expected)
 
@@ -187,6 +188,8 @@ class TestTypeProperty(unittest.TestCase):
         
         self.assertEqual(result["description"], "Test description")
         self.assertEqual(result["schema"], {"type": "string", "format": "email"})
+        self.assertIn("required", result)
+        self.assertFalse(result["required"])
 
 
 class TestType(unittest.TestCase):

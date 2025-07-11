@@ -48,7 +48,6 @@ class Type:
     def save(self):
         """Save the type and return the Type object."""
         try:
-            # Save the cleaned content
             FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.to_dict())
             return self
         except Exception as e:
@@ -71,7 +70,6 @@ class Type:
         for file in files:
             try:
                 type_obj = Type(file.name)
-                # Set locked state and save using normal save() method
                 type_obj._locked = True
                 type_obj.save()
                 
@@ -144,70 +142,61 @@ class TypeProperty:
         self.config = Config.get_instance()
         self.name = name
         self.description = property.get("description", "Missing Required Description")
+        self.type = property.get("type", "void")
+        self.required = property.get("required", False)
         self.schema = property.get("schema", None)
         self.json_type = property.get("json_type", None)
         self.bson_type = property.get("bson_type", None)
-        self.type = property.get("type", None)
-        self.required = property.get("required", False)
         self.additional_properties = property.get("additionalProperties", False)
         self.is_primitive = False
         self.is_universal = False
 
-        # Enforce mutual exclusivity
-        if self.schema is not None and (self.json_type is not None or self.bson_type is not None):
-            event = ConfiguratorEvent("TYP-99", "INVALID_TYPE_DEFINITION")
-            event.record_failure("Type definition cannot have both 'schema' and 'json_type'/'bson_type' at the top level.")
-            raise ConfiguratorException("Type definition cannot have both 'schema' and 'json_type'/'bson_type' at the top level.", event)
-        if self.schema is not None and ("json_type" in self.schema or "bson_type" in self.schema):
-            event = ConfiguratorEvent("TYP-99", "INVALID_TYPE_DEFINITION")
-            event.record_failure("'json_type' and 'bson_type' must not be nested under 'schema'. They must be top-level properties.")
-            raise ConfiguratorException("'json_type' and 'bson_type' must not be nested under 'schema'. They must be top-level properties.", event)
-
-        # Universal primitive: schema only
         if self.schema is not None:
             self.is_primitive = True
             self.is_universal = True
             return
-        # Non-universal primitive: json_type/bson_type only
+
         if self.json_type is not None or self.bson_type is not None:
             self.is_primitive = True
             self.is_universal = False
             return
-        # Array
+
         if self.type == "array":
             self.items = TypeProperty("items", property.get("items", {}))
             return
-        # Object
+
         if self.type == "object":
             self.properties = {}
             for name, prop in property.get("properties", {}).items():
                 self.properties[name] = TypeProperty(name, prop)
+            self.additional_properties = property.get("additionalProperties", False)
             return
 
     def to_dict(self):
-        # Universal primitive
         if self.is_universal:
             return {
                 "description": self.description,
+                "required": self.required,
                 "schema": self.schema,
             }
-        # Non-universal primitive
-        if self.is_primitive:
+
+        elif self.is_primitive:
             return {
                 "description": self.description,
+                "required": self.required,
                 "json_type": self.json_type or {},
                 "bson_type": self.bson_type or {},
             }
-        # Array
-        if self.type == "array":
+
+        elif self.type == "array":
             return {
                 "description": self.description,
                 "required": self.required,
                 "type": self.type,
                 "items": self.items.to_dict(),
             }
-        # Object
-        if self.type == "object":
+
+        elif self.type == "object":
             return {
                 "description": self.description,
                 "required": self.required,
@@ -215,11 +204,13 @@ class TypeProperty:
                 "properties": {name: property.to_dict() for name, property in self.properties.items()},
                 "additionalProperties": self.additional_properties
             }
-        # Basic type (string, number, etc.)
-        return {
-            "description": self.description,
-            "type": self.type
-        }
+        
+        else: # custom type
+            return {
+                "description": self.description,
+                "required": self.required,
+                "type": self.type
+            }
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:
