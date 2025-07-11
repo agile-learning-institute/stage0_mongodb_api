@@ -26,11 +26,11 @@ class Dictionary:
         return result
 
     def save(self):
-        """Save the dictionary and return the Dictionary object."""
+        """Save the dictionary and return the File object."""
         try:
             event = ConfiguratorEvent("DIC-03", "PUT_DICTIONARY")
-            document = FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.to_dict())
-            return document
+            file_obj = FileIO.put_document(self.config.DICTIONARY_FOLDER, self.file_name, self.to_dict())
+            return file_obj
         except ConfiguratorException as e:
             event.append_events([e.event])
             event.record_failure(f"Failed to save dictionary {self.file_name}: {str(e)}")
@@ -73,6 +73,8 @@ class Dictionary:
         except Exception as e:
             event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
             raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
+
+
         
 
     def delete(self):

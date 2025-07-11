@@ -46,10 +46,10 @@ class Type:
 
 
     def save(self):
-        """Save the type and return the Type object."""
+        """Save the type and return the File object."""
         try:
-            FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.to_dict())
-            return self
+            file_obj = FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.to_dict())
+            return file_obj
         except Exception as e:
             event = ConfiguratorEvent("TYP-03", "PUT_TYPE")
             event.record_failure(f"Failed to save type {self.file_name}: {str(e)}")
@@ -82,6 +82,8 @@ class Type:
         
         event.record_success()
         return event
+    
+
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:

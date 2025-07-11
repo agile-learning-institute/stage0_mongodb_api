@@ -17,6 +17,7 @@ class Enumerators:
             enumeration.save()
         return self
 
+
     def getVersion(self, version_number: int):
         """Get a specific version of enumerations"""
         for enumeration in self.enumerations:
@@ -70,9 +71,10 @@ class Enumerations:
         }
 
     def save(self):
-        """Save the enumerations to its file and return the file object"""
+        """Save the enumerations to its file and return the File object."""
         try:
-            return FileIO.put_document(self.config.ENUMERATOR_FOLDER, self.file_name, self.to_dict())
+            file_obj = FileIO.put_document(self.config.ENUMERATOR_FOLDER, self.file_name, self.to_dict())
+            return file_obj
         except ConfiguratorException as e:
             event = ConfiguratorEvent("ENU-03", "PUT_ENUMERATIONS")
             event.append_events([e.event])

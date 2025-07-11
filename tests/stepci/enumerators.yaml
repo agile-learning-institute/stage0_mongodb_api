@@ -7,103 +7,115 @@ tests:
   enumerators:
     name: Test Enumerators Endpoints
     steps:
-      # Test PUT with modified data (preserving existing content and adding new test values)
-      - name: Put Enumerators
+      # Test PUT with modified data for individual enumeration files
+      - name: Put Enumerations 0
         http:
-          url: http://${{env.host}}/api/enumerators/
+          url: http://${{env.host}}/api/enumerators/enumerations.0.yaml/
           method: PUT
           headers:
             Content-Type: application/json
           body: |
-            [
-              {
-                "version": 0,
-                "enumerators": {}
-              },
-              {
-                "version": 1,
-                "enumerators": {
-                  "default_status": {
-                    "active": "Not Deleted",
-                    "archived": "Soft Delete Indicator"
-                  },
-                  "test_enum": {
-                    "foo": "bar"
-                  }
-                }
-              },
-              {
-                "version": 2,
-                "enumerators": {
-                  "default_status": {
-                    "draft": "Draft",
-                    "active": "Not Deleted",
-                    "archived": "Soft Delete Indicator"
-                  },
-                  "test_enum": {
-                    "foo": "bar"
-                  }
-                }
-              }
-            ]
+            {
+              "name": "Enumerations",
+              "status": "Active",
+              "version": 0,
+              "enumerators": {}
+            }
           check:
             status: /200/
             jsonpath:
-              $[1].enumerators.test_enum.foo: "bar"
-              $[1].enumerators.default_status.active: "Not Deleted"
-            schema:
-              created_at:
-                type: string
-                format: date-time
-              updated_at:
-                type: string
-                format: date-time
-              size:
-                type: number
+              file_name: enumerations.0.yaml
+              created_at: /.+/
+              updated_at: /.+/
+              size: /\d+/
 
-      # Verify the PUT worked
-      - name: Get Enumerators After Put
+      - name: Put Enumerations 1
         http:
-          url: http://${{env.host}}/api/enumerators/
+          url: http://${{env.host}}/api/enumerators/enumerations.1.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "name": "Enumerations",
+              "status": "Active",
+              "version": 1,
+              "enumerators": {
+                "default_status": {
+                  "active": "Not Deleted",
+                  "archived": "Soft Delete Indicator"
+                },
+                "test_enum": {
+                  "foo": "bar"
+                }
+              }
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.1.yaml
+              created_at: /.+/
+              updated_at: /.+/
+              size: /\d+/
+
+      - name: Put Enumerations 2
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.2.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "name": "Enumerations",
+              "status": "Active",
+              "version": 2,
+              "enumerators": {}
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.2.yaml
+              created_at: /.+/
+              updated_at: /.+/
+              size: /\d+/
+
+      # Verify the PUT worked by getting individual files
+      - name: Get Enumerations 1 After Put
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.1.yaml/
           method: GET
           check:
             status: /200/
             jsonpath:
-              $[1].enumerators.test_enum.foo: "bar"
-              $[1].enumerators.default_status.active: "Not Deleted"
+              enumerators.test_enum.foo: "bar"
+              enumerators.default_status.active: "Not Deleted"
 
-      # Restore to original state from enumerators.json
-      - name: Restore Original Enumerators
+      # Restore to original state
+      - name: Restore Original Enumerations 1
         http:
-          url: http://${{env.host}}/api/enumerators/
+          url: http://${{env.host}}/api/enumerators/enumerations.1.yaml/
           method: PUT
           headers:
             Content-Type: application/json
           body: |
-            [
-              {
-                "version": 0,
-                "enumerators": {}
-              },
-              {
-                "version": 1,
-                "enumerators": {
-                  "default_status": {
-                    "active": "Not Deleted",
-                    "archived": "Soft Delete Indicator"
-                  }
-                }
-              },
-              {
-                "version": 2,
-                "enumerators": {
-                  "default_status": {
-                    "draft": "Draft",
-                    "active": "Not Deleted",
-                    "archived": "Soft Delete Indicator"
-                  }
+            {
+              "name": "Enumerations",
+              "status": "Active",
+              "version": 1,
+              "enumerators": {
+                "default_status": {
+                  "active": "Not Deleted",
+                  "archived": "Soft Delete Indicator"
+                },
+                "test_enum": {
+                  "foo": "bar"
                 }
               }
-            ]
+            }
           check:
             status: /200/
+            jsonpath:
+              file_name: enumerations.1.yaml
+              created_at: /.+/
+              updated_at: /.+/
+              size: /\d+/

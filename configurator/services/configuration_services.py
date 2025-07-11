@@ -29,11 +29,10 @@ class Configuration:
         }
 
     def save(self):
-        """Save the configuration and return the Configuration object."""
+        """Save the configuration and return the File object."""
         try:
-            # Save the cleaned content
-            FileIO.put_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
-            return self
+            file_obj = FileIO.put_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
+            return file_obj
         except Exception as e:
             event = ConfiguratorEvent("CFG-ROUTES-06", "PUT_CONFIGURATION")
             event.record_failure(f"Failed to save configuration {self.file_name}: {str(e)}")
@@ -66,6 +65,8 @@ class Configuration:
         
         event.record_success()
         return event
+    
+
     
     def delete(self):
         if self._locked:

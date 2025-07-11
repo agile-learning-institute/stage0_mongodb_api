@@ -83,6 +83,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+
   /api/configurations/{file_name}/:
     get:
       summary: Get a collection configuration
@@ -317,6 +318,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+
   /api/dictionaries/{file_name}/:
     get:
       summary: Get a dictionary 
@@ -426,6 +428,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+
   /api/types/{file_name}/:
     get:
       summary: Get a type 
@@ -537,6 +540,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+
   /api/test_data/{file_name}/:
     get:
       summary: Get a test data file 
@@ -665,6 +669,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
+
   /api/migrations/{file_name}/:
     get:
       summary: Get a migration file
@@ -753,15 +758,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-  /api/enumerations/:
+  /api/enumerators/:
     get:
       summary: List all Enumeration Files
-      operationId: list_enumerations
+      operationId: list_enumerators
       tags:
-        - Enumerator Values
+        - Enumerators
       responses:
         '200':
-          description: List of enumeration files
+          description: List of enumerator files
           content:
             application/json:
               schema:
@@ -773,13 +778,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
     patch:
-      summary: Lock all Enumerations
-      operationId: lock_enumerations
+      summary: Lock all Enumerators
+      operationId: lock_all_enumerators
       tags:
-        - Enumerator Values
+        - Enumerators
       responses:
         '200':
-          description: All enumerations locked successfully
+          description: All enumerators locked successfully
           content:
             application/json:
               schema:
@@ -791,12 +796,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-  /api/enumerations/{file_name}/:
+
+  /api/enumerators/{file_name}/:
     get:
-      summary: Get a specific enumeration file
-      operationId: get_enumeration
+      summary: Get an enumerator file
+      operationId: get_enumerator
       tags:
-        - Enumerator Values
+        - Enumerators
       parameters:
         - name: file_name
           in: path
@@ -805,7 +811,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Enumeration data
+          description: Enumerator file
           content:
             application/json:
               schema:
@@ -817,29 +823,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
     put:
-      summary: Update a specific enumeration file
-      operationId: update_enumeration
+      summary: Save an enumerator file
+      operationId: save_enumerator
       tags:
-        - Enumerator Values
+        - Enumerators
       parameters:
         - name: file_name
           in: path
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/enumerations'
       responses:
         '200':
-          description: Updated enumeration data
+          description: Enumerator file
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/enumerations'
+                $ref: '#/components/schemas/file'
         '500':
           description: Processing error
           content:
@@ -847,10 +847,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
     delete:
-      summary: Delete a specific enumeration file
-      operationId: delete_enumeration
+      summary: Delete an enumerator file
+      operationId: delete_enumerator
       tags:
-        - Enumerator Values
+        - Enumerators
       parameters:
         - name: file_name
           in: path
@@ -859,7 +859,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Enumeration deleted successfully
+          description: Enumerator file deleted
           content:
             application/json:
               schema:
@@ -924,6 +924,26 @@ paths:
                 $ref: '#/components/schemas/config'
         '500':
           description: Processing error
+
+  /api/configurations/lock_all/:
+    patch:
+      summary: Lock all Collection Configurations
+      operationId: lock_all_configurations
+      tags:
+        - Collection Configurations
+      responses:
+        '200':
+          description: All configurations locked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
 
 components:
   schemas:

@@ -28,6 +28,8 @@ def create_enumerator_routes():
         event.record_success()
         return jsonify(event.to_dict())
     
+
+    
     # GET /api/enumerations/<file_name> - Get specific enumeration file
     @enumerator_routes.route('/<file_name>/', methods=['GET'])
     @event_route("ENU-02", "GET_ENUMERATION", "getting enumeration")
@@ -41,8 +43,8 @@ def create_enumerator_routes():
     def put_enumeration(file_name):
         data = request.get_json(force=True)
         enumerations = Enumerations(data=data, file_name=file_name)
-        saved_enumerations = enumerations.save()
-        return jsonify(saved_enumerations.to_dict())
+        file_obj = enumerations.save()
+        return jsonify(file_obj.to_dict())
     
     # DELETE /api/enumerations/<file_name> - Delete specific enumeration file
     @enumerator_routes.route('/<file_name>/', methods=['DELETE'])

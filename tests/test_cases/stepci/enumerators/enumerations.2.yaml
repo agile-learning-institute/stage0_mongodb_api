@@ -1,9 +1,5 @@
 name: Enumerations
 status: Active
 version: 2
-enumerators:
-  default_status:
-    draft: "Draft"
-    active: "Not Deleted"
-    archived: "Soft Delete Indicator"
-_locked: false 
+enumerators: {}
+_locked: false

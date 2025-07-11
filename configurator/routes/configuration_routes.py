@@ -41,6 +41,7 @@ def create_configuration_routes():
         result = Configuration.lock_all()
         return jsonify(result.to_dict())
 
+
     @blueprint.route('/collection/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-04", "CREATE_COLLECTION", "creating collection")
     def create_collection(file_name):
@@ -54,12 +55,13 @@ def create_configuration_routes():
         configuration = Configuration(file_name)
         return jsonify(configuration.to_dict())
 
+    # PUT /api/configurations/<file_name> - Update a configuration file
     @blueprint.route('/<file_name>/', methods=['PUT'])
     @event_route("CFG-ROUTES-06", "PUT_CONFIGURATION", "updating configuration")
-    def put_configuration(file_name):
+    def update_configuration(file_name):
         configuration = Configuration(file_name, request.json)
-        configuration.save()
-        return jsonify(configuration.to_dict())
+        file_obj = configuration.save()
+        return jsonify(file_obj.to_dict())
     
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     @event_route("CFG-ROUTES-07", "DELETE_CONFIGURATION", "deleting configuration")

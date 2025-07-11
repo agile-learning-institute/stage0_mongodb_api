@@ -3,7 +3,7 @@ observable:
   steps:
   - name: GET Config Values
     http:
-      url: http://${{env.host}}/api/config
+      url: http://${{env.host}}/api/config/
       method: GET
       check:
         status: /200/
