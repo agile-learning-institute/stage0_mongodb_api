@@ -164,7 +164,7 @@ class TestTestDataRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_test_data_patch_method_not_allowed(self):
-        """Test that PATCH method is not allowed on /api/test_data."""
+        """Test that PATCH method is not allowed on /api/test_data since test_data cannot be locked."""
         # Act
         response = self.client.patch('/api/test_data/')
 

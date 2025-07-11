@@ -26,6 +26,8 @@ def create_dictionary_routes():
         result = Dictionary.lock_all()
         return jsonify(result.to_dict())
     
+
+    
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['GET'])
     @event_route("DIC-02", "GET_DICTIONARY", "getting dictionary")
@@ -38,8 +40,8 @@ def create_dictionary_routes():
     @event_route("DIC-03", "PUT_DICTIONARY", "updating dictionary")
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
-        saved_dictionary = dictionary.save()
-        return jsonify(saved_dictionary.to_dict())
+        file_obj = dictionary.save()
+        return jsonify(file_obj.to_dict())
     
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")

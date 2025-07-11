@@ -1,11 +1,15 @@
 from flask import Blueprint, request, jsonify
 from configurator.services.configuration_services import Configuration
+from configurator.services.dictionary_services import Dictionary
 from configurator.services.template_service import TemplateService
-from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
+from configurator.services.enumerator_service import Enumerators
+from configurator.utils.configurator_exception import ConfiguratorEvent
 from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO, File
 from configurator.utils.route_decorators import event_route
+from configurator.utils.version_number import VersionNumber
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +41,7 @@ def create_configuration_routes():
         result = Configuration.lock_all()
         return jsonify(result.to_dict())
 
+
     @blueprint.route('/collection/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-04", "CREATE_COLLECTION", "creating collection")
     def create_collection(file_name):
@@ -50,12 +55,13 @@ def create_configuration_routes():
         configuration = Configuration(file_name)
         return jsonify(configuration.to_dict())
 
+    # PUT /api/configurations/<file_name> - Update a configuration file
     @blueprint.route('/<file_name>/', methods=['PUT'])
     @event_route("CFG-ROUTES-06", "PUT_CONFIGURATION", "updating configuration")
-    def put_configuration(file_name):
+    def update_configuration(file_name):
         configuration = Configuration(file_name, request.json)
-        configuration.save()
-        return jsonify(configuration.to_dict())
+        file_obj = configuration.save()
+        return jsonify(file_obj.to_dict())
     
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     @event_route("CFG-ROUTES-07", "DELETE_CONFIGURATION", "deleting configuration")
@@ -63,8 +69,6 @@ def create_configuration_routes():
         configuration = Configuration(file_name)
         event = configuration.delete()
         return jsonify(event.to_dict())
-
-
 
     @blueprint.route('/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-09", "PROCESS_CONFIGURATION", "processing configuration")

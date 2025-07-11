@@ -25,7 +25,7 @@ class TestCircularReferences(unittest.TestCase):
 
     def setUp(self):
         self.config = set_config_input_folder("./tests/test_cases/complex_refs")
-        self.enumerators = Enumerators(None)
+        self.enumerators = Enumerators()
 
     def tearDown(self):
         clear_config()

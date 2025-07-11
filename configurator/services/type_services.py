@@ -46,10 +46,10 @@ class Type:
 
 
     def save(self):
-        """Save the type and return the Type object."""
+        """Save the type and return the File object."""
         try:
-            FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.to_dict())
-            return self
+            file_obj = FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.to_dict())
+            return file_obj
         except Exception as e:
             event = ConfiguratorEvent("TYP-03", "PUT_TYPE")
             event.record_failure(f"Failed to save type {self.file_name}: {str(e)}")
@@ -64,23 +64,26 @@ class Type:
         
         for file in files:
             try:
-                type_obj = Type(file.file_name)
                 sub_event = ConfiguratorEvent(f"TYP-{file.file_name}", "LOCK_TYPE")
-                sub_event.record_success()
                 event.append_events([sub_event])
+                type = Type(file.file_name)
+                type._locked = True
+                type.save()                
+                sub_event.record_success()
             except ConfiguratorException as ce:
+                sub_event.record_failure(f"ConfiguratorException locking type {file.file_name}")
                 event.append_events([ce.event])
                 event.record_failure(f"ConfiguratorException locking type {file.file_name}")
                 raise ConfiguratorException(f"ConfiguratorException locking type {file.file_name}", event)
             except Exception as e:
-                sub_event = ConfiguratorEvent(f"TYP-{file.file_name}", "LOCK_TYPE")
                 sub_event.record_failure(f"Failed to lock type {file.file_name}: {str(e)}")
-                event.append_events([sub_event])
                 event.record_failure(f"Unexpected error locking type {file.file_name}")
                 raise ConfiguratorException(f"Unexpected error locking type {file.file_name}", event)
         
         event.record_success()
         return event
+    
+
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:
@@ -117,8 +120,6 @@ class Type:
         except Exception as e:
             event.record_failure("unexpected error deleting type", {"error": str(e)})
         return event
-
-
 
 class TypeProperty:
     def __init__(self, name: str, property: dict):

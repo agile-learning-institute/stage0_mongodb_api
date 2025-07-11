@@ -3,7 +3,7 @@ processing:
   steps:
     - name: Test Processing Endpoint
       http:
-        url: http://${{env.host}}/api/configurations
+        url: http://${{env.host}}/api/configurations/
         method: GET
         check:
           status: /200/

@@ -26,6 +26,7 @@ def create_type_routes():
         result = Type.lock_all()
         return jsonify(result.to_dict())
 
+
     # GET /api/types/<file_name>/ - Return a type file
     @type_routes.route('/<file_name>/', methods=['GET'])
     @event_route("TYP-02", "GET_TYPE", "getting type")
@@ -38,8 +39,8 @@ def create_type_routes():
     @event_route("TYP-03", "PUT_TYPE", "updating type")
     def update_type(file_name):
         type_obj = Type(file_name, request.json)
-        saved_type = type_obj.save()
-        return jsonify(saved_type.to_dict())
+        file_obj = type_obj.save()
+        return jsonify(file_obj.to_dict())
     
     @type_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TYP-05", "DELETE_TYPE", "deleting type")

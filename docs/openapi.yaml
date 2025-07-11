@@ -2,9 +2,7 @@ openapi: 3.0.3
 info:
   title: MongoDB Configurator API
   description: |
-    API for managing MongoDB collections, indexes, and migrations
-    
-    **API Explorer**: [Interactive Documentation](/docs/)
+    API for managing MongoDB configurations
   version: 1.0.0
   contact:
     email: devs@agile-learning.institute
@@ -15,6 +13,7 @@ info:
 servers:
   - url: http://localhost:8081
     description: Local development server
+
 paths:
   /docs/index.html:
     get:
@@ -66,7 +65,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-  /api/configurations/:
     patch:
       summary: Lock all Collection Configurations
       operationId: lock_all_configurations
@@ -78,37 +76,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  total_files:
-                    type: integer
-                    description: Total number of files processed
-                  locked_files:
-                    type: integer
-                    description: Number of files successfully locked
-                  failed_files:
-                    type: integer
-                    description: Number of files that failed to lock
-                  results:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                          description: Name of the file
-                        locked:
-                          type: boolean
-                          description: Whether the file was successfully locked
-                        error:
-                          type: string
-                          description: Error message if locking failed
+                $ref: '#/components/schemas/events'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+
   /api/configurations/{file_name}/:
     get:
       summary: Get a collection configuration
@@ -164,7 +139,7 @@ paths:
       tags:
         - Collection Configurations
       parameters:
-        - name: name
+        - name: file_name
           in: path
           required: true
           schema:
@@ -207,7 +182,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-  
   /api/configurations/collection/{name}:
     post:
       summary: Create a new collection
@@ -326,7 +300,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-  /api/dictionaries/:
     patch:
       summary: Lock all Dictionaries
       operationId: lock_all_dictionaries
@@ -338,37 +311,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  total_files:
-                    type: integer
-                    description: Total number of files processed
-                  locked_files:
-                    type: integer
-                    description: Number of files successfully locked
-                  failed_files:
-                    type: integer
-                    description: Number of files that failed to lock
-                  results:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                          description: Name of the file
-                        locked:
-                          type: boolean
-                          description: Whether the file was successfully locked
-                        error:
-                          type: string
-                          description: Error message if locking failed
+                $ref: '#/components/schemas/events'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+
   /api/dictionaries/{file_name}/:
     get:
       summary: Get a dictionary 
@@ -441,7 +391,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-
   /api/types/:
     get:
       summary: List all Types
@@ -461,7 +410,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-  /api/types/:
     patch:
       summary: Lock all Types
       operationId: lock_all_types
@@ -473,37 +421,14 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  total_files:
-                    type: integer
-                    description: Total number of files processed
-                  locked_files:
-                    type: integer
-                    description: Number of files successfully locked
-                  failed_files:
-                    type: integer
-                    description: Number of files that failed to lock
-                  results:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        name:
-                          type: string
-                          description: Name of the file
-                        locked:
-                          type: boolean
-                          description: Whether the file was successfully locked
-                        error:
-                          type: string
-                          description: Error message if locking failed
+                $ref: '#/components/schemas/events'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+
   /api/types/{file_name}/:
     get:
       summary: Get a type 
@@ -578,7 +503,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-
   /api/test_data/:
     get:
       summary: List all Test Data Files
@@ -598,6 +522,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+    patch:
+      summary: Lock all Test Data Files
+      operationId: lock_all_test_data
+      tags:
+        - Test Data
+      responses:
+        '200':
+          description: All test data files locked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+
   /api/test_data/{file_name}/:
     get:
       summary: Get a test data file 
@@ -686,7 +629,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
 
-
   /api/migrations/:
     get:
       summary: List all Migration Files
@@ -708,6 +650,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
+    patch:
+      summary: Lock all Migration Files
+      operationId: lock_all_migrations
+      tags:
+        - Migrations
+      responses:
+        '200':
+          description: All migration files locked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+
 
   /api/migrations/{file_name}/:
     get:
@@ -799,22 +760,62 @@ paths:
 
   /api/enumerators/:
     get:
-      summary: Get all Enumerators
-      operationId: get_enumerators
+      summary: List all Enumeration Files
+      operationId: list_enumerators
       tags:
-        - Enumerator Values
+        - Enumerators
       responses:
         '200':
-          description: Enumerators data
+          description: List of enumerator files
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  enumerators:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/enumerations'
+                $ref: '#/components/schemas/files'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+    patch:
+      summary: Lock all Enumerators
+      operationId: lock_all_enumerators
+      tags:
+        - Enumerators
+      responses:
+        '200':
+          description: All enumerators locked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+
+
+  /api/enumerators/{file_name}/:
+    get:
+      summary: Get an enumerator file
+      operationId: get_enumerator
+      tags:
+        - Enumerators
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Enumerator file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/enumerations'
         '500':
           description: Processing error
           content:
@@ -822,19 +823,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/events'
     put:
-      summary: Save Enumerators
-      operationId: save_enumerators
+      summary: Save an enumerator file
+      operationId: save_enumerator
       tags:
-        - Enumerator Values
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
+        - Enumerators
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: Enumerators file
+          description: Enumerator file
           content:
             application/json:
               schema:
@@ -845,7 +846,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/events'
-
+    delete:
+      summary: Delete an enumerator file
+      operationId: delete_enumerator
+      tags:
+        - Enumerators
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Enumerator file deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
 
   /api/database/:
     delete:
@@ -861,9 +885,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/enumerators'
+                $ref: '#/components/schemas/events'
         '500':
           description: Processing error
           content:
@@ -903,6 +925,26 @@ paths:
         '500':
           description: Processing error
 
+  /api/configurations/lock_all/:
+    patch:
+      summary: Lock all Collection Configurations
+      operationId: lock_all_configurations
+      tags:
+        - Collection Configurations
+      responses:
+        '200':
+          description: All configurations locked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
+
 components:
   schemas:
     files:
@@ -927,6 +969,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/enumerations'
+      description: Array of enumeration objects
     enumerations:
       type: object
       properties:
@@ -946,6 +989,9 @@ components:
             type: object
             additionalProperties:
               type: string
+        _locked:
+          type: boolean
+          description: Whether the enumeration file is locked from editing
     configuration:
       description: SchemaManager Collection Configuration
       type: object

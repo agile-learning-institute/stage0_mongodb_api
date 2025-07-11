@@ -1,0 +1,8 @@
+name: Enumerations
+status: Active
+version: 1
+enumerators:
+  test_enum:
+    value1: "Test value 1"
+    value2: "Test value 2"
+_locked: false 
