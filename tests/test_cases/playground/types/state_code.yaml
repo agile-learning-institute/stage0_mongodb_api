@@ -1,4 +1,7 @@
+file_name: state_code.yaml
+_locked: true
 description: A two character state code
+required: false
 schema:
   type: string
-  pattern: "^[A-Z]{2}$"
+  pattern: ^[A-Z]{2}$
