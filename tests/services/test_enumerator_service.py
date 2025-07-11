@@ -41,7 +41,7 @@ class TestEnumerators(unittest.TestCase):
         self.assertEqual(result, enum)  # save() now returns self
         
         # Verify FileIO calls
-        expected_data = {"enumerators": cleaned_data}
+        expected_data = cleaned_data
         mock_put_document.assert_called_once_with("test_data", "enumerators.json", expected_data)
 
     @patch('configurator.services.enumerator_service.FileIO.put_document')
@@ -66,7 +66,7 @@ class TestEnumerators(unittest.TestCase):
         self.assertEqual(result, enum)  # save() now returns self
         
         # Verify FileIO calls
-        expected_data = {"enumerators": same_data}
+        expected_data = same_data
         mock_put_document.assert_called_once_with("test_data", "enumerators.json", expected_data)
 
     @patch('configurator.services.enumerator_service.FileIO.put_document')
@@ -121,7 +121,7 @@ class TestEnumerators(unittest.TestCase):
         data = [{"version": 0, "enumerators": {"test": {"value": 1}}}]
         enum = Enumerators(data)
         result = enum.to_dict()
-        expected = {"enumerators": data}
+        expected = data
         self.assertEqual(result, expected)
 
 class TestEnumerations(unittest.TestCase):

@@ -46,9 +46,7 @@ class Enumerators:
             
     def to_dict(self):
         """Return the enumerators data"""
-        return {
-            "enumerators": self.dict
-        }
+        return self.dict
 
 
 class Enumerations:
