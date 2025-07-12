@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.utils.file_io import FileIO
+from configurator.utils.file_io import FileIO, File
 from configurator.utils.route_decorators import event_route
 import logging
 import os
@@ -17,11 +17,7 @@ def create_migration_routes():
     @event_route("MIG-01", "GET_MIGRATIONS", "listing migrations")
     def get_migrations():
         files = FileIO.get_documents(config.MIGRATIONS_FOLDER)
-        filenames = [file.file_name for file in files]
-        return jsonify(filenames)
-
-
-
+        return jsonify([file.to_dict() for file in files])
 
     # GET /api/migrations/<file_name>/ - Get a migration file
     @migration_routes.route('/<file_name>/', methods=['GET'])
@@ -45,20 +41,7 @@ def create_migration_routes():
     @migration_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("MIG-06", "DELETE_MIGRATION", "deleting migration")
     def delete_migration(file_name):
-        event = ConfiguratorEvent(event_id="MIG-06", event_type="DELETE_MIGRATION")
-        try:
-            delete_event = FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name)
-            if delete_event.status == "SUCCESS":
-                event.record_success()
-            else:
-                event.append_events([delete_event])
-                event.record_failure("error deleting migration")
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error deleting migration")
-        except Exception as e:
-            event.record_failure("unexpected error deleting migration", {"error": str(e)})
-        return jsonify(event.to_dict())
+        return jsonify(FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name).to_dict())
     
     logger.info("Migration Flask Routes Registered")
     return migration_routes 

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, abort, Response
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.utils.file_io import FileIO
+from configurator.utils.file_io import FileIO, File
 from configurator.utils.route_decorators import event_route
 import json
 import logging
@@ -33,10 +33,7 @@ def create_test_data_routes():
     def get_data_files():
         files = FileIO.get_documents(config.TEST_DATA_FOLDER)
         # Only include .json files
-        return jsonify([
-            {**{('file_name' if k == 'name' else k): v for k, v in file.to_dict().items()}}
-            for file in files if file.file_name.endswith('.json')
-        ])
+        return jsonify([file.to_dict() for file in files if file.file_name.endswith('.json')])
         
 
 
@@ -69,19 +66,14 @@ def create_test_data_routes():
         if not file_name.endswith('.json'):
             abort(400, description='Test data files must be .json')
         file = FileIO.put_document(config.TEST_DATA_FOLDER, file_name, request.json)
-        d = file.to_dict()
-        d['file_name'] = d.pop('name', file_name)
-        return jsonify(d)
+        return jsonify(file.to_dict())
         
     @test_data_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TST-04", "DELETE_TEST_DATA", "deleting test data")
     def delete_test_data(file_name):
         if not file_name.endswith('.json'):
             abort(404)
-        file = FileIO.delete_document(config.TEST_DATA_FOLDER, file_name)
-        d = file.to_dict()
-        d['file_name'] = d.pop('name', file_name)
-        return jsonify(d)
+        return jsonify(FileIO.delete_document(config.TEST_DATA_FOLDER, file_name).to_dict())
         
     logger.info("test_data Flask Routes Registered")
     return test_data_routes

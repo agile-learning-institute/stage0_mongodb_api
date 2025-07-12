@@ -38,9 +38,16 @@ class MigrationRoutesTestCase(unittest.TestCase):
         resp = self.app.get("/api/migrations/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertIn("mig1.json", data)
-        self.assertIn("mig2.json", data)
+        # For successful responses, expect File objects with metadata
+        self.assertIsInstance(data, list)
+        self.assertTrue(any("mig1.json" in file.get("file_name", "") for file in data))
+        self.assertTrue(any("mig2.json" in file.get("file_name", "") for file in data))
+        # Check that each item has the expected File object structure
+        for file in data:
+            self.assertIn("file_name", file)
+            self.assertIn("created_at", file)
+            self.assertIn("updated_at", file)
+            self.assertIn("size", file)
 
     def test_get_migration(self):
         resp = self.app.get("/api/migrations/mig1.json/")
@@ -80,7 +87,7 @@ class MigrationRoutesTestCase(unittest.TestCase):
         resp = self.app.delete("/api/migrations/mig1.json/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
-        # For successful responses, expect ConfiguratorEvent with SUCCESS status
+        # For successful responses, expect ConfiguratorEvent object
         self.assertIn("id", data)
         self.assertIn("type", data)
         self.assertIn("status", data)
@@ -89,7 +96,7 @@ class MigrationRoutesTestCase(unittest.TestCase):
 
     def test_delete_migration_not_found(self):
         resp = self.app.delete("/api/migrations/doesnotexist.json/")
-        self.assertEqual(resp.status_code, 200)  # Now returns 200 with failure event
+        self.assertEqual(resp.status_code, 200)  # Should return event with FAILURE status
         data = resp.get_json()
         self.assertIn("id", data)
         self.assertIn("type", data)
@@ -111,9 +118,9 @@ class TestMigrationRoutes(unittest.TestCase):
         """Test successful GET /api/migrations/."""
         # Arrange
         mock_file1 = Mock()
-        mock_file1.file_name = "migration1.json"
+        mock_file1.to_dict.return_value = {"file_name": "migration1.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_file2 = Mock()
-        mock_file2.file_name = "migration2.json"
+        mock_file2.to_dict.return_value = {"file_name": "migration2.json", "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_files = [mock_file1, mock_file2]
         
         with patch('configurator.routes.migration_routes.FileIO') as mock_file_io:
@@ -125,7 +132,7 @@ class TestMigrationRoutes(unittest.TestCase):
             # Assert
             self.assertEqual(response.status_code, 200)
             response_data = response.json
-            self.assertEqual(response_data, ["migration1.json", "migration2.json"])
+            self.assertEqual(response_data, [{"file_name": "migration1.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}, {"file_name": "migration2.json", "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}])
 
     @patch('configurator.routes.migration_routes.FileIO')
     def test_list_migrations_general_exception(self, mock_file_io):
@@ -222,6 +229,7 @@ class TestMigrationRoutes(unittest.TestCase):
         mock_exists.return_value = True
         mock_event = Mock()
         mock_event.status = "SUCCESS"
+        mock_event.to_dict.return_value = {"id": "MIG-06", "type": "DELETE_MIGRATION", "status": "SUCCESS", "data": "test_migration.json deleted"}
         mock_file_io.delete_document.return_value = mock_event
 
         # Act
@@ -240,13 +248,16 @@ class TestMigrationRoutes(unittest.TestCase):
     def test_delete_migration_general_exception(self, mock_file_io):
         """Test DELETE /api/migrations/<file_name> when FileIO raises a general exception."""
         # Arrange
-        mock_file_io.delete_document.side_effect = Exception("Unexpected error")
+        mock_event = Mock()
+        mock_event.status = "FAILURE"
+        mock_event.to_dict.return_value = {"id": "MIG-06", "type": "DELETE_MIGRATION", "status": "FAILURE", "data": "Unexpected error"}
+        mock_file_io.delete_document.return_value = mock_event
 
         # Act
         response = self.client.delete('/api/migrations/test_migration.json/')
 
         # Assert
-        self.assertEqual(response.status_code, 200)  # Now returns 200 with failure event
+        self.assertEqual(response.status_code, 200)  # Should return event with FAILURE status
         response_data = response.json
         self.assertIn("id", response_data)
         self.assertIn("type", response_data)
@@ -269,8 +280,10 @@ class TestMigrationRoutes(unittest.TestCase):
         # Arrange
         mock_file1 = Mock()
         mock_file1.file_name = "migration1.json"
+        mock_file1.to_dict.return_value = {"file_name": "migration1.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_file2 = Mock()
         mock_file2.file_name = "migration2.json"
+        mock_file2.to_dict.return_value = {"file_name": "migration2.json", "size": 200, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_files = [mock_file1, mock_file2]
         
         with patch('configurator.routes.migration_routes.FileIO') as mock_file_io:
@@ -282,7 +295,12 @@ class TestMigrationRoutes(unittest.TestCase):
             # Assert
             self.assertEqual(response.status_code, 200)
             response_data = response.json
-            self.assertEqual(response_data, ["migration1.json", "migration2.json"])
+            self.assertIsInstance(response_data, list)
+            self.assertEqual(len(response_data), 2)
+            self.assertIn("file_name", response_data[0])
+            self.assertIn("file_name", response_data[1])
+            self.assertEqual(response_data[0]["file_name"], "migration1.json")
+            self.assertEqual(response_data[1]["file_name"], "migration2.json")
 
 if __name__ == "__main__":
     unittest.main() 

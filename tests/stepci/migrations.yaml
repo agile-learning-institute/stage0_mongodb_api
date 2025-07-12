@@ -98,7 +98,7 @@ tests:
           check:
             status: /200/
             jsonpath:
-              $: /.*test_migration\.json.*/
+              $[*].file_name: /.*test_migration\.json.*/
 
       # Cleanup - DELETE the test migration
       - name: Delete Test Migration (Cleanup)
