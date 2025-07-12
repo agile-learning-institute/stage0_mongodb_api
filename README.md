@@ -1,6 +1,6 @@
 # MongoDB Configurator API
 
-This project builds a the [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) API. 
+This project builds a the [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) API. This API supports the [MongoDB Configurator SPA](https://github.com/agile-learning-institute/mongodb_configurator_spa)
 
 ## Quick Start
 
@@ -8,6 +8,7 @@ This project builds a the [MongoDB Configurator](https://github.com/agile-learni
 
 - [Python](https://www.python.org/downloads/) 3.12 or later
 - [Pipenv](https://pipenv.pypa.io/en/latest/installation.html)
+- [StepCI](https://github.com/stepci/stepci/blob/main/README.md)
 - [Docker Desktop](https://github.com/agile-learning-institute/stage0/tree/main/developer_edition)
 - [MongoDB Compass](https://www.mongodb.com/products/compass) *optional*
 
@@ -44,9 +45,6 @@ export LOGGING_LEVEL=DEBUG
 # Install dependencies
 pipenv install --dev
 
-# Run Unit Tests and generate coverage report
-pipenv run test
-
 #####################
 # Running test server  - uses INPUT_FOLDER setting# 
 pipenv run database     # Start the backing mongo database
@@ -67,7 +65,6 @@ pipenv run down         # Stops all testing containers
 
 ################################
 # Black Box Testing with StepCI 
-# https://github.com/stepci/stepci/blob/main/README.md 
 export INPUT_FOLDER=./tests/test_cases/stepci
 pipenv run stepci
 
