@@ -91,7 +91,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Arrange
         test_data = {"data": "test content"}
         mock_file = Mock()
-        mock_file.to_dict.return_value = {"name": "test_file.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
+        mock_file.to_dict.return_value = {"file_name": "test_file.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
         mock_file_io.put_document.return_value = mock_file
 
         # Act
@@ -126,7 +126,8 @@ class TestTestDataRoutes(unittest.TestCase):
         """Test successful DELETE /api/test_data/<file_name>."""
         # Arrange
         mock_event = Mock()
-        mock_event.to_dict.return_value = {"deleted": True, "file_name": "test_file.json"}
+        mock_event.status = "SUCCESS"
+        mock_event.to_dict.return_value = {"id": "TST-04", "type": "DELETE_TEST_DATA", "status": "SUCCESS", "data": "test_file.json deleted"}
         mock_file_io.delete_document.return_value = mock_event
 
         # Act
@@ -135,7 +136,11 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, {"deleted": True, "file_name": "test_file.json"})
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_delete_data_file_general_exception(self, mock_file_io):
