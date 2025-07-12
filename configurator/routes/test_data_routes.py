@@ -8,19 +8,7 @@ import logging
 import os
 logger = logging.getLogger(__name__)
 
-class TestDataJSONEncoder(json.JSONEncoder):
-    """Custom JSON encoder that preserves MongoDB extended JSON format for test data"""
-    def default(self, obj):
-        # For test data, we want to preserve the original format
-        # This encoder will be used specifically for test data responses
-        return super().default(obj)
-    
-    def encode(self, obj):
-        # Override encode to preserve MongoDB extended JSON format
-        if isinstance(obj, dict):
-            # Recursively process dictionaries to preserve $oid and $date
-            return super().encode(obj)
-        return super().encode(obj)
+# Removed TestDataJSONEncoder as it's not being used and the global MongoJSONEncoder handles MongoDB objects
 
 # Define the Blueprint for test_data routes
 def create_test_data_routes():

@@ -31,7 +31,7 @@ from configurator.utils.ejson_encoder import MongoJSONEncoder
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 docs_path = os.path.join(project_root, 'docs')
 app = Flask(__name__, static_folder=docs_path, static_url_path='/docs')
-# app.json = MongoJSONEncoder(app)  # Commented out to test if this causes MongoDB object conversion
+app.json = MongoJSONEncoder(app)  # Enable MongoDB object conversion
 
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
 if config.AUTO_PROCESS:
