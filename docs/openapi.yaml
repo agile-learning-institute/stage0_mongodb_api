@@ -620,13 +620,11 @@ paths:
         - Migrations
       responses:
         '200':
-          description: List of migration file names
+          description: List of migration files
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                $ref: '#/components/schemas/files'
         '500':
           description: Processing error
           content:
@@ -716,7 +714,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/file'
         '500':
           description: Processing error
           content:
