@@ -1,5 +1,5 @@
 file_name: email.yaml
-_locked: true
+_locked: false
 description: A valid email address
 required: false
 schema:

@@ -1,5 +1,5 @@
 file_name: url.yaml
-_locked: true
+_locked: false
 description: A valid URL
 required: false
 schema:

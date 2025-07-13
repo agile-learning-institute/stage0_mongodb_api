@@ -21,4 +21,4 @@ properties:
     enums: default_status
 additionalProperties: false
 file_name: sample.1.0.0.yaml
-_locked: true
+_locked: false

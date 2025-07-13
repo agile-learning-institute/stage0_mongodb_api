@@ -1,5 +1,5 @@
 file_name: state_code.yaml
-_locked: true
+_locked: false
 description: A two character state code
 required: false
 schema:

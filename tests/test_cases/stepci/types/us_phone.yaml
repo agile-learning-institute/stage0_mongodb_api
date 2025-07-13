@@ -1,5 +1,5 @@
 file_name: us_phone.yaml
-_locked: true
+_locked: false
 description: A US phone number in E.164 format
 required: false
 schema:

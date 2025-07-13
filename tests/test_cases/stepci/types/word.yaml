@@ -1,5 +1,5 @@
 file_name: word.yaml
-_locked: true
+_locked: false
 description: A String of text, 1 to 40 characters with no spaces, or special characters
   like /t or /n
 required: false

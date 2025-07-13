@@ -1,5 +1,5 @@
 file_name: appointment.yaml
-_locked: true
+_locked: false
 description: A date/time range
 required: false
 type: object

@@ -1,5 +1,5 @@
 file_name: index.yaml
-_locked: true
+_locked: false
 description: A zero-based array index
 required: false
 json_type:

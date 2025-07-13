@@ -1,5 +1,5 @@
 file_name: count.yaml
-_locked: true
+_locked: false
 description: A positive integer value
 required: false
 json_type:

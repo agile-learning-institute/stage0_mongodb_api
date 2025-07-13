@@ -1,5 +1,5 @@
 file_name: markdown.yaml
-_locked: true
+_locked: false
 description: A String of text, at least 1 and no more than 4k characters. May contain
   markdown, newlines, and tabs.
 required: false

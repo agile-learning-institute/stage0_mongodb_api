@@ -1,5 +1,5 @@
 file_name: date-time.yaml
-_locked: true
+_locked: false
 description: An ISO 8601 formatted date-time string
 required: false
 json_type:
