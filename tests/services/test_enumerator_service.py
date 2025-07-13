@@ -85,15 +85,15 @@ class TestEnumerators(unittest.TestCase):
                     mock_get_version.assert_called_once_with(1)
 
     def test_lock_all(self):
-        """Test that lock_all() locks all enumerations."""
+        """Test that lock_all() locks all enumerations and returns a ConfiguratorEvent."""
         # Arrange
         with patch('configurator.services.enumerator_service.FileIO.get_documents') as mock_get_documents:
             mock_files = [Mock(file_name="test1.yaml"), Mock(file_name="test2.yaml")]
             mock_get_documents.return_value = mock_files
             
             with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
-                mock_enum1 = Mock()
-                mock_enum2 = Mock()
+                mock_enum1 = Mock(file_name="test1.yaml")
+                mock_enum2 = Mock(file_name="test2.yaml")
                 mock_enumerations.side_effect = [mock_enum1, mock_enum2]
                 
                 # Act
@@ -101,10 +101,16 @@ class TestEnumerators(unittest.TestCase):
                 result = enum.lock_all()
                 
                 # Assert
-                self.assertEqual(result, enum)
-                mock_enum1._locked = True
+                from configurator.utils.configurator_exception import ConfiguratorEvent
+                self.assertIsInstance(result, ConfiguratorEvent)
+                # There should be a sub-event for each file
+                sub_event_ids = [e.id for e in result.sub_events]
+                self.assertIn("ENU-test1.yaml", sub_event_ids)
+                self.assertIn("ENU-test2.yaml", sub_event_ids)
+                # Each enumeration should be locked and saved
+                self.assertTrue(mock_enum1._locked)
+                self.assertTrue(mock_enum2._locked)
                 mock_enum1.save.assert_called_once()
-                mock_enum2._locked = True
                 mock_enum2.save.assert_called_once()
 
 
@@ -116,8 +122,6 @@ class TestEnumerations(unittest.TestCase):
         # Arrange
         with patch('configurator.services.enumerator_service.FileIO.get_document') as mock_get_document:
             mock_get_document.return_value = {
-                "name": "test",
-                "status": "active",
                 "version": 1,
                 "enumerators": {"test_enum": {"value1": True, "value2": False}},
                 "_locked": True
@@ -127,8 +131,6 @@ class TestEnumerations(unittest.TestCase):
             enum = Enumerations(data=None, file_name="test.yaml")
             
             # Assert
-            self.assertEqual(enum.name, "test")
-            self.assertEqual(enum.status, "active")
             self.assertEqual(enum.version, 1)
             self.assertEqual(enum.enumerators, {"test_enum": {"value1": True, "value2": False}})
             self.assertTrue(enum._locked)
@@ -143,8 +145,6 @@ class TestEnumerations(unittest.TestCase):
         """Test Enumerations initialization with valid data."""
         # Arrange
         data = {
-            "name": "test",
-            "status": "active",
             "version": 1,
             "enumerators": {"test_enum": {"value1": True, "value2": False}},
             "_locked": True
@@ -154,8 +154,6 @@ class TestEnumerations(unittest.TestCase):
         enum = Enumerations(data=data)
         
         # Assert
-        self.assertEqual(enum.name, "test")
-        self.assertEqual(enum.status, "active")
         self.assertEqual(enum.version, 1)
         self.assertEqual(enum.enumerators, {"test_enum": {"value1": True, "value2": False}})
         self.assertTrue(enum._locked)
@@ -164,8 +162,6 @@ class TestEnumerations(unittest.TestCase):
         """Test get_enum_values method."""
         # Arrange
         data = {
-            "name": "test",
-            "status": "active",
             "version": 1,
             "enumerators": {"test_enum": {"value1": True, "value2": False}}
         }
@@ -181,8 +177,6 @@ class TestEnumerations(unittest.TestCase):
         """Test get_enum_values when enumerators is None."""
         # Arrange
         data = {
-            "name": "test",
-            "status": "active",
             "version": 1,
             "enumerators": None
         }
@@ -196,8 +190,6 @@ class TestEnumerations(unittest.TestCase):
         """Test get_enum_values when enum is not found."""
         # Arrange
         data = {
-            "name": "test",
-            "status": "active",
             "version": 1,
             "enumerators": {"test_enum": {"value1": True}}
         }
@@ -211,8 +203,6 @@ class TestEnumerations(unittest.TestCase):
         """Test to_dict method."""
         # Arrange
         data = {
-            "name": "test",
-            "status": "active",
             "version": 1,
             "enumerators": {"test_enum": {"value1": True}},
             "_locked": True
@@ -224,8 +214,6 @@ class TestEnumerations(unittest.TestCase):
         
         # Assert
         expected = {
-            "name": "test",
-            "status": "active",
             "version": 1,
             "enumerators": {"test_enum": {"value1": True}},
             "_locked": True

@@ -22,10 +22,8 @@ def create_enumerator_routes():
     @enumerator_routes.route('/', methods=['PATCH'])
     @event_route("ENU-04", "LOCK_ENUMERATIONS", "locking all enumerations")
     def lock_enumerations():
-        event = ConfiguratorEvent("ENU-04", "LOCK_ENUMERATIONS")
         enumerators = Enumerators()
-        enumerators.lock_all()
-        event.record_success()
+        event = enumerators.lock_all()
         return jsonify(event.to_dict())
     
 

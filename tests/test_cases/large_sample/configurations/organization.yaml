@@ -1,22 +1,25 @@
+file_name: organization.yaml
 title: Organization Collection
 description: Collection for managing organizations
-name: organization
 versions:
-  - version: "1.0.0.1"
-    add_indexes:
-      - name: name
-        key:
-          name: 1
-        options:
-          unique: true
-      - name: status
-        key:
-          status: 1
-        options:
-          unique: false
-      - name: last_saved
-        key:
-          last_saved.saved_at: 1
-        options:
-          unique: false
-    test_data: organization.1.0.0.1.json
+- version: 1.0.0.1
+  drop_indexes: []
+  add_indexes:
+  - name: name
+    key:
+      name: 1
+    options:
+      unique: true
+  - name: status
+    key:
+      status: 1
+    options:
+      unique: false
+  - name: last_saved
+    key:
+      last_saved.saved_at: 1
+    options:
+      unique: false
+  migrations: []
+  test_data: organization.1.0.0.1.json
+_locked: true

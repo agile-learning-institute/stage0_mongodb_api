@@ -1,4 +1,7 @@
+file_name: index.yaml
+_locked: true
 description: A zero-based array index
+required: false
 json_type:
   type: number
   minimum: 0

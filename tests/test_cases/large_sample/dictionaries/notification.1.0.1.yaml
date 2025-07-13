@@ -1,15 +1,14 @@
-title: Notification Collection
-description: A notification collection for testing enum_array and cross-collection references
+description: A notification collection for testing enum_array and cross-collection
+  references
 type: object
+required: false
 properties:
   _id:
     description: The unique identifier for notification
     type: identity
     required: true
   user_id:
-    description: Reference to user receiving the notification
     ref: user.1.0.0.yaml
-    required: true
   title:
     description: Notification title
     type: word
@@ -21,34 +20,37 @@ properties:
   notification_type:
     description: Type of notification
     type: enum
-    enums: notification_type
     required: true
+    enums: notification_type
   status:
     description: Notification status
     type: enum
-    enums: default_status
     required: true
+    enums: default_status
   priority:
     description: Notification priority level
     type: enum
-    enums: priority_level
     required: true
+    enums: priority_level
   tags:
     description: Notification tags for categorization
     type: enum_array
+    required: false
     enums: notification_tags
   categories:
     description: Notification categories
     type: enum_array
+    required: false
     enums: category_type
   channels:
     description: Delivery channels for this notification
     type: enum_array
-    enums: delivery_channel
     required: true
+    enums: delivery_channel
   metadata:
     description: Additional notification metadata
     type: object
+    required: false
     properties:
       created_at:
         description: When the notification was created
@@ -57,15 +59,19 @@ properties:
       sent_at:
         description: When the notification was sent
         type: date-time
+        required: false
       read_at:
         description: When the notification was read
         type: date-time
+        required: false
       expires_at:
         description: When the notification expires
         type: date-time
+        required: false
       source:
         description: Source of the notification
         type: object
+        required: false
         properties:
           collection:
             description: Source collection name
@@ -78,8 +84,14 @@ properties:
           action:
             description: Action that triggered the notification
             type: enum
+            required: false
             enums: notification_action
+        additionalProperties: false
+    additionalProperties: false
   last_saved:
     description: Last saved breadcrumb
     type: breadcrumb
-    required: true 
+    required: true
+additionalProperties: false
+file_name: notification.1.0.1.yaml
+_locked: true

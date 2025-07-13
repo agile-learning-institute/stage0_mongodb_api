@@ -34,15 +34,27 @@ class Type:
         self.type_property = {}
         self._locked = False  # Default to unlocked
 
-        if document:
-            self.property = TypeProperty(file_name.replace('.yaml', ''), document)
-            # Extract _locked from document if present
-            self._locked = document.get("_locked", False)
-        else:
-            document_data = FileIO.get_document(self.config.TYPE_FOLDER, file_name)
-            self.property = TypeProperty(file_name.replace('.yaml', ''), document_data)
-            # Extract _locked from loaded document if present
-            self._locked = document_data.get("_locked", False)
+        try:
+            if document:
+                self.property = TypeProperty(file_name.replace('.yaml', ''), document)
+                # Extract _locked from document if present
+                self._locked = document.get("_locked", False)
+            else:
+                document_data = FileIO.get_document(self.config.TYPE_FOLDER, file_name)
+                self.property = TypeProperty(file_name.replace('.yaml', ''), document_data)
+                # Extract _locked from loaded document if present
+                self._locked = document_data.get("_locked", False)
+        except ConfiguratorException as e:
+            # Re-raise with additional context about the type file
+            event = ConfiguratorEvent(event_id=f"TYP-CONSTRUCTOR-{file_name}", event_type="TYPE_CONSTRUCTOR")
+            event.record_failure(f"Failed to construct type from {file_name}")
+            event.append_events([e.event])
+            raise ConfiguratorException(f"Failed to construct type from {file_name}: {str(e)}", event)
+        except Exception as e:
+            # Handle unexpected errors during construction
+            event = ConfiguratorEvent(event_id=f"TYP-CONSTRUCTOR-{file_name}", event_type="TYPE_CONSTRUCTOR")
+            event.record_failure(f"Unexpected error constructing type from {file_name}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error constructing type from {file_name}: {str(e)}", event)
 
 
     def save(self):

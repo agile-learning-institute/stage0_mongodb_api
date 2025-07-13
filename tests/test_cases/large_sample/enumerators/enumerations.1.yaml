@@ -1,62 +1,9 @@
-name: Enumerations
-status: Active
 version: 1
 enumerators:
   default_status:
-    active: "Not Deleted"
-    archived: "Soft Delete Indicator"
-  media_type:
-    movie: "A motion picture"
-    tv_show: "A television series"
-    documentary: "A non-fiction film"
-    short: "A short film"
-  media_status:
-    draft: "Not yet published"
-    published: "Available to users"
-    archived: "No longer available"
-  media_tags:
-    action: "Action genre"
-    comedy: "Comedy genre"
-    drama: "Drama genre"
-    sci_fi: "Science fiction genre"
-    documentary: "Documentary genre"
-  media_format:
-    dvd: "DVD format"
-    bluray: "Blu-ray format"
-    digital: "Digital format"
-    streaming: "Streaming format"
-  media_quality:
-    sd: "Standard definition"
-    hd: "High definition"
-    uhd: "Ultra high definition"
-  notification_type:
-    system: "System notification"
-    user: "User notification"
-    content: "Content notification"
-    reminder: "Reminder notification"
-  priority_level:
-    critical: "Critical priority"
-    high: "High priority"
-    medium: "Medium priority"
-    low: "Low priority"
-  notification_tags:
-    urgent: "Urgent notification"
-    important: "Important notification"
-    normal: "Normal notification"
-    low: "Low priority notification"
-  category_type:
-    work: "Work related items"
-    personal: "Personal items"
-    project: "Project specific items"
-    reference: "Reference materials"
-  delivery_channel:
-    email: "Email delivery"
-    sms: "SMS delivery"
-    push: "Push notification"
-    in_app: "In-app notification"
-  notification_action:
-    created: "Document created"
-    updated: "Document updated"
-    deleted: "Document deleted"
-    published: "Document published"
-_locked: false 
+    active: Not Deleted
+    archived: Soft Delete Indicator
+  test_enum:
+    foo: bar
+_locked: false
+file_name: enumerations.1.yaml

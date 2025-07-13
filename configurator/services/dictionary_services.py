@@ -11,13 +11,25 @@ class Dictionary:
         self._locked = False
         self.property = None
 
-        if document:
-            self._locked = document.get("_locked", False)
-            self.property = Property("root", document)
-        else:
-            document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
-            self._locked = document_data.get("_locked", False)
-            self.property = Property("root", document_data)
+        try:
+            if document:
+                self._locked = document.get("_locked", False)
+                self.property = Property("root", document)
+            else:
+                document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
+                self._locked = document_data.get("_locked", False)
+                self.property = Property("root", document_data)
+        except ConfiguratorException as e:
+            # Re-raise with additional context about the dictionary file
+            event = ConfiguratorEvent(event_id=f"DIC-CONSTRUCTOR-{file_name}", event_type="DICTIONARY_CONSTRUCTOR")
+            event.record_failure(f"Failed to construct dictionary from {file_name}")
+            event.append_events([e.event])
+            raise ConfiguratorException(f"Failed to construct dictionary from {file_name}: {str(e)}", event)
+        except Exception as e:
+            # Handle unexpected errors during construction
+            event = ConfiguratorEvent(event_id=f"DIC-CONSTRUCTOR-{file_name}", event_type="DICTIONARY_CONSTRUCTOR")
+            event.record_failure(f"Unexpected error constructing dictionary from {file_name}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error constructing dictionary from {file_name}: {str(e)}", event)
 
     def to_dict(self):
         result = self.property.to_dict()

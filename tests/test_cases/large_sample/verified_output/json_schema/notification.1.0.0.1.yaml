@@ -109,7 +109,6 @@ properties:
     - correlation_id
 required:
 - _id
-- user_id
 - title
 - message
 - status

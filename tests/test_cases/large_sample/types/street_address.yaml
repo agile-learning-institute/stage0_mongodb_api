@@ -1,17 +1,23 @@
+file_name: street_address.yaml
+_locked: true
 description: A street address
+required: false
 type: object
 properties:
   street:
     description: Street address
-    type: sentence
     required: true
+    type: sentence
   city:
     description: City
+    required: false
     type: word
   state:
     description: State or province
+    required: false
     type: state_code
   postal_code:
     description: Postal code
-    type: word
     required: true
+    type: word
+additionalProperties: false

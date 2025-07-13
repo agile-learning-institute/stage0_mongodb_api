@@ -1,4 +1,7 @@
+file_name: url.yaml
+_locked: true
 description: A valid URL
+required: false
 schema:
   type: string
-  pattern: "^https?://[^\\s]+$"
+  pattern: ^https?://[^\s]+$

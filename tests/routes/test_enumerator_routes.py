@@ -143,9 +143,16 @@ class TestEnumeratorRoutes(unittest.TestCase):
     def test_lock_enumerations_success(self, mock_enumerators_class):
         """Test successful PATCH /api/enumerations - Lock all enumerations."""
         # Arrange
+        mock_event = Mock()
+        mock_event.to_dict.return_value = {
+            "id": "ENU-04",
+            "type": "LOCK_ENUMERATIONS",
+            "status": "SUCCESS",
+            "data": {},
+            "events": []
+        }
         mock_enumerators = Mock()
-        mock_enumerators.enumerations = []
-        mock_enumerators.lock_all.return_value = mock_enumerators
+        mock_enumerators.lock_all.return_value = mock_event
         mock_enumerators_class.return_value = mock_enumerators
 
         # Act

@@ -1,5 +1,3 @@
-name: Enumerations
-status: Active
 version: 1
 enumerators:
   default_status:
@@ -8,3 +6,4 @@ enumerators:
   test_enum:
     foo: bar
 _locked: false
+file_name: enumerations.1.yaml
