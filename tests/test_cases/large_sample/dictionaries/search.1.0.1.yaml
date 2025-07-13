@@ -1,6 +1,7 @@
-title: search
-description: A search index that is used to support a elastic search polymorphic query service
+description: A search index that is used to support a elastic search polymorphic query
+  service
 type: object
+required: false
 properties:
   collection_name:
     description: The name of the collection
@@ -10,12 +11,14 @@ properties:
     description: The unique identifier for this source document
     type: identity
     required: true
+additionalProperties: false
 one_of:
   schemas:
-    media: 
+    media:
       ref: media.1.0.0.yaml
-    organization: 
+    organization:
       ref: organization.1.0.0.yaml
-    user: 
+    user:
       ref: user.1.0.1.yaml
-  
+file_name: search.1.0.1.yaml
+_locked: true

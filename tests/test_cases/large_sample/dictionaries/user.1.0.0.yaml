@@ -1,6 +1,6 @@
-title: User Collection
 description: A user collection for testing the schema system
 type: object
+required: false
 properties:
   _id:
     description: The unique identifier for a user
@@ -13,15 +13,20 @@ properties:
   first_name:
     description: Users First Name
     type: word
+    required: false
   last_name:
     description: Users Last Name
     type: word
+    required: false
   status:
     description: document status
     type: enum
-    enums: default_status
     required: true
+    enums: default_status
   last_saved:
     description: The last time this document was saved
     type: breadcrumb
     required: true
+additionalProperties: false
+file_name: user.1.0.0.yaml
+_locked: true

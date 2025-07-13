@@ -1,6 +1,6 @@
-title: Organization
 description: An organization in the system
 type: object
+required: false
 properties:
   _id:
     description: The unique identifier for the organization
@@ -13,8 +13,8 @@ properties:
   status:
     description: The current status of the organization
     type: enum
-    enums: default_status
     required: true
+    enums: default_status
   last_saved:
     description: When the organization document was last updated
     type: breadcrumb
@@ -22,13 +22,19 @@ properties:
   users:
     description: Users associated with this organization
     type: array
+    required: false
     items:
       description: A user identifier
       type: identity
+      required: false
   website:
     description: Organization website
     type: url
+    required: false
   home_address:
     description: Organization home address
     type: street_address
- 
+    required: false
+additionalProperties: false
+file_name: organization.1.0.0.yaml
+_locked: true
