@@ -1,5 +1,5 @@
 file_name: breadcrumb.yaml
-_locked: false
+_locked: true
 description: A tracking breadcrumb
 required: false
 type: object

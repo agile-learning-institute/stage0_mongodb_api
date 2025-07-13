@@ -1,5 +1,5 @@
 file_name: ip_address.yaml
-_locked: false
+_locked: true
 description: A valid IP Address
 required: false
 schema:

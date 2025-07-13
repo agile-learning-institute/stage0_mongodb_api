@@ -1,5 +1,5 @@
 file_name: street_address.yaml
-_locked: false
+_locked: true
 description: A street address
 required: false
 type: object

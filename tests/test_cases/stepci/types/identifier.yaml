@@ -1,5 +1,5 @@
 file_name: identifier.yaml
-_locked: false
+_locked: true
 description: A unique identifier for a document
 required: false
 json_type:
