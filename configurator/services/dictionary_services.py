@@ -12,13 +12,13 @@ class Dictionary:
         self.property = None
 
         try:
-        if document:
-            self._locked = document.get("_locked", False)
-            self.property = Property("root", document)
-        else:
-            document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
-            self._locked = document_data.get("_locked", False)
-            self.property = Property("root", document_data)
+            if document:
+                self._locked = document.get("_locked", False)
+                self.property = Property("root", document)
+            else:
+                document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
+                self._locked = document_data.get("_locked", False)
+                self.property = Property("root", document_data)
         except ConfiguratorException as e:
             # Re-raise with additional context about the dictionary file
             event = ConfiguratorEvent(event_id=f"DIC-CONSTRUCTOR-{file_name}", event_type="DICTIONARY_CONSTRUCTOR")
