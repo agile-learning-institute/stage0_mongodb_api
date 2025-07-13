@@ -1,5 +1,5 @@
 name: Enumerations
-status: Deprecated
+status: Active
 version: 0
 enumerators: {}
-_locked: true
+_locked: false
