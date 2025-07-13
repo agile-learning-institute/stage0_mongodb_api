@@ -13,13 +13,13 @@ class Configuration:
         self.file_name = file_name
         
         try:
-            if not document:
-                document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
-            
-            self.title = document.get("title", "")
-            self.description = document.get("description", "")
-            self.versions = [Version(file_name.replace('.yaml', ''), v, self.config) for v in document.get("versions", [])]
-            self._locked = document.get("_locked", False)
+        if not document:
+            document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
+        
+        self.title = document.get("title", "")
+        self.description = document.get("description", "")
+        self.versions = [Version(file_name.replace('.yaml', ''), v, self.config) for v in document.get("versions", [])]
+        self._locked = document.get("_locked", False)
         except ConfiguratorException as e:
             # Re-raise with additional context about the configuration file
             event = ConfiguratorEvent(event_id=f"CFG-CONSTRUCTOR-{file_name}", event_type="CONFIGURATION_CONSTRUCTOR")
@@ -144,13 +144,13 @@ class Version:
         self.collection_name = collection_name
         
         try:
-            # Always construct VersionNumber with 4-part version string
-            self.collection_version = VersionNumber(f"{collection_name}.{version['version']}")
-            self.version_str = self.collection_version.get_version_str()
-            self.drop_indexes = version.get("drop_indexes", [])
-            self.add_indexes = version.get("add_indexes", [])
-            self.migrations = version.get("migrations", [])
-            self.test_data = version.get("test_data", None)
+        # Always construct VersionNumber with 4-part version string
+        self.collection_version = VersionNumber(f"{collection_name}.{version['version']}")
+        self.version_str = self.collection_version.get_version_str()
+        self.drop_indexes = version.get("drop_indexes", [])
+        self.add_indexes = version.get("add_indexes", [])
+        self.migrations = version.get("migrations", [])
+        self.test_data = version.get("test_data", None)
         except ConfiguratorException as e:
             # Re-raise with additional context about the version being constructed
             event = ConfiguratorEvent(event_id=f"VER-CONSTRUCTOR-{collection_name}", event_type="VERSION_CONSTRUCTOR")

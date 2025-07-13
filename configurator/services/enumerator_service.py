@@ -11,11 +11,31 @@ class Enumerators:
         self.enumerations = [Enumerations(file_name=file.file_name) for file in files]
 
     def lock_all(self):
-        """Lock all enumerations"""
+        """Lock all enumerations and return a ConfiguratorEvent with sub-events for each file."""
+        event = ConfiguratorEvent("ENU-04", "LOCK_ENUMERATIONS")
+        success_count = 0
+        
         for enumeration in self.enumerations:
-            enumeration._locked = True
-            enumeration.save()
-        return self
+            sub_event = ConfiguratorEvent(f"ENU-{enumeration.file_name}", "LOCK_ENUMERATION")
+            try:
+                enumeration._locked = True
+                enumeration.save()
+                sub_event.record_success()
+                success_count += 1
+            except ConfiguratorException as ce:
+                sub_event.record_failure(f"ConfiguratorException locking enumeration {enumeration.file_name}")
+                event.append_events([ce.event])
+            except Exception as e:
+                sub_event.record_failure(f"Failed to lock enumeration {enumeration.file_name}: {str(e)}")
+            event.append_events([sub_event])
+        
+        # Record overall success/failure based on whether all enumerations were locked
+        if success_count == len(self.enumerations):
+            event.record_success()
+        else:
+            event.record_failure(f"Failed to lock {len(self.enumerations) - success_count} out of {len(self.enumerations)} enumerations")
+        
+        return event
 
 
     def getVersion(self, version_number: int):
@@ -39,11 +59,18 @@ class Enumerations:
         self._locked = False
         self.file_name = file_name
 
-        if data:
-            self._load_from_document(data)
-        else:
-            document = FileIO.get_document(self.config.ENUMERATOR_FOLDER, file_name)
-            self._load_from_document(document)
+        try:
+            if data:
+                self._load_from_document(data)
+            else:
+                document = FileIO.get_document(self.config.ENUMERATOR_FOLDER, file_name)
+                self._load_from_document(document)
+        except ConfiguratorException as e:
+            # Re-raise with additional context about the enumerations file
+            event = ConfiguratorEvent(event_id=f"ENU-CONSTRUCTOR-{file_name}", event_type="ENUMERATIONS_CONSTRUCTOR")
+            event.record_failure(f"Failed to construct enumerations from {file_name}")
+            event.append_events([e.event])
+            raise ConfiguratorException(f"Failed to construct enumerations from {file_name}: {str(e)}", event)
 
     def _load_from_document(self, data: dict):
         """Load enumerations data from document"""
@@ -62,13 +89,17 @@ class Enumerations:
 
     def to_dict(self):
         """Return the enumerations data"""
-        return {
+        result = {
             "name": self.name,
             "status": self.status,
             "version": self.version,
             "enumerators": self.enumerators,
             "_locked": self._locked
         }
+        # Only include file_name if it's not None
+        if self.file_name is not None:
+            result["file_name"] = self.file_name
+        return result
 
     def save(self):
         """Save the enumerations to its file and return the File object."""
