@@ -1,0 +1,4 @@
+description: Collection for managing circular ref items
+name: circular_ref
+versions:
+  - version: "1.0.0.1"    
