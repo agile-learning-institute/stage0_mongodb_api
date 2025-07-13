@@ -11,13 +11,26 @@ class Configuration:
     def __init__(self, file_name: str, document: dict = None):
         self.config = Config.get_instance()
         self.file_name = file_name
-        if not document:
-            document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
         
-        self.title = document.get("title", "")
-        self.description = document.get("description", "")
-        self.versions = [Version(file_name.replace('.yaml', ''), v, self.config) for v in document.get("versions", [])]
-        self._locked = document.get("_locked", False)
+        try:
+            if not document:
+                document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
+            
+            self.title = document.get("title", "")
+            self.description = document.get("description", "")
+            self.versions = [Version(file_name.replace('.yaml', ''), v, self.config) for v in document.get("versions", [])]
+            self._locked = document.get("_locked", False)
+        except ConfiguratorException as e:
+            # Re-raise with additional context about the configuration file
+            event = ConfiguratorEvent(event_id=f"CFG-CONSTRUCTOR-{file_name}", event_type="CONFIGURATION_CONSTRUCTOR")
+            event.record_failure(f"Failed to construct configuration from {file_name}")
+            event.append_events([e.event])
+            raise ConfiguratorException(f"Failed to construct configuration from {file_name}: {str(e)}", event)
+        except Exception as e:
+            # Handle unexpected errors during construction
+            event = ConfiguratorEvent(event_id=f"CFG-CONSTRUCTOR-{file_name}", event_type="CONFIGURATION_CONSTRUCTOR")
+            event.record_failure(f"Unexpected error constructing configuration from {file_name}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error constructing configuration from {file_name}: {str(e)}", event)
 
     def to_dict(self):
         return {
@@ -129,13 +142,26 @@ class Version:
     def __init__(self, collection_name: str, version: dict, config):
         self.config = config
         self.collection_name = collection_name
-        # Always construct VersionNumber with 4-part version string
-        self.collection_version = VersionNumber(f"{collection_name}.{version['version']}")
-        self.version_str = self.collection_version.get_version_str()
-        self.drop_indexes = version.get("drop_indexes", [])
-        self.add_indexes = version.get("add_indexes", [])
-        self.migrations = version.get("migrations", [])
-        self.test_data = version.get("test_data", None)
+        
+        try:
+            # Always construct VersionNumber with 4-part version string
+            self.collection_version = VersionNumber(f"{collection_name}.{version['version']}")
+            self.version_str = self.collection_version.get_version_str()
+            self.drop_indexes = version.get("drop_indexes", [])
+            self.add_indexes = version.get("add_indexes", [])
+            self.migrations = version.get("migrations", [])
+            self.test_data = version.get("test_data", None)
+        except ConfiguratorException as e:
+            # Re-raise with additional context about the version being constructed
+            event = ConfiguratorEvent(event_id=f"VER-CONSTRUCTOR-{collection_name}", event_type="VERSION_CONSTRUCTOR")
+            event.record_failure(f"Failed to construct version for collection {collection_name}")
+            event.append_events([e.event])
+            raise ConfiguratorException(f"Failed to construct version for collection {collection_name}: {str(e)}", event)
+        except Exception as e:
+            # Handle unexpected errors during construction
+            event = ConfiguratorEvent(event_id=f"VER-CONSTRUCTOR-{collection_name}", event_type="VERSION_CONSTRUCTOR")
+            event.record_failure(f"Unexpected error constructing version for collection {collection_name}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error constructing version for collection {collection_name}: {str(e)}", event)
 
     def to_dict(self):
         return {
