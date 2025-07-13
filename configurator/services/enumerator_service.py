@@ -74,8 +74,6 @@ class Enumerations:
 
     def _load_from_document(self, data: dict):
         """Load enumerations data from document"""
-        self.name = data.get("name", "Enumerations")
-        self.status = data.get("status", "Active")
         self.version = data.get("version", 0)
         self.enumerators = data.get("enumerators", {})
         self._locked = data.get("_locked", False)
@@ -90,8 +88,6 @@ class Enumerations:
     def to_dict(self):
         """Return the enumerations data"""
         result = {
-            "name": self.name,
-            "status": self.status,
             "version": self.version,
             "enumerators": self.enumerators,
             "_locked": self._locked

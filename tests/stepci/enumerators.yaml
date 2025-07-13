@@ -16,8 +16,6 @@ tests:
             Content-Type: application/json
           body: |
             {
-              "name": "Enumerations",
-              "status": "Active",
               "version": 0,
               "enumerators": {}
             }
@@ -37,8 +35,6 @@ tests:
             Content-Type: application/json
           body: |
             {
-              "name": "Enumerations",
-              "status": "Active",
               "version": 1,
               "enumerators": {
                 "default_status": {
@@ -66,8 +62,6 @@ tests:
             Content-Type: application/json
           body: |
             {
-              "name": "Enumerations",
-              "status": "Active",
               "version": 2,
               "enumerators": {}
             }
@@ -99,8 +93,6 @@ tests:
             Content-Type: application/json
           body: |
             {
-              "name": "Enumerations",
-              "status": "Active",
               "version": 1,
               "enumerators": {
                 "default_status": {

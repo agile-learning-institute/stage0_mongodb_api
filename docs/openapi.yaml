@@ -938,12 +938,6 @@ components:
     enumerations:
       type: object
       properties:
-        name:
-          type: string
-          description: Name of the enumeration
-        status:
-          type: string
-          description: Status of the enumeration (e.g., "Active", "Deprecated")
         version:
           type: integer
           description: Version number of the enumeration
