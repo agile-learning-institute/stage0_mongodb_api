@@ -7,4 +7,4 @@ enumerators:
     archived: Soft Delete Indicator
   test_enum:
     foo: bar
-_locked: false
+_locked: true
