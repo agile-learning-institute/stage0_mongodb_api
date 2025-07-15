@@ -1,4 +1,0 @@
-name: missing_ref
-versions:
-  - version: 1.0.0
-    description: Test version with missing $ref 

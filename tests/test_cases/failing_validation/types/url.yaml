@@ -1,4 +1,0 @@
-description: A valid URL
-schema:
-  type: string
-  pattern: "^https?://[\\w\\d\\-]+(\\.[\\w\\d\\-]+)+([\\w\\d\\-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
