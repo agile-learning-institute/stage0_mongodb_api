@@ -1,13 +1,9 @@
 [
     {
-        "name": "Enumerations",
-        "status": "Deprecated",
         "version": 0,
         "enumerators": {}
     },
     {
-        "name": "Enumerations",
-        "status": "Active",
         "version": 1,
         "enumerators": {
             "default_status": {
@@ -82,8 +78,6 @@
         }
     },
     {
-        "name": "Enumerations",
-        "status": "Active",
         "version": 2,
         "enumerators": {
             "default_status": {
@@ -123,8 +117,6 @@
         }
     },
     {
-        "name": "Enumerations",
-        "status": "Active",
         "version": 3,
         "enumerators": {
             "default_status": {
@@ -198,36 +190,6 @@
                 "entertainment": "Entertainment content",
                 "education": "Educational content",
                 "news": "News content"
-            },
-            "notification_type": {
-                "system": "System notification",
-                "user": "User notification",
-                "content": "Content notification",
-                "reminder": "Reminder notification"
-            },
-            "notification_tags": {
-                "urgent": "Urgent notification",
-                "important": "Important notification",
-                "normal": "Normal notification",
-                "low": "Low priority notification"
-            },
-            "priority_level": {
-                "critical": "Critical priority",
-                "high": "High priority",
-                "medium": "Medium priority",
-                "low": "Low priority"
-            },
-            "delivery_channel": {
-                "email": "Email delivery",
-                "sms": "SMS delivery",
-                "push": "Push notification",
-                "in_app": "In-app notification"
-            },
-            "notification_action": {
-                "created": "Document created",
-                "updated": "Document updated",
-                "deleted": "Document deleted",
-                "published": "Document published"
             }
         }
     }

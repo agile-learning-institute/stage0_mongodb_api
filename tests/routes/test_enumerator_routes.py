@@ -58,10 +58,9 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Arrange
         mock_enumeration = Mock()
         mock_enumeration.to_dict.return_value = {
-            "name": "test",
-            "status": "active",
             "version": 1,
-            "enumerators": {"test_enum": {"value1": True}}
+            "enumerators": {"test_enum": {"value1": True}},
+            "file_name": "test"
         }
         mock_enumerations_class.return_value = mock_enumeration
         
@@ -71,9 +70,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data["name"], "test")
-        self.assertEqual(response_data["status"], "active")
         self.assertEqual(response_data["version"], 1)
+        self.assertEqual(response_data["enumerators"], {"test_enum": {"value1": True}})
         mock_enumerations_class.assert_called_once_with(file_name="test")
 
     @patch('configurator.routes.enumerator_routes.Enumerations')
@@ -100,10 +98,9 @@ class TestEnumeratorRoutes(unittest.TestCase):
         """Test successful PUT /api/enumerations/{name} - Update specific enumeration."""
         # Arrange
         test_data = {
-            "name": "test",
-            "status": "active",
             "version": 1,
-            "enumerators": {"test_enum": {"value1": True}}
+            "enumerators": {"test_enum": {"value1": True}},
+            "file_name": "test"
         }
         mock_enumeration = Mock()
         mock_enumeration.to_dict.return_value = test_data
@@ -125,7 +122,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Arrange
         event = ConfiguratorEvent("ENU-03", "PUT_ENUMERATION")
         mock_enumerations_class.side_effect = ConfiguratorException("Save error", event)
-        test_data = {"name": "test", "status": "active", "version": 1, "enumerators": {}}
+        test_data = {"version": 1, "enumerators": {}, "file_name": "test"}
 
         # Act
         response = self.client.put('/api/enumerations/test/', json=test_data)
