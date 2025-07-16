@@ -8,15 +8,17 @@ properties:
     items:
       description: User Name
       type: word
-  says:
-    description: Things the user says
-    type: sentence
-  does:
-    description: Things the user does
-    type: sentence
-  thinks:
-    description: Things the user thinks
-    type: sentence
-  feels:
-    description: Things the user feels
-    type: sentence
+one_of:
+  schemas:
+    says:
+      description: Things the user says
+      type: sentence
+    does:
+      description: Things the user does
+      type: sentence
+    thinks:
+      description: Things the user thinks
+      type: sentence
+    feels:
+      description: Things the user feels
+      type: sentence

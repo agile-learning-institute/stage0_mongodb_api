@@ -40,25 +40,47 @@ properties:
       type: object
       required: true
       properties:
-          exercise_id:
-            description: The Exercise Instructions this is using
-            type: identifier
-            required: true
-          status:
-            description: The exercise status or state (Observe/Reflect/Make)
-            type: enum
-            enums: exercise_status
-            required: true
-          conversation_id:
-            description: The _id of the conversation for this exercise
-            type: identifier
-            required: true
-          observations:
-            description: Observations of the exercise
-            type: array
-            required: true
-            items:
-              ref: observation.1.0.0
+        exercise_id:
+          description: The Exercise Instructions this is using
+          type: identifier
+          required: true
+        conversation_id:
+          required: true
+          description: The _id of the conversation for this exercise
+          type: identifier
+        exercise_name:
+          description: The name of the exercise
+          type: word
+          required: true
+        status:
+          description: The exercise status or state (Observe/Reflect/Make)
+          type: enum
+          enums: exercise_status
+          required: true
+        persona:
+          ref: observation_persona.1.0.0.yaml
+        observations:
+          description: Observations of the exercise
+          type: array
+          required: false
+          items:
+            type: object
+            required: false
+            properties:
+            one_of:
+              schemas:
+                stakeholder:
+                  ref: observation_stakeholder.1.0.0.yaml
+                empathy:
+                  ref: observation_empathy.1.0.0.yaml
+                hills:
+                  ref: observation_hills.1.0.0.yaml
+                priority:
+                  ref: observation_priority.1.0.0.yaml
+                ranking:
+                  ref: observation_ranking.1.0.0.yaml
+                retrospective:
+                  ref: observation_retrospective.1.0.0.yaml
   last_saved:
     description: Last Saved breadcrumb
     type: breadcrumb
