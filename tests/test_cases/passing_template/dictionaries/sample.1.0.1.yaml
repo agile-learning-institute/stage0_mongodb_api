@@ -3,10 +3,10 @@ type: object
 properties:
   _id:
     description: The unique identifier for the media
-    type: identity
+    type: identifier
     required: true
   full_name:
-    description: Full Name
+    description: The name of the document
     type: sentence
     required: true
   status:

@@ -13,6 +13,6 @@
     ]
   },
   {
-    "$out": "user"
+    "$out": "sample"
   }
 ] 
