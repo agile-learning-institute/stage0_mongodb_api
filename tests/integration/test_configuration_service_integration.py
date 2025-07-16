@@ -252,50 +252,38 @@ class TestConfigurationIntegration(unittest.TestCase):
 
     def _assert_document_equality(self, actual, expected, context):
         """Assert document equality with detailed diff reporting."""
-        # Remove _id fields for comparison since MongoDB generates new ObjectIds
-        actual_copy = actual.copy()
-        expected_copy = expected.copy()
-        
-        if '_id' in actual_copy:
-            del actual_copy['_id']
-        if '_id' in expected_copy:
-            del expected_copy['_id']
-            
-        if actual_copy != expected_copy:
-            diff = self._dict_diff(actual_copy, expected_copy)
+        if actual != expected:
+            diff = self._dict_diff(actual, expected)
             self.fail(f"{context} mismatch:\n{diff}")
 
     def _dict_diff(self, dict1, dict2):
         """Generate a detailed diff between two dictionaries."""
         def _diff_dict(d1, d2, path=""):
-            diff = []
+            diff_lines = []
             all_keys = set(d1.keys()) | set(d2.keys())
             
             for key in sorted(all_keys):
                 current_path = f"{path}.{key}" if path else key
                 
                 if key not in d1:
-                    diff.append(f"Missing in actual: {current_path}")
+                    diff_lines.append(f"  + {current_path}: {d2[key]}")
                 elif key not in d2:
-                    diff.append(f"Extra in actual: {current_path} = {d1[key]}")
-                elif isinstance(d1[key], dict) and isinstance(d2[key], dict):
-                    diff.extend(_diff_dict(d1[key], d2[key], current_path))
+                    diff_lines.append(f"  - {current_path}: {d1[key]}")
                 elif d1[key] != d2[key]:
-                    diff.append(f"Value mismatch at {current_path}:")
-                    diff.append(f"  Expected: {d2[key]}")
-                    diff.append(f"  Actual:   {d1[key]}")
+                    if isinstance(d1[key], dict) and isinstance(d2[key], dict):
+                        diff_lines.extend(_diff_dict(d1[key], d2[key], current_path))
+                    else:
+                        diff_lines.append(f"  ~ {current_path}: {d1[key]} -> {d2[key]}")
             
-            return diff
+            return diff_lines
         
-        return "\n".join(_diff_dict(dict1, dict2))
+        diff_lines = _diff_dict(dict1, dict2)
+        return "\n".join(diff_lines) if diff_lines else "No differences found"
 
 
 class TestSmallSampleConfigurationIntegration(TestConfigurationIntegration):
     """Test configuration processing integration for small_sample test case."""
     test_case = 'small_sample'
-
-
-# Removed large_sample test as it was failing and redundant with other integration tests
 
 
 if __name__ == '__main__':
