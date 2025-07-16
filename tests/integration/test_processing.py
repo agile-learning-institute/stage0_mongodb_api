@@ -1,20 +1,28 @@
+from configurator.services.configuration_services import Configuration
 from configurator.utils.config import Config
+from configurator.utils.file_io import FileIO
 import unittest
 import os
 
 class TestProcessing(unittest.TestCase):
-    """Test Processing of input files"""
+    """Test Processing of several passing_* test cases"""
 
-    def test_something(self):
-        """Test Something"""
+    def test_processing(self):
+        """Test Processing"""
         # Arrange
-        value = True
-
+        config = Config.get_instance()
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        results = []
         # Act
-        result = False
-    
+        for file in files:
+            configuration = Configuration(file.name)
+            results.append(configuration.process())
+        
         # Assert
-        self.assertEqual(result, value)
+        # Assert results = verified_output/processing_events.yaml
+        # Assert database contents = verified_output/test_database/
+        # For file in verfied_output/bson_schema Assert file contents == ConfigurationVersion().render bson
+        # For file in verfied_output/json_schema Assert file contents == ConfigurationVersion().render json
 
 class TestComplexRefs(TestProcessing):
     """Test Processing of complex refs"""

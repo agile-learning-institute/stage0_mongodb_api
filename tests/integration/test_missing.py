@@ -6,7 +6,7 @@ class TestMissing(unittest.TestCase):
     """Test Missing input folders"""
 
     def setUp(self):
-        os.environ['INPUT_FOLDER'] = "./tests/test_cases/failing_missing"
+        os.environ['INPUT_FOLDER'] = "./tests/test_cases/failing_empty"
         Config._instance = None
         self.config = Config.get_instance()
         os.environ['INPUT_FOLDER'].delete()
@@ -14,8 +14,8 @@ class TestMissing(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_something(self):
-        """Test Something"""
+    def test_failing_empty(self):
+        """Test Failing Empty"""
         # Arrange
         value = True
 
