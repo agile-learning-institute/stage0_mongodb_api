@@ -14,7 +14,7 @@
    - Identify which tests are true integration tests (using real data from `test_cases`) and which should be unit tests (mocking data).
    - **Explicitly categorize tests that should be moved largely unchanged** (e.g., MongoIO, Config File, FileIO, etc.) if they are already integration-style tests using real data. These should be moved to the integration folder before refactoring the failing_ test cases.
    - Move or refactor tests as needed.
-2. **Refactor Failing Condition Integration Tests**
+2. **Refactor Failing Condition Integration Tests** ✅ **COMPLETED**
    - Update and validate tests for:
      - `failing_refs` (bad references)
      - `failing_empty` (missing data)
@@ -23,10 +23,15 @@
 3. **Refactor Processing and Rendering Integration Tests**
    - Start with `passing_template` and work through one test case at a time.
    - Update tests to use new data and verify output against `verified_output`.
+   - **Note:** `test_configuration_service_integration.py` should be largely replaced by `test_processing.py` as they serve similar purposes.
    - Only move to the next test case after the previous one passes and is reviewed/committed.
 4. **Refactor/Migrate Other Integration Tests**
-   - Move MongoIO, FileIO, Config file, and similar tests into the integration folder if they use real data.
-   - Ensure all integration tests are in one place and use the correct data.
+   - ✅ **Main integration test moves completed in Step 1**
+   - **Remove/refactor unit tests that are still failing because of data dependency:**
+     - Identify any unit tests in `tests/services`, `tests/uitls`, `tests/routes` that are failing due to data dependency
+     - Refactor these tests to use proper mocking instead of real data
+     - Ensure all unit tests are truly unit tests (no external dependencies)
+   - **Ensure all integration tests are in one place and use the correct data**
 5. **Cleanup and Final Review**
    - Remove or rewrite any remaining tests that do not fit the new structure.
    - Ensure all tests pass and the integration suite is robust and maintainable.
@@ -56,19 +61,53 @@ chore(test): move integration tests to integration folder
 
 ---
 
-## Step 2: Refactor Failing Condition Integration Tests
-- Update and validate the following tests:
-  - `test_bad_refs.py` (uses `failing_refs`)
-  - `test_missing.py` (uses `failing_empty`)
-  - `test_unparsable.py` (uses `failing_not_parsable`)
-- Ensure each test:
+## Step 2: Refactor Failing Condition Integration Tests ✅ **COMPLETED**
+- ✅ **Updated and validated the following tests:**
+  - `test_bad_refs.py` (uses `failing_refs`) - Tests circular references, missing references, and missing types
+  - `test_missing.py` (uses `failing_empty`) - Tests empty/missing folders for all data types
+  - `test_unparsable.py` (uses `failing_not_parsable`) - Tests unparsable files and unsupported file types
+- ✅ **Ensured each test:**
   - Sets `INPUT_FOLDER` to the correct test case directory
   - Asserts correct exception handling and reporting (using `ConfiguratorException` and `ConfiguratorEvent`)
   - Uses the new test case data structure
+  - Has proper cleanup in tearDown methods
 
 **Commit message suggestion:**
 ```
 refactor(test): update failing condition integration tests to use new test_cases data and assert correct error handling
+
+- Refactor test_bad_refs.py to test circular references, missing references, and missing types
+- Refactor test_missing.py to test empty/missing folders for all data types  
+- Refactor test_unparsable.py to test unparsable files and unsupported file types
+- Add proper exception handling assertions and cleanup
+```
+
+---
+
+## Step 3: Refactor Processing and Rendering Integration Tests
+- Start with `passing_template` and work through one test case at a time.
+- Update tests to use new data and verify output against `verified_output`.
+- **Note:** `test_configuration_service_integration.py` should be largely replaced by `test_processing.py` as they serve similar purposes.
+- Only move to the next test case after the previous one passes and is reviewed/committed.
+
+**Commit message suggestion:**
+```
+refactor(test): update processing and rendering integration tests to use new test_cases data, starting with passing_template
+```
+
+---
+
+## Step 4: Refactor/Migrate Other Integration Tests
+- ✅ **Main integration test moves completed in Step 1**
+- **Remove/refactor unit tests that are still failing because of data dependency:**
+  - Identify any unit tests in `tests/services`, `tests/uitls`, `tests/routes` that are failing due to data dependency
+  - Refactor these tests to use proper mocking instead of real data
+  - Ensure all unit tests are truly unit tests (no external dependencies)
+- **Ensure all integration tests are in one place and use the correct data**
+
+**Commit message suggestion:**
+```
+refactor(test): remove data dependencies from unit tests and ensure proper mocking
 ```
 
 ---

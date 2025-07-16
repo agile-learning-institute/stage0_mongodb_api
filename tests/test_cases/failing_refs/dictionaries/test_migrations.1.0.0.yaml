@@ -1,5 +1,6 @@
 description: A schema for invalid tests data
 type: object
 properties:
-  self_ref:
-    ref: circular_ref.1.0.0 
+  name:
+    description: The name of the person
+    type: word
