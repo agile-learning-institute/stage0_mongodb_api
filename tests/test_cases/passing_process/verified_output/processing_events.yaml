@@ -1,0 +1,3056 @@
+- data:
+    configuration_name: search.yaml
+    version_count: 3
+  ends: '2025-07-16 18:28:37.524789'
+  id: CFG-search.yaml
+  starts: '2025-07-16 18:28:37.438471'
+  status: SUCCESS
+  sub_events:
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.480531'
+    id: search.1.0.0.1
+    starts: '2025-07-16 18:28:37.443237'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.450270'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.443238'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: search
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.450267'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.443241'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.460384'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.450272'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.460383'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.453233'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.458416'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.453235'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.459099'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.458419'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.459810'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.459101'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.460381'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.459812'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.460386'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'media_type' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.480524'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.502938'
+    id: search.1.0.0.2
+    starts: '2025-07-16 18:28:37.480539'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.481238'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.480541'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: search
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.481236'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.480542'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.485380'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.481240'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.485379'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.483145'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.483765'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.483146'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.484315'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.483767'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.484832'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.484317'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.485377'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.484834'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.485381'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'media_type' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.502933'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.524781'
+    id: search.1.0.1.3
+    starts: '2025-07-16 18:28:37.502946'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.503656'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.502947'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: search
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.503654'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.502948'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.508053'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.503657'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.508052'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.505487'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.506153'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.505489'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.506782'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.506155'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.507376'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.506784'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.508050'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.507378'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.508054'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'media_type' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.524775'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  type: PROCESS_CONFIGURATION
+- data:
+    configuration_name: content.yaml
+    version_count: 3
+  ends: '2025-07-16 18:28:37.644705'
+  id: CFG-content.yaml
+  starts: '2025-07-16 18:28:37.527640'
+  status: SUCCESS
+  sub_events:
+  - data: null
+    ends: '2025-07-16 18:28:37.592314'
+    id: content.1.0.0.1
+    starts: '2025-07-16 18:28:37.532550'
+    status: SUCCESS
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.537361'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.532552'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: content
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.537356'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.532553'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.542720'
+      id: PRO-04
+      starts: '2025-07-16 18:28:37.537363'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: content
+          index_keys:
+            content_type: 1
+          index_name: contentTypeIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.539387'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.537366'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: content
+          index_keys:
+            status: 1
+          index_name: statusIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.542718'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.539390'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.546839'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.542721'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.546838'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.544604'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.545215'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.544605'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.545780'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.545217'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.546311'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.545782'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.546836'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.546313'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: '2025-07-16 18:28:37.586315'
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.546840'
+      status: SUCCESS
+      sub_events:
+      - data:
+          additionalProperties: false
+          bsonType: object
+          properties:
+            _id:
+              bsonType: objectId
+            author_id:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                _id:
+                  bsonType: objectId
+                first_name:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                last_name:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                last_saved:
+                  additionalProperties: false
+                  bsonType: object
+                  properties:
+                    at_time:
+                      bsonType: date
+                    by_user:
+                      bsonType: string
+                      pattern: ^\S{1,40}$
+                    correlation_id:
+                      bsonType: string
+                      pattern: ^\S{1,40}$
+                    from_ip:
+                      bsonType: string
+                      pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+                  required:
+                  - from_ip
+                  - by_user
+                  - at_time
+                  - correlation_id
+                status:
+                  bsonType: string
+                  enum:
+                  - active
+                  - archived
+                user_name:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+              required:
+              - _id
+              - user_name
+              - status
+              - last_saved
+            content_data:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                audio_url:
+                  bsonType: string
+                  pattern: ^https?://[^\s]+$
+                body:
+                  bsonType: string
+                  maxLength: 4096
+                duration:
+                  bsonType: int
+                  minimum: 1
+                episode_number:
+                  bsonType: int
+                  minimum: 1
+                quality:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                tags:
+                  bsonType: array
+                  items:
+                    bsonType: string
+                    pattern: ^\S{1,40}$
+                transcript:
+                  bsonType: string
+                  maxLength: 4096
+                url:
+                  bsonType: string
+                  pattern: ^https?://[^\s]+$
+                word_count:
+                  bsonType: int
+                  minimum: 1
+            content_type:
+              bsonType: string
+              pattern: ^\S{1,40}$
+            last_saved:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                at_time:
+                  bsonType: date
+                by_user:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                correlation_id:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                from_ip:
+                  bsonType: string
+                  pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+              required:
+              - from_ip
+              - by_user
+              - at_time
+              - correlation_id
+            metadata:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                categories:
+                  bsonType: array
+                  items:
+                    additionalProperties: false
+                    bsonType: object
+                    properties:
+                      name:
+                        bsonType: string
+                        pattern: ^\S{1,40}$
+                      tags:
+                        bsonType: array
+                        items:
+                          bsonType: string
+                          pattern: ^\S{1,40}$
+                      type:
+                        bsonType: string
+                        pattern: ^\S{1,40}$
+                    required:
+                    - name
+                    - type
+                created_at:
+                  bsonType: date
+                published_at:
+                  bsonType: date
+                updated_at:
+                  bsonType: date
+              required:
+              - created_at
+            status:
+              bsonType: string
+              enum:
+              - active
+              - archived
+            subtitle:
+              bsonType: string
+              pattern: ^[^\t\n\r]{0,255}$
+            title:
+              bsonType: string
+              pattern: ^\S{1,40}$
+          required:
+          - _id
+          - title
+          - content_type
+          - status
+          - content_data
+          - last_saved
+        ends: '2025-07-16 18:28:37.586313'
+        id: MON-10
+        starts: '2025-07-16 18:28:37.584785'
+        status: SUCCESS
+        sub_events: []
+        type: APPLY_SCHEMA
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        test_data_path: ./tests/test_cases/passing_process/test_data/content.1.0.0.1.json
+      ends: '2025-07-16 18:28:37.587379'
+      id: PRO-07
+      starts: '2025-07-16 18:28:37.586317'
+      status: SUCCESS
+      sub_events:
+      - data:
+          error: Bulk write operation failed
+          nInserted: 0
+          nMatched: 0
+          nModified: 0
+          nRemoved: 0
+          nUpserted: 0
+          upserted: []
+          writeConcernErrors: []
+          writeErrors:
+          - code: 121
+            errInfo:
+              details:
+                operatorName: $jsonSchema
+                schemaRulesNotSatisfied:
+                - operatorName: properties
+                  propertiesNotSatisfied:
+                  - details:
+                    - consideredType: string
+                      consideredValue: content_001
+                      operatorName: bsonType
+                      reason: type did not match
+                      specifiedAs:
+                        bsonType: objectId
+                    propertyName: _id
+                  - details:
+                    - consideredValue: Introduction to MongoDB
+                      operatorName: pattern
+                      reason: regular expression did not match
+                      specifiedAs:
+                        pattern: ^\S{1,40}$
+                    propertyName: title
+                  - details:
+                    - consideredValue: published
+                      operatorName: enum
+                      reason: value was not found in enum
+                      specifiedAs:
+                        enum:
+                        - active
+                        - archived
+                    propertyName: status
+                  - details:
+                    - consideredType: string
+                      consideredValue: A00000000000000000000001
+                      operatorName: bsonType
+                      reason: type did not match
+                      specifiedAs:
+                        bsonType: object
+                    propertyName: author_id
+                  - details:
+                    - operatorName: properties
+                      propertiesNotSatisfied:
+                      - details:
+                        - consideredType: string
+                          consideredValue: '2024-01-15T10:00:00Z'
+                          operatorName: bsonType
+                          reason: type did not match
+                          specifiedAs:
+                            bsonType: date
+                        propertyName: created_at
+                      - details:
+                        - consideredType: string
+                          consideredValue: '2024-01-20T14:30:00Z'
+                          operatorName: bsonType
+                          reason: type did not match
+                          specifiedAs:
+                            bsonType: date
+                        propertyName: updated_at
+                      - details:
+                        - consideredType: string
+                          consideredValue: '2024-01-20T14:30:00Z'
+                          operatorName: bsonType
+                          reason: type did not match
+                          specifiedAs:
+                            bsonType: date
+                        propertyName: published_at
+                      - details:
+                        - details:
+                          - operatorName: properties
+                            propertiesNotSatisfied:
+                            - details:
+                              - consideredValue: Database Tutorials
+                                operatorName: pattern
+                                reason: regular expression did not match
+                                specifiedAs:
+                                  pattern: ^\S{1,40}$
+                              propertyName: name
+                          itemIndex: 0
+                          operatorName: items
+                          reason: At least one item did not match the sub-schema
+                        propertyName: categories
+                    propertyName: metadata
+                  - details:
+                    - operatorName: properties
+                      propertiesNotSatisfied:
+                      - details:
+                        - consideredType: string
+                          consideredValue: '2024-01-20T14:30:00Z'
+                          operatorName: bsonType
+                          reason: type did not match
+                          specifiedAs:
+                            bsonType: date
+                        propertyName: at_time
+                    propertyName: last_saved
+              failingDocumentId: content_001
+            errmsg: Document failed validation
+            index: 0
+            op:
+              _id: content_001
+              author_id: A00000000000000000000001
+              content_data:
+                body: '# Introduction to MongoDB
+
+
+                  MongoDB is a popular NoSQL database...'
+                tags:
+                - technology
+                - education
+                word_count: 2500
+              content_type: article
+              last_saved:
+                at_time: '2024-01-20T14:30:00Z'
+                by_user: admin
+                correlation_id: corr_008
+                from_ip: 192.168.1.107
+              metadata:
+                categories:
+                - name: Database Tutorials
+                  tags:
+                  - urgent
+                  - important
+                  type: education
+                created_at: '2024-01-15T10:00:00Z'
+                published_at: '2024-01-20T14:30:00Z'
+                updated_at: '2024-01-20T14:30:00Z'
+              status: published
+              subtitle: A comprehensive guide for beginners
+              title: Introduction to MongoDB
+        ends: '2025-07-16 18:28:37.587373'
+        id: MON-11
+        starts: '2025-07-16 18:28:37.586324'
+        status: FAILURE
+        sub_events: []
+        type: LOAD_DATA
+      type: LOAD_TEST_DATA
+    - data:
+        _id: 6878279518076259bdccc69f
+        collection_name: content
+        current_version: content.1.0.0.1
+      ends: '2025-07-16 18:28:37.592313'
+      id: PRO-08
+      starts: '2025-07-16 18:28:37.587380'
+      status: SUCCESS
+      sub_events: []
+      type: UPDATE_VERSION
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.612530'
+    id: content.1.0.0.2
+    starts: '2025-07-16 18:28:37.592318'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.592861'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.592319'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: content
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.592859'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.592322'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.594876'
+      id: PRO-04
+      starts: '2025-07-16 18:28:37.592862'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: content
+          index_keys:
+            author_id: 1
+          index_name: authorIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.594874'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.592864'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.598848'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.594877'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.598847'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.596692'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.597297'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.596694'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.597803'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.597299'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.598339'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.597805'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.598846'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.598340'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.598849'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'default_status' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.612525'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.644695'
+    id: content.1.0.1.3
+    starts: '2025-07-16 18:28:37.612537'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.613268'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.612538'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: content
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.613267'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.612540'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.625301'
+      id: PRO-03
+      starts: '2025-07-16 18:28:37.613269'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: content
+          migration_file: content_merge_content_fields.json
+          migration_path: ./tests/test_cases/passing_process/migrations/content_merge_content_fields.json
+          pipeline_operations:
+          - $addFields
+          - $unset
+          - $out
+          pipeline_stages: 3
+          pipeline_summary:
+          - details:
+              $addFields:
+                full_title:
+                  $concat:
+                  - $title
+                  - ' - '
+                  - $subtitle
+            operation: $addFields
+            stage: 1
+          - details:
+              $unset:
+              - subtitle
+            operation: $unset
+            stage: 2
+          - details:
+              $out: content
+            operation: $out
+            stage: 3
+        ends: '2025-07-16 18:28:37.625300'
+        id: MON-14
+        starts: '2025-07-16 18:28:37.613284'
+        status: SUCCESS
+        sub_events:
+        - data:
+            file: ./tests/test_cases/passing_process/migrations/content_merge_content_fields.json
+            file_name: content_merge_content_fields.json
+            pipeline_operations:
+            - $addFields
+            - $unset
+            - $out
+            pipeline_stages: 3
+          ends: '2025-07-16 18:28:37.613398'
+          id: MON-13
+          starts: '2025-07-16 18:28:37.613295'
+          status: SUCCESS
+          sub_events: []
+          type: LOAD_MIGRATION
+        - data:
+            collection: content
+          ends: '2025-07-16 18:28:37.625285'
+          id: MON-08
+          starts: '2025-07-16 18:28:37.613402'
+          status: SUCCESS
+          sub_events: []
+          type: EXECUTE_MIGRATION
+        type: EXECUTE_MIGRATION_FILE
+      type: EXECUTE_MIGRATIONS
+    - data: null
+      ends: '2025-07-16 18:28:37.629394'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.625303'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.629392'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.627187'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.627798'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.627189'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.628341'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.627799'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.628902'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.628342'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.629391'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.628904'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.629395'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'content_type' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.644690'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  type: PROCESS_CONFIGURATION
+- data:
+    configuration_name: test_config.yaml
+    version_count: 2
+  ends: '2025-07-16 18:28:37.669499'
+  id: CFG-test_config.yaml
+  starts: '2025-07-16 18:28:37.646214'
+  status: SUCCESS
+  sub_events:
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.663190'
+    id: test_config.1.0.0.1
+    starts: '2025-07-16 18:28:37.652877'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.657282'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.652878'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: test_config
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.657280'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.652880'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.661340'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.657283'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.661339'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.659183'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.659829'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.659184'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.660336'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.659831'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.660851'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.660338'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.661337'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.660853'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.661341'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        abs_path: /Users/mikestorey/source/agile-learning-institute/mongodb_configurator/mongodb_configurator_api/tests/test_cases/passing_process/dictionaries/test_config.1.0.0.yaml
+        cwd: /Users/mikestorey/source/agile-learning-institute/mongodb_configurator/mongodb_configurator_api
+        file_path: ./tests/test_cases/passing_process/dictionaries/test_config.1.0.0.yaml
+      ends: null
+      id: FIL-04
+      starts: '2025-07-16 18:28:37.663186'
+      status: PENDING
+      sub_events: []
+      type: FILE_NOT_FOUND
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.669497'
+    id: test_config.1.0.1.2
+    starts: '2025-07-16 18:28:37.663194'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.663762'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.663195'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: test_config
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.663760'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.663196'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.667679'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.663763'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.667677'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.665591'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.666168'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.665592'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.666665'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.666170'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.667163'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.666666'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.667676'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.667164'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.667680'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        abs_path: /Users/mikestorey/source/agile-learning-institute/mongodb_configurator/mongodb_configurator_api/tests/test_cases/passing_process/dictionaries/test_config.1.0.1.yaml
+        cwd: /Users/mikestorey/source/agile-learning-institute/mongodb_configurator/mongodb_configurator_api
+        file_path: ./tests/test_cases/passing_process/dictionaries/test_config.1.0.1.yaml
+      ends: null
+      id: FIL-04
+      starts: '2025-07-16 18:28:37.669493'
+      status: PENDING
+      sub_events: []
+      type: FILE_NOT_FOUND
+    type: PROCESS
+  type: PROCESS_CONFIGURATION
+- data:
+    configuration_name: organization.yaml
+    version_count: 1
+  ends: '2025-07-16 18:28:37.726571'
+  id: CFG-organization.yaml
+  starts: '2025-07-16 18:28:37.671668'
+  status: SUCCESS
+  sub_events:
+  - data: null
+    ends: '2025-07-16 18:28:37.726566'
+    id: organization.1.0.0.1
+    starts: '2025-07-16 18:28:37.677801'
+    status: SUCCESS
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.684005'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.677802'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: organization
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.684003'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.677804'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.693016'
+      id: PRO-04
+      starts: '2025-07-16 18:28:37.684007'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: organization
+          index_keys:
+            name: 1
+          index_name: name
+          operation: created
+        ends: '2025-07-16 18:28:37.686039'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.684009'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: organization
+          index_keys:
+            status: 1
+          index_name: status
+          operation: created
+        ends: '2025-07-16 18:28:37.688919'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.686041'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: organization
+          index_keys:
+            last_saved.saved_at: 1
+          index_name: last_saved
+          operation: created
+        ends: '2025-07-16 18:28:37.693013'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.688923'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.699129'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.693018'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.699127'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.695159'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.696262'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.695162'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.697120'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.696264'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.698145'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.697123'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.699125'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.698149'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: '2025-07-16 18:28:37.720850'
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.699131'
+      status: SUCCESS
+      sub_events:
+      - data:
+          additionalProperties: false
+          bsonType: object
+          properties:
+            _id:
+              bsonType: objectId
+            home_address:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                city:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                postal_code:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                state:
+                  bsonType: string
+                  pattern: ^[A-Z]{2}$
+                street:
+                  bsonType: string
+                  pattern: ^[^\t\n\r]{0,255}$
+              required:
+              - street
+              - postal_code
+            last_saved:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                at_time:
+                  bsonType: date
+                by_user:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                correlation_id:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                from_ip:
+                  bsonType: string
+                  pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+              required:
+              - from_ip
+              - by_user
+              - at_time
+              - correlation_id
+            name:
+              bsonType: string
+              pattern: ^[^\t\n\r]{0,255}$
+            status:
+              bsonType: string
+              enum:
+              - active
+              - archived
+            users:
+              bsonType: array
+              items:
+                bsonType: objectId
+            website:
+              bsonType: string
+              pattern: ^https?://[^\s]+$
+          required:
+          - _id
+          - name
+          - status
+          - last_saved
+        ends: '2025-07-16 18:28:37.720847'
+        id: MON-10
+        starts: '2025-07-16 18:28:37.719079'
+        status: SUCCESS
+        sub_events: []
+        type: APPLY_SCHEMA
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        test_data_path: ./tests/test_cases/passing_process/test_data/organization.1.0.0.1.json
+      ends: '2025-07-16 18:28:37.725542'
+      id: PRO-07
+      starts: '2025-07-16 18:28:37.720852'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: organization
+          data_file: organization.1.0.0.1.json
+          documents_loaded: 2
+          insert_many_result:
+            acknowledged: true
+            inserted_ids:
+            - b00000000000000000000001
+            - b00000000000000000000002
+        ends: '2025-07-16 18:28:37.725534'
+        id: MON-11
+        starts: '2025-07-16 18:28:37.720863'
+        status: SUCCESS
+        sub_events: []
+        type: LOAD_DATA
+      type: LOAD_TEST_DATA
+    - data:
+        _id: 6878279518076259bdccc6f0
+        collection_name: organization
+        current_version: organization.1.0.0.1
+      ends: '2025-07-16 18:28:37.726565'
+      id: PRO-08
+      starts: '2025-07-16 18:28:37.725544'
+      status: SUCCESS
+      sub_events: []
+      type: UPDATE_VERSION
+    type: PROCESS
+  type: PROCESS_CONFIGURATION
+- data:
+    configuration_name: notification.yaml
+    version_count: 3
+  ends: '2025-07-16 18:28:37.831961'
+  id: CFG-notification.yaml
+  starts: '2025-07-16 18:28:37.729962'
+  status: SUCCESS
+  sub_events:
+  - data: null
+    ends: '2025-07-16 18:28:37.778198'
+    id: notification.1.0.0.1
+    starts: '2025-07-16 18:28:37.736454'
+    status: SUCCESS
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.742370'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.736455'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: notification
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.742367'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.736462'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.747575'
+      id: PRO-04
+      starts: '2025-07-16 18:28:37.742372'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: notification
+          index_keys:
+            user_id: 1
+          index_name: userIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.745255'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.742375'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: notification
+          index_keys:
+            status: 1
+          index_name: statusIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.747572'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.745259'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.752842'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.747576'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.752841'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.749609'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.750566'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.749611'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.751552'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.750568'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.752245'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.751554'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.752839'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.752247'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: '2025-07-16 18:28:37.775995'
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.752844'
+      status: SUCCESS
+      sub_events:
+      - data:
+          additionalProperties: false
+          bsonType: object
+          properties:
+            _id:
+              bsonType: objectId
+            last_saved:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                at_time:
+                  bsonType: date
+                by_user:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                correlation_id:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                from_ip:
+                  bsonType: string
+                  pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+              required:
+              - from_ip
+              - by_user
+              - at_time
+              - correlation_id
+            message:
+              bsonType: string
+              pattern: ^[^\t\n\r]{0,255}$
+            status:
+              bsonType: string
+              enum:
+              - active
+              - archived
+            title:
+              bsonType: string
+              pattern: ^\S{1,40}$
+            user_id:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                _id:
+                  bsonType: objectId
+                first_name:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                last_name:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                last_saved:
+                  additionalProperties: false
+                  bsonType: object
+                  properties:
+                    at_time:
+                      bsonType: date
+                    by_user:
+                      bsonType: string
+                      pattern: ^\S{1,40}$
+                    correlation_id:
+                      bsonType: string
+                      pattern: ^\S{1,40}$
+                    from_ip:
+                      bsonType: string
+                      pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+                  required:
+                  - from_ip
+                  - by_user
+                  - at_time
+                  - correlation_id
+                status:
+                  bsonType: string
+                  enum:
+                  - active
+                  - archived
+                user_name:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+              required:
+              - _id
+              - user_name
+              - status
+              - last_saved
+          required:
+          - _id
+          - title
+          - message
+          - status
+          - last_saved
+        ends: '2025-07-16 18:28:37.775992'
+        id: MON-10
+        starts: '2025-07-16 18:28:37.774262'
+        status: SUCCESS
+        sub_events: []
+        type: APPLY_SCHEMA
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        test_data_path: ./tests/test_cases/passing_process/test_data/notification.1.0.0.1.json
+      ends: '2025-07-16 18:28:37.777338'
+      id: PRO-07
+      starts: '2025-07-16 18:28:37.775998'
+      status: SUCCESS
+      sub_events:
+      - data:
+          error: Bulk write operation failed
+          nInserted: 0
+          nMatched: 0
+          nModified: 0
+          nRemoved: 0
+          nUpserted: 0
+          upserted: []
+          writeConcernErrors: []
+          writeErrors:
+          - code: 121
+            errInfo:
+              details:
+                operatorName: $jsonSchema
+                schemaRulesNotSatisfied:
+                - operatorName: properties
+                  propertiesNotSatisfied:
+                  - details:
+                    - consideredType: string
+                      consideredValue: notification_001
+                      operatorName: bsonType
+                      reason: type did not match
+                      specifiedAs:
+                        bsonType: objectId
+                    propertyName: _id
+                  - details:
+                    - consideredType: string
+                      consideredValue: A00000000000000000000001
+                      operatorName: bsonType
+                      reason: type did not match
+                      specifiedAs:
+                        bsonType: object
+                    propertyName: user_id
+                  - details:
+                    - consideredValue: Welcome to the Platform
+                      operatorName: pattern
+                      reason: regular expression did not match
+                      specifiedAs:
+                        pattern: ^\S{1,40}$
+                    propertyName: title
+                  - details:
+                    - operatorName: properties
+                      propertiesNotSatisfied:
+                      - details:
+                        - consideredType: string
+                          consideredValue: '2024-01-15T10:05:00Z'
+                          operatorName: bsonType
+                          reason: type did not match
+                          specifiedAs:
+                            bsonType: date
+                        propertyName: at_time
+                    propertyName: last_saved
+              failingDocumentId: notification_001
+            errmsg: Document failed validation
+            index: 0
+            op:
+              _id: notification_001
+              last_saved:
+                at_time: '2024-01-15T10:05:00Z'
+                by_user: system
+                correlation_id: corr_001
+                from_ip: 192.168.1.100
+              message: Thank you for joining our platform!
+              status: active
+              title: Welcome to the Platform
+              user_id: A00000000000000000000001
+        ends: '2025-07-16 18:28:37.777331'
+        id: MON-11
+        starts: '2025-07-16 18:28:37.776010'
+        status: FAILURE
+        sub_events: []
+        type: LOAD_DATA
+      type: LOAD_TEST_DATA
+    - data:
+        _id: 6878279518076259bdccc70c
+        collection_name: notification
+        current_version: notification.1.0.0.1
+      ends: '2025-07-16 18:28:37.778197'
+      id: PRO-08
+      starts: '2025-07-16 18:28:37.777339'
+      status: SUCCESS
+      sub_events: []
+      type: UPDATE_VERSION
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.798069'
+    id: notification.1.0.0.2
+    starts: '2025-07-16 18:28:37.778204'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.778886'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.778205'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: notification
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.778884'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.778207'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.781982'
+      id: PRO-04
+      starts: '2025-07-16 18:28:37.778889'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: notification
+          index_keys:
+            notification_type: 1
+          index_name: typeIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.781979'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.778896'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.787593'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.781984'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.787592'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.784115'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.785082'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.784117'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.785833'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.785084'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.786824'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.785835'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.787590'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.786826'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.787595'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'default_status' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.798062'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.831948'
+    id: notification.1.0.1.3
+    starts: '2025-07-16 18:28:37.798078'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.799708'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.798079'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: notification
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.799705'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.798081'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.810972'
+      id: PRO-03
+      starts: '2025-07-16 18:28:37.799710'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: notification
+          migration_file: notification_merge_notification_data.json
+          migration_path: ./tests/test_cases/passing_process/migrations/notification_merge_notification_data.json
+          pipeline_operations:
+          - $addFields
+          - $unset
+          - $out
+          pipeline_stages: 3
+          pipeline_summary:
+          - details:
+              $addFields:
+                full_message:
+                  $concat:
+                  - $title
+                  - ': '
+                  - $message
+            operation: $addFields
+            stage: 1
+          - details:
+              $unset:
+              - message
+            operation: $unset
+            stage: 2
+          - details:
+              $out: notification
+            operation: $out
+            stage: 3
+        ends: '2025-07-16 18:28:37.810970'
+        id: MON-14
+        starts: '2025-07-16 18:28:37.799727'
+        status: SUCCESS
+        sub_events:
+        - data:
+            file: ./tests/test_cases/passing_process/migrations/notification_merge_notification_data.json
+            file_name: notification_merge_notification_data.json
+            pipeline_operations:
+            - $addFields
+            - $unset
+            - $out
+            pipeline_stages: 3
+          ends: '2025-07-16 18:28:37.799980'
+          id: MON-13
+          starts: '2025-07-16 18:28:37.799731'
+          status: SUCCESS
+          sub_events: []
+          type: LOAD_MIGRATION
+        - data:
+            collection: notification
+          ends: '2025-07-16 18:28:37.810955'
+          id: MON-08
+          starts: '2025-07-16 18:28:37.799990'
+          status: SUCCESS
+          sub_events: []
+          type: EXECUTE_MIGRATION
+        type: EXECUTE_MIGRATION_FILE
+      type: EXECUTE_MIGRATIONS
+    - data: null
+      ends: '2025-07-16 18:28:37.816019'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.810974'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.816018'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.812993'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.813915'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.812995'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.814736'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.813917'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.815363'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.814738'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.816016'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.815365'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.816021'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'default_status' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.831939'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  type: PROCESS_CONFIGURATION
+- data:
+    configuration_name: media.yaml
+    version_count: 1
+  ends: '2025-07-16 18:28:37.872818'
+  id: CFG-media.yaml
+  starts: '2025-07-16 18:28:37.834427'
+  status: SUCCESS
+  sub_events:
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.872809'
+    id: media.1.0.0.1
+    starts: '2025-07-16 18:28:37.840340'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.845365'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.840342'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: media
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.845363'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.840344'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.853368'
+      id: PRO-04
+      starts: '2025-07-16 18:28:37.845367'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: media
+          index_keys:
+            title: 1
+          index_name: title
+          operation: created
+        ends: '2025-07-16 18:28:37.848071'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.845370'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: media
+          index_keys:
+            status: 1
+          index_name: status
+          operation: created
+        ends: '2025-07-16 18:28:37.851029'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.848076'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: media
+          index_keys:
+            last_saved.saved_at: 1
+          index_name: last_saved
+          operation: created
+        ends: '2025-07-16 18:28:37.853365'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.851033'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.858292'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.853369'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.858291'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.855466'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.856376'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.855468'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.856995'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.856378'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.857601'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.856997'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.858289'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.857604'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.858294'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'media_type' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.872799'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  type: PROCESS_CONFIGURATION
+- data:
+    configuration_name: user.yaml
+    version_count: 3
+  ends: '2025-07-16 18:28:37.957644'
+  id: CFG-user.yaml
+  starts: '2025-07-16 18:28:37.876016'
+  status: SUCCESS
+  sub_events:
+  - data: null
+    ends: '2025-07-16 18:28:37.918454'
+    id: user.1.0.0.1
+    starts: '2025-07-16 18:28:37.882907'
+    status: SUCCESS
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.889731'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.882909'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: user
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.889729'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.882911'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.897757'
+      id: PRO-04
+      starts: '2025-07-16 18:28:37.889733'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: user
+          index_keys:
+            userName: 1
+          index_name: nameIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.892282'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.889740'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: user
+          index_keys:
+            status: 1
+          index_name: statusIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.895504'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.892286'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: user
+          index_keys:
+            last_saved.saved_at: 1
+          index_name: savedIndex
+          operation: created
+        ends: '2025-07-16 18:28:37.897754'
+        id: MON-09
+        starts: '2025-07-16 18:28:37.895513'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.902583'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.897758'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.902581'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.900000'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.900803'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.900001'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.901406'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.900805'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.901991'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.901407'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.902579'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.901993'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: '2025-07-16 18:28:37.916077'
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.902584'
+      status: SUCCESS
+      sub_events:
+      - data:
+          additionalProperties: false
+          bsonType: object
+          properties:
+            _id:
+              bsonType: objectId
+            first_name:
+              bsonType: string
+              pattern: ^\S{1,40}$
+            last_name:
+              bsonType: string
+              pattern: ^\S{1,40}$
+            last_saved:
+              additionalProperties: false
+              bsonType: object
+              properties:
+                at_time:
+                  bsonType: date
+                by_user:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                correlation_id:
+                  bsonType: string
+                  pattern: ^\S{1,40}$
+                from_ip:
+                  bsonType: string
+                  pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+              required:
+              - from_ip
+              - by_user
+              - at_time
+              - correlation_id
+            status:
+              bsonType: string
+              enum:
+              - active
+              - archived
+            user_name:
+              bsonType: string
+              pattern: ^\S{1,40}$
+          required:
+          - _id
+          - user_name
+          - status
+          - last_saved
+        ends: '2025-07-16 18:28:37.916073'
+        id: MON-10
+        starts: '2025-07-16 18:28:37.914741'
+        status: SUCCESS
+        sub_events: []
+        type: APPLY_SCHEMA
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        test_data_path: ./tests/test_cases/passing_process/test_data/user.1.0.0.1.json
+      ends: '2025-07-16 18:28:37.917565'
+      id: PRO-07
+      starts: '2025-07-16 18:28:37.916079'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: user
+          data_file: user.1.0.0.1.json
+          documents_loaded: 6
+          insert_many_result:
+            acknowledged: true
+            inserted_ids:
+            - a00000000000000000000001
+            - a00000000000000000000002
+            - a00000000000000000000003
+            - a00000000000000000000004
+            - a00000000000000000000005
+            - a00000000000000000000006
+        ends: '2025-07-16 18:28:37.917555'
+        id: MON-11
+        starts: '2025-07-16 18:28:37.916091'
+        status: SUCCESS
+        sub_events: []
+        type: LOAD_DATA
+      type: LOAD_TEST_DATA
+    - data:
+        _id: 6878279518076259bdccc759
+        collection_name: user
+        current_version: user.1.0.0.1
+      ends: '2025-07-16 18:28:37.918454'
+      id: PRO-08
+      starts: '2025-07-16 18:28:37.917567'
+      status: SUCCESS
+      sub_events: []
+      type: UPDATE_VERSION
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.932531'
+    id: user.1.0.0.2
+    starts: '2025-07-16 18:28:37.918460'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.919185'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.918461'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: user
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.919184'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.918467'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.920157'
+      id: PRO-02
+      starts: '2025-07-16 18:28:37.919187'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: user
+          index_name: statusIndex
+          operation: dropped
+        ends: '2025-07-16 18:28:37.920155'
+        id: MON-07
+        starts: '2025-07-16 18:28:37.919189'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_INDEX
+      type: REMOVE_INDEXES
+    - data: null
+      ends: '2025-07-16 18:28:37.924893'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.920159'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.924892'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.922170'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.923130'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.922171'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.923711'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.923132'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.924244'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.923713'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.924890'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.924246'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.924895'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'default_status' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.932517'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  - data:
+      error: error processing version
+    ends: '2025-07-16 18:28:37.957636'
+    id: user.1.0.1.3
+    starts: '2025-07-16 18:28:37.932540'
+    status: FAILURE
+    sub_events:
+    - data: null
+      ends: '2025-07-16 18:28:37.933814'
+      id: PRO-01
+      starts: '2025-07-16 18:28:37.932541'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: user
+          operation: schema_validation_removed
+        ends: '2025-07-16 18:28:37.933812'
+        id: MON-06
+        starts: '2025-07-16 18:28:37.932549'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-16 18:28:37.942410'
+      id: PRO-03
+      starts: '2025-07-16 18:28:37.933815'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: user
+          migration_file: user_merge_name_fields.json
+          migration_path: ./tests/test_cases/passing_process/migrations/user_merge_name_fields.json
+          pipeline_operations:
+          - $addFields
+          - $unset
+          - $out
+          pipeline_stages: 3
+          pipeline_summary:
+          - details:
+              $addFields:
+                full_name:
+                  $concat:
+                  - $first_name
+                  - ' '
+                  - $last_name
+            operation: $addFields
+            stage: 1
+          - details:
+              $unset:
+              - first_name
+              - last_name
+            operation: $unset
+            stage: 2
+          - details:
+              $out: user
+            operation: $out
+            stage: 3
+        ends: '2025-07-16 18:28:37.942408'
+        id: MON-14
+        starts: '2025-07-16 18:28:37.933821'
+        status: SUCCESS
+        sub_events:
+        - data:
+            file: ./tests/test_cases/passing_process/migrations/user_merge_name_fields.json
+            file_name: user_merge_name_fields.json
+            pipeline_operations:
+            - $addFields
+            - $unset
+            - $out
+            pipeline_stages: 3
+          ends: '2025-07-16 18:28:37.933983'
+          id: MON-13
+          starts: '2025-07-16 18:28:37.933824'
+          status: SUCCESS
+          sub_events: []
+          type: LOAD_MIGRATION
+        - data:
+            collection: user
+          ends: '2025-07-16 18:28:37.942395'
+          id: MON-08
+          starts: '2025-07-16 18:28:37.933986'
+          status: SUCCESS
+          sub_events: []
+          type: EXECUTE_MIGRATION
+        type: EXECUTE_MIGRATION_FILE
+      type: EXECUTE_MIGRATIONS
+    - data: null
+      ends: '2025-07-16 18:28:37.947022'
+      id: PRO-05
+      starts: '2025-07-16 18:28:37.942412'
+      status: SUCCESS
+      sub_events:
+      - data: null
+        ends: '2025-07-16 18:28:37.947021'
+        id: ENU-05
+        starts: '2025-07-16 18:28:37.944302'
+        status: SUCCESS
+        sub_events:
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc664
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 3
+            version: 3
+          ends: '2025-07-16 18:28:37.945151'
+          id: ENU-UPSERT-enumerations.3.yaml
+          starts: '2025-07-16 18:28:37.944304'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc667
+              enumerators: {}
+              name: Enumerations
+              status: Active
+              version: 2
+            version: 2
+          ends: '2025-07-16 18:28:37.945817'
+          id: ENU-UPSERT-enumerations.2.yaml
+          starts: '2025-07-16 18:28:37.945153'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 2
+            result:
+              _id: 6878279518076259bdccc66a
+              enumerators:
+                default_status:
+                  active: Not Deleted
+                  archived: Soft Delete Indicator
+                test_enum:
+                  foo: bar
+              name: Enumerations
+              status: Active
+              version: 1
+            version: 1
+          ends: '2025-07-16 18:28:37.946438'
+          id: ENU-UPSERT-enumerations.1.yaml
+          starts: '2025-07-16 18:28:37.945819'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        - data:
+            enumerators_count: 0
+            result:
+              _id: 6878279518076259bdccc66d
+              enumerators: {}
+              name: Enumerations
+              status: Deprecated
+              version: 0
+            version: 0
+          ends: '2025-07-16 18:28:37.947019'
+          id: ENU-UPSERT-enumerations.0.yaml
+          starts: '2025-07-16 18:28:37.946440'
+          status: SUCCESS
+          sub_events: []
+          type: UPSERT_ENUMERATION
+        type: UPSERT_ENUMERATORS_TO_DATABASE
+      type: UPSERT_ENUMERATORS
+    - data: null
+      ends: null
+      id: PRO-06
+      starts: '2025-07-16 18:28:37.947023'
+      status: PENDING
+      sub_events: []
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        error: Enum 'default_status' not found
+      ends: null
+      id: ENU-02
+      starts: '2025-07-16 18:28:37.957630'
+      status: PENDING
+      sub_events: []
+      type: GET_ENUM_VALUES
+    type: PROCESS
+  type: PROCESS_CONFIGURATION

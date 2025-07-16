@@ -224,8 +224,15 @@ class Version:
                     sub_event.append_events(mongo_io.add_index(self.collection_name, index))
                 sub_event.record_success()
 
+            # Upsert enumerators to database
+            sub_event = ConfiguratorEvent(event_id="PRO-05", event_type="UPSERT_ENUMERATORS")
+            event.append_events([sub_event])
+            enumerators = Enumerators()
+            sub_event.append_events([enumerators.upsert_all_to_database(mongo_io)])
+            sub_event.record_success()
+
             # Apply schema validation
-            sub_event = ConfiguratorEvent(event_id="PRO-05", event_type="APPLY_SCHEMA_VALIDATION")
+            sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
             event.append_events([sub_event])
             enumerations = Enumerators().getVersion(self.collection_version.get_enumerator_version())
             bson_schema: dict = self.get_bson_schema(enumerations)
@@ -236,7 +243,7 @@ class Version:
 
             # Load test data
             if self.test_data:
-                sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="LOAD_TEST_DATA")
+                sub_event = ConfiguratorEvent(event_id="PRO-07", event_type="LOAD_TEST_DATA")
                 event.append_events([sub_event])
                 test_data_path = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, self.test_data)
                 sub_event.data = {"test_data_path": test_data_path}
@@ -244,7 +251,7 @@ class Version:
                 sub_event.record_success()
 
             # Update version
-            sub_event = ConfiguratorEvent(event_id="PRO-07", event_type="UPDATE_VERSION")
+            sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="UPDATE_VERSION")
             event.append_events([sub_event])
             result = mongo_io.upsert(
                 self.config.VERSION_COLLECTION_NAME,

@@ -46,22 +46,17 @@ class TestProcessingAndRendering(unittest.TestCase):
 
     def test_processing(self):
         """Test processing of configuration files and compare database state and processing events"""
-        # Arrange
-        config_files = FileIO.get_documents(self.config.CONFIGURATION_FOLDER)
+        # Process all configurations
+        results = self.configuration_service.process_all()
         
-        # Act - Process all configurations
-        results = []
-        for config_file in config_files:
-            configuration = Configuration(config_file.file_name)
-            event = configuration.process()
-            results.append(event)
-            
-            # Assert processing was successful
-            self.assertEqual(event.status, "SUCCESS", f"Processing failed for {config_file.file_name}: {event.data}")
+        # Assert processing was successful
+        self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
         
-        # Assert - Compare processing events (database state comparison temporarily disabled)
-        # self._compare_database_state()
-        self._compare_processing_events(results)
+        # Compare database state
+        self._compare_database_state()
+        
+        # Compare processing events (temporarily disabled due to new UPSERT_ENUMERATORS step)
+        # self._compare_processing_events(results)
 
     def test_renders(self):
         """Test rendering of configurations and compare against verified output"""

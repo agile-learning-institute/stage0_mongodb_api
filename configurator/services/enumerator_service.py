@@ -1,6 +1,7 @@
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO, File
 from configurator.utils.config import Config
+from configurator.utils.mongo_io import MongoIO
 import os
 
 class Enumerators:
@@ -37,6 +38,35 @@ class Enumerators:
         
         return event
 
+    def upsert_all_to_database(self, mongo_io: MongoIO) -> ConfiguratorEvent:
+        """Upsert all enumerators to the database."""
+        event = ConfiguratorEvent("ENU-05", "UPSERT_ENUMERATORS_TO_DATABASE")
+        
+        for enumeration in self.enumerations:
+            sub_event = ConfiguratorEvent(f"ENU-UPSERT-{enumeration.file_name}", "UPSERT_ENUMERATION")
+            try:
+                # Use the enumeration's upsert method
+                result = enumeration.upsert(mongo_io)
+                
+                sub_event.data = {
+                    "version": enumeration.version,
+                    "enumerators_count": len(enumeration.enumerators),
+                    "result": result
+                }
+                sub_event.record_success()
+            except ConfiguratorException as ce:
+                sub_event.record_failure(f"ConfiguratorException upserting enumeration {enumeration.file_name}")
+                event.append_events([ce.event])
+                # Re-raise to halt processing
+                raise
+            except Exception as e:
+                sub_event.record_failure(f"Failed to upsert enumeration {enumeration.file_name}: {str(e)}")
+                # Re-raise to halt processing
+                raise ConfiguratorException(f"Failed to upsert enumeration {enumeration.file_name}: {str(e)}", sub_event)
+            event.append_events([sub_event])
+        
+        event.record_success()
+        return event
 
     def getVersion(self, version_number: int):
         """Get a specific version of enumerations"""
@@ -96,6 +126,18 @@ class Enumerations:
         if self.file_name is not None:
             result["file_name"] = self.file_name
         return result
+
+    def upsert(self, mongo_io: MongoIO):
+        """Upsert this enumeration to the database using to_dict() to create the document."""
+        # Create document for database using to_dict()
+        doc = self.to_dict()
+        
+        # Upsert to database
+        return mongo_io.upsert(
+            self.config.ENUMERATORS_COLLECTION_NAME,
+            {"version": self.version},
+            doc
+        )
 
     def save(self):
         """Save the enumerations to its file and return the File object."""
