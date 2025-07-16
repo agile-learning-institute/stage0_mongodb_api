@@ -5,21 +5,19 @@ properties:
     description: The unique identifier for the media
     type: string
     pattern: "^[0-9a-fA-F]{24}$"
-  first_name:
+  full_name:
     description: The name of the document
     type: string
-    pattern: "^\\S{1,40}$"
-  last_name:
-    description: The last name of the document
-    type: string
-    pattern: "^\\S{1,40}$"
+    pattern: "^[^\\t\\n\\r]{0,255}$"
   status:
     description: The current status of the document
     type: string
     enum:
+      - draft
       - active
       - archived
 required:
   - _id
+  - full_name
   - status
 additionalProperties: false 

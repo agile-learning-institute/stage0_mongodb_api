@@ -8,6 +8,7 @@ properties:
   full_name:
     description: Full Name
     type: sentence
+    required: true
   status:
     description: The current status of the document
     type: enum

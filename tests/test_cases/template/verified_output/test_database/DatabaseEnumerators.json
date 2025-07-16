@@ -1,18 +1,25 @@
 [
   {
-    "_id": {
-      "$oid": "a00000000000000000000001"
-    },
+    "_id": "ignore",
     "version": 0,
     "enumerators": {}
   },
   {
-    "_id": {
-      "$oid": "a00000000000000000000002"
-    },
+    "_id": "ignore",
     "version": 1,
     "enumerators": {
       "default_status": {
+        "active": "Not Deleted",
+        "archived": "Soft Delete Indicator"
+      }
+    }
+  },
+  {
+    "_id": "ignore",
+    "version": 2,
+    "enumerators": {
+      "default_status": {
+        "draft": "Draft",
         "active": "Not Deleted",
         "archived": "Soft Delete Indicator"
       }
