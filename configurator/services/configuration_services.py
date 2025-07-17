@@ -207,8 +207,8 @@ class Version:
             if self.drop_indexes:
                 sub_event = ConfiguratorEvent(event_id="PRO-02", event_type="REMOVE_INDEXES")
                 event.append_events([sub_event])
-                for index in self.drop_indexes:
-                    sub_event.append_events(mongo_io.remove_index(self.collection_name, index))                    
+                for index_name in self.drop_indexes:
+                    sub_event.append_events(mongo_io.remove_index(self.collection_name, index_name))                    
                 sub_event.record_success()
 
             # Execute migrations

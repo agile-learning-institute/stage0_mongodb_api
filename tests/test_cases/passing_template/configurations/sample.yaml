@@ -18,7 +18,7 @@ versions:
     test_data: sample.1.0.0.1.json
   - version: "1.0.1.2"
     drop_indexes:
-      - name: nameIndex
+      - nameIndex
     migrations:
       - first_last_to_full_name.json
     add_indexes:
