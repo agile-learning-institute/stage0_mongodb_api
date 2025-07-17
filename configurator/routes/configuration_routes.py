@@ -25,15 +25,10 @@ def create_configuration_routes():
         return jsonify([file.to_dict() for file in files])
 
     @blueprint.route('/', methods=['POST'])
-    @event_route("CFG-ROUTES-02", "PROCESS_CONFIGURATIONS", "processing configurations")
+    @event_route("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS", "processing all configurations")
     def process_configurations():
-        results = ConfiguratorEvent(event_id="CFG-ROUTES-02", event_type="PROCESS_CONFIGURATIONS")
-        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        for file in files:
-            configuration = Configuration(file.name)
-            results.append_events([configuration.process()])
-        results.record_success()
-        return jsonify(results.to_dict())
+        result = Configuration.process_all()
+        return jsonify(result.to_dict())
 
     @blueprint.route('/', methods=['PATCH'])
     @event_route("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS", "locking all configurations")

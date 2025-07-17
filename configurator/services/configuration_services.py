@@ -78,6 +78,35 @@ class Configuration:
         
         event.record_success()
         return event
+
+    @staticmethod
+    def process_all():
+        """Process all configuration files."""
+        config = Config.get_instance()
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        event = ConfiguratorEvent("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS")
+        
+        for file in files:
+            try:
+                sub_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
+                event.append_events([sub_event])
+                configuration = Configuration(file.file_name)
+                process_event = configuration.process()
+                sub_event.data = process_event.data
+                sub_event.append_events([process_event])
+                sub_event.record_success()
+            except ConfiguratorException as ce:
+                sub_event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
+                event.append_events([ce.event])
+                event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
+                raise ConfiguratorException(f"ConfiguratorException processing configuration {file.file_name}", event)
+            except Exception as e:
+                sub_event.record_failure(f"Failed to process configuration {file.file_name}: {str(e)}")
+                event.record_failure(f"Unexpected error processing configuration {file.file_name}")
+                raise ConfiguratorException(f"Unexpected error processing configuration {file.file_name}", event)
+        
+        event.record_success()
+        return event
     
 
     
