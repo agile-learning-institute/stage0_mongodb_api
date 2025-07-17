@@ -75,6 +75,10 @@ class TestProcessingAndRendering(unittest.TestCase):
         # Process all configurations
         results = self.configuration_service.process_all()
         
+        # Print the processing event for debugging
+        import pprint
+        pprint.pprint(results.to_dict())
+        
         # Assert processing was successful
         self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
         
@@ -142,8 +146,16 @@ class TestProcessingAndRendering(unittest.TestCase):
         
         # Convert actual results to comparable format
         actual_events = []
-        for event in results:
-            actual_events.append(event.to_dict())
+        # Handle both single ConfiguratorEvent and list of events
+        if hasattr(results, 'sub_events'):
+            # Single ConfiguratorEvent with sub_events
+            actual_events = [event.to_dict() for event in results.sub_events]
+        elif isinstance(results, list):
+            # List of ConfiguratorEvent objects
+            actual_events = [event.to_dict() for event in results]
+        else:
+            # Single ConfiguratorEvent without sub_events
+            actual_events = [results.to_dict()]
         
         if not os.path.exists(events_path):
             # If no verified events file exists, create one from current results
@@ -238,6 +250,10 @@ class TestProcessingAndRendering(unittest.TestCase):
         for key, expected_value in expected_doc.items():
             if expected_value == "ignore":
                 continue  # Skip properties with value "ignore"
+            
+            # For DatabaseEnumerators, ignore _id comparison since ObjectIds are generated dynamically
+            if collection_name == "DatabaseEnumerators" and key == "_id":
+                continue
             
             self.assertIn(key, actual_doc, 
                          f"Document {doc_index} in collection {collection_name} missing key: {key}")

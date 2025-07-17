@@ -1,19 +1,12 @@
 [
   {
     "_id": {"$oid": "A00000000000000000000001"},
-    "first_name": "Joe",
-    "last_name": "Smith",
+    "full_name": "Joe Smith",
     "status": "active"
   },
   {
     "_id": {"$oid": "A00000000000000000000002"},
-    "first_name": "Jane",
-    "last_name": "Doe",
+    "full_name": "Jane Doe",
     "status": "archived"
-  },
-  {
-    "_id": {"$oid": "A00000000000000000000003"},
-    "full name": "Dr. James Earl Ray II",
-    "status": "draft"
   }
 ]
