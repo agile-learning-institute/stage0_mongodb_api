@@ -12,7 +12,7 @@ class TestConfigFiles(unittest.TestCase):
         Config._instance = None
         
         # Set INPUT_FOLDER to point to the test config files
-        os.environ["INPUT_FOLDER"] = "./tests/test_cases/config_files/"
+        os.environ["INPUT_FOLDER"] = "./tests/test_cases/passing_config_files/"
         
         # Initialize the Config object
         self.config = Config.get_instance()
