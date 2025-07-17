@@ -43,12 +43,10 @@ class TestProcessingAndRendering(unittest.TestCase):
         os.environ['INPUT_FOLDER'] = f"./tests/test_cases/{self.test_case}"
         Config._instance = None
         self.config = Config.get_instance()
+        del os.environ['INPUT_FOLDER']
         
-        # Clean up environment variable after Config.get_instance()
-        if 'INPUT_FOLDER' in os.environ:
-            del os.environ['INPUT_FOLDER']
-        
-        # Drop the database before starting
+        # Ensure the database is dropped before any test runs
+        # This guarantees a clean state for every test
         mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         mongo_io.drop_database()
         mongo_io.disconnect()
@@ -140,10 +138,44 @@ class TestProcessingAndRendering(unittest.TestCase):
                 self._compare_collection_data(collection_name, expected_data, actual_data)
 
     def _compare_processing_events(self, results):
-        """Compare processing events against verified output."""
+        """Compare processing events against verified output. Also write actual events to JSON for review."""
+        import json
+        import datetime
+        from bson.objectid import ObjectId
+        def sanitize(obj):
+            if isinstance(obj, dict):
+                return {k: sanitize(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [sanitize(v) for v in obj]
+            elif isinstance(obj, (ObjectId, datetime.datetime, datetime.date)):
+                return str(obj)
+            elif hasattr(obj, 'isoformat'):
+                return str(obj)
+            elif isinstance(obj, (str, int, float, bool, type(None))):
+                return obj
+            else:
+                return str(obj)
+
+        def compare_events(a, b, path="root"):
+            """Recursively compare two event structures, ignoring 'starts', 'ends', and any '_id' fields."""
+            if isinstance(a, dict) and isinstance(b, dict):
+                for k in set(a.keys()).union(b.keys()):
+                    if k in ("starts", "ends", "_id"):
+                        continue
+                    self.assertIn(k, a, f"Key '{k}' missing in actual at {path}")
+                    self.assertIn(k, b, f"Key '{k}' missing in expected at {path}")
+                    compare_events(a[k], b[k], path + f"['{k}']")
+            elif isinstance(a, list) and isinstance(b, list):
+                self.assertEqual(len(a), len(b), f"List length mismatch at {path}")
+                for i, (ai, bi) in enumerate(zip(a, b)):
+                    compare_events(ai, bi, path + f"[{i}]")
+            else:
+                self.assertEqual(a, b, f"Value mismatch at {path}: {a} != {b}")
+
         verified_output_dir = f"{self.config.INPUT_FOLDER}/verified_output"
         events_path = f"{verified_output_dir}/processing_events.yaml"
-        
+        json_path = f"{verified_output_dir}/processing_events.json"
+
         # Convert actual results to comparable format
         actual_events = []
         # Handle both single ConfiguratorEvent and list of events
@@ -156,19 +188,24 @@ class TestProcessingAndRendering(unittest.TestCase):
         else:
             # Single ConfiguratorEvent without sub_events
             actual_events = [results.to_dict()]
-        
+
+        # Always write actual events to JSON for review (sanitize first)
+        sanitized_events = sanitize(actual_events)
+        with open(json_path, 'w') as f:
+            json.dump(sanitized_events, f, indent=2)
+
         if not os.path.exists(events_path):
             # If no verified events file exists, create one from current results
             self._harvest_processing_events(results, events_path)
             return
-        
+
         # Load expected events from verified output
+        import yaml
         with open(events_path, 'r') as f:
             expected_events = yaml.safe_load(f)
-        
-        # Compare events
-        self.assertEqual(actual_events, expected_events, 
-                        "Processing events do not match verified output")
+
+        # Use custom comparison to ignore dynamic fields
+        compare_events(sanitized_events, expected_events)
 
     def _harvest_processing_events(self, results, events_path):
         """Harvest processing events and save to verified output file, sanitizing non-primitive types."""

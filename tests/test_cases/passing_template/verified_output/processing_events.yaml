@@ -1,37 +1,98 @@
 - data:
     configuration_name: sample.yaml
     version_count: 2
-  ends: '2025-07-16 18:19:40.109137'
+  ends: '2025-07-17 14:50:57.704057'
   id: CFG-sample.yaml
-  starts: '2025-07-16 18:19:40.072664'
+  starts: '2025-07-17 14:50:57.647823'
   status: SUCCESS
   sub_events:
   - data: null
-    ends: '2025-07-16 18:19:40.089088'
+    ends: '2025-07-17 14:50:57.665091'
+    id: ENU-05
+    starts: '2025-07-17 14:50:57.654663'
+    status: SUCCESS
+    sub_events:
+    - data:
+        enumerators_count: 1
+        result:
+          _id: 6879461118076259bdcea8cf
+          _locked: false
+          enumerators:
+            default_status:
+              active: Not Deleted
+              archived: Soft Delete Indicator
+              draft: Draft
+          file_name: enumerations.2.yaml
+          version: 2
+        version: 2
+      ends: '2025-07-17 14:50:57.663944'
+      id: ENU-UPSERT-enumerations.2.yaml
+      starts: '2025-07-17 14:50:57.654664'
+      status: SUCCESS
+      sub_events: []
+      type: UPSERT_ENUMERATION
+    - data:
+        enumerators_count: 2
+        result:
+          _id: 6879461118076259bdcea8d2
+          _locked: false
+          enumerators:
+            default_status:
+              active: Not Deleted
+              archived: Soft Delete Indicator
+            test_enum:
+              foo: bar
+          file_name: enumerations.1.yaml
+          version: 1
+        version: 1
+      ends: '2025-07-17 14:50:57.664568'
+      id: ENU-UPSERT-enumerations.1.yaml
+      starts: '2025-07-17 14:50:57.663946'
+      status: SUCCESS
+      sub_events: []
+      type: UPSERT_ENUMERATION
+    - data:
+        enumerators_count: 0
+        result:
+          _id: 6879461118076259bdcea8d5
+          _locked: false
+          enumerators: {}
+          file_name: enumerations.0.yaml
+          version: 0
+        version: 0
+      ends: '2025-07-17 14:50:57.665090'
+      id: ENU-UPSERT-enumerations.0.yaml
+      starts: '2025-07-17 14:50:57.664570'
+      status: SUCCESS
+      sub_events: []
+      type: UPSERT_ENUMERATION
+    type: UPSERT_ENUMERATORS_TO_DATABASE
+  - data: null
+    ends: '2025-07-17 14:50:57.684369'
     id: sample.1.0.0.1
-    starts: '2025-07-16 18:19:40.079474'
+    starts: '2025-07-17 14:50:57.665095'
     status: SUCCESS
     sub_events:
     - data: null
-      ends: '2025-07-16 18:19:40.080720'
+      ends: '2025-07-17 14:50:57.669996'
       id: PRO-01
-      starts: '2025-07-16 18:19:40.079476'
+      starts: '2025-07-17 14:50:57.665095'
       status: SUCCESS
       sub_events:
       - data:
           collection: sample
           operation: schema_validation_removed
-        ends: '2025-07-16 18:19:40.080718'
+        ends: '2025-07-17 14:50:57.669994'
         id: MON-06
-        starts: '2025-07-16 18:19:40.079478'
+        starts: '2025-07-17 14:50:57.665097'
         status: SUCCESS
         sub_events: []
         type: REMOVE_SCHEMA
       type: REMOVE_SCHEMA_VALIDATION
     - data: null
-      ends: '2025-07-16 18:19:40.082414'
+      ends: '2025-07-17 14:50:57.675163'
       id: PRO-04
-      starts: '2025-07-16 18:19:40.080721'
+      starts: '2025-07-17 14:50:57.669997'
       status: SUCCESS
       sub_events:
       - data:
@@ -41,9 +102,9 @@
             last_name: 1
           index_name: nameIndex
           operation: created
-        ends: '2025-07-16 18:19:40.081645'
+        ends: '2025-07-17 14:50:57.672655'
         id: MON-09
-        starts: '2025-07-16 18:19:40.080723'
+        starts: '2025-07-17 14:50:57.669998'
         status: SUCCESS
         sub_events: []
         type: ADD_INDEX
@@ -53,17 +114,17 @@
             status: 1
           index_name: statusIndex
           operation: created
-        ends: '2025-07-16 18:19:40.082412'
+        ends: '2025-07-17 14:50:57.675162'
         id: MON-09
-        starts: '2025-07-16 18:19:40.081648'
+        starts: '2025-07-17 14:50:57.672657'
         status: SUCCESS
         sub_events: []
         type: ADD_INDEX
       type: ADD_INDEXES
     - data: null
-      ends: '2025-07-16 18:19:40.086313'
-      id: PRO-05
-      starts: '2025-07-16 18:19:40.082415'
+      ends: '2025-07-17 14:50:57.677602'
+      id: PRO-06
+      starts: '2025-07-17 14:50:57.675164'
       status: SUCCESS
       sub_events:
       - data:
@@ -86,106 +147,90 @@
           required:
           - _id
           - status
-        ends: '2025-07-16 18:19:40.086311'
+        ends: '2025-07-17 14:50:57.677601'
         id: MON-10
-        starts: '2025-07-16 18:19:40.084150'
+        starts: '2025-07-17 14:50:57.676943'
         status: SUCCESS
         sub_events: []
         type: APPLY_SCHEMA
       type: APPLY_SCHEMA_VALIDATION
     - data:
         test_data_path: ./tests/test_cases/passing_template/test_data/sample.1.0.0.1.json
-      ends: '2025-07-16 18:19:40.087848'
-      id: PRO-06
-      starts: '2025-07-16 18:19:40.086314'
+      ends: '2025-07-17 14:50:57.678293'
+      id: PRO-07
+      starts: '2025-07-17 14:50:57.677604'
       status: SUCCESS
       sub_events:
       - data:
-          error: Bulk write operation failed
-          nInserted: 0
-          nMatched: 0
-          nModified: 0
-          nRemoved: 0
-          nUpserted: 0
-          upserted: []
-          writeConcernErrors: []
-          writeErrors:
-          - code: 11000
-            errmsg: 'E11000 duplicate key error collection: configurator.sample index:
-              _id_ dup key: { _id: ObjectId(''a00000000000000000000001'') }'
-            index: 0
-            keyPattern:
-              _id: 1
-            keyValue:
-              _id: a00000000000000000000001
-            op:
-              _id: a00000000000000000000001
-              first_name: Joe
-              last_name: Smith
-              status: active
-        ends: '2025-07-16 18:19:40.087843'
+          collection: sample
+          data_file: sample.1.0.0.1.json
+          documents_loaded: 2
+          insert_many_result:
+            acknowledged: true
+            inserted_ids:
+            - a00000000000000000000001
+            - a00000000000000000000002
+        ends: '2025-07-17 14:50:57.678290'
         id: MON-11
-        starts: '2025-07-16 18:19:40.086318'
-        status: FAILURE
+        starts: '2025-07-17 14:50:57.677608'
+        status: SUCCESS
         sub_events: []
         type: LOAD_DATA
       type: LOAD_TEST_DATA
     - data:
-        _id: 687820c518076259bdccb5a0
+        _id: 6879461118076259bdcea8e6
         collection_name: sample
         current_version: sample.1.0.0.1
-      ends: '2025-07-16 18:19:40.089088'
-      id: PRO-07
-      starts: '2025-07-16 18:19:40.087848'
+      ends: '2025-07-17 14:50:57.684368'
+      id: PRO-08
+      starts: '2025-07-17 14:50:57.678294'
       status: SUCCESS
       sub_events: []
       type: UPDATE_VERSION
     type: PROCESS
   - data: null
-    ends: '2025-07-16 18:19:40.109135'
+    ends: '2025-07-17 14:50:57.704055'
     id: sample.1.0.1.2
-    starts: '2025-07-16 18:19:40.089090'
+    starts: '2025-07-17 14:50:57.684371'
     status: SUCCESS
     sub_events:
     - data: null
-      ends: '2025-07-16 18:19:40.090380'
+      ends: '2025-07-17 14:50:57.684892'
       id: PRO-01
-      starts: '2025-07-16 18:19:40.089091'
+      starts: '2025-07-17 14:50:57.684372'
       status: SUCCESS
       sub_events:
       - data:
           collection: sample
           operation: schema_validation_removed
-        ends: '2025-07-16 18:19:40.090379'
+        ends: '2025-07-17 14:50:57.684891'
         id: MON-06
-        starts: '2025-07-16 18:19:40.089092'
+        starts: '2025-07-17 14:50:57.684374'
         status: SUCCESS
         sub_events: []
         type: REMOVE_SCHEMA
       type: REMOVE_SCHEMA_VALIDATION
     - data: null
-      ends: '2025-07-16 18:19:40.090806'
+      ends: '2025-07-17 14:50:57.685406'
       id: PRO-02
-      starts: '2025-07-16 18:19:40.090381'
+      starts: '2025-07-17 14:50:57.684893'
       status: SUCCESS
       sub_events:
       - data:
-          error:
-            collection: sample
-            error: index_or_name must be an instance of str or list, not <class 'dict'>
-            index:
-              name: nameIndex
-        ends: '2025-07-16 18:19:40.090805'
+          collection: sample
+          index_name: nameIndex
+          operation: dropped
+        ends: '2025-07-17 14:50:57.685405'
         id: MON-07
-        starts: '2025-07-16 18:19:40.090383'
-        status: FAILURE
+        starts: '2025-07-17 14:50:57.684894'
+        status: SUCCESS
         sub_events: []
         type: REMOVE_INDEX
       type: REMOVE_INDEXES
     - data: null
-      ends: '2025-07-16 18:19:40.104213'
+      ends: '2025-07-17 14:50:57.694219'
       id: PRO-03
-      starts: '2025-07-16 18:19:40.090807'
+      starts: '2025-07-17 14:50:57.685407'
       status: SUCCESS
       sub_events:
       - data:
@@ -217,9 +262,9 @@
               $out: sample
             operation: $out
             stage: 3
-        ends: '2025-07-16 18:19:40.104212'
+        ends: '2025-07-17 14:50:57.694219'
         id: MON-14
-        starts: '2025-07-16 18:19:40.090809'
+        starts: '2025-07-17 14:50:57.685411'
         status: SUCCESS
         sub_events:
         - data:
@@ -230,26 +275,26 @@
             - $unset
             - $out
             pipeline_stages: 3
-          ends: '2025-07-16 18:19:40.090864'
+          ends: '2025-07-17 14:50:57.685508'
           id: MON-13
-          starts: '2025-07-16 18:19:40.090810'
+          starts: '2025-07-17 14:50:57.685413'
           status: SUCCESS
           sub_events: []
           type: LOAD_MIGRATION
         - data:
             collection: sample
-          ends: '2025-07-16 18:19:40.104203'
+          ends: '2025-07-17 14:50:57.694210'
           id: MON-08
-          starts: '2025-07-16 18:19:40.090867'
+          starts: '2025-07-17 14:50:57.685511'
           status: SUCCESS
           sub_events: []
           type: EXECUTE_MIGRATION
         type: EXECUTE_MIGRATION_FILE
       type: EXECUTE_MIGRATIONS
     - data: null
-      ends: '2025-07-16 18:19:40.104983'
+      ends: '2025-07-17 14:50:57.699943'
       id: PRO-04
-      starts: '2025-07-16 18:19:40.104215'
+      starts: '2025-07-17 14:50:57.694221'
       status: SUCCESS
       sub_events:
       - data:
@@ -258,17 +303,17 @@
             full_name: 1
           index_name: fullNameIndex
           operation: created
-        ends: '2025-07-16 18:19:40.104981'
+        ends: '2025-07-17 14:50:57.699941'
         id: MON-09
-        starts: '2025-07-16 18:19:40.104216'
+        starts: '2025-07-17 14:50:57.694222'
         status: SUCCESS
         sub_events: []
         type: ADD_INDEX
       type: ADD_INDEXES
     - data: null
-      ends: '2025-07-16 18:19:40.107754'
-      id: PRO-05
-      starts: '2025-07-16 18:19:40.104984'
+      ends: '2025-07-17 14:50:57.702503'
+      id: PRO-06
+      starts: '2025-07-17 14:50:57.699945'
       status: SUCCESS
       sub_events:
       - data:
@@ -290,69 +335,42 @@
           - _id
           - full_name
           - status
-        ends: '2025-07-16 18:19:40.107752'
+        ends: '2025-07-17 14:50:57.702501'
         id: MON-10
-        starts: '2025-07-16 18:19:40.106773'
+        starts: '2025-07-17 14:50:57.701735'
         status: SUCCESS
         sub_events: []
         type: APPLY_SCHEMA
       type: APPLY_SCHEMA_VALIDATION
     - data:
         test_data_path: ./tests/test_cases/passing_template/test_data/sample.1.0.1.2.json
-      ends: '2025-07-16 18:19:40.108529'
-      id: PRO-06
-      starts: '2025-07-16 18:19:40.107756'
+      ends: '2025-07-17 14:50:57.703457'
+      id: PRO-07
+      starts: '2025-07-17 14:50:57.702504'
       status: SUCCESS
       sub_events:
       - data:
-          error: Bulk write operation failed
-          nInserted: 0
-          nMatched: 0
-          nModified: 0
-          nRemoved: 0
-          nUpserted: 0
-          upserted: []
-          writeConcernErrors: []
-          writeErrors:
-          - code: 121
-            errInfo:
-              details:
-                operatorName: $jsonSchema
-                schemaRulesNotSatisfied:
-                - additionalProperties:
-                  - full name
-                  operatorName: additionalProperties
-                  specifiedAs:
-                    additionalProperties: false
-                - missingProperties:
-                  - full_name
-                  operatorName: required
-                  specifiedAs:
-                    required:
-                    - _id
-                    - full_name
-                    - status
-              failingDocumentId: a00000000000000000000003
-            errmsg: Document failed validation
-            index: 0
-            op:
-              _id: a00000000000000000000003
-              full name: Dr. James Earl Ray II
-              status: draft
-        ends: '2025-07-16 18:19:40.108524'
+          collection: sample
+          data_file: sample.1.0.1.2.json
+          documents_loaded: 1
+          insert_many_result:
+            acknowledged: true
+            inserted_ids:
+            - a00000000000000000000003
+        ends: '2025-07-17 14:50:57.703455'
         id: MON-11
-        starts: '2025-07-16 18:19:40.107760'
-        status: FAILURE
+        starts: '2025-07-17 14:50:57.702508'
+        status: SUCCESS
         sub_events: []
         type: LOAD_DATA
       type: LOAD_TEST_DATA
     - data:
-        _id: 687820c518076259bdccb5a0
+        _id: 6879461118076259bdcea8e6
         collection_name: sample
         current_version: sample.1.0.1.2
-      ends: '2025-07-16 18:19:40.109135'
-      id: PRO-07
-      starts: '2025-07-16 18:19:40.108530'
+      ends: '2025-07-17 14:50:57.704055'
+      id: PRO-08
+      starts: '2025-07-17 14:50:57.703458'
       status: SUCCESS
       sub_events: []
       type: UPDATE_VERSION
