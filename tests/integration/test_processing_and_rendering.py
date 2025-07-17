@@ -241,6 +241,13 @@ class TestProcessingAndRendering(unittest.TestCase):
             # Convert ObjectId to string for comparison
             if '_id' in actual_doc and isinstance(actual_doc['_id'], dict) and '$oid' in actual_doc['_id']:
                 actual_doc['_id'] = actual_doc['_id']['$oid']
+            elif '_id' in actual_doc and hasattr(actual_doc['_id'], '__str__'):
+                # Convert MongoDB ObjectId to string format for comparison
+                actual_doc['_id'] = str(actual_doc['_id'])
+            
+            # Convert expected ObjectId to string format for comparison
+            if '_id' in expected_doc and isinstance(expected_doc['_id'], dict) and '$oid' in expected_doc['_id']:
+                expected_doc['_id'] = expected_doc['_id']['$oid']
             
             # Compare documents, ignoring properties with value "ignore"
             self._compare_document(collection_name, i, expected_doc, actual_doc)
