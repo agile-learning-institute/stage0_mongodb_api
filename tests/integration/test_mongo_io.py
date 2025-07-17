@@ -28,6 +28,8 @@ class TestMongoIO(unittest.TestCase):
         self.config = Config.get_instance()
         self.config.initialize()
         self.test_collection_name = "test_collection"
+        del os.environ['ENABLE_DROP_DATABASE']
+        del os.environ['BUILT_AT']
         
         # Create MongoIO instance using config values
         self.mongo_io = MongoIO(
@@ -55,20 +57,12 @@ class TestMongoIO(unittest.TestCase):
         collection.insert_many(docs)        
 
     def tearDown(self):
-        """Clean up test fixtures."""
-        if hasattr(self, 'mongo_io'):
-            try:
-                # Drop the test database
-                self.mongo_io.drop_database()
-            except:
-                pass  # Database might not drop..
-            self.mongo_io.disconnect()
-        
-        # Clean up environment variables set in setUp
-        if 'ENABLE_DROP_DATABASE' in os.environ:
-            del os.environ['ENABLE_DROP_DATABASE']
-        if 'BUILT_AT' in os.environ:
-            del os.environ['BUILT_AT']
+        # Clear any existing test data by dropping the database
+        try:
+            self.mongo_io.drop_database()
+        except Exception as e:
+            # Database might not exist, which is fine for testing
+            pass
 
     def test_connection_and_disconnect(self):
         """Test MongoDB connection and disconnection."""
