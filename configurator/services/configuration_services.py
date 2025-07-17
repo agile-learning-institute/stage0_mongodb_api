@@ -109,6 +109,10 @@ class Configuration:
         
         # Create MongoIO instance with proper parameters
         mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
+
+        # Upsert enumerators to database ONCE per configuration
+        enumerators = Enumerators()
+        event.append_events([enumerators.upsert_all_to_database(mongo_io)])
         
         for version in self.versions:
             event.append_events([version.process(mongo_io)])
@@ -223,13 +227,6 @@ class Version:
                 for index in self.add_indexes:
                     sub_event.append_events(mongo_io.add_index(self.collection_name, index))
                 sub_event.record_success()
-
-            # Upsert enumerators to database
-            sub_event = ConfiguratorEvent(event_id="PRO-05", event_type="UPSERT_ENUMERATORS")
-            event.append_events([sub_event])
-            enumerators = Enumerators()
-            sub_event.append_events([enumerators.upsert_all_to_database(mongo_io)])
-            sub_event.record_success()
 
             # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
