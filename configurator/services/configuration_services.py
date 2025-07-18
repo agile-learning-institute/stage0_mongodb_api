@@ -184,6 +184,7 @@ class Version:
             self.add_indexes = version.get("add_indexes", [])
             self.migrations = version.get("migrations", [])
             self.test_data = version.get("test_data", None)
+            self._locked = version.get("_locked", False)
         except ConfiguratorException as e:
             # Re-raise with additional context about the version being constructed
             event = ConfiguratorEvent(event_id=f"VER-CONSTRUCTOR-{collection_name}", event_type="VERSION_CONSTRUCTOR")
@@ -203,6 +204,7 @@ class Version:
             "add_indexes": self.add_indexes,
             "migrations": self.migrations,
             "test_data": self.test_data,
+            "_locked": self._locked,
         }
 
     def get_json_schema(self, enumerations) -> dict:

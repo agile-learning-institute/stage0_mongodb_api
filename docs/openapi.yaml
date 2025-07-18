@@ -994,7 +994,11 @@ components:
               test_data:
                 description: Name of the test data file for this version
                 type: string
-                example: sample.1.0.0.1.json 
+                example: sample.1.0.0.1.json
+              _locked:
+                description: Whether this version is locked from modification
+                type: boolean
+                default: false 
     dictionary:
       description: A Simple Schema Dictionary
       type: object
