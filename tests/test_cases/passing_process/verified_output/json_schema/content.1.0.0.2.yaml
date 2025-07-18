@@ -21,9 +21,10 @@ properties:
     description: Content status
     type: string
     enum:
-    - draft
     - active
     - archived
+    - published
+    - draft
   author_id:
     description: A user collection for testing the schema system
     type: object
@@ -48,9 +49,10 @@ properties:
         description: document status
         type: string
         enum:
-        - draft
         - active
         - archived
+        - published
+        - draft
       last_saved:
         description: The last time this document was saved
         type: object

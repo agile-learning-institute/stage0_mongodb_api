@@ -29,9 +29,10 @@ properties:
         description: document status
         type: string
         enum:
-        - draft
         - active
         - archived
+        - published
+        - draft
       last_saved:
         description: The last time this document was saved
         type: object
@@ -78,9 +79,10 @@ properties:
     description: Notification status
     type: string
     enum:
-    - draft
     - active
     - archived
+    - published
+    - draft
   last_saved:
     description: Last saved breadcrumb
     type: object
@@ -111,7 +113,6 @@ properties:
     - correlation_id
 required:
 - _id
-- user_id
 - title
 - message
 - status

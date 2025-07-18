@@ -17,9 +17,11 @@ properties:
     description: The status
     type: string
     enum:
-    - draft
     - active
     - archived
+    - published
+    - draft
+    - scheduled
   categories:
     description: A users list of categorized tags
     type: array

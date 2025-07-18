@@ -1,4 +1,87 @@
 version: 3
-enumerators: {}
+enumerators:
+  default_status:
+    active: Not Deleted
+    archived: Soft Delete Indicator
+    published: Published Content
+    draft: Draft Content
+    scheduled: Scheduled Content
+  media_status:
+    published: Published Media
+    draft: Draft Media
+    processing: Media Being Processed
+    archived: Archived Media
+    scheduled: Scheduled Media
+  media_type:
+    movie: Movie
+    tv_show: TV Show
+    documentary: Documentary
+    short: Short Film
+  media_format:
+    bluray: Blu-ray
+    dvd: DVD
+    digital: Digital
+    streaming: Streaming
+  media_quality:
+    hd: High Definition
+    uhd: Ultra High Definition
+    sd: Standard Definition
+    fhd: Full High Definition
+  media_tags:
+    action: Action
+    sci_fi: Science Fiction
+    documentary: Documentary
+    drama: Drama
+    comedy: Comedy
+    thriller: Thriller
+  category_type:
+    work: Work related items
+    personal: Personal items
+    project: Project specific items
+    reference: Reference materials
+  category_tags:
+    urgent: Requires immediate attention
+    important: High priority
+    normal: Standard priority
+    low: Low priority
+    completed: Task is done
+    in_progress: Currently being worked on
+    blocked: Cannot proceed
+    review: Needs review
+  notification_type:
+    system: System notification
+    user: User notification
+    content: Content notification
+    reminder: Reminder notification
+  priority_level:
+    critical: Critical priority
+    high: High priority
+    medium: Medium priority
+    low: Low priority
+  notification_tags:
+    urgent: Urgent notification
+    important: Important notification
+    normal: Normal notification
+    low: Low priority notification
+  delivery_channel:
+    email: Email delivery
+    sms: SMS delivery
+    push: Push notification
+    in_app: In-app notification
+  content_type:
+    article: Written content
+    video: Video content
+    podcast: Audio content
+  content_tags:
+    technology: Technology related content
+    business: Business related content
+    entertainment: Entertainment content
+    education: Educational content
+    news: News content
+  notification_action:
+    created: Document created
+    updated: Document updated
+    deleted: Document deleted
+    published: Document published
 _locked: false
 file_name: enumerations.3.yaml

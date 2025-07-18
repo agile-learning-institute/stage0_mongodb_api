@@ -21,9 +21,10 @@ properties:
     description: document status
     type: string
     enum:
-    - draft
     - active
     - archived
+    - published
+    - draft
   last_saved:
     description: The last time this document was saved
     type: object
