@@ -58,6 +58,7 @@ pipenv run drop
 #####################
 # Building and Testing the container (before a PR)
 pipenv run container    # Build the container
+pipenv run api          # Run the DB and API containers
 pipenv run service      # Run the DB, API, and SPA containers
 # visit http://localhost:8082 and "process all"
 
@@ -114,19 +115,18 @@ tests/
 ├── stepci/                 # API Black Box testing
 ├── test_cases/             # Test data 
 │   ├── failing_*/          # Integration Test data for failure use cases
-│   ├── failing_refs/           # Circular/Missing Refs, integration/test_refs.py
-│   ├── failing_missing/        # Missing folders, integration/test_missing.py
-│   ├── failing_unparsable/     # Non yaml/json files, integration/test_unparsable.py
-│   ├── failing_validation/     # Missing required, integration/test_validation.py
+│   ├── failing_empty/          # Empty input folder
+│   ├── failing_not_parsable/   # Non yaml/json files
+│   ├── failing_refs/           # Circular/Missing Refs
 │   ├── passing_*/          # Integration Test data for success use cases
-│   ├── passing_complex_refs/   # integration/test_renders.py, integration/test_processing.py
-│   ├── passing_config_files/   # integration/test_config_file.py
-│   ├── passing_empty/          # integration/test_renders.py, integration/test_processing.py
-│   ├── passing_process/        # integration/test_renders.py, integration/test_processing.py
-│   ├── passing_type_renders/   # integration/test_type_renders.py
+│   ├── passing_config_files/   # API Config file testing
+│   ├── passing_type_renders/   # Custom type render testing
+│   ├── passing_empty/          # Minimum valid input
+│   ├── passing_template/       # New project input template 
+│   ├── passing_process/        # More complex processing
+│   ├── passing_complex_refs/   # one_of plus refs
 │   ├── playground/         # Playground for SPA - not used in integration testing
 │   ├── stepci/             # Configuration for step ci testing - setup/tear down in tests
-│   ├── template/           # Template, integration/test_renders.py, integration/test_processing.py
 
 ```
 
