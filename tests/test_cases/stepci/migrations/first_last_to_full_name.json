@@ -1,0 +1,18 @@
+[
+  {
+    "$addFields": {
+      "full_name": {
+        "$concat": ["$first_name", " ", "$last_name"]
+      }
+    }
+  },
+  {
+    "$unset": [
+      "first_name",
+      "last_name"
+    ]
+  },
+  {
+    "$out": "sample"
+  }
+] 
