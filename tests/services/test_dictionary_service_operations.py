@@ -278,12 +278,16 @@ class TestDictionary(unittest.TestCase):
     def test_init_with_file_name(self, mock_file_io):
         """Test Dictionary initialization with file name"""
         mock_file_io.get_document.return_value = {
-            "description": "Test dictionary",
-            "version": "1.0.0",
-            "properties": {
-                "name": {
-                    "description": "Name property",
-                    "type": "string"
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary",
+                "version": "1.0.0",
+                "properties": {
+                    "name": {
+                        "description": "Name property",
+                        "type": "string"
+                    }
                 }
             }
         }
@@ -291,45 +295,581 @@ class TestDictionary(unittest.TestCase):
         dictionary = Dictionary("test.yaml")
         
         self.assertEqual(dictionary.file_name, "test.yaml")
-        self.assertIsInstance(dictionary.property, Property)
-        self.assertEqual(dictionary.property.description, "Test dictionary")
+        self.assertIsInstance(dictionary.root, Property)
+        self.assertEqual(dictionary.root.description, "Test dictionary")
 
     def test_init_with_document(self):
         """Test Dictionary initialization with document"""
         doc = {
-            "description": "Test dictionary",
-            "version": "1.0.0",
-            "properties": {
-                "name": {
-                    "description": "Name property",
-                    "type": "string"
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary",
+                "version": "1.0.0",
+                "properties": {
+                    "name": {
+                        "description": "Name property",
+                        "type": "string"
+                    }
                 }
             }
         }
         dictionary = Dictionary("test.yaml", doc)
         self.assertEqual(dictionary.file_name, "test.yaml")
-        self.assertIsInstance(dictionary.property, Property)
-        self.assertEqual(dictionary.property.description, "Test dictionary")
+        self.assertIsInstance(dictionary.root, Property)
+        self.assertEqual(dictionary.root.description, "Test dictionary")
 
     def test_to_dict(self):
         """Test Dictionary to_dict method"""
         dictionary = Dictionary("test.yaml", {
-            "description": "Test dictionary",
-            "version": "1.0.0",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "Name field"
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name field"
+                    }
                 }
             }
         })
         
         result = dictionary.to_dict()
-        self.assertEqual(result["description"], "Test dictionary")
-        self.assertIn("properties", result)
         self.assertEqual(result["file_name"], "test.yaml")
         self.assertEqual(result["_locked"], False)
+        self.assertIn("root", result)
+        
+        # Check that root contains the expected structure
+        root = result["root"]
+        self.assertEqual(root["description"], "Test dictionary")
+        self.assertIn("properties", root)
+
+    def test_to_dict_roundtrip_basic(self):
+        """Test that Dictionary.to_dict() returns the same data used to create it - basic case"""
+        test_data = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name field",
+                        "required": True
+                    },
+                    "age": {
+                        "type": "number",
+                        "description": "Age field",
+                        "required": False
+                    }
+                }
+            }
+        }
+        
+        dictionary = Dictionary("test.yaml", test_data)
+        result = dictionary.to_dict()
+        
+        # Check that the structure is correct
+        self.assertEqual(result["file_name"], "test.yaml")
+        self.assertEqual(result["_locked"], False)
+        self.assertIn("root", result)
+        
+        # The root should contain the property structure (without document-level fields)
+        expected_root = {
+            "description": "Test dictionary",
+            "type": "object",
+            "required": False,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name field",
+                    "required": True
+                },
+                "age": {
+                    "type": "number",
+                    "description": "Age field",
+                    "required": False
+                }
+            },
+            "additionalProperties": False
+        }
+        self.assertEqual(result["root"], expected_root)
+
+    def test_to_dict_roundtrip_with_one_of(self):
+        """Test that Dictionary.to_dict() returns the same data used to create it - with one_of"""
+        test_data = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary with oneOf",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "content_data": {
+                        "description": "Content data with oneOf",
+                        "type": "object",
+                        "required": True,
+                        "properties": {},
+                        "additionalProperties": False,
+                        "one_of": [
+                            {
+                                "description": "Article content",
+                                "type": "object",
+                                "properties": {
+                                    "body": {
+                                        "description": "Article body",
+                                        "type": "string",
+                                        "required": True
+                                    }
+                                },
+                                "required": ["body"],
+                                "additionalProperties": False
+                            },
+                            {
+                                "description": "Video content",
+                                "type": "object",
+                                "properties": {
+                                    "url": {
+                                        "description": "Video URL",
+                                        "type": "string",
+                                        "required": True
+                                    }
+                                },
+                                "required": ["url"],
+                                "additionalProperties": False
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        
+        dictionary = Dictionary("test.yaml", test_data)
+        result = dictionary.to_dict()
+        
+        # Check that the structure is correct
+        self.assertEqual(result["file_name"], "test.yaml")
+        self.assertEqual(result["_locked"], False)
+        self.assertIn("root", result)
+        
+        # The root should contain the property structure (without document-level fields)
+        expected_root = {
+            "description": "Test dictionary with oneOf",
+            "type": "object",
+            "required": False,
+            "properties": {
+                "content_data": {
+                    "description": "Content data with oneOf",
+                    "type": "object",
+                    "required": True,
+                    "properties": {},
+                    "additionalProperties": False,
+                    "one_of": [
+                        {
+                            "description": "Article content",
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "description": "Article body",
+                                    "type": "string",
+                                    "required": True
+                                }
+                            },
+                            "required": ["body"],
+                            "additionalProperties": False
+                        },
+                        {
+                            "description": "Video content",
+                            "type": "object",
+                            "properties": {
+                                "url": {
+                                    "description": "Video URL",
+                                    "type": "string",
+                                    "required": True
+                                }
+                            },
+                            "required": ["url"],
+                            "additionalProperties": False
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": False
+        }
+        self.assertEqual(result["root"], expected_root)
+
+    def test_to_dict_roundtrip_with_refs(self):
+        """Test that Dictionary.to_dict() returns the same data used to create it - with refs"""
+        test_data = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary with refs",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "ref": "user.1.0.0.yaml"
+                    },
+                    "settings": {
+                        "ref": "settings.1.0.0.yaml"
+                    }
+                }
+            }
+        }
+        
+        dictionary = Dictionary("test.yaml", test_data)
+        result = dictionary.to_dict()
+        
+        # Check that the structure is correct
+        self.assertEqual(result["file_name"], "test.yaml")
+        self.assertEqual(result["_locked"], False)
+        self.assertIn("root", result)
+        
+        # The root should contain the property structure (without document-level fields)
+        expected_root = {
+            "description": "Test dictionary with refs",
+            "type": "object",
+            "required": False,
+            "properties": {
+                "user": {
+                    "ref": "user.1.0.0.yaml"
+                },
+                "settings": {
+                    "ref": "settings.1.0.0.yaml"
+                }
+            },
+            "additionalProperties": False
+        }
+        self.assertEqual(result["root"], expected_root)
+
+    def test_to_dict_roundtrip_with_enums(self):
+        """Test that Dictionary.to_dict() returns the same data used to create it - with enums"""
+        test_data = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary with enums",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "enum",
+                        "description": "Status enum",
+                        "enums": "default_status",
+                        "required": True
+                    },
+                    "tags": {
+                        "type": "enum_array",
+                        "description": "Array of tags",
+                        "enums": "content_tags",
+                        "required": False
+                    }
+                }
+            }
+        }
+        
+        dictionary = Dictionary("test.yaml", test_data)
+        result = dictionary.to_dict()
+        
+        # Check that the structure is correct
+        self.assertEqual(result["file_name"], "test.yaml")
+        self.assertEqual(result["_locked"], False)
+        self.assertIn("root", result)
+        
+        # The root should contain the property structure (without document-level fields)
+        expected_root = {
+            "description": "Test dictionary with enums",
+            "type": "object",
+            "required": False,
+            "properties": {
+                "status": {
+                    "type": "enum",
+                    "description": "Status enum",
+                    "enums": "default_status",
+                    "required": True
+                },
+                "tags": {
+                    "type": "enum_array",
+                    "description": "Array of tags",
+                    "enums": "content_tags",
+                    "required": False
+                }
+            },
+            "additionalProperties": False
+        }
+        self.assertEqual(result["root"], expected_root)
+
+    def test_to_dict_roundtrip_with_arrays(self):
+        """Test that Dictionary.to_dict() returns the same data used to create it - with arrays"""
+        test_data = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary with arrays",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "description": "Array of items",
+                        "required": True,
+                        "items": {
+                            "description": "Individual item",
+                            "type": "string"
+                        }
+                    },
+                    "metadata": {
+                        "type": "array",
+                        "description": "Array of metadata",
+                        "required": False,
+                        "items": {
+                            "description": "Metadata item",
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "type": "string",
+                                    "description": "Metadata key"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "description": "Metadata value"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        dictionary = Dictionary("test.yaml", test_data)
+        result = dictionary.to_dict()
+        
+        # Check that the structure is correct
+        self.assertEqual(result["file_name"], "test.yaml")
+        self.assertEqual(result["_locked"], False)
+        self.assertIn("root", result)
+        
+        # The root should contain the property structure (without document-level fields)
+        expected_root = {
+            "description": "Test dictionary with arrays",
+            "type": "object",
+            "required": False,
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "description": "Array of items",
+                    "required": True,
+                    "items": {
+                        "description": "Individual item",
+                        "type": "string",
+                        "required": False
+                    }
+                },
+                "metadata": {
+                    "type": "array",
+                    "description": "Array of metadata",
+                    "required": False,
+                    "items": {
+                        "description": "Metadata item",
+                        "type": "object",
+                        "required": False,
+                        "additionalProperties": False,
+                        "properties": {
+                            "key": {
+                                "type": "string",
+                                "description": "Metadata key",
+                                "required": False
+                            },
+                            "value": {
+                                "type": "string",
+                                "description": "Metadata value",
+                                "required": False
+                            }
+                        }
+                    }
+                }
+            },
+            "additionalProperties": False
+        }
+        self.assertEqual(result["root"], expected_root)
+
+    def test_to_dict_roundtrip_with_missing_values(self):
+        """Test that Dictionary.to_dict() returns the same data used to create it - with missing values"""
+        test_data = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary with missing values",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                        # Missing description, required, etc.
+                    },
+                    "age": {
+                        "type": "number"
+                        # Missing description, required, etc.
+                    }
+                }
+            }
+        }
+        
+        dictionary = Dictionary("test.yaml", test_data)
+        result = dictionary.to_dict()
+        
+        # Check that the structure is correct
+        self.assertEqual(result["file_name"], "test.yaml")
+        self.assertEqual(result["_locked"], False)
+        self.assertIn("root", result)
+        
+        # The root should have default values filled in, so we need to check
+        # that the original structure is preserved but with defaults added
+        root = result["root"]
+        self.assertEqual(root["description"], "Test dictionary with missing values")
+        self.assertEqual(root["type"], "object")
+        self.assertIn("properties", root)
+        self.assertIn("name", root["properties"])
+        self.assertIn("age", root["properties"])
+        
+        # Check that defaults are applied
+        self.assertEqual(root["properties"]["name"]["description"], "Missing Required Description")
+        self.assertFalse(root["properties"]["name"]["required"])
+        self.assertEqual(root["properties"]["age"]["description"], "Missing Required Description")
+        self.assertFalse(root["properties"]["age"]["required"])
+
+    def test_to_dict_roundtrip_complex_nested(self):
+        """Test that Dictionary.to_dict() returns the same data used to create it - complex nested structure"""
+        test_data = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Complex nested dictionary",
+                "version": "1.0.0",
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "type": "object",
+                        "description": "User object",
+                        "properties": {
+                            "profile": {
+                                "type": "object",
+                                "description": "User profile",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "User name"
+                                    },
+                                    "preferences": {
+                                        "type": "array",
+                                        "description": "User preferences",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "additionalProperties": False
+                            },
+                            "settings": {
+                                "ref": "settings.1.0.0.yaml"
+                            }
+                        },
+                        "additionalProperties": False
+                    },
+                    "content": {
+                        "type": "object",
+                        "description": "Content object",
+                        "properties": {
+                            "title": {"type": "string", "required": True, "description": "Missing Required Description"},
+                            "body": {"type": "string", "required": True, "description": "Missing Required Description"}
+                        },
+                        "additionalProperties": False
+                    },
+                    "media": {
+                        "type": "object",
+                        "description": "Media object",
+                        "properties": {
+                            "url": {"type": "string", "required": True, "description": "Missing Required Description"},
+                            "duration": {"type": "number", "required": False, "description": "Missing Required Description"}
+                        },
+                        "additionalProperties": False
+                    }
+                },
+                "additionalProperties": False
+            }
+        }
+        
+        dictionary = Dictionary("test.yaml", test_data)
+        result = dictionary.to_dict()
+        expected_root = {
+            "description": "Complex nested dictionary",
+            "type": "object",
+            "required": False,
+            "properties": {
+                "user": {
+                    "type": "object",
+                    "description": "User object",
+                    "required": False,
+                    "properties": {
+                        "profile": {
+                            "type": "object",
+                            "description": "User profile",
+                            "required": False,
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "User name",
+                                    "required": False
+                                },
+                                "preferences": {
+                                    "type": "array",
+                                    "description": "User preferences",
+                                    "required": False,
+                                    "items": {
+                                        "description": "Missing Required Description",
+                                        "type": "string",
+                                        "required": False
+                                    }
+                                }
+                            },
+                            "additionalProperties": False
+                        },
+                        "settings": {
+                            "ref": "settings.1.0.0.yaml"
+                        }
+                    },
+                    "additionalProperties": False
+                },
+                "content": {
+                    "type": "object",
+                    "description": "Content object",
+                    "required": False,
+                    "properties": {
+                        "title": {"type": "string", "required": True, "description": "Missing Required Description"},
+                        "body": {"type": "string", "required": True, "description": "Missing Required Description"}
+                    },
+                    "additionalProperties": False
+                },
+                "media": {
+                    "type": "object",
+                    "description": "Media object",
+                    "required": False,
+                    "properties": {
+                        "url": {"type": "string", "required": True, "description": "Missing Required Description"},
+                        "duration": {"type": "number", "required": False, "description": "Missing Required Description"}
+                    },
+                    "additionalProperties": False
+                }
+            },
+            "additionalProperties": False
+        }
+        self.assertEqual(result["root"], expected_root)
 
 
 if __name__ == '__main__':

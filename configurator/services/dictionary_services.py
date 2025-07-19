@@ -6,20 +6,20 @@ from configurator.services.enumerator_service import Enumerators
 from configurator.utils.config import Config
 
 class Dictionary:
-    def __init__(self, file_name: str = "", document: dict = {}):
+    def __init__(self, file_name: str = "", document: dict = None):
         self.config = Config.get_instance()
         self.file_name = file_name
         self._locked = False
-        self.property = None
+        self.root = None
 
         try:
-            if document:
+            if document is not None:
                 self._locked = document.get("_locked", False)
-                self.property = Property("root", document)
+                self.root = Property("root", document["root"])
             else:
                 document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
                 self._locked = document_data.get("_locked", False)
-                self.property = Property("root", document_data)
+                self.root = Property("root", document_data["root"])
         except ConfiguratorException as e:
             # Re-raise with additional context about the dictionary file
             event = ConfiguratorEvent(event_id=f"DIC-CONSTRUCTOR-{file_name}", event_type="DICTIONARY_CONSTRUCTOR")
@@ -33,9 +33,10 @@ class Dictionary:
             raise ConfiguratorException(f"Unexpected error constructing dictionary from {file_name}: {str(e)}", event)
 
     def to_dict(self):
-        result = self.property.to_dict()
+        result = {}
         result["file_name"] = self.file_name
         result["_locked"] = self._locked
+        result["root"] = self.root.to_dict()
         return result
 
     def save(self):
@@ -55,12 +56,12 @@ class Dictionary:
     def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_json_schema(enumerations, ref_stack)
+        return self.root.get_json_schema(enumerations, ref_stack)
 
     def get_bson_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_bson_schema(enumerations, ref_stack)
+        return self.root.get_bson_schema(enumerations, ref_stack)
 
     @staticmethod
     def lock_all():
@@ -87,9 +88,6 @@ class Dictionary:
             event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
             raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
 
-
-        
-
     def delete(self):
         if self._locked:
             event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY", event_data={"error": "Dictionary is locked"})
@@ -109,6 +107,17 @@ class Dictionary:
 
 
 class Property:
+    """
+    Property class is used to represent a property in a dictionary.
+
+    Properties have 5 type specific forms. 
+    A ref property is a reference to another property file and is a solo format with only this property
+    All other properties have a name, and description, type, and required properties boolean.
+    type: object properties have properties, additional_properties boolean, and optionally one_of
+    type: list properties have items
+    type: enum and enum_array properties have enums
+    type: Anything else is considered a custom type 
+    """
     def __init__(self, name: str, property: dict):
         self.config = Config.get_instance()
         self.name = name
@@ -122,11 +131,9 @@ class Property:
         self.items = None
         self.one_of = None
 
-        properties_data = property.get("properties", {})
-
         # Initialize properties if this is an object type
         if self.type == "object":
-            for prop_name, prop_data in properties_data.items():
+            for prop_name, prop_data in property.get("properties", {}).items():
                 self.properties[prop_name] = Property(prop_name, prop_data)
 
             # Initialize oneOf if present
@@ -152,12 +159,11 @@ class Property:
         result["required"] = self.required
 
         if self.type == "object":
+            result["additionalProperties"] = self.additional_properties
             result["properties"] = {}
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()
-            result["additionalProperties"] = self.additional_properties
 
-            # Add one_of if present (internal format)
             if self.one_of:
                 result["one_of"] = self.one_of.to_dict()
 

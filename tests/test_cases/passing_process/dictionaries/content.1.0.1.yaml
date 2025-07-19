@@ -1,145 +1,146 @@
-description: A content collection for testing one_of structures and advanced schema
-  features
-type: object
-required: false
-properties:
-  _id:
-    description: The unique identifier for content
-    type: identity
-    required: true
-  title:
-    description: Content title
-    type: word
-    required: true
-  subtitle:
-    description: Content subtitle
-    type: sentence
-    required: false
-  content_type:
-    description: Type of content (article, video, podcast, etc.)
-    type: enum
-    required: true
-    enums: content_type
-  status:
-    description: Content status
-    type: enum
-    required: true
-    enums: default_status
-  author_id:
-    ref: user.1.0.0.yaml
-  full_title:
-    description: Full title including subtitle
-    type: sentence
-    required: false
-  content_data:
-    description: The actual content data - varies by type
-    type: object
-    required: true
-    properties: {}
-    additionalProperties: false
-    one_of:
-      - description: Article content structure
-        type: object
-        properties:
-          body:
-            description: Article body text
-            type: markdown
-            required: true
-          tags:
-            description: Article tags
-            type: enum_array
-            required: false
-            enums: content_tags
-          word_count:
-            description: Article word count
-            type: count
-            required: false
-        required:
-          - body
-        additionalProperties: false
-      - description: Video content structure
-        type: object
-        properties:
-          url:
-            description: Video URL
-            type: url
-            required: true
-          duration:
-            description: Video duration in seconds
-            type: count
-            required: false
-          quality:
-            description: Video quality
-            type: enum
-            required: false
-            enums: media_quality
-        required:
-          - url
-        additionalProperties: false
-      - description: Podcast content structure
-        type: object
-        properties:
-          audio_url:
-            description: Audio file URL
-            type: url
-            required: true
-          transcript:
-            description: Podcast transcript
-            type: markdown
-            required: false
-          episode_number:
-            description: Episode number
-            type: count
-            required: false
-        required:
-          - audio_url
-        additionalProperties: false
-  metadata:
-    description: Additional metadata for the content
-    type: object
-    required: false
-    properties:
-      created_at:
-        description: When the content was created
-        type: date-time
-        required: true
-      updated_at:
-        description: When the content was last updated
-        type: date-time
-        required: false
-      published_at:
-        description: When the content was published
-        type: date-time
-        required: false
-      categories:
-        description: Content categories
-        type: array
-        required: false
-        items:
-          description: A content category
-          type: object
-          required: false
-          properties:
-            name:
-              description: Category name
-              type: word
-              required: true
-            type:
-              description: Category type
-              type: enum
-              required: true
-              enums: category_type
-            tags:
-              description: Category tags
-              type: enum_array
-              required: false
-              enums: category_tags
-          additionalProperties: false
-    additionalProperties: false
-  last_saved:
-    description: Last saved breadcrumb
-    type: breadcrumb
-    required: true
-additionalProperties: false
 file_name: content.1.0.1.yaml
 _locked: true
+root:
+  description: A content collection for testing one_of structures and advanced schema
+    features
+  type: object
+  required: false
+  properties:
+    _id:
+      description: The unique identifier for content
+      type: identity
+      required: true
+    title:
+      description: Content title
+      type: word
+      required: true
+    subtitle:
+      description: Content subtitle
+      type: sentence
+      required: false
+    content_type:
+      description: Type of content (article, video, podcast, etc.)
+      type: enum
+      required: true
+      enums: content_type
+    status:
+      description: Content status
+      type: enum
+      required: true
+      enums: default_status
+    author_id:
+      ref: user.1.0.0.yaml
+    full_title:
+      description: Full title including subtitle
+      type: sentence
+      required: false
+    content_data:
+      description: The actual content data - varies by type
+      type: object
+      required: true
+      properties: {}
+      additionalProperties: false
+      one_of:
+        - description: Article content structure
+          type: object
+          properties:
+            body:
+              description: Article body text
+              type: markdown
+              required: true
+            tags:
+              description: Article tags
+              type: enum_array
+              required: false
+              enums: content_tags
+            word_count:
+              description: Article word count
+              type: count
+              required: false
+          required:
+            - body
+          additionalProperties: false
+        - description: Video content structure
+          type: object
+          properties:
+            url:
+              description: Video URL
+              type: url
+              required: true
+            duration:
+              description: Video duration in seconds
+              type: count
+              required: false
+            quality:
+              description: Video quality
+              type: enum
+              required: false
+              enums: media_quality
+          required:
+            - url
+          additionalProperties: false
+        - description: Podcast content structure
+          type: object
+          properties:
+            audio_url:
+              description: Audio file URL
+              type: url
+              required: true
+            transcript:
+              description: Podcast transcript
+              type: markdown
+              required: false
+            episode_number:
+              description: Episode number
+              type: count
+              required: false
+          required:
+            - audio_url
+          additionalProperties: false
+    metadata:
+      description: Additional metadata for the content
+      type: object
+      required: false
+      properties:
+        created_at:
+          description: When the content was created
+          type: date-time
+          required: true
+        updated_at:
+          description: When the content was last updated
+          type: date-time
+          required: false
+        published_at:
+          description: When the content was published
+          type: date-time
+          required: false
+        categories:
+          description: Content categories
+          type: array
+          required: false
+          items:
+            description: A content category
+            type: object
+            required: false
+            properties:
+              name:
+                description: Category name
+                type: word
+                required: true
+              type:
+                description: Category type
+                type: enum
+                required: true
+                enums: category_type
+              tags:
+                description: Category tags
+                type: enum_array
+                required: false
+                enums: category_tags
+            additionalProperties: false
+      additionalProperties: false
+    last_saved:
+      description: Last saved breadcrumb
+      type: breadcrumb
+      required: true
+  additionalProperties: false

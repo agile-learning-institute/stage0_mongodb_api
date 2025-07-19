@@ -1,6 +1,9 @@
-description: A schema for invalid tests data
-type: object
-properties:
-  name:
-    description: The name of the person
-    type: word
+file_name: test_migrations.1.0.0.yaml
+_locked: false
+root:
+  description: A schema for invalid tests data
+  type: object
+  properties:
+    name:
+      description: The name of the person
+      type: word

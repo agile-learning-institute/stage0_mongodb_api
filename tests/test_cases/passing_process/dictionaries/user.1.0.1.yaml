@@ -1,86 +1,87 @@
-description: A user collection for testing the schema system
-type: object
-required: false
-properties:
-  _id:
-    description: The unique identifier for a user
-    type: identity
-    required: true
-  user_name:
-    description: Username
-    type: word
-    required: true
-  full_name:
-    description: Users Full Name
-    type: sentence
-    required: false
-  status:
-    description: The status
-    type: enum
-    required: true
-    enums: default_status
-  categories:
-    description: A users list of categorized tags
-    type: array
-    required: false
-    items:
-      description: A user category
+file_name: user.1.0.1.yaml
+_locked: true
+root:
+  description: A user collection for testing the schema system
+  type: object
+  required: false
+  properties:
+    _id:
+      description: The unique identifier for a user
+      type: identity
+      required: true
+    user_name:
+      description: Username
+      type: word
+      required: true
+    full_name:
+      description: Users Full Name
+      type: sentence
+      required: false
+    status:
+      description: The status
+      type: enum
+      required: true
+      enums: default_status
+    categories:
+      description: A users list of categorized tags
+      type: array
+      required: false
+      items:
+        description: A user category
+        type: object
+        required: false
+        properties:
+          name:
+            description: Category Name assigned by the user
+            type: word
+            required: true
+          category:
+            description: The category type assigned by the user
+            type: enum
+            required: true
+            enums: category_type
+          tags:
+            description: A list of enumerated values assigned by the user
+            type: enum_array
+            required: true
+            enums: category_tags
+        additionalProperties: false
+    preferences:
+      description: User preferences and settings
       type: object
       required: false
       properties:
-        name:
-          description: Category Name assigned by the user
-          type: word
-          required: true
-        category:
-          description: The category type assigned by the user
-          type: enum
-          required: true
-          enums: category_type
-        tags:
-          description: A list of enumerated values assigned by the user
+        notification_types:
+          description: Types of notifications the user wants to receive
           type: enum_array
           required: true
-          enums: category_tags
+          enums: notification_type
+        delivery_channels:
+          description: Preferred delivery channels for notifications
+          type: enum_array
+          required: true
+          enums: delivery_channel
+        content_tags:
+          description: Content tags the user is interested in
+          type: enum_array
+          required: false
+          enums: content_tags
+        priority_levels:
+          description: Priority levels the user wants to receive
+          type: enum_array
+          required: false
+          enums: priority_level
       additionalProperties: false
-  preferences:
-    description: User preferences and settings
-    type: object
-    required: false
-    properties:
-      notification_types:
-        description: Types of notifications the user wants to receive
-        type: enum_array
-        required: true
-        enums: notification_type
-      delivery_channels:
-        description: Preferred delivery channels for notifications
-        type: enum_array
-        required: true
-        enums: delivery_channel
-      content_tags:
-        description: Content tags the user is interested in
-        type: enum_array
-        required: false
-        enums: content_tags
-      priority_levels:
-        description: Priority levels the user wants to receive
-        type: enum_array
-        required: false
-        enums: priority_level
-    additionalProperties: false
-  email:
-    description: The person's email address
-    type: email
-    required: false
-  phone:
-    description: The person's phone number
-    type: us_phone
-    required: false
-  last_saved:
-    description: The last time this document was saved
-    type: breadcrumb
-    required: true
-additionalProperties: false
-file_name: user.1.0.1.yaml
-_locked: true
+    email:
+      description: The person's email address
+      type: email
+      required: false
+    phone:
+      description: The person's phone number
+      type: us_phone
+      required: false
+    last_saved:
+      description: The last time this document was saved
+      type: breadcrumb
+      required: true
+  additionalProperties: false

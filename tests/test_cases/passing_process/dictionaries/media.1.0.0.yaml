@@ -1,133 +1,134 @@
-description: A media item in the system
-type: object
-required: false
-properties:
-  _id:
-    description: The unique identifier for the media
-    type: identity
-    required: true
-  title:
-    description: The title of the media
-    type: sentence
-    required: true
-  type:
-    description: The type of media
-    type: enum
-    required: false
-    enums: media_type
-  status:
-    description: The current status of the media
-    type: enum
-    required: true
-    enums: media_status
-  last_saved:
-    description: When the media was last updated
-    type: breadcrumb
-    required: true
-  tags:
-    description: Tags associated with the media
-    type: enum_array
-    required: false
-    enums: media_tags
-  metadata:
-    description: Additional metadata about the media
-    type: object
-    required: false
-    properties:
-      duration:
-        description: Duration in minutes
-        type: count
-        required: false
-      format:
-        description: Media format
-        type: enum
-        required: false
-        enums: media_format
-      quality:
-        description: Quality rating
-        type: enum
-        required: false
-        enums: media_quality
-      content_data:
-        description: Media-specific content data
-        type: object
-        required: false
-        properties: {}
-        additionalProperties: false
-        one_of:
-          - description: Movie-specific metadata
-            type: object
-            properties:
-              director:
-                description: Movie director
-                type: word
-                required: true
-              cast:
-                description: Movie cast members
-                type: array
-                required: false
-                items:
-                  description: Cast member
-                  type: word
-                  required: false
-              genre:
-                description: Movie genre
-                type: enum_array
-                required: false
-                enums: media_tags
-            required:
-              - director
-            additionalProperties: false
-          - description: TV show-specific metadata
-            type: object
-            properties:
-              season:
-                description: Season number
-                type: count
-                required: true
-              episode:
-                description: Episode number
-                type: count
-                required: true
-              network:
-                description: Broadcasting network
-                type: word
-                required: false
-            required:
-              - season
-              - episode
-            additionalProperties: false
-          - description: Documentary-specific metadata
-            type: object
-            properties:
-              subject:
-                description: Documentary subject
-                type: sentence
-                required: true
-              narrator:
-                description: Documentary narrator
-                type: word
-                required: false
-            required:
-              - subject
-            additionalProperties: false
-          - description: Short film-specific metadata
-            type: object
-            properties:
-              festival:
-                description: Film festival
-                type: word
-                required: false
-              awards:
-                description: Awards received
-                type: array
-                required: false
-                items:
-                  description: Award name
-                  type: word
-                  required: false
-            additionalProperties: false
-    additionalProperties: false
-additionalProperties: false
 file_name: media.1.0.0.yaml
 _locked: true
+root:
+  description: A media item in the system
+  type: object
+  required: false
+  properties:
+    _id:
+      description: The unique identifier for the media
+      type: identity
+      required: true
+    title:
+      description: The title of the media
+      type: sentence
+      required: true
+    type:
+      description: The type of media
+      type: enum
+      required: false
+      enums: media_type
+    status:
+      description: The current status of the media
+      type: enum
+      required: true
+      enums: media_status
+    last_saved:
+      description: When the media was last updated
+      type: breadcrumb
+      required: true
+    tags:
+      description: Tags associated with the media
+      type: enum_array
+      required: false
+      enums: media_tags
+    metadata:
+      description: Additional metadata about the media
+      type: object
+      required: false
+      properties:
+        duration:
+          description: Duration in minutes
+          type: count
+          required: false
+        format:
+          description: Media format
+          type: enum
+          required: false
+          enums: media_format
+        quality:
+          description: Quality rating
+          type: enum
+          required: false
+          enums: media_quality
+        content_data:
+          description: Media-specific content data
+          type: object
+          required: false
+          properties: {}
+          additionalProperties: false
+          one_of:
+            - description: Movie-specific metadata
+              type: object
+              properties:
+                director:
+                  description: Movie director
+                  type: word
+                  required: true
+                cast:
+                  description: Movie cast members
+                  type: array
+                  required: false
+                  items:
+                    description: Cast member
+                    type: word
+                    required: false
+                genre:
+                  description: Movie genre
+                  type: enum_array
+                  required: false
+                  enums: media_tags
+              required:
+                - director
+              additionalProperties: false
+            - description: TV show-specific metadata
+              type: object
+              properties:
+                season:
+                  description: Season number
+                  type: count
+                  required: true
+                episode:
+                  description: Episode number
+                  type: count
+                  required: true
+                network:
+                  description: Broadcasting network
+                  type: word
+                  required: false
+              required:
+                - season
+                - episode
+              additionalProperties: false
+            - description: Documentary-specific metadata
+              type: object
+              properties:
+                subject:
+                  description: Documentary subject
+                  type: sentence
+                  required: true
+                narrator:
+                  description: Documentary narrator
+                  type: word
+                  required: false
+              required:
+                - subject
+              additionalProperties: false
+            - description: Short film-specific metadata
+              type: object
+              properties:
+                festival:
+                  description: Film festival
+                  type: word
+                  required: false
+                awards:
+                  description: Awards received
+                  type: array
+                  required: false
+                  items:
+                    description: Award name
+                    type: word
+                    required: false
+              additionalProperties: false
+      additionalProperties: false
+  additionalProperties: false

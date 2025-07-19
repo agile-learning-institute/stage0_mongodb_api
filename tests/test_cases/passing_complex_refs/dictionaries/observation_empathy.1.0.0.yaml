@@ -1,24 +1,27 @@
-description: A empathy of a Empathy Mapping exercise
-type: object
-properties:
-  users:
-    description: Users who made the observation
-    required: true
-    type: array
-    items:
-      description: User Name
-      type: word
-one_of:
-  schemas:
-    says:
-      description: Things the user says
-      type: sentence
-    does:
-      description: Things the user does
-      type: sentence
-    thinks:
-      description: Things the user thinks
-      type: sentence
-    feels:
-      description: Things the user feels
-      type: sentence
+file_name: observation_empathy.1.0.0.yaml
+_locked: false
+root:
+  description: A empathy of a Empathy Mapping exercise
+  type: object
+  properties:
+    users:
+      description: Users who made the observation
+      required: true
+      type: array
+      items:
+        description: User Name
+        type: word
+  one_of:
+    schemas:
+      says:
+        description: Things the user says
+        type: sentence
+      does:
+        description: Things the user does
+        type: sentence
+      thinks:
+        description: Things the user thinks
+        type: sentence
+      feels:
+        description: Things the user feels
+        type: sentence
