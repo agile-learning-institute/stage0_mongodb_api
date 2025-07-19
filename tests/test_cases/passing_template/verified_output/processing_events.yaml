@@ -1,0 +1,378 @@
+- data:
+    configuration_name: sample.yaml
+    version_count: 2
+  ends: '2025-07-17 14:50:57.704057'
+  id: CFG-sample.yaml
+  starts: '2025-07-17 14:50:57.647823'
+  status: SUCCESS
+  sub_events:
+  - data: null
+    ends: '2025-07-17 14:50:57.665091'
+    id: ENU-05
+    starts: '2025-07-17 14:50:57.654663'
+    status: SUCCESS
+    sub_events:
+    - data:
+        enumerators_count: 1
+        result:
+          _id: 6879461118076259bdcea8cf
+          _locked: false
+          enumerators:
+            default_status:
+              active: Not Deleted
+              archived: Soft Delete Indicator
+              draft: Draft
+          file_name: enumerations.2.yaml
+          version: 2
+        version: 2
+      ends: '2025-07-17 14:50:57.663944'
+      id: ENU-UPSERT-enumerations.2.yaml
+      starts: '2025-07-17 14:50:57.654664'
+      status: SUCCESS
+      sub_events: []
+      type: UPSERT_ENUMERATION
+    - data:
+        enumerators_count: 2
+        result:
+          _id: 6879461118076259bdcea8d2
+          _locked: false
+          enumerators:
+            default_status:
+              active: Not Deleted
+              archived: Soft Delete Indicator
+            test_enum:
+              foo: bar
+          file_name: enumerations.1.yaml
+          version: 1
+        version: 1
+      ends: '2025-07-17 14:50:57.664568'
+      id: ENU-UPSERT-enumerations.1.yaml
+      starts: '2025-07-17 14:50:57.663946'
+      status: SUCCESS
+      sub_events: []
+      type: UPSERT_ENUMERATION
+    - data:
+        enumerators_count: 0
+        result:
+          _id: 6879461118076259bdcea8d5
+          _locked: false
+          enumerators: {}
+          file_name: enumerations.0.yaml
+          version: 0
+        version: 0
+      ends: '2025-07-17 14:50:57.665090'
+      id: ENU-UPSERT-enumerations.0.yaml
+      starts: '2025-07-17 14:50:57.664570'
+      status: SUCCESS
+      sub_events: []
+      type: UPSERT_ENUMERATION
+    type: UPSERT_ENUMERATORS_TO_DATABASE
+  - data: null
+    ends: '2025-07-17 14:50:57.684369'
+    id: sample.1.0.0.1
+    starts: '2025-07-17 14:50:57.665095'
+    status: SUCCESS
+    sub_events:
+    - data: null
+      ends: '2025-07-17 14:50:57.669996'
+      id: PRO-01
+      starts: '2025-07-17 14:50:57.665095'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          operation: schema_validation_removed
+        ends: '2025-07-17 14:50:57.669994'
+        id: MON-06
+        starts: '2025-07-17 14:50:57.665097'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-17 14:50:57.675163'
+      id: PRO-04
+      starts: '2025-07-17 14:50:57.669997'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          index_keys:
+            first_name: 1
+            last_name: 1
+          index_name: nameIndex
+          operation: created
+        ends: '2025-07-17 14:50:57.672655'
+        id: MON-09
+        starts: '2025-07-17 14:50:57.669998'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      - data:
+          collection: sample
+          index_keys:
+            status: 1
+          index_name: statusIndex
+          operation: created
+        ends: '2025-07-17 14:50:57.675162'
+        id: MON-09
+        starts: '2025-07-17 14:50:57.672657'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-17 14:50:57.677602'
+      id: PRO-06
+      starts: '2025-07-17 14:50:57.675164'
+      status: SUCCESS
+      sub_events:
+      - data:
+          additionalProperties: false
+          bsonType: object
+          properties:
+            _id:
+              bsonType: objectId
+            first_name:
+              bsonType: string
+              pattern: ^\S{1,40}$
+            last_name:
+              bsonType: string
+              pattern: ^\S{1,40}$
+            status:
+              bsonType: string
+              enum:
+              - active
+              - archived
+          required:
+          - _id
+          - status
+        ends: '2025-07-17 14:50:57.677601'
+        id: MON-10
+        starts: '2025-07-17 14:50:57.676943'
+        status: SUCCESS
+        sub_events: []
+        type: APPLY_SCHEMA
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        test_data_path: ./tests/test_cases/passing_template/test_data/sample.1.0.0.1.json
+      ends: '2025-07-17 14:50:57.678293'
+      id: PRO-07
+      starts: '2025-07-17 14:50:57.677604'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          data_file: sample.1.0.0.1.json
+          documents_loaded: 2
+          insert_many_result:
+            acknowledged: true
+            inserted_ids:
+            - a00000000000000000000001
+            - a00000000000000000000002
+        ends: '2025-07-17 14:50:57.678290'
+        id: MON-11
+        starts: '2025-07-17 14:50:57.677608'
+        status: SUCCESS
+        sub_events: []
+        type: LOAD_DATA
+      type: LOAD_TEST_DATA
+    - data:
+        _id: 6879461118076259bdcea8e6
+        collection_name: sample
+        current_version: sample.1.0.0.1
+      ends: '2025-07-17 14:50:57.684368'
+      id: PRO-08
+      starts: '2025-07-17 14:50:57.678294'
+      status: SUCCESS
+      sub_events: []
+      type: UPDATE_VERSION
+    type: PROCESS
+  - data: null
+    ends: '2025-07-17 14:50:57.704055'
+    id: sample.1.0.1.2
+    starts: '2025-07-17 14:50:57.684371'
+    status: SUCCESS
+    sub_events:
+    - data: null
+      ends: '2025-07-17 14:50:57.684892'
+      id: PRO-01
+      starts: '2025-07-17 14:50:57.684372'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          operation: schema_validation_removed
+        ends: '2025-07-17 14:50:57.684891'
+        id: MON-06
+        starts: '2025-07-17 14:50:57.684374'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_SCHEMA
+      type: REMOVE_SCHEMA_VALIDATION
+    - data: null
+      ends: '2025-07-17 14:50:57.685406'
+      id: PRO-02
+      starts: '2025-07-17 14:50:57.684893'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          index_name: nameIndex
+          operation: dropped
+        ends: '2025-07-17 14:50:57.685405'
+        id: MON-07
+        starts: '2025-07-17 14:50:57.684894'
+        status: SUCCESS
+        sub_events: []
+        type: REMOVE_INDEX
+      type: REMOVE_INDEXES
+    - data: null
+      ends: '2025-07-17 14:50:57.694219'
+      id: PRO-03
+      starts: '2025-07-17 14:50:57.685407'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          migration_file: first_last_to_full_name.json
+          migration_path: ./tests/test_cases/passing_template/migrations/first_last_to_full_name.json
+          pipeline_operations:
+          - $addFields
+          - $unset
+          - $out
+          pipeline_stages: 3
+          pipeline_summary:
+          - details:
+              $addFields:
+                full_name:
+                  $concat:
+                  - $first_name
+                  - ' '
+                  - $last_name
+            operation: $addFields
+            stage: 1
+          - details:
+              $unset:
+              - first_name
+              - last_name
+            operation: $unset
+            stage: 2
+          - details:
+              $out: sample
+            operation: $out
+            stage: 3
+        ends: '2025-07-17 14:50:57.694219'
+        id: MON-14
+        starts: '2025-07-17 14:50:57.685411'
+        status: SUCCESS
+        sub_events:
+        - data:
+            file: ./tests/test_cases/passing_template/migrations/first_last_to_full_name.json
+            file_name: first_last_to_full_name.json
+            pipeline_operations:
+            - $addFields
+            - $unset
+            - $out
+            pipeline_stages: 3
+          ends: '2025-07-17 14:50:57.685508'
+          id: MON-13
+          starts: '2025-07-17 14:50:57.685413'
+          status: SUCCESS
+          sub_events: []
+          type: LOAD_MIGRATION
+        - data:
+            collection: sample
+          ends: '2025-07-17 14:50:57.694210'
+          id: MON-08
+          starts: '2025-07-17 14:50:57.685511'
+          status: SUCCESS
+          sub_events: []
+          type: EXECUTE_MIGRATION
+        type: EXECUTE_MIGRATION_FILE
+      type: EXECUTE_MIGRATIONS
+    - data: null
+      ends: '2025-07-17 14:50:57.699943'
+      id: PRO-04
+      starts: '2025-07-17 14:50:57.694221'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          index_keys:
+            full_name: 1
+          index_name: fullNameIndex
+          operation: created
+        ends: '2025-07-17 14:50:57.699941'
+        id: MON-09
+        starts: '2025-07-17 14:50:57.694222'
+        status: SUCCESS
+        sub_events: []
+        type: ADD_INDEX
+      type: ADD_INDEXES
+    - data: null
+      ends: '2025-07-17 14:50:57.702503'
+      id: PRO-06
+      starts: '2025-07-17 14:50:57.699945'
+      status: SUCCESS
+      sub_events:
+      - data:
+          additionalProperties: false
+          bsonType: object
+          properties:
+            _id:
+              bsonType: objectId
+            full_name:
+              bsonType: string
+              pattern: ^[^\t\n\r]{0,255}$
+            status:
+              bsonType: string
+              enum:
+              - draft
+              - active
+              - archived
+          required:
+          - _id
+          - full_name
+          - status
+        ends: '2025-07-17 14:50:57.702501'
+        id: MON-10
+        starts: '2025-07-17 14:50:57.701735'
+        status: SUCCESS
+        sub_events: []
+        type: APPLY_SCHEMA
+      type: APPLY_SCHEMA_VALIDATION
+    - data:
+        test_data_path: ./tests/test_cases/passing_template/test_data/sample.1.0.1.2.json
+      ends: '2025-07-17 14:50:57.703457'
+      id: PRO-07
+      starts: '2025-07-17 14:50:57.702504'
+      status: SUCCESS
+      sub_events:
+      - data:
+          collection: sample
+          data_file: sample.1.0.1.2.json
+          documents_loaded: 1
+          insert_many_result:
+            acknowledged: true
+            inserted_ids:
+            - a00000000000000000000003
+        ends: '2025-07-17 14:50:57.703455'
+        id: MON-11
+        starts: '2025-07-17 14:50:57.702508'
+        status: SUCCESS
+        sub_events: []
+        type: LOAD_DATA
+      type: LOAD_TEST_DATA
+    - data:
+        _id: 6879461118076259bdcea8e6
+        collection_name: sample
+        current_version: sample.1.0.1.2
+      ends: '2025-07-17 14:50:57.704055'
+      id: PRO-08
+      starts: '2025-07-17 14:50:57.703458'
+      status: SUCCESS
+      sub_events: []
+      type: UPDATE_VERSION
+    type: PROCESS
+  type: PROCESS_CONFIGURATION

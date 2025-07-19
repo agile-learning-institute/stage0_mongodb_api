@@ -1,5 +1,0 @@
-description: A positive integer value
-json_type:
-  type: number
-  minimum: 1
-  multipleOf: 1

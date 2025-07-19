@@ -1,6 +1,0 @@
-version: 1
-enumerators:
-  default_status:
-    active: Not Deleted
-    archived: Soft Delete Indicator
-_locked: false 

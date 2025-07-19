@@ -1,9 +1,0 @@
-[
-  {
-    "_id": {
-      "$oid": "68571db811401f03ab90f71e"
-    },
-    "collection_name": "sample",
-    "current_version": "sample.1.0.0.1"
-  }
-]

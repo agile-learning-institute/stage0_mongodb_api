@@ -1,0 +1,537 @@
+[
+  {
+    "id": "CFG-sample.yaml",
+    "type": "PROCESS_CONFIGURATION",
+    "data": {
+      "configuration_name": "sample.yaml",
+      "version_count": 2
+    },
+    "starts": "2025-07-17 15:10:56.433747",
+    "ends": "2025-07-17 15:10:56.495597",
+    "status": "SUCCESS",
+    "sub_events": [
+      {
+        "id": "CFG-sample.yaml",
+        "type": "PROCESS_CONFIGURATION",
+        "data": {
+          "configuration_name": "sample.yaml",
+          "version_count": 2
+        },
+        "starts": "2025-07-17 15:10:56.434680",
+        "ends": "2025-07-17 15:10:56.495545",
+        "status": "SUCCESS",
+        "sub_events": [
+          {
+            "id": "ENU-05",
+            "type": "UPSERT_ENUMERATORS_TO_DATABASE",
+            "data": null,
+            "starts": "2025-07-17 15:10:56.441668",
+            "ends": "2025-07-17 15:10:56.455021",
+            "status": "SUCCESS",
+            "sub_events": [
+              {
+                "id": "ENU-UPSERT-enumerations.2.yaml",
+                "type": "UPSERT_ENUMERATION",
+                "data": {
+                  "version": 2,
+                  "enumerators_count": 1,
+                  "result": {
+                    "_id": "68794ac018076259bdcebdce",
+                    "version": 2,
+                    "_locked": false,
+                    "enumerators": {
+                      "default_status": {
+                        "draft": "Draft",
+                        "active": "Not Deleted",
+                        "archived": "Soft Delete Indicator"
+                      }
+                    },
+                    "file_name": "enumerations.2.yaml"
+                  }
+                },
+                "starts": "2025-07-17 15:10:56.441669",
+                "ends": "2025-07-17 15:10:56.453864",
+                "status": "SUCCESS",
+                "sub_events": []
+              },
+              {
+                "id": "ENU-UPSERT-enumerations.1.yaml",
+                "type": "UPSERT_ENUMERATION",
+                "data": {
+                  "version": 1,
+                  "enumerators_count": 2,
+                  "result": {
+                    "_id": "68794ac018076259bdcebdd1",
+                    "version": 1,
+                    "_locked": false,
+                    "enumerators": {
+                      "default_status": {
+                        "active": "Not Deleted",
+                        "archived": "Soft Delete Indicator"
+                      },
+                      "test_enum": {
+                        "foo": "bar"
+                      }
+                    },
+                    "file_name": "enumerations.1.yaml"
+                  }
+                },
+                "starts": "2025-07-17 15:10:56.453866",
+                "ends": "2025-07-17 15:10:56.454489",
+                "status": "SUCCESS",
+                "sub_events": []
+              },
+              {
+                "id": "ENU-UPSERT-enumerations.0.yaml",
+                "type": "UPSERT_ENUMERATION",
+                "data": {
+                  "version": 0,
+                  "enumerators_count": 0,
+                  "result": {
+                    "_id": "68794ac018076259bdcebdd4",
+                    "version": 0,
+                    "_locked": false,
+                    "enumerators": {},
+                    "file_name": "enumerations.0.yaml"
+                  }
+                },
+                "starts": "2025-07-17 15:10:56.454490",
+                "ends": "2025-07-17 15:10:56.455020",
+                "status": "SUCCESS",
+                "sub_events": []
+              }
+            ]
+          },
+          {
+            "id": "sample.1.0.0.1",
+            "type": "PROCESS",
+            "data": null,
+            "starts": "2025-07-17 15:10:56.455023",
+            "ends": "2025-07-17 15:10:56.475274",
+            "status": "SUCCESS",
+            "sub_events": [
+              {
+                "id": "PRO-01",
+                "type": "REMOVE_SCHEMA_VALIDATION",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.455024",
+                "ends": "2025-07-17 15:10:56.460550",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-06",
+                    "type": "REMOVE_SCHEMA",
+                    "data": {
+                      "collection": "sample",
+                      "operation": "schema_validation_removed"
+                    },
+                    "starts": "2025-07-17 15:10:56.455025",
+                    "ends": "2025-07-17 15:10:56.460548",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-04",
+                "type": "ADD_INDEXES",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.460553",
+                "ends": "2025-07-17 15:10:56.467283",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-09",
+                    "type": "ADD_INDEX",
+                    "data": {
+                      "collection": "sample",
+                      "index_name": "nameIndex",
+                      "index_keys": {
+                        "first_name": 1,
+                        "last_name": 1
+                      },
+                      "operation": "created"
+                    },
+                    "starts": "2025-07-17 15:10:56.460556",
+                    "ends": "2025-07-17 15:10:56.464342",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  },
+                  {
+                    "id": "MON-09",
+                    "type": "ADD_INDEX",
+                    "data": {
+                      "collection": "sample",
+                      "index_name": "statusIndex",
+                      "index_keys": {
+                        "status": 1
+                      },
+                      "operation": "created"
+                    },
+                    "starts": "2025-07-17 15:10:56.464346",
+                    "ends": "2025-07-17 15:10:56.467281",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-06",
+                "type": "APPLY_SCHEMA_VALIDATION",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.467284",
+                "ends": "2025-07-17 15:10:56.469938",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-10",
+                    "type": "APPLY_SCHEMA",
+                    "data": {
+                      "bsonType": "object",
+                      "properties": {
+                        "_id": {
+                          "bsonType": "objectId"
+                        },
+                        "first_name": {
+                          "pattern": "^\\S{1,40}$",
+                          "bsonType": "string"
+                        },
+                        "last_name": {
+                          "pattern": "^\\S{1,40}$",
+                          "bsonType": "string"
+                        },
+                        "status": {
+                          "bsonType": "string",
+                          "enum": [
+                            "active",
+                            "archived"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "_id",
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "starts": "2025-07-17 15:10:56.469149",
+                    "ends": "2025-07-17 15:10:56.469936",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-07",
+                "type": "LOAD_TEST_DATA",
+                "data": {
+                  "test_data_path": "./tests/test_cases/passing_template/test_data/sample.1.0.0.1.json"
+                },
+                "starts": "2025-07-17 15:10:56.469940",
+                "ends": "2025-07-17 15:10:56.470746",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-11",
+                    "type": "LOAD_DATA",
+                    "data": {
+                      "collection": "sample",
+                      "data_file": "sample.1.0.0.1.json",
+                      "documents_loaded": 2,
+                      "insert_many_result": {
+                        "inserted_ids": [
+                          "a00000000000000000000001",
+                          "a00000000000000000000002"
+                        ],
+                        "acknowledged": true
+                      }
+                    },
+                    "starts": "2025-07-17 15:10:56.469945",
+                    "ends": "2025-07-17 15:10:56.470743",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-08",
+                "type": "UPDATE_VERSION",
+                "data": {
+                  "_id": "68794ac018076259bdcebde5",
+                  "collection_name": "sample",
+                  "current_version": "sample.1.0.0.1"
+                },
+                "starts": "2025-07-17 15:10:56.470746",
+                "ends": "2025-07-17 15:10:56.475273",
+                "status": "SUCCESS",
+                "sub_events": []
+              }
+            ]
+          },
+          {
+            "id": "sample.1.0.1.2",
+            "type": "PROCESS",
+            "data": null,
+            "starts": "2025-07-17 15:10:56.475277",
+            "ends": "2025-07-17 15:10:56.495543",
+            "status": "SUCCESS",
+            "sub_events": [
+              {
+                "id": "PRO-01",
+                "type": "REMOVE_SCHEMA_VALIDATION",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.475277",
+                "ends": "2025-07-17 15:10:56.475795",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-06",
+                    "type": "REMOVE_SCHEMA",
+                    "data": {
+                      "collection": "sample",
+                      "operation": "schema_validation_removed"
+                    },
+                    "starts": "2025-07-17 15:10:56.475279",
+                    "ends": "2025-07-17 15:10:56.475794",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-02",
+                "type": "REMOVE_INDEXES",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.475796",
+                "ends": "2025-07-17 15:10:56.476483",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-07",
+                    "type": "REMOVE_INDEX",
+                    "data": {
+                      "collection": "sample",
+                      "index_name": "nameIndex",
+                      "operation": "dropped"
+                    },
+                    "starts": "2025-07-17 15:10:56.475797",
+                    "ends": "2025-07-17 15:10:56.476482",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-03",
+                "type": "EXECUTE_MIGRATIONS",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.476484",
+                "ends": "2025-07-17 15:10:56.484542",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-14",
+                    "type": "EXECUTE_MIGRATION_FILE",
+                    "data": {
+                      "collection": "sample",
+                      "migration_file": "first_last_to_full_name.json",
+                      "migration_path": "./tests/test_cases/passing_template/migrations/first_last_to_full_name.json",
+                      "pipeline_stages": 3,
+                      "pipeline_summary": [
+                        {
+                          "stage": 1,
+                          "operation": "$addFields",
+                          "details": {
+                            "$addFields": {
+                              "full_name": {
+                                "$concat": [
+                                  "$first_name",
+                                  " ",
+                                  "$last_name"
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "stage": 2,
+                          "operation": "$unset",
+                          "details": {
+                            "$unset": [
+                              "first_name",
+                              "last_name"
+                            ]
+                          }
+                        },
+                        {
+                          "stage": 3,
+                          "operation": "$out",
+                          "details": {
+                            "$out": "sample"
+                          }
+                        }
+                      ],
+                      "pipeline_operations": [
+                        "$addFields",
+                        "$unset",
+                        "$out"
+                      ]
+                    },
+                    "starts": "2025-07-17 15:10:56.476488",
+                    "ends": "2025-07-17 15:10:56.484541",
+                    "status": "SUCCESS",
+                    "sub_events": [
+                      {
+                        "id": "MON-13",
+                        "type": "LOAD_MIGRATION",
+                        "data": {
+                          "file": "./tests/test_cases/passing_template/migrations/first_last_to_full_name.json",
+                          "file_name": "first_last_to_full_name.json",
+                          "pipeline_stages": 3,
+                          "pipeline_operations": [
+                            "$addFields",
+                            "$unset",
+                            "$out"
+                          ]
+                        },
+                        "starts": "2025-07-17 15:10:56.476490",
+                        "ends": "2025-07-17 15:10:56.476580",
+                        "status": "SUCCESS",
+                        "sub_events": []
+                      },
+                      {
+                        "id": "MON-08",
+                        "type": "EXECUTE_MIGRATION",
+                        "data": {
+                          "collection": "sample"
+                        },
+                        "starts": "2025-07-17 15:10:56.476583",
+                        "ends": "2025-07-17 15:10:56.484532",
+                        "status": "SUCCESS",
+                        "sub_events": []
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "PRO-04",
+                "type": "ADD_INDEXES",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.484544",
+                "ends": "2025-07-17 15:10:56.490772",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-09",
+                    "type": "ADD_INDEX",
+                    "data": {
+                      "collection": "sample",
+                      "index_name": "fullNameIndex",
+                      "index_keys": {
+                        "full_name": 1
+                      },
+                      "operation": "created"
+                    },
+                    "starts": "2025-07-17 15:10:56.484545",
+                    "ends": "2025-07-17 15:10:56.490770",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-06",
+                "type": "APPLY_SCHEMA_VALIDATION",
+                "data": null,
+                "starts": "2025-07-17 15:10:56.490773",
+                "ends": "2025-07-17 15:10:56.493748",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-10",
+                    "type": "APPLY_SCHEMA",
+                    "data": {
+                      "bsonType": "object",
+                      "properties": {
+                        "_id": {
+                          "bsonType": "objectId"
+                        },
+                        "full_name": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        },
+                        "status": {
+                          "bsonType": "string",
+                          "enum": [
+                            "draft",
+                            "active",
+                            "archived"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "_id",
+                        "full_name",
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "starts": "2025-07-17 15:10:56.492491",
+                    "ends": "2025-07-17 15:10:56.493746",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-07",
+                "type": "LOAD_TEST_DATA",
+                "data": {
+                  "test_data_path": "./tests/test_cases/passing_template/test_data/sample.1.0.1.2.json"
+                },
+                "starts": "2025-07-17 15:10:56.493749",
+                "ends": "2025-07-17 15:10:56.494925",
+                "status": "SUCCESS",
+                "sub_events": [
+                  {
+                    "id": "MON-11",
+                    "type": "LOAD_DATA",
+                    "data": {
+                      "collection": "sample",
+                      "data_file": "sample.1.0.1.2.json",
+                      "documents_loaded": 1,
+                      "insert_many_result": {
+                        "inserted_ids": [
+                          "a00000000000000000000003"
+                        ],
+                        "acknowledged": true
+                      }
+                    },
+                    "starts": "2025-07-17 15:10:56.493754",
+                    "ends": "2025-07-17 15:10:56.494922",
+                    "status": "SUCCESS",
+                    "sub_events": []
+                  }
+                ]
+              },
+              {
+                "id": "PRO-08",
+                "type": "UPDATE_VERSION",
+                "data": {
+                  "_id": "68794ac018076259bdcebde5",
+                  "collection_name": "sample",
+                  "current_version": "sample.1.0.1.2"
+                },
+                "starts": "2025-07-17 15:10:56.494926",
+                "ends": "2025-07-17 15:10:56.495542",
+                "status": "SUCCESS",
+                "sub_events": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

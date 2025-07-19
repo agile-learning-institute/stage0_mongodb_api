@@ -1,0 +1,27 @@
+[
+  {
+    "_id": "687a7a8418076259bdd0c437",
+    "collection_name": "content",
+    "current_version": "content.1.0.1.3"
+  },
+  {
+    "_id": "687a7a8418076259bdd0c469",
+    "collection_name": "organization",
+    "current_version": "organization.1.0.0.1"
+  },
+  {
+    "_id": "687a7a8418076259bdd0c485",
+    "collection_name": "notification",
+    "current_version": "notification.1.0.1.3"
+  },
+  {
+    "_id": "687a7a8418076259bdd0c4b7",
+    "collection_name": "media",
+    "current_version": "media.1.0.0.1"
+  },
+  {
+    "_id": "687a7a8418076259bdd0c4d5",
+    "collection_name": "user",
+    "current_version": "user.1.0.1.3"
+  }
+]

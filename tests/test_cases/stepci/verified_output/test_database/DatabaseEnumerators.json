@@ -1,0 +1,31 @@
+[
+  {
+    "_id": "ignore",
+    "version": 0,
+    "enumerators": {}
+  },
+  {
+    "_id": "ignore",
+    "version": 1,
+    "enumerators": {
+      "default_status": {
+        "active": "Not Deleted",
+        "archived": "Soft Delete Indicator"
+      },
+      "test_enum": {
+        "foo": "bar"
+      }
+    }
+  },
+  {
+    "_id": "ignore",
+    "version": 2,
+    "enumerators": {
+      "default_status": {
+        "draft": "Draft",
+        "active": "Not Deleted",
+        "archived": "Soft Delete Indicator"
+      }
+    }
+  }
+] 

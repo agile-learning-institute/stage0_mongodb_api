@@ -1,0 +1,5 @@
+description: Configuration for Missing Test Migrations
+name: test_migrations
+versions:
+  - version: "1.0.0.0"
+    test_data: missing_migration_file.json

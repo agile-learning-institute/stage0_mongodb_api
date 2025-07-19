@@ -53,31 +53,13 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.configuration_routes.FileIO')
     @patch('configurator.routes.configuration_routes.Configuration')
-    def test_process_configurations_success(self, mock_configuration_class, mock_file_io):
+    def test_process_configurations_success(self, mock_configuration_class):
         """Test successful POST /api/configurations/."""
         # Arrange
-        # Create mock File objects with name attribute
-        mock_file1 = Mock()
-        mock_file1.name = "config1.yaml"
-        mock_file2 = Mock()
-        mock_file2.name = "config2.yaml"
-        mock_files = [mock_file1, mock_file2]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        # Mock Configuration.process() to return ConfiguratorEvent objects
-        mock_config1 = Mock()
-        mock_event1 = ConfiguratorEvent("CFG-00", "PROCESS")
-        mock_event1.record_success()
-        mock_config1.process.return_value = mock_event1
-        
-        mock_config2 = Mock()
-        mock_event2 = ConfiguratorEvent("CFG-00", "PROCESS")
-        mock_event2.record_success()
-        mock_config2.process.return_value = mock_event2
-        
-        mock_configuration_class.side_effect = [mock_config1, mock_config2]
+        mock_event = ConfiguratorEvent("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS")
+        mock_event.record_success()
+        mock_configuration_class.process_all.return_value = mock_event
 
         # Act
         response = self.client.post('/api/configurations/')
@@ -90,14 +72,14 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("type", response_data)
         self.assertIn("status", response_data)
         self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["type"], "PROCESS_CONFIGURATIONS")
+        self.assertEqual(response_data["type"], "PROCESS_ALL_CONFIGURATIONS")
         self.assertIn("sub_events", response_data)
 
-    @patch('configurator.routes.configuration_routes.FileIO')
-    def test_process_configurations_general_exception(self, mock_file_io):
-        """Test POST /api/configurations/ when FileIO raises a general exception."""
+    @patch('configurator.routes.configuration_routes.Configuration')
+    def test_process_configurations_general_exception(self, mock_configuration_class):
+        """Test POST /api/configurations/ when Configuration.process_all raises a general exception."""
         # Arrange
-        mock_file_io.get_documents.side_effect = Exception("Unexpected error")
+        mock_configuration_class.process_all.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.post('/api/configurations/')

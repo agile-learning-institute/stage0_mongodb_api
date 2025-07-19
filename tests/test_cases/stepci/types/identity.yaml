@@ -1,9 +1,0 @@
-file_name: identity.yaml
-_locked: true
-description: A unique identifier for a document
-required: false
-json_type:
-  type: string
-  pattern: ^[0-9a-fA-F]{24}$
-bson_type:
-  bsonType: objectId

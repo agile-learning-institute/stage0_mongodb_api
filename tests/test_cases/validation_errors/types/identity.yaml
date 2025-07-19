@@ -1,4 +1,0 @@
-description: A unique identifier for a document
-json_type: "not_a_dictionary"
-bson_type:
-  bsonType: objectId 

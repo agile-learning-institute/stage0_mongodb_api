@@ -18,9 +18,10 @@ versions:
       unique: false
   migrations: []
   test_data: sample.1.0.0.1.json
+  _locked: false
 - version: 1.0.1.2
   drop_indexes:
-  - name: nameIndex
+  - nameIndex
   add_indexes:
   - name: fullNameIndex
     key:
@@ -30,4 +31,5 @@ versions:
   migrations:
   - first_last_to_full_name.json
   test_data: sample.1.0.1.2.json
+  _locked: false
 _locked: true

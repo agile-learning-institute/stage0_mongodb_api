@@ -1,0 +1,44 @@
+[
+  {
+    "_id": "c00000000000000000000001",
+    "title": "The Matrix",
+    "type": "movie",
+    "status": "published",
+    "last_saved": {
+      "from_ip": "127.0.0.1",
+      "by_user": "system",
+      "at_time": "2024-01-01 00:00:00",
+      "correlation_id": "corr_005"
+    },
+    "tags": [
+      "action",
+      "sci_fi"
+    ],
+    "metadata": {
+      "duration": 136,
+      "format": "bluray",
+      "quality": "uhd"
+    }
+  },
+  {
+    "_id": "c00000000000000000000002",
+    "title": "War and Peace",
+    "type": "tv_show",
+    "status": "published",
+    "last_saved": {
+      "from_ip": "127.0.0.1",
+      "by_user": "system",
+      "at_time": "2024-01-02 00:00:00",
+      "correlation_id": "corr_006"
+    },
+    "tags": [
+      "documentary",
+      "action"
+    ],
+    "metadata": {
+      "duration": 240,
+      "format": "bluray",
+      "quality": "hd"
+    }
+  }
+]

@@ -1,5 +1,0 @@
-description: A schema with a missing reference
-type: object
-properties:
-  missing:
-    ref: does_not_exist.1.0.0 

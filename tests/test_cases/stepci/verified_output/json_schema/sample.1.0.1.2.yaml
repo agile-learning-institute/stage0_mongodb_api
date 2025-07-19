@@ -1,0 +1,23 @@
+description: A simple collection for testing
+type: object
+properties:
+  _id:
+    description: The unique identifier for the media
+    type: string
+    pattern: "^[0-9a-fA-F]{24}$"
+  full_name:
+    description: The name of the document
+    type: string
+    pattern: "^[^\\t\\n\\r]{0,255}$"
+  status:
+    description: The current status of the document
+    type: string
+    enum:
+      - draft
+      - active
+      - archived
+required:
+  - _id
+  - full_name
+  - status
+additionalProperties: false 

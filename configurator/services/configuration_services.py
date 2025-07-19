@@ -78,6 +78,35 @@ class Configuration:
         
         event.record_success()
         return event
+
+    @staticmethod
+    def process_all():
+        """Process all configuration files."""
+        config = Config.get_instance()
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        event = ConfiguratorEvent("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS")
+        
+        for file in files:
+            try:
+                sub_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
+                event.append_events([sub_event])
+                configuration = Configuration(file.file_name)
+                process_event = configuration.process()
+                sub_event.data = process_event.data
+                sub_event.append_events([process_event])
+                sub_event.record_success()
+            except ConfiguratorException as ce:
+                sub_event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
+                event.append_events([ce.event])
+                event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
+                raise ConfiguratorException(f"ConfiguratorException processing configuration {file.file_name}", event)
+            except Exception as e:
+                sub_event.record_failure(f"Failed to process configuration {file.file_name}: {str(e)}")
+                event.record_failure(f"Unexpected error processing configuration {file.file_name}")
+                raise ConfiguratorException(f"Unexpected error processing configuration {file.file_name}", event)
+        
+        event.record_success()
+        return event
     
 
     
@@ -109,6 +138,10 @@ class Configuration:
         
         # Create MongoIO instance with proper parameters
         mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
+
+        # Upsert enumerators to database ONCE per configuration
+        enumerators = Enumerators()
+        event.append_events([enumerators.upsert_all_to_database(mongo_io)])
         
         for version in self.versions:
             event.append_events([version.process(mongo_io)])
@@ -151,6 +184,7 @@ class Version:
             self.add_indexes = version.get("add_indexes", [])
             self.migrations = version.get("migrations", [])
             self.test_data = version.get("test_data", None)
+            self._locked = version.get("_locked", False)
         except ConfiguratorException as e:
             # Re-raise with additional context about the version being constructed
             event = ConfiguratorEvent(event_id=f"VER-CONSTRUCTOR-{collection_name}", event_type="VERSION_CONSTRUCTOR")
@@ -170,6 +204,7 @@ class Version:
             "add_indexes": self.add_indexes,
             "migrations": self.migrations,
             "test_data": self.test_data,
+            "_locked": self._locked,
         }
 
     def get_json_schema(self, enumerations) -> dict:
@@ -203,8 +238,8 @@ class Version:
             if self.drop_indexes:
                 sub_event = ConfiguratorEvent(event_id="PRO-02", event_type="REMOVE_INDEXES")
                 event.append_events([sub_event])
-                for index in self.drop_indexes:
-                    sub_event.append_events(mongo_io.remove_index(self.collection_name, index))                    
+                for index_name in self.drop_indexes:
+                    sub_event.append_events(mongo_io.remove_index(self.collection_name, index_name))                    
                 sub_event.record_success()
 
             # Execute migrations
@@ -225,7 +260,7 @@ class Version:
                 sub_event.record_success()
 
             # Apply schema validation
-            sub_event = ConfiguratorEvent(event_id="PRO-05", event_type="APPLY_SCHEMA_VALIDATION")
+            sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
             event.append_events([sub_event])
             enumerations = Enumerators().getVersion(self.collection_version.get_enumerator_version())
             bson_schema: dict = self.get_bson_schema(enumerations)
@@ -236,7 +271,7 @@ class Version:
 
             # Load test data
             if self.test_data:
-                sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="LOAD_TEST_DATA")
+                sub_event = ConfiguratorEvent(event_id="PRO-07", event_type="LOAD_TEST_DATA")
                 event.append_events([sub_event])
                 test_data_path = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, self.test_data)
                 sub_event.data = {"test_data_path": test_data_path}
@@ -244,7 +279,7 @@ class Version:
                 sub_event.record_success()
 
             # Update version
-            sub_event = ConfiguratorEvent(event_id="PRO-07", event_type="UPDATE_VERSION")
+            sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="UPDATE_VERSION")
             event.append_events([sub_event])
             result = mongo_io.upsert(
                 self.config.VERSION_COLLECTION_NAME,

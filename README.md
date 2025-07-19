@@ -57,7 +57,7 @@ pipenv run drop
 
 #####################
 # Building and Testing the container (before a PR)
-pipenv run build        # Build the container
+pipenv run container    # Build the container
 pipenv run service      # Run the DB, API, and SPA containers
 # visit http://localhost:8082 and "process all"
 
@@ -106,20 +106,29 @@ The `tests/` directory contains python unit tests, stepci black box, and testing
 ```
 tests/
 ├── test_server.py          # Server.py unit tests
+├── integration/            # Integration tests dependent on backing services
 ├── models/                 # Model class unit tests
 ├── routes/                 # Route class unit tests
 ├── services/               # Service layer unit tests
 ├── utils/                  # Utility unit tests
 ├── stepci/                 # API Black Box testing
 ├── test_cases/             # Test data 
-│   ├── small_sample/       # Simple test configuration
-│   ├── large_sample/       # Complex test configuration
-│   ├── stepci/             # For step ci testing
-│   ├── sample_template/    # Configuration for Template
-│   ├── playground/         # Served with Stack for interactive UI testing
-│   ├── .../                # Additional test cases
+│   ├── failing_*/          # Integration Test data for failure use cases
+│   ├── failing_refs/           # Circular/Missing Refs, integration/test_refs.py
+│   ├── failing_missing/        # Missing folders, integration/test_missing.py
+│   ├── failing_unparsable/     # Non yaml/json files, integration/test_unparsable.py
+│   ├── failing_validation/     # Missing required, integration/test_validation.py
+│   ├── passing_*/          # Integration Test data for success use cases
+│   ├── passing_complex_refs/   # integration/test_renders.py, integration/test_processing.py
+│   ├── passing_config_files/   # integration/test_config_file.py
+│   ├── passing_empty/          # integration/test_renders.py, integration/test_processing.py
+│   ├── passing_process/        # integration/test_renders.py, integration/test_processing.py
+│   ├── passing_type_renders/   # integration/test_type_renders.py
+│   ├── playground/         # Playground for SPA - not used in integration testing
+│   ├── stepci/             # Configuration for step ci testing - setup/tear down in tests
+│   ├── template/           # Template, integration/test_renders.py, integration/test_processing.py
+
 ```
-the unit tests TestConfigurationIntegration and TestTypeRendering are integration tests that use the small_sample and large_sample input folders in test_cases. 
 
 ## API Documentation
 

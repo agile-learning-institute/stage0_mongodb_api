@@ -4,14 +4,14 @@ required: false
 properties:
   _id:
     description: The unique identifier for the media
-    type: identity
+    type: identifier
     required: true
   first_name:
-    description: First Name
+    description: The name of the document
     type: word
     required: false
   last_name:
-    description: Family Name
+    description: The last name of the document
     type: word
     required: false
   status:

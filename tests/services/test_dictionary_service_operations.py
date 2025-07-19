@@ -332,49 +332,5 @@ class TestDictionary(unittest.TestCase):
         self.assertEqual(result["_locked"], False)
 
 
-class TestDictionaryCanonical(unittest.TestCase):
-    """Test cases for Dictionary class using canonical test data"""
-
-    def setUp(self):
-        self.config = set_config_input_folder("tests/test_cases/small_sample")
-
-    def tearDown(self):
-        clear_config()
-
-    def test_dictionary_object(self):
-        """Test Dictionary with object type from test data"""
-        doc = load_yaml("tests/test_cases/small_sample/dictionaries/sample.1.0.0.yaml")
-        
-        dictionary = Dictionary("sample.1.0.0.yaml", doc)
-        
-        self.assertEqual(dictionary.file_name, "sample.1.0.0.yaml")
-        self.assertEqual(dictionary.property.description, "A simple collection for testing")
-        self.assertEqual(dictionary.property.type, "object")
-        
-        # Test to_dict
-        result = dictionary.to_dict()
-        self.assertEqual(result["description"], "A simple collection for testing")
-        self.assertEqual(result["type"], "object")
-        self.assertIn("properties", result)
-        self.assertEqual(result["file_name"], "sample.1.0.0.yaml")
-        self.assertEqual(result["_locked"], False)
-
-    def test_dictionary_without_properties(self):
-        """Test Dictionary without properties"""
-        doc = {
-            "description": "Test dictionary without properties",
-            "version": "1.0.0"
-        }
-        
-        dictionary = Dictionary("test.yaml", doc)
-        
-        self.assertEqual(dictionary.property.description, "Test dictionary without properties")
-        
-        # Test to_dict
-        result = dictionary.to_dict()
-        self.assertEqual(result["description"], "Test dictionary without properties")
-        self.assertEqual(result["file_name"], "test.yaml")
-        self.assertEqual(result["_locked"], False)
-
 if __name__ == '__main__':
     unittest.main() 

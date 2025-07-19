@@ -1,0 +1,4 @@
+description: Configuration for missing type
+name: missing_type
+versions:
+  - version: "1.0.0.0"
