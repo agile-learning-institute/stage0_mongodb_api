@@ -67,20 +67,20 @@ properties:
             type: object
             required: false
             properties:
-            one_of:
-              schemas:
-                stakeholder:
-                  ref: observation_stakeholder.1.0.0.yaml
-                empathy:
-                  ref: observation_empathy.1.0.0.yaml
-                hills:
-                  ref: observation_hills.1.0.0.yaml
-                priority:
-                  ref: observation_priority.1.0.0.yaml
-                ranking:
-                  ref: observation_ranking.1.0.0.yaml
-                retrospective:
-                  ref: observation_retrospective.1.0.0.yaml
+              users:
+                description: Users who made the observation
+                required: true
+                type: array
+                items:
+                  description: User Name
+                  type: word
+            oneOf:
+              - ref: observation_stakeholder.1.0.0.yaml
+              - ref: observation_empathy.1.0.0.yaml
+              - ref: observation_hills.1.0.0.yaml
+              - ref: observation_priority.1.0.0.yaml
+              - ref: observation_ranking.1.0.0.yaml
+              - ref: observation_retrospective.1.0.0.yaml
   last_saved:
     description: Last Saved breadcrumb
     type: breadcrumb

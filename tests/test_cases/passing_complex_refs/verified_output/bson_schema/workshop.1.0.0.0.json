@@ -1,14 +1,10 @@
 {
-  "description": "A record of a specific design thinking workshop.",
   "bsonType": "object",
-  "additionalProperties": false,
   "properties": {
     "_id": {
-      "bsonType": "objectId",
-      "description": "The unique identifier for a Workshop"
+      "bsonType": "objectId"
     },
     "status": {
-      "description": "Workshop Status/State",
       "bsonType": "string",
       "enum": [
         "pending",
@@ -19,65 +15,60 @@
     },
     "channel_id": {
       "pattern": "^\\S{1,40}$",
-      "bsonType": "string",
-      "description": "The discord identifier for the channel this workshop is hosted on"
+      "bsonType": "string"
     },
     "channel_name": {
       "pattern": "^\\S{1,40}$",
-      "bsonType": "string",
-      "description": "Workshop Name"
+      "bsonType": "string"
     },
     "category": {
-      "pattern": "^[^\\t\\n\\r]{1,255}$",
-      "bsonType": "string",
-      "description": "Discord Channel Category where this workshop channel is"
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
     },
     "guild": {
-      "pattern": "^[^\\t\\n\\r]{1,255}$",
-      "bsonType": "string",
-      "description": "Discord Server where this workshop takes place"
+      "pattern": "^[^\\t\\n\\r]{0,255}$",
+      "bsonType": "string"
     },
     "purpose": {
-      "pattern": "[\\s\\S]{1,4096}",
-      "bsonType": "string",
-      "description": "Workshop Purpose"
+      "maxLength": 4096,
+      "bsonType": "string"
     },
     "when": {
-      "description": "From-To Date/Time for the Workshop Event",
       "bsonType": "object",
-      "additionalProperties": false,
       "properties": {
         "from": {
-          "bsonType": "date",
-          "description": "Starting Date-Time"
+          "bsonType": "date"
         },
         "to": {
-          "bsonType": "date",
-          "description": "Ending Date-Time"
+          "bsonType": "date"
         }
       },
-      "title": "Appointment",
-      "required": ["from", "to"]
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "to"
+      ]
     },
     "current_exercise": {
       "bsonType": "int",
-      "minimum": 0,
-      "description": "Index of the current exercise for Active workshops"
+      "minimum": 0
     },
     "exercises": {
-      "description": "List of workshop_exercise documents",
       "bsonType": "array",
       "items": {
-        "description": "A Workshop Exercise and observations",
         "bsonType": "object",
-        "additionalProperties": false,
         "properties": {
           "exercise_id": {
-            "bsonType": "objectId",
-            "description": "The Exercise Instructions this is using"
+            "bsonType": "objectId"
+          },
+          "conversation_id": {
+            "bsonType": "objectId"
+          },
+          "exercise_name": {
+            "pattern": "^\\S{1,40}$",
+            "bsonType": "string"
           },
           "status": {
-            "description": "The exercise status or state (Observe/Reflect/Make)",
             "bsonType": "string",
             "enum": [
               "pending",
@@ -87,377 +78,249 @@
               "complete"
             ]
           },
-          "conversation_id": {
-            "bsonType": "objectId",
-            "description": "The _id of the conversation for this exercise"
+          "persona": {
+            "bsonType": "object",
+            "properties": {
+              "name": {
+                "pattern": "^\\S{1,40}$",
+                "bsonType": "string"
+              },
+              "age": {
+                "bsonType": "int"
+              },
+              "occupation": {
+                "pattern": "^[^\\t\\n\\r]{0,255}$",
+                "bsonType": "string"
+              },
+              "goals": {
+                "maxLength": 4096,
+                "bsonType": "string"
+              },
+              "frustrations": {
+                "maxLength": 4096,
+                "bsonType": "string"
+              },
+              "needs": {
+                "maxLength": 4096,
+                "bsonType": "string"
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
           },
           "observations": {
-            "description": "Observations of the exercise",
             "bsonType": "array",
             "items": {
-              "description": "A workshop observation",
               "bsonType": "object",
-              "additionalProperties": false,
               "properties": {
-                "exercise": {
-                  "pattern": "^\\S{1,40}$",
-                  "bsonType": "string",
-                  "description": "The exercise name"
-                },
-                "stakeholders": {
-                  "description": "Stakeholders Exercise",
-                  "bsonType": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "observations": {
-                      "description": "Stakeholder Observations",
-                      "bsonType": "array",
-                      "items": {
-                        "description": "A stakeholder of a Stakeholder exercise",
-                        "bsonType": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "users": {
-                            "description": "Users of the stakeholder",
-                            "bsonType": "array",
-                            "items": {
-                              "pattern": "^\\S{1,40}$",
-                              "bsonType": "string",
-                              "description": "User Name"
-                            }
-                          },
-                          "text": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "Text of the stakeholder"
-                          },
-                          "name": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "Name of the stakeholder"
-                          },
-                          "title": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "Title of the stakeholder"
-                          },
-                          "roles": {
-                            "description": "Roles of the stakeholder",
-                            "bsonType": "array",
-                            "items": {
-                              "pattern": "^\\S{1,40}$",
-                              "bsonType": "string",
-                              "description": "Role Name"
-                            }
-                          }
-                        },
-                        "title": "Observation Stakeholder",
-                        "required": [
-                          "users"
-                        ]
-                      }
-                    }
-                  }
-                },
-                "empathy": {
-                  "description": "Empathy Mapping exercise",
-                  "bsonType": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "persona": {
-                      "description": "Persona information",
-                      "bsonType": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "name": {
-                          "pattern": "^\\S{1,40}$",
-                          "bsonType": "string",
-                          "description": "Name of the persona"
-                        },
-                        "description": {
-                          "pattern": "^[^\\t\\n\\r]{1,255}$",
-                          "bsonType": "string",
-                          "description": "Description of the persona"
-                        },
-                        "observations": {
-                          "description": "Empathy Observations",
-                          "bsonType": "array",
-                          "items": {
-                            "description": "A empathy of a Empathy Mapping exercise",
-                            "bsonType": "object",
-                            "additionalProperties": false,
-                            "properties": {
-                              "users": {
-                                "description": "Users who made the observation",
-                                "bsonType": "array",
-                                "items": {
-                                  "pattern": "^\\S{1,40}$",
-                                  "bsonType": "string",
-                                  "description": "User Name"
-                                }
-                              },
-                              "says": {
-                                "pattern": "^[^\\t\\n\\r]{1,255}$",
-                                "bsonType": "string",
-                                "description": "Things the user says"
-                              },
-                              "does": {
-                                "pattern": "^[^\\t\\n\\r]{1,255}$",
-                                "bsonType": "string",
-                                "description": "Things the user does"
-                              },
-                              "thinks": {
-                                "pattern": "^[^\\t\\n\\r]{1,255}$",
-                                "bsonType": "string",
-                                "description": "Things the user thinks"
-                              },
-                              "feels": {
-                                "pattern": "^[^\\t\\n\\r]{1,255}$",
-                                "bsonType": "string",
-                                "description": "Things the user feels"
-                              }
-                            },
-                            "title": "Empathy Observation",
-                            "required": [
-                              "users"
-                            ]
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "hills": {
-                  "description": "Hills of the exercise",
-                  "bsonType": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "observations": {
-                      "description": "Hills Observations",
-                      "bsonType": "array",
-                      "items": {
-                        "description": "A hill of a Hills exercise",
-                        "bsonType": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "name": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "Unique Name of the hill"
-                          },
-                          "users": {
-                            "description": "Users who made the observation",
-                            "bsonType": "array",
-                            "items": {
-                              "pattern": "^\\S{1,40}$",
-                              "bsonType": "string",
-                              "description": "User Name"
-                            }
-                          },
-                          "who": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "Persona Who is the hill about"
-                          },
-                          "what": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "What the user does"
-                          },
-                          "wow": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "The Wow that happens when Who does What"
-                          }
-                        },
-                        "title": "Hills Exercise Observation",
-                        "required": [
-                          "users"
-                        ]
-                      }
-                    }
-                  }
-                },
-                "priority": {
-                  "description": "Priority of the exercise",
-                  "bsonType": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "observations": {
-                      "description": "Priority Observations",
-                      "bsonType": "array",
-                      "items": {
-                        "description": "A priority of a Priority exercise",
-                        "bsonType": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "user": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "User who made the priority observation"
-                          },
-                          "feasibility": {
-                            "description": "Hills in order of feasibility (low to high)",
-                            "bsonType": "array",
-                            "items": {
-                              "pattern": "^\\S{1,40}$",
-                              "bsonType": "string",
-                              "description": "Hill Name"
-                            }
-                          },
-                          "impact": {
-                            "description": "Hills in order of impact (low to high)",
-                            "bsonType": "array",
-                            "items": {
-                              "pattern": "^\\S{1,40}$",
-                              "bsonType": "string",
-                              "description": "Hill Name"
-                            }
-                          }
-                        },
-                        "title": "Priority Exercise Observation",
-                        "required": [
-                          "user"
-                        ]
-                      }
-                    },
-                    "outcome": {
-                      "description": "The outcome of a Priority exercise",
-                      "bsonType": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "no_brainers": {
-                          "description": "Hills that are high impact, and high feasibility",
-                          "bsonType": "array",
-                          "items": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "Hill Name"
-                          }
-                        },
-                        "big_bets": {
-                          "description": "Hills that are high impact, but low feasibility",
-                          "bsonType": "array",
-                          "items": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "Hill Name"
-                          }
-                        },
-                        "utilities": {
-                          "description": "Hills that are low impact, but high feasibility",
-                          "bsonType": "array",
-                          "items": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "Hill Name"
-                          }
-                        },
-                        "unwise": {
-                          "description": "Hills that are low impact, and low feasibility",
-                          "bsonType": "array",
-                          "items": {
-                            "pattern": "^\\S{1,40}$",
-                            "bsonType": "string",
-                            "description": "Hill Name"
-                          }
-                        }
-                      },
-                      "title": "Ranking Outcome"
-                    }
-                  }
-                },
-                "retrospective": {
-                  "description": "Retrospective of the exercise",
-                  "bsonType": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "observations": {
-                      "description": "Retrospective Observations",
-                      "bsonType": "array",
-                      "items": {
-                        "description": "A observation for a Retrospective exercise",
-                        "bsonType": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "users": {
-                            "description": "Users who made the observation",
-                            "bsonType": "array",
-                            "items": {
-                              "pattern": "^\\S{1,40}$",
-                              "bsonType": "string",
-                              "description": "User Name"
-                            }
-                          },
-                          "question": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "Question that remains"
-                          },
-                          "worked_well": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "Something that worked well"
-                          },
-                          "could_be_improved": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "Something that could be improved"
-                          },
-                          "ideas_to_try": {
-                            "pattern": "^[^\\t\\n\\r]{1,255}$",
-                            "bsonType": "string",
-                            "description": "Something to try differently next time"
-                          }
-                        },
-                        "title": "Retrospective Observation",
-                        "required": [
-                          "users"
-                        ]
-                      }
-                    }
+                "users": {
+                  "bsonType": "array",
+                  "items": {
+                    "pattern": "^\\S{1,40}$",
+                    "bsonType": "string"
                   }
                 }
               },
-              "title": "Observation",
-              "required": ["exercise"]
+              "required": [
+                "users"
+              ],
+              "additionalProperties": false,
+              "oneOf": [
+                {
+                  "bsonType": "object",
+                  "properties": {
+                    "users": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    },
+                    "text": {
+                      "pattern": "^[^\\t\\n\\r]{0,255}$",
+                      "bsonType": "string"
+                    },
+                    "name": {
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    },
+                    "title": {
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    },
+                    "roles": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "users"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "bsonType": "object",
+                  "properties": {
+                    "users": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "users"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "bsonType": "object",
+                  "properties": {
+                    "name": {
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    },
+                    "users": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    },
+                    "who": {
+                      "pattern": "^[^\\t\\n\\r]{0,255}$",
+                      "bsonType": "string"
+                    },
+                    "what": {
+                      "pattern": "^[^\\t\\n\\r]{0,255}$",
+                      "bsonType": "string"
+                    },
+                    "wow": {
+                      "pattern": "^[^\\t\\n\\r]{0,255}$",
+                      "bsonType": "string"
+                    }
+                  },
+                  "required": [
+                    "users"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "bsonType": "object",
+                  "properties": {
+                    "user": {
+                      "pattern": "^\\S{1,40}$",
+                      "bsonType": "string"
+                    },
+                    "feasibility": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    },
+                    "impact": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "user"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "bsonType": "object",
+                  "properties": {
+                    "no_brainers": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    },
+                    "big_bets": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    },
+                    "utilities": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    },
+                    "unwise": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "bsonType": "object",
+                  "properties": {
+                    "users": {
+                      "bsonType": "array",
+                      "items": {
+                        "pattern": "^\\S{1,40}$",
+                        "bsonType": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "users"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             }
           }
         },
         "required": [
           "exercise_id",
-          "status",
           "conversation_id",
-          "observations"
-        ]
+          "exercise_name",
+          "status"
+        ],
+        "additionalProperties": false
       }
     },
     "last_saved": {
-      "description": "Last Saved breadcrumb",
       "bsonType": "object",
-      "additionalProperties": false,
       "properties": {
         "from_ip": {
-          "pattern": "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$",
-          "bsonType": "string",
-          "description": "Http Request remote IP address"
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+          "bsonType": "string"
         },
         "by_user": {
           "pattern": "^\\S{1,40}$",
-          "bsonType": "string",
-          "description": "ID Of User"
+          "bsonType": "string"
         },
         "at_time": {
-          "bsonType": "date",
-          "description": "The date-time when last updated"
+          "bsonType": "date"
         },
         "correlation_id": {
           "pattern": "^\\S{1,40}$",
-          "bsonType": "string",
-          "description": "The logging correlation ID of the update transaction"
+          "bsonType": "string"
         }
       },
-      "title": "Breadcrumb",
+      "additionalProperties": false,
       "required": [
         "from_ip",
         "by_user",
@@ -466,11 +329,11 @@
       ]
     }
   },
-  "title": "Workshop",
   "required": [
     "_id",
     "status",
     "exercises",
     "last_saved"
-  ]
+  ],
+  "additionalProperties": false
 }

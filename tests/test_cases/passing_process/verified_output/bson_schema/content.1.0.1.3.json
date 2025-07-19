@@ -23,9 +23,11 @@
     "status": {
       "bsonType": "string",
       "enum": [
-        "draft",
         "active",
-        "archived"
+        "archived",
+        "published",
+        "draft",
+        "scheduled"
       ]
     },
     "author_id": {
@@ -49,9 +51,11 @@
         "status": {
           "bsonType": "string",
           "enum": [
-            "draft",
             "active",
-            "archived"
+            "archived",
+            "published",
+            "draft",
+            "scheduled"
           ]
         },
         "last_saved": {
@@ -143,9 +147,10 @@
             "quality": {
               "bsonType": "string",
               "enum": [
-                "sd",
                 "hd",
-                "uhd"
+                "uhd",
+                "sd",
+                "fhd"
               ]
             }
           },

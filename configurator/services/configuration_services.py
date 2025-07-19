@@ -227,6 +227,7 @@ class Version:
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         """Process this version with proper event nesting."""
         event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version_str}", event_type="PROCESS")
+        sub_event = None
         
         try:
             # Check if this version is already implemented
@@ -307,10 +308,11 @@ class Version:
             return event
         
         except ConfiguratorException as e:
-            # This should not happen since we handle ConfiguratorException above
             event.append_events([e.event])
+            sub_event.record_failure(f"ConfiguratorException processing version {self.version_str}: {str(e)}")
             event.record_failure("error processing version")
-            return event
+            raise ConfiguratorException(f"ConfiguratorException processing version {self.version_str}: {str(e)}", event)
         except Exception as e:
+            sub_event.record_failure(f"ConfiguratorException processing version {self.version_str}: {str(e)}")
             event.record_failure("unexpected error processing version", {"error": str(e)})
-            return event
+            raise ConfiguratorException(f"ConfiguratorException processing version {self.version_str}: {str(e)}", event)

@@ -1,8 +1,9 @@
-from configurator.services.type_services import Type
-from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.utils.file_io import FileIO
-from configurator.utils.config import Config
 import os
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.file_io import FileIO
+from configurator.services.type_services import Type
+from configurator.services.enumerator_service import Enumerators
+from configurator.utils.config import Config
 
 class Dictionary:
     def __init__(self, file_name: str = "", document: dict = {}):
@@ -128,7 +129,7 @@ class Property:
             for prop_name, prop_data in properties_data.items():
                 self.properties[prop_name] = Property(prop_name, prop_data)
 
-            # Initialize one_of if present
+            # Initialize oneOf if present
             one_of_data = property.get("one_of", None)
             if one_of_data:
                 self.one_of = OneOf(one_of_data)
@@ -156,9 +157,9 @@ class Property:
                 result["properties"][prop_name] = prop.to_dict()
             result["additionalProperties"] = self.additional_properties
 
-            # Add one_of if present
+            # Add oneOf if present (use JSON Schema standard)
             if self.one_of:
-                result["one_of"] = self.one_of.to_dict()
+                result["oneOf"] = self.one_of.to_dict()
 
         elif self.type == "array":
             result["items"] = self.items.to_dict()
@@ -187,7 +188,7 @@ class Property:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
 
-            # Handle one_of structure
+            # Handle oneOf structure (JSON Schema standard)
             if self.one_of:
                 schema["oneOf"] = self.one_of.get_json_schema(enumerations, ref_stack)
 
@@ -245,7 +246,7 @@ class Property:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
 
-            # Handle one_of structure
+            # Handle oneOf structure (JSON Schema standard)
             if self.one_of:
                 schema["oneOf"] = self.one_of.get_bson_schema(enumerations, ref_stack)
 
@@ -324,18 +325,32 @@ class Property:
 
 
 class OneOf:
-    def __init__(self, one_of_data: dict):
-        self.schemas = {}
-        for schema_name, schema_data in one_of_data.get("schemas", {}).items():
-            self.schemas[schema_name] = Property(schema_name, schema_data)
+    def __init__(self, one_of_data):
+        self.schemas = []
+        
+        # Handle array format (JSON Schema standard)
+        if isinstance(one_of_data, list):
+            for i, schema_data in enumerate(one_of_data):
+                # Check if this is a ref object
+                if isinstance(schema_data, dict) and "ref" in schema_data:
+                    # Create a Property with just the ref
+                    self.schemas.append(Property(f"oneOf_item_{i}", {"ref": schema_data["ref"]}))
+                else:
+                    # Regular schema object
+                    self.schemas.append(Property(f"oneOf_item_{i}", schema_data))
+        else:
+            # If not a list, this is an error - oneOf should always be an array
+            raise ConfiguratorException(
+                f"oneOf data must be an array, got {type(one_of_data)}", 
+                ConfiguratorEvent(event_id="DIC-10", event_type="INVALID_ONEOF_FORMAT")
+            )
 
     def to_dict(self):
-        return {
-            "schemas": {name: schema.to_dict() for name, schema in self.schemas.items()}
-        }
+        # Return array of schemas (JSON Schema standard)
+        return [schema.to_dict() for schema in self.schemas]
 
     def get_json_schema(self, enumerations, ref_stack: list = None):
-        return [schema.get_json_schema(enumerations, ref_stack) for schema in self.schemas.values()]
+        return [schema.get_json_schema(enumerations, ref_stack) for schema in self.schemas]
 
     def get_bson_schema(self, enumerations, ref_stack: list = None):
-        return [schema.get_bson_schema(enumerations, ref_stack) for schema in self.schemas.values()]
+        return [schema.get_bson_schema(enumerations, ref_stack) for schema in self.schemas]

@@ -38,63 +38,62 @@ properties:
     properties: {}
     additionalProperties: false
     one_of:
-      schemas:
-        article:
-          description: Article content structure
-          type: object
-          required: false
-          properties:
-            body:
-              description: Article body text
-              type: markdown
-              required: true
-            tags:
-              description: Article tags
-              type: enum_array
-              required: false
-              enums: content_tags
-            word_count:
-              description: Article word count
-              type: count
-              required: false
-          additionalProperties: false
-        video:
-          description: Video content structure
-          type: object
-          required: false
-          properties:
-            url:
-              description: Video URL
-              type: url
-              required: true
-            duration:
-              description: Video duration in seconds
-              type: count
-              required: false
-            quality:
-              description: Video quality
-              type: enum
-              required: false
-              enums: media_quality
-          additionalProperties: false
-        podcast:
-          description: Podcast content structure
-          type: object
-          required: false
-          properties:
-            audio_url:
-              description: Audio file URL
-              type: url
-              required: true
-            transcript:
-              description: Podcast transcript
-              type: markdown
-              required: false
-            episode_number:
-              description: Episode number
-              type: count
-              required: false
-          additionalProperties: false
+      - description: Article content structure
+        type: object
+        properties:
+          body:
+            description: Article body text
+            type: markdown
+            required: true
+          tags:
+            description: Article tags
+            type: enum_array
+            required: false
+            enums: content_tags
+          word_count:
+            description: Article word count
+            type: count
+            required: false
+        required:
+          - body
+        additionalProperties: false
+      - description: Video content structure
+        type: object
+        properties:
+          url:
+            description: Video URL
+            type: url
+            required: true
+          duration:
+            description: Video duration in seconds
+            type: count
+            required: false
+          quality:
+            description: Video quality
+            type: enum
+            required: false
+            enums: media_quality
+        required:
+          - url
+        additionalProperties: false
+      - description: Podcast content structure
+        type: object
+        properties:
+          audio_url:
+            description: Audio file URL
+            type: url
+            required: true
+          transcript:
+            description: Podcast transcript
+            type: markdown
+            required: false
+          episode_number:
+            description: Episode number
+            type: count
+            required: false
+        required:
+          - audio_url
+        additionalProperties: false
   metadata:
     description: Additional metadata for the content
     type: object
