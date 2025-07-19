@@ -157,9 +157,9 @@ class Property:
                 result["properties"][prop_name] = prop.to_dict()
             result["additionalProperties"] = self.additional_properties
 
-            # Add oneOf if present (use JSON Schema standard)
+            # Add one_of if present (internal format)
             if self.one_of:
-                result["oneOf"] = self.one_of.to_dict()
+                result["one_of"] = self.one_of.to_dict()
 
         elif self.type == "array":
             result["items"] = self.items.to_dict()
