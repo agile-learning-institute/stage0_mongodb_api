@@ -1,180 +1,181 @@
+additionalProperties: false
 description: A media item in the system
-type: object
 properties:
   _id:
     description: The unique identifier for the media
-    type: string
     pattern: ^[0-9a-fA-F]{24}$
-  title:
-    description: The title of the media
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
-  type:
-    description: The type of media
-    type: string
-    enum:
-    - movie
-    - tv_show
-    - documentary
-    - short
-  status:
-    description: The current status of the media
-    type: string
-    enum:
-    - draft
-    - published
-    - archived
   last_saved:
+    additionalProperties: false
     description: When the media was last updated
-    type: object
     properties:
-      from_ip:
-        description: A valid IP Address
+      at_time:
+        description: An ISO 8601 formatted date-time string
+        format: date-time
         type: string
-        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
       by_user:
         description: A String of text, 1 to 40 characters with no spaces, or special
           characters like /t or /n
-        type: string
         pattern: ^\S{1,40}$
-      at_time:
-        description: An ISO 8601 formatted date-time string
         type: string
-        format: date-time
       correlation_id:
         description: A String of text, 1 to 40 characters with no spaces, or special
           characters like /t or /n
-        type: string
         pattern: ^\S{1,40}$
-    additionalProperties: false
+        type: string
+      from_ip:
+        description: A valid IP Address
+        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        type: string
     required:
     - from_ip
     - by_user
     - at_time
     - correlation_id
-  tags:
-    description: Tags associated with the media
-    type: array
-    items:
-      type: string
-      enum:
-      - action
-      - comedy
-      - drama
-      - sci_fi
-      - documentary
-  metadata:
-    description: Additional metadata about the media
     type: object
+  metadata:
+    additionalProperties: false
+    description: Additional metadata about the media
     properties:
-      duration:
-        description: Duration in minutes
-        type: number
-        minimum: 1
-        multipleOf: 1
-      format:
-        description: Media format
-        type: string
-        enum:
-        - dvd
-        - bluray
-        - digital
-        - streaming
-      quality:
-        description: Quality rating
-        type: string
-        enum:
-        - sd
-        - hd
-        - uhd
       content_data:
-        description: Media-specific content data
-        type: object
-        properties: {}
         additionalProperties: false
+        description: Media-specific content data
         oneOf:
-        - description: Movie-specific metadata
-          type: object
+        - additionalProperties: false
+          description: Movie-specific metadata
           properties:
-            director:
-              description: Movie director
-              type: string
-              pattern: ^\S{1,40}$
             cast:
               description: Movie cast members
-              type: array
               items:
                 description: Cast member
-                type: string
                 pattern: ^\S{1,40}$
+                type: string
+              type: array
+            director:
+              description: Movie director
+              pattern: ^\S{1,40}$
+              type: string
             genre:
               description: Movie genre
-              type: array
               items:
-                type: string
                 enum:
                 - action
                 - comedy
                 - drama
                 - sci_fi
                 - documentary
+                type: string
+              type: array
           required:
           - director
-          additionalProperties: false
-        - description: TV show-specific metadata
           type: object
+        - additionalProperties: false
+          description: TV show-specific metadata
           properties:
-            season:
-              description: Season number
-              type: number
-              minimum: 1
-              multipleOf: 1
             episode:
               description: Episode number
-              type: number
               minimum: 1
               multipleOf: 1
+              type: number
             network:
               description: Broadcasting network
-              type: string
               pattern: ^\S{1,40}$
+              type: string
+            season:
+              description: Season number
+              minimum: 1
+              multipleOf: 1
+              type: number
           required:
           - season
           - episode
-          additionalProperties: false
-        - description: Documentary-specific metadata
           type: object
+        - additionalProperties: false
+          description: Documentary-specific metadata
           properties:
-            subject:
-              description: Documentary subject
-              type: string
-              pattern: ^[^\t\n\r]{0,255}$
             narrator:
               description: Documentary narrator
-              type: string
               pattern: ^\S{1,40}$
+              type: string
+            subject:
+              description: Documentary subject
+              pattern: ^[^\t\n\r]{0,255}$
+              type: string
           required:
           - subject
-          additionalProperties: false
-        - description: Short film-specific metadata
           type: object
+        - additionalProperties: false
+          description: Short film-specific metadata
           properties:
-            festival:
-              description: Film festival
-              type: string
-              pattern: ^\S{1,40}$
             awards:
               description: Awards received
-              type: array
               items:
                 description: Award name
-                type: string
                 pattern: ^\S{1,40}$
-          additionalProperties: false
-    additionalProperties: false
+                type: string
+              type: array
+            festival:
+              description: Film festival
+              pattern: ^\S{1,40}$
+              type: string
+          type: object
+        properties: {}
+        type: object
+      duration:
+        description: Duration in minutes
+        minimum: 1
+        multipleOf: 1
+        type: number
+      format:
+        description: Media format
+        enum:
+        - dvd
+        - bluray
+        - digital
+        - streaming
+        type: string
+      quality:
+        description: Quality rating
+        enum:
+        - sd
+        - hd
+        - uhd
+        type: string
+    type: object
+  status:
+    description: The current status of the media
+    enum:
+    - draft
+    - published
+    - archived
+    type: string
+  tags:
+    description: Tags associated with the media
+    items:
+      enum:
+      - action
+      - comedy
+      - drama
+      - sci_fi
+      - documentary
+      type: string
+    type: array
+  title:
+    description: The title of the media
+    pattern: ^[^\t\n\r]{0,255}$
+    type: string
+  type:
+    description: The type of media
+    enum:
+    - movie
+    - tv_show
+    - documentary
+    - short
+    type: string
 required:
 - _id
 - title
 - status
 - last_saved
-additionalProperties: false
+type: object
+

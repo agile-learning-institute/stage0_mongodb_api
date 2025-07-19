@@ -1,0 +1,115 @@
+{
+  "id": "CFG-ROUTES-02",
+  "type": "PROCESS_ALL_CONFIGURATIONS",
+  "data": null,
+  "starts": "2025-07-18 22:33:29.703261",
+  "ends": "2025-07-18 22:33:29.715012",
+  "status": "SUCCESS",
+  "sub_events": [
+    {
+      "id": "CFG-workshop.yaml",
+      "type": "PROCESS_CONFIGURATION",
+      "data": {
+        "configuration_name": "workshop.yaml",
+        "version_count": 1
+      },
+      "starts": "2025-07-18 22:33:29.703263",
+      "ends": "2025-07-18 22:33:29.715011",
+      "status": "SUCCESS",
+      "sub_events": [
+        {
+          "id": "CFG-workshop.yaml",
+          "type": "PROCESS_CONFIGURATION",
+          "data": {
+            "configuration_name": "workshop.yaml",
+            "version_count": 1
+          },
+          "starts": "2025-07-18 22:33:29.703457",
+          "ends": "2025-07-18 22:33:29.714971",
+          "status": "SUCCESS",
+          "sub_events": [
+            {
+              "id": "ENU-05",
+              "type": "UPSERT_ENUMERATORS_TO_DATABASE",
+              "data": null,
+              "starts": "2025-07-18 22:33:29.712821",
+              "ends": "2025-07-18 22:33:29.714048",
+              "status": "SUCCESS",
+              "sub_events": [
+                {
+                  "id": "ENU-UPSERT-enumerations.0.yaml",
+                  "type": "UPSERT_ENUMERATION",
+                  "data": {
+                    "version": 0,
+                    "enumerators_count": 6,
+                    "result": {
+                      "_id": "687b02c52ffee8ec6449fc05",
+                      "version": 0,
+                      "_locked": false,
+                      "enumerators": {
+                        "default_status": {
+                          "active": "Started but not finished",
+                          "archived": "Soft Delete Indicator"
+                        },
+                        "workshop_status": {
+                          "pending": "Scheduled, but not started",
+                          "active": "Started but not finished",
+                          "complete": "Finished",
+                          "archived": "Soft Delete Indicator"
+                        },
+                        "exercise_status": {
+                          "pending": "Waiting to start",
+                          "observe": "Observe as Individuals",
+                          "reflect": "Reflect as a Team",
+                          "make": "Make a decision as a Team",
+                          "complete": "Exercise Completed"
+                        },
+                        "conversation_status": {
+                          "active": "An active conversation",
+                          "named": "A named conversation, allows you to load information into a conversation",
+                          "paused": "An in-active conversation",
+                          "full": "A full conversation with a version date",
+                          "complete": "A completed conversation with a version date",
+                          "archived": "Soft Delete Indicator"
+                        },
+                        "llm_message_roles": {
+                          "system": "System Prompt",
+                          "assistant": "LLM Responding to User Prompts",
+                          "user": "LLM User sending prompts to the model"
+                        },
+                        "roles": {
+                          "facilitator": "A Design Thinking Facilitator",
+                          "engineer": "A Stage0 AI Engineer",
+                          "practitioner": "A Design Thinking Practitioner",
+                          "administrator": "A Super User"
+                        }
+                      },
+                      "file_name": "enumerations.0.yaml"
+                    }
+                  },
+                  "starts": "2025-07-18 22:33:29.712822",
+                  "ends": "2025-07-18 22:33:29.714047",
+                  "status": "SUCCESS",
+                  "sub_events": []
+                }
+              ]
+            },
+            {
+              "id": "workshop.1.0.0.0",
+              "type": "PROCESS",
+              "data": {
+                "skip_reason": "Version already implemented",
+                "current_version": "workshop.1.0.0.yaml",
+                "target_version": "workshop.1.0.0.yaml"
+              },
+              "starts": "2025-07-18 22:33:29.714051",
+              "ends": "2025-07-18 22:33:29.714969",
+              "status": "SUCCESS",
+              "sub_events": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,375 +1,172 @@
-description: A record of a specific design thinking workshop.
-type: object
 additionalProperties: false
+description: A record of a specific design thinking workshop.
 properties:
   _id:
-    type: string
-    pattern: ^[0-9a-fA-F]{24}$
     description: The unique identifier for a Workshop
-  status:
-    description: Workshop Status/State
+    pattern: ^[0-9a-fA-F]{24}$
     type: string
-    enum:
-      - pending
-      - active
-      - complete
-      - archived
-  channel_id:
-    type: string
-    pattern: ^\S{1,40}$
-    description: The discord identifier for the channel this workshop is hosted on
-  channel_name:
-    type: string
-    pattern: ^\S{1,40}$
-    description: Workshop Name
   category:
-    type: string
-    pattern: ^[^\t\n\r]{1,255}$
     description: Discord Channel Category where this workshop channel is
-  guild:
+    pattern: ^[^\t\n\r]{0,255}$
     type: string
-    pattern: ^[^\t\n\r]{1,255}$
-    description: Discord Server where this workshop takes place
-  purpose:
+  channel_id:
+    description: The discord identifier for the channel this workshop is hosted on
+    pattern: ^\S{1,40}$
     type: string
-    pattern: '[\s\S]{1,4096}'
-    description: Workshop Purpose
-  when:
-    description: From-To Date/Time for the Workshop Event
-    type: object
-    additionalProperties: false
-    properties:
-      from:
-        type: string
-        format: date-time
-        description: Starting Date-Time
-      to:
-        type: string
-        format: date-time
-        description: Ending Date-Time
-    title: Appointment
-    required:
-      - from
-      - to
+  channel_name:
+    description: Workshop Name
+    pattern: ^\S{1,40}$
+    type: string
   current_exercise:
-    type: number
+    description: Index of the current exercise for Active workshops
     minimum: 0
     multipleOf: 1
-    description: Index of the current exercise for Active workshops
+    type: number
   exercises:
     description: List of workshop_exercise documents
-    type: array
     items:
-      description: A Workshop Exercise and observations
-      type: object
       additionalProperties: false
+      description: A Workshop Exercise and observations
       properties:
-        exercise_id:
-          type: string
-          pattern: ^[0-9a-fA-F]{24}$
-          description: The Exercise Instructions this is using
-        status:
-          description: The exercise status or state (Observe/Reflect/Make)
-          type: string
-          enum:
-            - pending
-            - observe
-            - reflect
-            - make
-            - complete
         conversation_id:
-          type: string
-          pattern: ^[0-9a-fA-F]{24}$
           description: The _id of the conversation for this exercise
+          pattern: ^[0-9a-fA-F]{24}$
+          type: string
+        exercise_id:
+          description: The Exercise Instructions this is using
+          pattern: ^[0-9a-fA-F]{24}$
+          type: string
+        exercise_name:
+          description: The name of the exercise
+          pattern: ^\S{1,40}$
+          type: string
         observations:
           description: Observations of the exercise
-          type: array
           items:
-            description: A workshop observation
-            type: object
             additionalProperties: false
+            description: Missing Required Description
             properties:
-              exercise:
-                type: string
-                pattern: ^\S{1,40}$
-                description: The exercise name
-              stakeholders:
-                description: Stakeholders Exercise
-                type: object
-                additionalProperties: false
-                properties:
-                  observations:
-                    description: Stakeholder Observations
-                    type: array
-                    items:
-                      description: A stakeholder of a Stakeholder exercise
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        users:
-                          description: Users of the stakeholder
-                          type: array
-                          items:
-                            type: string
-                            pattern: ^\S{1,40}$
-                            description: User Name
-                        text:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: Text of the stakeholder
-                        name:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: Name of the stakeholder
-                        title:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: Title of the stakeholder
-                        roles:
-                          description: Roles of the stakeholder
-                          type: array
-                          items:
-                            type: string
-                            pattern: ^\S{1,40}$
-                            description: Role Name
-                      title: Observation Stakeholder
-                      required:
-                        - users
-              empathy:
-                description: Empathy Mapping exercise
-                type: object
-                additionalProperties: false
-                properties:
-                  persona:
-                    description: Persona information
-                    type: object
-                    additionalProperties: false
-                    properties:
-                      name:
-                        type: string
-                        pattern: ^\S{1,40}$
-                        description: Name of the persona
-                      description:
-                        type: string
-                        pattern: ^[^\t\n\r]{1,255}$
-                        description: Description of the persona
-                      observations:
-                        description: Empathy Observations
-                        type: array
-                        items:
-                          description: A empathy of a Empathy Mapping exercise
-                          type: object
-                          additionalProperties: false
-                          properties:
-                            users:
-                              description: Users who made the observation
-                              type: array
-                              items:
-                                type: string
-                                pattern: ^\S{1,40}$
-                                description: User Name
-                            says:
-                              type: string
-                              pattern: ^[^\t\n\r]{1,255}$
-                              description: Things the user says
-                            does:
-                              type: string
-                              pattern: ^[^\t\n\r]{1,255}$
-                              description: Things the user does
-                            thinks:
-                              type: string
-                              pattern: ^[^\t\n\r]{1,255}$
-                              description: Things the user thinks
-                            feels:
-                              type: string
-                              pattern: ^[^\t\n\r]{1,255}$
-                              description: Things the user feels
-                          title: Empathy Observation
-                          required:
-                            - users
-              hills:
-                description: Hills of the exercise
-                type: object
-                additionalProperties: false
-                properties:
-                  observations:
-                    description: Hills Observations
-                    type: array
-                    items:
-                      description: A hill of a Hills exercise
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        name:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: Unique Name of the hill
-                        users:
-                          description: Users who made the observation
-                          type: array
-                          items:
-                            type: string
-                            pattern: ^\S{1,40}$
-                            description: User Name
-                        who:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: Persona Who is the hill about
-                        what:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: What the user does
-                        wow:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: The Wow that happens when Who does What
-                      title: Hills Exercise Observation
-                      required:
-                        - users
-              priority:
-                description: Priority of the exercise
-                type: object
-                additionalProperties: false
-                properties:
-                  observations:
-                    description: Priority Observations
-                    type: array
-                    items:
-                      description: A priority of a Priority exercise
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        user:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: User who made the priority observation
-                        feasibility:
-                          description: Hills in order of feasibility (low to high)
-                          type: array
-                          items:
-                            type: string
-                            pattern: ^\S{1,40}$
-                            description: Hill Name
-                        impact:
-                          description: Hills in order of impact (low to high)
-                          type: array
-                          items:
-                            type: string
-                            pattern: ^\S{1,40}$
-                            description: Hill Name
-                      title: Priority Exercise Observation
-                      required:
-                        - user
-                  outcome:
-                    description: The outcome of a Priority exercise
-                    type: object
-                    additionalProperties: false
-                    properties:
-                      no_brainers:
-                        description: Hills that are high impact, and high feasibility
-                        type: array
-                        items:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: Hill Name
-                      big_bets:
-                        description: Hills that are high impact, but low feasibility
-                        type: array
-                        items:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: Hill Name
-                      utilities:
-                        description: Hills that are low impact, but high feasibility
-                        type: array
-                        items:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: Hill Name
-                      unwise:
-                        description: Hills that are low impact, and low feasibility
-                        type: array
-                        items:
-                          type: string
-                          pattern: ^\S{1,40}$
-                          description: Hill Name
-                    title: Ranking Outcome
-              retrospective:
-                description: Retrospective of the exercise
-                type: object
-                additionalProperties: false
-                properties:
-                  observations:
-                    description: Retrospective Observations
-                    type: array
-                    items:
-                      description: A observation for a Retrospective exercise
-                      type: object
-                      additionalProperties: false
-                      properties:
-                        users:
-                          description: Users who made the observation
-                          type: array
-                          items:
-                            type: string
-                            pattern: ^\S{1,40}$
-                            description: User Name
-                        question:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: Question that remains
-                        worked_well:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: Something that worked well
-                        could_be_improved:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: Something that could be improved
-                        ideas_to_try:
-                          type: string
-                          pattern: ^[^\t\n\r]{1,255}$
-                          description: Something to try differently next time
-                      title: Retrospective Observation
-                      required:
-                        - users
-            title: Observation
+              users:
+                description: Users who made the observation
+                items:
+                  description: User Name
+                  pattern: ^\S{1,40}$
+                  type: string
+                type: array
             required:
-              - exercise
+            - users
+            type: object
+          type: array
+        persona:
+          additionalProperties: false
+          description: A persona observation for design thinking exercises.
+          properties:
+            age:
+              description: The age of the persona
+              type: integer
+            frustrations:
+              description: The frustrations of the persona
+              maxLength: 4096
+              type: string
+            goals:
+              description: The goals of the persona
+              maxLength: 4096
+              type: string
+            name:
+              description: The name of the persona
+              pattern: ^\S{1,40}$
+              type: string
+            needs:
+              description: The needs of the persona
+              maxLength: 4096
+              type: string
+            occupation:
+              description: The occupation of the persona
+              pattern: ^[^\t\n\r]{0,255}$
+              type: string
+          required:
+          - name
+          type: object
+        status:
+          description: The exercise status or state (Observe/Reflect/Make)
+          enum:
+          - pending
+          - observe
+          - reflect
+          - make
+          - complete
+          type: string
       required:
-        - exercise_id
-        - status
-        - conversation_id
-        - observations
+      - exercise_id
+      - conversation_id
+      - exercise_name
+      - status
+      type: object
+    type: array
+  guild:
+    description: Discord Server where this workshop takes place
+    pattern: ^[^\t\n\r]{0,255}$
+    type: string
   last_saved:
-    description: Last Saved breadcrumb
-    type: object
     additionalProperties: false
+    description: Last Saved breadcrumb
     properties:
-      from_ip:
-        type: string
-        pattern: ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
-        description: Http Request remote IP address
-      by_user:
-        type: string
-        pattern: ^\S{1,40}$
-        description: ID Of User
       at_time:
-        type: string
+        description: An ISO 8601 formatted date-time string
         format: date-time
-        description: The date-time when last updated
-      correlation_id:
         type: string
+      by_user:
+        description: A String of text, 1 to 40 characters with no spaces, or special
+          characters like /t or /n
         pattern: ^\S{1,40}$
-        description: The logging correlation ID of the update transaction
-    title: Breadcrumb
+        type: string
+      correlation_id:
+        description: A String of text, 1 to 40 characters with no spaces, or special
+          characters like /t or /n
+        pattern: ^\S{1,40}$
+        type: string
+      from_ip:
+        description: A valid IP Address
+        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        type: string
     required:
-      - from_ip
-      - by_user
-      - at_time
-      - correlation_id
+    - from_ip
+    - by_user
+    - at_time
+    - correlation_id
+    type: object
+  purpose:
+    description: Workshop Purpose
+    maxLength: 4096
+    type: string
+  status:
+    description: Workshop Status/State
+    enum:
+    - pending
+    - active
+    - complete
+    - archived
+    type: string
+  when:
+    additionalProperties: false
+    description: From-To Date/Time for the Workshop Event
+    properties:
+      from:
+        description: An ISO 8601 formatted date-time string
+        format: date-time
+        type: string
+      to:
+        description: An ISO 8601 formatted date-time string
+        format: date-time
+        type: string
+    required:
+    - from
+    - to
+    type: object
 required:
-  - _id
-  - status
-  - exercises
-  - last_saved 
+- _id
+- status
+- exercises
+- last_saved
+type: object
+

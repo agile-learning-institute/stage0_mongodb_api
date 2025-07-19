@@ -2,11 +2,11 @@
   {
     "_id": {"$oid": "000000000000000000000000"},
     "status": "pending",
-    "channel_id": "",
-    "name": "pending Empty",
-    "category": "",
-    "guild": "",
-    "purpose": "",
+    "channel_id": "workshop-channel-001",
+    "channel_name": "pending Empty",
+    "category": "Design Thinking",
+    "guild": "Agile Learning Institute",
+    "purpose": "Practice design thinking exercises",
     "when": {
       "from": {"$date": "1/2/2025 12:00:00"},
       "to": {"$date": "1/2/2025 13:00:00"}
@@ -32,17 +32,17 @@
           },
           {
             "users": ["fred", "amy"],
-            "text": "I want to talk to the stakeholders",
-            "name": "Jill Johnson",
-            "title": "Product Manager",
-            "roles": ["Product Manager", "Stakeholder"]
+            "text": "Need to understand user needs better",
+            "name": "Sarah Chen",
+            "title": "UX Designer",
+            "roles": ["UX Designer", "User Advocate"]
           },
           {
             "users": ["fred", "amy"],
-            "text": "I want to talk to the stakeholders",
-            "name": "Jill Johnson",
-            "title": "Product Manager",
-            "roles": ["Product Manager", "Stakeholder"]
+            "text": "Budget constraints are a concern",
+            "name": "Mike Rodriguez",
+            "title": "Finance Manager",
+            "roles": ["Finance Manager", "Budget Controller"]
           }
         ]
       },
@@ -51,7 +51,7 @@
         "conversation_id": {"$oid": "C00000000000000000000002"},
         "exercise_name": "empathy",
         "status": "complete",
-        "duration": {"from": {"$date": "1/2/2025 12:10:00"}},
+        "duration": {"from": {"$date": "1/2/2025 12:15:00"}},
         "persona": {
           "name": "Claire",
           "description": "Claire the Customer.",
@@ -60,38 +60,23 @@
         "observations": [
           {
             "users": ["fred", "amy"],
-            "says": "I want to talk to the stakeholders",
-            "does": "I want to talk to the stakeholders",
-            "thinks": "I want to talk to the stakeholders",
-            "feels": "I want to talk to the stakeholders"        
+            "says": "I want to talk to the stakeholders"
           },
           {
             "users": ["fred", "amy"],
-            "says": "I want to talk to the stakeholders",
-            "does": "I want to talk to the stakeholders",
-            "thinks": "I want to talk to the stakeholders",
-            "feels": "I want to talk to the stakeholders"        
+            "does": "I want to talk to the stakeholders"
           },
           {
             "users": ["fred", "amy"],
-            "says": "I want to talk to the stakeholders",
-            "does": "I want to talk to the stakeholders",
-            "thinks": "I want to talk to the stakeholders",
-            "feels": "I want to talk to the stakeholders"        
+            "thinks": "I want to talk to the stakeholders"
           },
           {
             "users": ["fred", "amy"],
-            "says": "I want to talk to the stakeholders",
-            "does": "I want to talk to the stakeholders",
-            "thinks": "I want to talk to the stakeholders",
-            "feels": "I want to talk to the stakeholders"        
+            "feels": "I want to talk to the stakeholders"
           },
           {
             "users": ["fred", "amy"],
-            "says": "I want to talk to the stakeholders",
-            "does": "I want to talk to the stakeholders",
-            "thinks": "I want to talk to the stakeholders",
-            "feels": "I want to talk to the stakeholders"        
+            "says": "The interface is too complicated"
           }
         ]
       },
@@ -100,26 +85,34 @@
         "conversation_id": {"$oid": "C00000000000000000000003"},
         "exercise_name": "hills",
         "status": "complete",
-        "duration": {"from": {"$date": "1/2/2025 12:10:00"}},
+        "duration": {"from": {"$date": "1/2/2025 12:20:00"}},
         "observations": [
           {
             "users": ["fred", "amy"],
             "who": "Brenda",
             "what": "Deposits a check on her phone",
-            "wow": "and she does't have to take time off work to do it"
+            "wow": "and she doesn't have to take time off work to do it"
           },
           {
             "users": ["fred", "amy"],
             "who": "Brenda",
             "what": "Deposits a check on her phone",
-            "wow": "and she does't have to take time off work to do it"
+            "wow": "and she doesn't have to take time off work to do it"
+          },
+          {
+            "users": ["fred", "amy"],
+            "who": "Alex",
+            "what": "Books a doctor appointment online",
+            "wow": "and gets a reminder 24 hours before"
+          }
+        ]
       },
       {
         "exercise_id": {"$oid": "E00000000000000000000004"},
         "conversation_id": {"$oid": "C00000000000000000000004"},
         "exercise_name": "priority",
         "status": "complete",
-        "duration": {"from": {"$date": "1/2/2025 12:10:00"}},
+        "duration": {"from": {"$date": "1/2/2025 12:25:00"}},
         "observations": [
           {
             "user": "fred",
@@ -130,13 +123,6 @@
             "user": "amy",
             "feasibility": ["easy", "medium", "hard"],
             "impact": ["low", "medium", "high"]
-          },
-          {
-            "summary": "Hill's grouped by feasibility and impact",
-            "no_brainers": ["hill1", "hill2", "hill3"],
-            "big_bets": ["hill4", "hill5", "hill6"],
-            "utilities": ["hill7", "hill8", "hill9"],
-            "unwise": []
           }
         ]
       },
@@ -145,48 +131,46 @@
         "conversation_id": {"$oid": "C00000000000000000000005"},
         "exercise_name": "retrospective",
         "status": "observe",
-        "duration": {"from": {"$date": "1/2/2025 12:10:00"}},
+        "duration": {"from": {"$date": "1/2/2025 12:30:00"}},
         "observations": [
           {
             "users": ["fred", "amy"],
-            "question": "What went well?",
+            "question": "What went well?"
           },
           {
             "users": ["fred", "amy"],
-            "worked_well": "We did a great job of listening to each other",
+            "worked_well": "We did a great job of listening to each other"
           },
           {
             "users": ["fred", "amy"],
-            "could_be_improved": "We could have been more specific about what we wanted",
-            "ideas_to_try": "We could try using a different tool to help us listen to each other"
-          },
-          {
-            "users": ["fred", "amy"],
-            "could_be_improved": "We could have been more specific about what we wanted",
-            "ideas_to_try": "We could try using a different tool to help us listen to each other"
+            "could_be_improved": "We could have been more specific about what we wanted"
           },
           {
             "users": ["fred", "amy"],
             "ideas_to_try": "We could try using a different tool to help us listen to each other"
+          },
+          {
+            "users": ["fred", "amy"],
+            "worked_well": "The brainstorming session was very productive"
           }
         ]
       }
     ],
     "last_saved": {
-      "fromIp": "",
-      "byUser": "",
+      "fromIp": "192.168.1.100",
+      "byUser": "fred",
       "atTime": {"$date": "1/1/2025 12:34:56"},
-      "correlationId": ""
+      "correlationId": "corr-001"
     }
   },
   {
     "_id": {"$oid": "000000000000000000000001"},
     "status": "archived",
-    "channel_id": "",
-    "name": "WorkshopName1",
-    "category": "",
-    "guild": "",
-    "purpose": "",
+    "channel_id": "workshop-channel-002",
+    "channel_name": "WorkshopName1",
+    "category": "Design Thinking",
+    "guild": "Agile Learning Institute",
+    "purpose": "Advanced design thinking workshop",
     "when": {
       "from": {"$date": "1/2/2025 12:00:00"},
       "to": {"$date": "1/2/2025 13:00:00"}
@@ -196,45 +180,65 @@
       {
         "exercise_id": {"$oid": "E00000000000000000000003"},
         "conversation_id": {"$oid": "C00000000000000000000003"},
+        "exercise_name": "hills",
         "status": "pending",
         "duration": {
           "from": {"$date": "1/2/2025 12:10:00"},
           "to": {"$date": "1/2/2025 12:15:00"}
         },
         "observations": [
-          {},
-          {}
+          {
+            "users": ["bob", "carol"],
+            "who": "David",
+            "what": "Uses mobile banking app",
+            "wow": "and can transfer money instantly"
+          },
+          {
+            "users": ["bob", "carol"],
+            "who": "Emma",
+            "what": "Schedules meetings via calendar app",
+            "wow": "and automatically gets video call links"
+          }
         ]
       },
       {
         "exercise_id": {"$oid": "E00000000000000000000004"},
         "conversation_id": {"$oid": "C00000000000000000000004"},
+        "exercise_name": "priority",
         "status": "pending",
         "duration": {
           "from": {"$date": "1/2/2025 12:10:00"},
           "to": {"$date": "1/2/2025 12:15:00"}
         },
         "observations": [
-          {},
-          {}
+          {
+            "user": "bob",
+            "feasibility": ["easy", "medium", "hard"],
+            "impact": ["low", "medium", "high"]
+          },
+          {
+            "user": "carol",
+            "feasibility": ["easy", "medium", "hard"],
+            "impact": ["low", "medium", "high"]
+          }
         ]
       }
     ],
     "last_saved": {
-      "fromIp": "",
-      "byUser": "",
+      "fromIp": "192.168.1.101",
+      "byUser": "bob",
       "atTime": {"$date": "1/1/2025 12:34:56"},
-      "correlationId": ""
+      "correlationId": "corr-002"
     }
   },
   {
     "_id": {"$oid": "000000000000000000000002"},
     "status": "pending",
-    "channel_id": "",
-    "name": "another pending workshop",
-    "category": "",
-    "guild": "",
-    "purpose": "",
+    "channel_id": "workshop-channel-003",
+    "channel_name": "another pending workshop",
+    "category": "Design Thinking",
+    "guild": "Agile Learning Institute",
+    "purpose": "New design thinking workshop",
     "when": {
       "from": {"$date": "1/2/2026 12:00:00"},
       "to": {"$date": "1/2/2026 13:00:00"}
@@ -273,10 +277,10 @@
       }
     ],
     "last_saved": {
-      "fromIp": "",
-      "byUser": "",
+      "fromIp": "192.168.1.102",
+      "byUser": "dave",
       "atTime": {"$date": "1/1/2025 12:34:56"},
-      "correlationId": ""
+      "correlationId": "corr-003"
     }
   }
 ]

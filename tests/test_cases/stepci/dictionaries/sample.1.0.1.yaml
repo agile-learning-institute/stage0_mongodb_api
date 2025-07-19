@@ -1,20 +1,21 @@
-description: A simple collection for testing
-type: object
-required: false
-properties:
-  _id:
-    description: The unique identifier for the media
-    type: identifier
-    required: true
-  full_name:
-    description: The name of the document
-    type: sentence
-    required: true
-  status:
-    description: The current status of the document
-    type: enum
-    required: true
-    enums: default_status
-additionalProperties: false
 file_name: sample.1.0.1.yaml
 _locked: true
+root:
+  description: A simple collection for testing
+  type: object
+  required: false
+  additionalProperties: false
+  properties:
+    _id:
+      description: The unique identifier for the media
+      type: identifier
+      required: true
+    full_name:
+      description: The name of the document
+      type: sentence
+      required: true
+    status:
+      description: The current status of the document
+      type: enum
+      required: true
+      enums: default_status

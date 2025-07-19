@@ -1,30 +1,31 @@
-description: A simple notification collection for testing
-type: object
-required: false
-properties:
-  _id:
-    description: The unique identifier for notification
-    type: identity
-    required: true
-  user_id:
-    ref: user.1.0.0.yaml
-  title:
-    description: Notification title
-    type: word
-    required: true
-  message:
-    description: Notification message
-    type: sentence
-    required: true
-  status:
-    description: Notification status
-    type: enum
-    required: true
-    enums: default_status
-  last_saved:
-    description: Last saved breadcrumb
-    type: breadcrumb
-    required: true
-additionalProperties: false
 file_name: notification.1.0.0.yaml
 _locked: true
+root:
+  description: A simple notification collection for testing
+  type: object
+  required: false
+  properties:
+    _id:
+      description: The unique identifier for notification
+      type: identity
+      required: true
+    user_id:
+      ref: user.1.0.0.yaml
+    title:
+      description: Notification title
+      type: word
+      required: true
+    message:
+      description: Notification message
+      type: sentence
+      required: true
+    status:
+      description: Notification status
+      type: enum
+      required: true
+      enums: default_status
+    last_saved:
+      description: Last saved breadcrumb
+      type: breadcrumb
+      required: true
+  additionalProperties: false

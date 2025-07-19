@@ -1,65 +1,65 @@
-description: A media item in the system
-type: object
-required: false
-properties:
-  _id:
-    description: The unique identifier for the media
-    type: identity
-    required: true
-  title:
-    description: The title of the media
-    type: sentence
-    required: true
-  type:
-    description: The type of media
-    type: enum
-    required: false
-    enums: media_type
-  status:
-    description: The current status of the media
-    type: enum
-    required: true
-    enums: media_status
-  last_saved:
-    description: When the media was last updated
-    type: breadcrumb
-    required: true
-  tags:
-    description: Tags associated with the media
-    type: enum_array
-    required: false
-    enums: media_tags
-  metadata:
-    description: Additional metadata about the media
-    type: object
-    required: false
-    properties:
-      duration:
-        description: Duration in minutes
-        type: count
-        required: false
-      format:
-        description: Media format
-        type: enum
-        required: false
-        enums: media_format
-      quality:
-        description: Quality rating
-        type: enum
-        required: false
-        enums: media_quality
-      content_data:
-        description: Media-specific content data
-        type: object
-        required: false
-        properties: {}
-        additionalProperties: false
-        one_of:
-          schemas:
-            movie:
-              description: Movie-specific metadata
+file_name: media.1.0.0.yaml
+_locked: true
+root:
+  description: A media item in the system
+  type: object
+  required: false
+  properties:
+    _id:
+      description: The unique identifier for the media
+      type: identity
+      required: true
+    title:
+      description: The title of the media
+      type: sentence
+      required: true
+    type:
+      description: The type of media
+      type: enum
+      required: false
+      enums: media_type
+    status:
+      description: The current status of the media
+      type: enum
+      required: true
+      enums: media_status
+    last_saved:
+      description: When the media was last updated
+      type: breadcrumb
+      required: true
+    tags:
+      description: Tags associated with the media
+      type: enum_array
+      required: false
+      enums: media_tags
+    metadata:
+      description: Additional metadata about the media
+      type: object
+      required: false
+      properties:
+        duration:
+          description: Duration in minutes
+          type: count
+          required: false
+        format:
+          description: Media format
+          type: enum
+          required: false
+          enums: media_format
+        quality:
+          description: Quality rating
+          type: enum
+          required: false
+          enums: media_quality
+        content_data:
+          description: Media-specific content data
+          type: object
+          required: false
+          properties: {}
+          additionalProperties: false
+          one_of:
+            - description: Movie-specific metadata
               type: object
-              required: false
               properties:
                 director:
                   description: Movie director
@@ -78,11 +78,11 @@ properties:
                   type: enum_array
                   required: false
                   enums: media_tags
+              required:
+                - director
               additionalProperties: false
-            tv_show:
-              description: TV show-specific metadata
+            - description: TV show-specific metadata
               type: object
-              required: false
               properties:
                 season:
                   description: Season number
@@ -96,11 +96,12 @@ properties:
                   description: Broadcasting network
                   type: word
                   required: false
+              required:
+                - season
+                - episode
               additionalProperties: false
-            documentary:
-              description: Documentary-specific metadata
+            - description: Documentary-specific metadata
               type: object
-              required: false
               properties:
                 subject:
                   description: Documentary subject
@@ -110,11 +111,11 @@ properties:
                   description: Documentary narrator
                   type: word
                   required: false
+              required:
+                - subject
               additionalProperties: false
-            short:
-              description: Short film-specific metadata
+            - description: Short film-specific metadata
               type: object
-              required: false
               properties:
                 festival:
                   description: Film festival
@@ -129,7 +130,5 @@ properties:
                     type: word
                     required: false
               additionalProperties: false
-    additionalProperties: false
-additionalProperties: false
-file_name: media.1.0.0.yaml
-_locked: true
+      additionalProperties: false
+  additionalProperties: false
