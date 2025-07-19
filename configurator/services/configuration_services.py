@@ -5,6 +5,7 @@ from configurator.services.enumerator_service import Enumerators
 from configurator.utils.file_io import FileIO
 from configurator.utils.mongo_io import MongoIO
 from configurator.utils.version_number import VersionNumber
+from configurator.utils.version_manager import VersionManager
 import os
 
 class Configuration:
@@ -228,6 +229,19 @@ class Version:
         event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version_str}", event_type="PROCESS")
         
         try:
+            # Check if this version is already implemented
+            current_version = VersionManager.get_current_version(mongo_io, self.collection_name)
+            
+            # If current version is greater than or equal to this version, skip processing
+            if current_version >= self.collection_version:
+                event.data = {
+                    "skip_reason": "Version already implemented",
+                    "current_version": str(current_version),
+                    "target_version": str(self.collection_version)
+                }
+                event.record_success()
+                return event
+            
             # Remove schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-01", event_type="REMOVE_SCHEMA_VALIDATION")
             event.append_events([sub_event])
